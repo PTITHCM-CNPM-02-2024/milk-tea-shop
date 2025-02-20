@@ -1,0 +1,12 @@
+*
+
+!data/
+!data/dev/
+!data/prod/
+
+!.gitignore
+!HELP.md
+!.project
+!ddl-data-source/
+!ddl-data-source/**
+

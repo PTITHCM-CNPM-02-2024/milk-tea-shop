@@ -1,0 +1,1 @@
+ALTER TABLE OrderDetail RENAME OrderProduct;
