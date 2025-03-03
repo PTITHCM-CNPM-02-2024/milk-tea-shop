@@ -1,10 +1,10 @@
 create table if not exists milk_tea_shop_dev.InventoryTransaction
 (
-    transaction_id   int auto_increment comment 'Mã giao dịch kho'
+    transaction_id   int unsigned                       not null comment 'Mã giao dịch kho'
         primary key,
-    material_id      int                                null comment 'Mã nguyên vật liệu',
-    supplier_id      int                                null comment 'Mã nhà cung cấp',
-    manager_id       int                                null comment 'Mã quản lý',
+    material_id      mediumint unsigned                 null comment 'Mã nguyên vật liệu',
+    supplier_id      int unsigned                       null comment 'Mã nhà cung cấp',
+    manager_id       int unsigned                       null comment 'Mã quản lý',
     transaction_type enum ('INBOUND', 'OUTBOUND')       not null comment 'Loại giao dịch (INBOUND, OUTBOUND)',
     quantity         decimal(10, 2)                     not null comment 'Số lượng',
     transaction_date datetime default CURRENT_TIMESTAMP null comment 'Ngày giao dịch',

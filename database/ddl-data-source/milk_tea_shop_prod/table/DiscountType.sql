@@ -1,6 +1,6 @@
 create table if not exists milk_tea_shop_prod.DiscountType
 (
-    discount_type_id int auto_increment comment 'Mã loại giảm giá'
+    discount_type_id smallint unsigned auto_increment comment 'Mã loại giảm giá'
         primary key,
     promotion_name   varchar(100)                       not null comment 'Tên loại giảm giá',
     description      text                               null comment 'Mô tả',

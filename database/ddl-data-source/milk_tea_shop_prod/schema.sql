@@ -1,6 +1,6 @@
 create table if not exists Area
 (
-    area_id     int auto_increment comment 'Mã khu vực'
+    area_id     smallint unsigned auto_increment comment 'Mã khu vực'
         primary key,
     name        char(3)                              not null comment 'Tên khu vực',
     description varchar(255)                         null comment 'Mô tả',
@@ -14,19 +14,22 @@ create table if not exists Area
 
 create table if not exists Category
 (
-    category_id int auto_increment comment 'Mã danh mục'
+    category_id        smallint unsigned auto_increment comment 'Mã danh mục'
         primary key,
-    name        varchar(100)                       not null comment 'Tên danh mục',
-    description text                               null comment 'Mô tả',
-    created_at  datetime default CURRENT_TIMESTAMP null,
-    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    name               varchar(100)                       not null comment 'Tên danh mục',
+    description        varchar(1000)                      null comment 'Mô tả danh mục',
+    parent_category_id smallint unsigned                  null comment 'Mã danh mục sản phẩm cha',
+    created_at         datetime default CURRENT_TIMESTAMP null,
+    updated_at         datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Category_pk
-        unique (name)
+        unique (name),
+    constraint Category_ibfk_1
+        foreign key (parent_category_id) references Category (category_id)
 );
 
 create table if not exists Coupon
 (
-    coupon_id   int auto_increment comment 'Mã coupon'
+    coupon_id   int unsigned auto_increment comment 'Mã coupon'
         primary key,
     coupon      varchar(15)                          not null comment 'Mã giảm giá',
     description text                                 null comment 'Mô tả',
@@ -39,7 +42,7 @@ create table if not exists Coupon
 
 create table if not exists DiscountType
 (
-    discount_type_id int auto_increment comment 'Mã loại giảm giá'
+    discount_type_id smallint unsigned auto_increment comment 'Mã loại giảm giá'
         primary key,
     promotion_name   varchar(100)                       not null comment 'Tên loại giảm giá',
     description      text                               null comment 'Mô tả',
@@ -49,54 +52,57 @@ create table if not exists DiscountType
         unique (promotion_name)
 );
 
-create table if not exists DiscountDetail
+create table if not exists Discount
 (
-    discount_details_id     int auto_increment comment 'Mã chi tiết giảm giá'
+    discount_id           int unsigned auto_increment comment 'Mã định danh duy nhất cho chương trình giảm giá'
         primary key,
-    discount_type_id        int                                  null comment 'Mã loại giảm giá',
-    apply_type              enum ('BEST', 'COMBINE')             not null comment 'Kiểu áp dụng (BEST, COMBINE)',
-    discount_value          decimal(10, 2)                       not null comment 'Giá trị giảm giá',
-    max_discount_amount     decimal(10, 2)                       null comment 'Số tiền giảm giá tối đa',
-    is_allowed_reedem_point tinyint(1) default 0                 null comment 'Cho phép đổi điểm (1: Có, 0: Không)',
-    created_at              datetime   default CURRENT_TIMESTAMP null,
-    updated_at              datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint DiscountDetail_ibfk_1
-        foreign key (discount_type_id) references DiscountType (discount_type_id)
+    discount_type_id      smallint unsigned                      not null comment 'Liên kết với bảng DiscountType, xác định loại giảm giá (ví dụ: giảm giá theo mùa, khuyến mãi đặc biệt, v.v.)',
+    coupon_id             int unsigned                           null comment 'Liên kết với mã giảm giá (coupon), NULL nếu không yêu cầu mã giảm giá',
+    apply_type            enum ('BEST', 'COMBINE')               not null comment 'Cách áp dụng khi có nhiều giảm giá: BEST - chọn giảm giá tốt nhất, COMBINE - kết hợp các giảm giá',
+    discount_value        decimal(10, 2)                         not null comment 'Giá trị giảm giá (phần trăm hoặc số tiền cố định)',
+    max_discount_amount   decimal(10, 2)                         null comment 'Giới hạn số tiền giảm giá tối đa, NULL nếu không giới hạn',
+    valid_from            datetime                               not null comment 'Thời điểm bắt đầu hiệu lực của chương trình giảm giá',
+    valid_until           datetime                               not null comment 'Thời điểm kết thúc hiệu lực của chương trình giảm giá',
+    current_uses          int unsigned default '0'               null comment 'Số lần đã sử dụng chương trình giảm giá này',
+    max_uses              int unsigned                           null comment 'Số lần sử dụng tối đa cho chương trình giảm giá, NULL nếu không giới hạn',
+    max_uses_per_customer smallint unsigned                      null comment 'Số lần tối đa mỗi khách hàng được sử dụng chương trình giảm giá này, NULL nếu không giới hạn',
+    is_active             tinyint(1)   default 1                 null comment 'Trạng thái kích hoạt: 1 - đang hoạt động, 0 - không hoạt động',
+    created_at            datetime     default CURRENT_TIMESTAMP null comment 'Thời điểm tạo chương trình giảm giá',
+    updated_at            datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời điểm cập nhật gần nhất',
+    constraint Discount_pk
+        unique (coupon_id),
+    constraint Discount_ibfk_1
+        foreign key (discount_type_id) references DiscountType (discount_type_id),
+    constraint Discount_ibfk_2
+        foreign key (coupon_id) references Coupon (coupon_id)
 );
 
 create table if not exists CategoryDiscount
 (
-    category_discount_id  int auto_increment comment 'Mã giảm giá theo danh mục'
+    category_discount_id int auto_increment comment 'Mã định danh duy nhất cho mối quan hệ giữa danh mục và chương trình giảm giá'
         primary key,
-    category_id           int                                  null comment 'Mã danh mục',
-    discount_details_id   int                                  null comment 'Mã chi tiết giảm giá',
-    min_prod_nums         int                                  not null comment 'Số lượng sản phẩm tối thiểu',
-    valid_from            datetime                             not null comment 'Ngày bắt đầu hiệu lực',
-    valid_until           datetime                             not null comment 'Ngày kết thúc hiệu lực',
-    current_uses          int        default 0                 null comment 'Số lần đã sử dụng',
-    max_uses              int                                  null comment 'Số lần sử dụng tối đa',
-    max_uses_per_customer int                                  null comment 'Số lần sử dụng tối đa cho mỗi khách hàng',
-    is_active             tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
-    created_at            datetime   default CURRENT_TIMESTAMP null comment 'Ngày tạo',
-    updated_at            datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    discount_id          int unsigned                       not null comment 'Liên kết với bảng Discount, xác định chương trình giảm giá áp dụng',
+    category_id          smallint unsigned                  not null comment 'Liên kết với bảng Category, xác định danh mục được giảm giá',
+    min_prod_quantity    tinyint unsigned                   not null comment 'Số lượng sản phẩm tối thiểu từ danh mục này để áp dụng giảm giá',
+    created_at           datetime default CURRENT_TIMESTAMP null,
+    updated_at           datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint CategoryDiscount_pk
+        unique (discount_id, category_id),
     constraint CategoryDiscount_ibfk_1
-        foreign key (category_id) references Category (category_id),
+        foreign key (discount_id) references Discount (discount_id),
     constraint CategoryDiscount_ibfk_2
-        foreign key (discount_details_id) references DiscountDetail (discount_details_id)
+        foreign key (category_id) references Category (category_id)
 );
 
 create index category_id
     on CategoryDiscount (category_id);
 
-create index discount_details_id
-    on CategoryDiscount (discount_details_id);
-
-create index discount_type_id
-    on DiscountDetail (discount_type_id);
+create index discount_id
+    on CategoryDiscount (discount_id);
 
 create table if not exists ExpenseCategory
 (
-    expense_category_id int auto_increment comment 'Mã loại chi phí'
+    expense_category_id smallint unsigned auto_increment comment 'Mã loại chi phí'
         primary key,
     name                varchar(50)                        not null comment 'Tên loại chi phí (ví dụ: Nguyên liệu, Tiền điện, Lương nhân viên)',
     description         text                               null comment 'Mô tả',
@@ -108,7 +114,7 @@ create table if not exists ExpenseCategory
 
 create table if not exists IncomeCategory
 (
-    income_category_id int auto_increment comment 'Mã loại thu nhập'
+    income_category_id smallint unsigned auto_increment comment 'Mã loại thu nhập'
         primary key,
     name               varchar(50)                        not null comment 'Tên loại thu nhập (ví dụ: Bán hàng, Hoàn tiền)',
     description        text                               null comment 'Mô tả',
@@ -120,7 +126,7 @@ create table if not exists IncomeCategory
 
 create table if not exists Material
 (
-    material_id  int auto_increment comment 'Mã nguyên vật liệu'
+    material_id  mediumint unsigned auto_increment comment 'Mã nguyên vật liệu'
         primary key,
     name         varchar(100)                       not null comment 'Tên nguyên vật liệu',
     description  text                               null comment 'Mô tả',
@@ -135,10 +141,10 @@ create table if not exists Material
 
 create table if not exists MembershipType
 (
-    membership_type_id int auto_increment comment 'Mã loại thành viên'
+    membership_type_id tinyint unsigned auto_increment comment 'Mã loại thành viên'
         primary key,
     type               enum ('BRONZE', 'SILVER', 'GOLD', 'PLATINUM') not null comment 'Loại thành viên',
-    discount_value     int                                           not null comment 'Giá trị giảm giá',
+    discount_value     decimal(10, 3)                                not null comment 'Giá trị giảm giá',
     discount_unit      enum ('PERCENT', 'FIXED')                     not null comment 'Đơn vị giảm giá (PERCENT, FIXED)',
     required_point     int                                           not null comment 'Điểm yêu cầu',
     description        varchar(255)                                  null comment 'Mô tả',
@@ -152,7 +158,7 @@ create table if not exists MembershipType
 
 create table if not exists PaymentMethod
 (
-    payment_method_id   int auto_increment comment 'Mã phương thức thanh toán'
+    payment_method_id   tinyint unsigned auto_increment comment 'Mã phương thức thanh toán'
         primary key,
     payment_name        varchar(50)                        not null comment 'Tên phương thức thanh toán',
     payment_description varchar(255)                       null comment 'Mô tả phương thức thanh toán',
@@ -164,14 +170,14 @@ create table if not exists PaymentMethod
 
 create table if not exists Product
 (
-    product_id   int auto_increment comment 'Mã sản phẩm'
+    product_id   mediumint unsigned auto_increment comment 'Mã sản phẩm'
         primary key,
-    category_id  int                                  null comment 'Mã danh mục',
+    category_id  smallint unsigned                    null comment 'Mã danh mục',
     name         varchar(100)                         not null comment 'Tên sản phẩm',
-    description  text                                 null comment 'Mô tả',
+    description  varchar(1000)                        null comment 'Mô tả sản phẩm',
     is_available tinyint(1) default 1                 null comment 'Sản phẩm có sẵn (1: Có, 0: Không)',
     is_signature tinyint(1) default 0                 null comment 'Sản phẩm đặc trưng (1: Có, 0: Không)',
-    image        mediumblob                           null comment 'Hình ảnh',
+    image_path   varchar(1000)                        null comment 'Đường dẫn mô tả hình ảnh',
     created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
     constraint Product_ibfk_1
@@ -181,90 +187,29 @@ create table if not exists Product
 create index category_id
     on Product (category_id);
 
-create table if not exists ProductSize
-(
-    size_id     int auto_increment comment 'Mã kích thước'
-        primary key,
-    name        varchar(10)                        not null comment 'Tên kích thước (ví dụ: S, M, L)',
-    description text                               null comment 'Mô tả',
-    created_at  datetime default CURRENT_TIMESTAMP null,
-    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint ProductSize_pk
-        unique (name)
-);
-
-create table if not exists ProductPrice
-(
-    product_price_id int auto_increment comment 'Mã giá sản phẩm'
-        primary key,
-    product_id       int                                null comment 'Mã sản phẩm',
-    size_id          int                                null comment 'Mã kích thước',
-    price            decimal(10, 2)                     not null comment 'Giá',
-    created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
-    updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    constraint ProductPrice_pk
-        unique (product_id, size_id),
-    constraint ProductPrice_ibfk_1
-        foreign key (product_id) references Product (product_id),
-    constraint ProductPrice_ibfk_2
-        foreign key (size_id) references ProductSize (size_id)
-);
-
-create index product_id
-    on ProductPrice (product_id);
-
-create index size_id
-    on ProductPrice (size_id);
-
-create table if not exists ProductPriceDiscount
-(
-    product_price_discount_id int auto_increment comment 'Mã giảm giá theo giá sản phẩm'
-        primary key,
-    product_price_id          int                                  null comment 'Mã giá sản phẩm',
-    discount_details_id       int                                  null comment 'Mã chi tiết giảm giá',
-    min_required_prod         int                                  not null comment 'Số lượng sản phẩm tối thiểu',
-    valid_from                datetime                             not null comment 'Ngày bắt đầu hiệu lực',
-    valid_until               datetime                             not null comment 'Ngày kết thúc hiệu lực',
-    current_uses              int        default 0                 null comment 'Số lần đã sử dụng',
-    max_uses                  int                                  null comment 'Số lần sử dụng tối đa',
-    max_uses_per_customer     int                                  null comment 'Số lần sử dụng tối đa cho mỗi khách hàng',
-    is_active                 tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
-    created_at                datetime   default CURRENT_TIMESTAMP null comment 'Ngày tạo',
-    updated_at                datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint ProductPriceDiscount_ibfk_1
-        foreign key (product_price_id) references ProductPrice (product_price_id),
-    constraint ProductPriceDiscount_ibfk_2
-        foreign key (discount_details_id) references DiscountDetail (discount_details_id)
-);
-
-create index discount_details_id
-    on ProductPriceDiscount (discount_details_id);
-
-create index product_price_id
-    on ProductPriceDiscount (product_price_id);
-
 create table if not exists Role
 (
-    role_id    int auto_increment comment 'Mã vai trò'
+    role_id     tinyint unsigned auto_increment comment 'Mã vai trò'
         primary key,
-    name       varchar(50)                        not null comment 'Tên vai trò (ví dụ: admin, staff, customer)',
-    created_at datetime default CURRENT_TIMESTAMP null,
-    updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    name        varchar(50)                        not null comment 'Tên vai trò (ví dụ: admin, staff, customer)',
+    description varchar(1000)                      null comment 'Mô tả vai trò',
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Role_pk
         unique (name)
 );
 
 create table if not exists Account
 (
-    account_id    int auto_increment comment 'Mã tài khoản'
+    account_id    int unsigned auto_increment comment 'Mã tài khoản'
         primary key,
-    role_id       int                                  null comment 'Mã vai trò',
+    role_id       tinyint unsigned                     null comment 'Mã vai trò',
     username      varchar(50)                          not null comment 'Tên đăng nhập',
     password_hash varchar(255)                         not null comment 'Mật khẩu đã mã hóa',
     is_active     tinyint(1) default 1                 null comment 'Tài khoản hoạt động (1: Có, 0: Không)',
     last_login    timestamp                            null comment 'Lần đăng nhập cuối',
-    created_at    timestamp  default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
-    updated_at    timestamp  default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
+    created_at    datetime   default CURRENT_TIMESTAMP null,
+    updated_at    datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint username
         unique (username),
     constraint Account_ibfk_1
@@ -276,10 +221,10 @@ create index role_id
 
 create table if not exists Customer
 (
-    customer_id        int auto_increment comment 'Mã khách hàng'
+    customer_id        int unsigned auto_increment comment 'Mã khách hàng'
         primary key,
-    membership_type_id int                                 null comment 'Mã loại thành viên',
-    account_id         int                                 null comment 'Mã tài khoản',
+    membership_type_id tinyint unsigned                    null comment 'Mã loại thành viên',
+    account_id         int unsigned                        null comment 'Mã tài khoản',
     last_name          varchar(35)                         not null comment 'Họ',
     first_name         varchar(25)                         not null comment 'Tên',
     phone              varchar(15)                         not null comment 'Số điện thoại',
@@ -306,9 +251,9 @@ create index membership_type_id
 
 create table if not exists Employee
 (
-    employee_id int auto_increment comment 'Mã nhân viên'
+    employee_id int unsigned auto_increment comment 'Mã nhân viên'
         primary key,
-    account_id  int                                null comment 'Mã tài khoản',
+    account_id  int unsigned                       null comment 'Mã tài khoản',
     position    varchar(50)                        not null comment 'Chức vụ',
     last_name   varchar(35)                        not null comment 'Họ',
     first_name  varchar(25)                        not null comment 'Tên',
@@ -325,10 +270,10 @@ create table if not exists Employee
 
 create table if not exists Expense
 (
-    expense_id          int auto_increment comment 'Mã chi phí'
+    expense_id          int unsigned auto_increment comment 'Mã chi phí'
         primary key,
-    account_id          int                                null comment 'Mã tài khoản',
-    expense_category_id int                                null comment 'Mã loại chi phí',
+    account_id          int unsigned                       null comment 'Mã tài khoản',
+    expense_category_id smallint unsigned                  null comment 'Mã loại chi phí',
     amount              decimal(10, 2)                     not null comment 'Số tiền',
     transaction_date    datetime default CURRENT_TIMESTAMP null comment 'Ngày giao dịch',
     description         text                               null comment 'Mô tả',
@@ -348,10 +293,10 @@ create index expense_category_id
 
 create table if not exists Income
 (
-    income_id          int auto_increment comment 'Mã thu nhập'
+    income_id          int unsigned auto_increment comment 'Mã thu nhập'
         primary key,
-    account_id         int                                null comment 'Mã tài khoản',
-    income_category_id int                                null comment 'Mã loại thu nhập',
+    account_id         int unsigned                       null comment 'Mã tài khoản',
+    income_category_id smallint unsigned                  null comment 'Mã loại thu nhập',
     amount             decimal(10, 2)                     not null comment 'Số tiền',
     transaction_date   datetime default CURRENT_TIMESTAMP null comment 'Ngày giao dịch',
     description        text                               null comment 'Mô tả',
@@ -371,9 +316,9 @@ create index income_category_id
 
 create table if not exists Manager
 (
-    manager_id int auto_increment comment 'Mã quản lý'
+    manager_id int unsigned auto_increment comment 'Mã quản lý'
         primary key,
-    account_id int                                null comment 'Mã tài khoản',
+    account_id int unsigned                       null comment 'Mã tài khoản',
     last_name  varchar(35)                        not null comment 'Họ',
     first_name varchar(25)                        not null comment 'Tên',
     sex        enum ('MALE', 'FEMALE', 'OTHER')   null comment 'Giới tính',
@@ -389,11 +334,11 @@ create table if not exists Manager
 
 create table if not exists `Order`
 (
-    order_id        int auto_increment comment 'Mã đơn hàng'
+    order_id        int unsigned auto_increment comment 'Mã đơn hàng'
         primary key,
-    customer_id     int                                      null comment 'Mã khách hàng',
-    employee_id     int                                      null comment 'Mã nhân viên',
-    payment_id      int                                      null comment 'Mã thanh toán',
+    customer_id     int unsigned                             null comment 'Mã khách hàng',
+    employee_id     int unsigned                             null comment 'Mã nhân viên',
+    payment_id      int unsigned                             null comment 'Mã thanh toán',
     order_time      timestamp      default CURRENT_TIMESTAMP null comment 'Thời gian đặt hàng',
     total_amount    decimal(10, 2)                           not null comment 'Tổng tiền',
     discount_amount decimal(10, 2) default 0.00              null comment 'Số tiền giảm giá',
@@ -401,6 +346,8 @@ create table if not exists `Order`
     customize_note  text                                     null comment 'Ghi chú tùy chỉnh',
     created_at      datetime       default CURRENT_TIMESTAMP null,
     updated_at      datetime       default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint Order_pk
+        unique (payment_id),
     constraint Order_ibfk_1
         foreign key (customer_id) references Customer (customer_id),
     constraint Order_ibfk_2
@@ -410,35 +357,12 @@ create table if not exists `Order`
 create index employee_id
     on `Order` (employee_id);
 
-create table if not exists OrderProduct
-(
-    order_product_id int auto_increment comment 'Mã chi tiết đơn hàng'
-        primary key,
-    order_id         int                                null comment 'Mã đơn hàng',
-    product_price_id int                                null comment 'Mã giá sản phẩm',
-    quantity         int                                not null comment 'Số lượng',
-    created_at       datetime default CURRENT_TIMESTAMP null,
-    updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint OrderProduct_pk
-        unique (order_id, product_price_id),
-    constraint OrderProduct_ibfk_1
-        foreign key (order_id) references `Order` (order_id),
-    constraint OrderProduct_ibfk_2
-        foreign key (product_price_id) references ProductPrice (product_price_id)
-);
-
-create index order_id
-    on OrderProduct (order_id);
-
-create index product_price_id
-    on OrderProduct (product_price_id);
-
 create table if not exists Payment
 (
-    payment_id        int auto_increment comment 'Mã thanh toán'
+    payment_id        int unsigned auto_increment comment 'Mã thanh toán'
         primary key,
-    order_id          int                                      null comment 'Mã đơn hàng',
-    payment_method_id int                                      null comment 'Mã phương thức thanh toán',
+    order_id          int unsigned                             null comment 'Mã đơn hàng',
+    payment_method_id tinyint unsigned                         null comment 'Mã phương thức thanh toán',
     amount_paid       decimal(10, 2)                           not null comment 'Số tiền đã trả',
     change_amount     decimal(10, 2) default 0.00              null comment 'Tiền thừa',
     payment_time      timestamp      default CURRENT_TIMESTAMP null comment 'Thời gian thanh toán',
@@ -452,14 +376,18 @@ create table if not exists Payment
         foreign key (payment_method_id) references PaymentMethod (payment_method_id)
 );
 
+alter table `Order`
+    add constraint Order_ibfk_3
+        foreign key (payment_id) references Payment (payment_id);
+
 create index payment_method_id
     on Payment (payment_method_id);
 
 create table if not exists RewardPointLog
 (
-    reward_point_log_id int auto_increment comment 'Mã lịch sử điểm thưởng'
+    reward_point_log_id int unsigned auto_increment comment 'Mã lịch sử điểm thưởng'
         primary key,
-    customer_id         int                                null comment 'Mã khách hàng',
+    customer_id         int unsigned                       null comment 'Mã khách hàng',
     reward_point        int                                not null comment 'Số điểm thưởng',
     operation_type      enum ('EARN', 'REDEEM', 'ADJUST')  not null comment 'Loại thao tác (EARN, REDEEM, ADJUST)',
     created_at          datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
@@ -470,9 +398,9 @@ create table if not exists RewardPointLog
 
 create table if not exists ServiceTable
 (
-    table_id     int auto_increment comment 'Mã bàn'
+    table_id     smallint unsigned auto_increment comment 'Mã bàn'
         primary key,
-    area_id      int                                  null comment 'Mã khu vực',
+    area_id      smallint unsigned                    null comment 'Mã khu vực',
     table_number varchar(10)                          not null comment 'Số bàn',
     is_available tinyint(1) default 1                 null comment 'Bàn có sẵn (1: Có, 0: Không)',
     created_at   datetime   default CURRENT_TIMESTAMP null,
@@ -485,10 +413,10 @@ create table if not exists ServiceTable
 
 create table if not exists OrderTable
 (
-    order_table_id int auto_increment comment 'Mã đơn hàng và bàn'
+    order_table_id int unsigned auto_increment comment 'Mã đơn hàng và bàn'
         primary key,
-    order_id       int                                not null,
-    table_id       int                                not null,
+    order_id       int unsigned                       not null comment 'Mã đơn hàng',
+    table_id       smallint unsigned                  not null comment 'Mã bàn',
     check_in       datetime                           not null comment 'Thời gian vào bàn',
     check_out      datetime                           null comment 'Thời gian rời bàn',
     created_at     datetime default CURRENT_TIMESTAMP null,
@@ -512,7 +440,7 @@ create index area_id
 
 create table if not exists Store
 (
-    store_id     int auto_increment comment 'Mã cửa hàng'
+    store_id     tinyint unsigned auto_increment comment 'Mã cửa hàng'
         primary key,
     name         varchar(100)                       not null comment 'Tên cửa hàng',
     address      varchar(255)                       not null comment 'Địa chỉ',
@@ -526,17 +454,20 @@ create table if not exists Store
 
 create table if not exists StoreHour
 (
-    store_hour_id int auto_increment comment 'Mã giờ mở cửa hàng'
+    store_hour_id smallint unsigned auto_increment comment 'Mã giờ mở cửa hàng'
         primary key,
-    store_id      int                                null comment 'Mã cửa hàng',
-    day_of_week   tinyint                            not null comment 'Thứ trong tuần (1-7, 1: Chủ nhật)',
+    store_id      tinyint unsigned                   null comment 'Mã cửa hàng',
+    day_of_week   tinyint unsigned                   not null comment 'Thứ trong tuần (1-7, 1: Chủ nhật)',
     open_time     time                               not null comment 'Giờ mở cửa',
     close_time    time                               not null comment 'Giờ đóng cửa',
     created_at    datetime default CURRENT_TIMESTAMP null,
     updated_at    datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint StoreHour_pk
+        unique (store_id, day_of_week),
     constraint StoreHour_ibfk_1
         foreign key (store_id) references Store (store_id),
-    check (`day_of_week` between 1 and 7)
+    constraint StoreHour_chk_1
+        check (`day_of_week` between 1 and 7)
 );
 
 create index store_id
@@ -544,7 +475,7 @@ create index store_id
 
 create table if not exists Supplier
 (
-    supplier_id    int auto_increment comment 'Mã nhà cung cấp'
+    supplier_id    int unsigned auto_increment comment 'Mã nhà cung cấp'
         primary key,
     name           varchar(100)                       not null comment 'Tên nhà cung cấp',
     contact_person varchar(100)                       null comment 'Người liên hệ',
@@ -557,11 +488,11 @@ create table if not exists Supplier
 
 create table if not exists InventoryTransaction
 (
-    transaction_id   int auto_increment comment 'Mã giao dịch kho'
+    transaction_id   int unsigned                       not null comment 'Mã giao dịch kho'
         primary key,
-    material_id      int                                null comment 'Mã nguyên vật liệu',
-    supplier_id      int                                null comment 'Mã nhà cung cấp',
-    manager_id       int                                null comment 'Mã quản lý',
+    material_id      mediumint unsigned                 null comment 'Mã nguyên vật liệu',
+    supplier_id      int unsigned                       null comment 'Mã nhà cung cấp',
+    manager_id       int unsigned                       null comment 'Mã quản lý',
     transaction_type enum ('INBOUND', 'OUTBOUND')       not null comment 'Loại giao dịch (INBOUND, OUTBOUND)',
     quantity         decimal(10, 2)                     not null comment 'Số lượng',
     transaction_date datetime default CURRENT_TIMESTAMP null comment 'Ngày giao dịch',
@@ -587,43 +518,123 @@ create index material_id
 create index supplier_id
     on InventoryTransaction (supplier_id);
 
-create table if not exists Topping
+create table if not exists UnitOfMeasure
 (
-    topping_id   int auto_increment comment 'Mã topping'
+    unit_id     smallint unsigned auto_increment comment 'Mã đơn vị tính'
         primary key,
-    name         varchar(50)                          not null comment 'Tên topping',
-    description  text                                 null comment 'Mô tả',
-    price        decimal(10, 2)                       not null comment 'Giá',
-    is_available tinyint(1) default 1                 null comment 'Topping có sẵn (1: Có, 0: Không)',
-    image        mediumblob                           null comment 'Hình ảnh',
-    created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
-    updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    constraint Topping_pk
+    name        varchar(30)                        not null comment 'Tên đơn vị tính (cái, cc, ml, v.v.)',
+    symbol      varchar(10)                        null comment 'Ký hiệu (cc, ml, v.v.)',
+    description text                               null comment 'Mô tả',
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint UnitOfMeasure_pk
         unique (name)
 );
 
-create table if not exists OrderTopping
+create table if not exists ProductSize
 (
-    order_topping_id int auto_increment
+    size_id     smallint unsigned auto_increment comment 'Mã kích thước'
         primary key,
-    order_product_id int                                null,
-    topping_id       int                                null comment 'Mã topping',
-    quantity         int                                not null comment 'Số lượng',
-    created_at       datetime default CURRENT_TIMESTAMP null,
-    updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint OrderTopping_pk
-        unique (order_product_id, topping_id),
-    constraint OrderTopping_ibfk_1
-        foreign key (order_product_id) references OrderProduct (order_product_id),
-    constraint OrderTopping_ibfk_2
-        foreign key (topping_id) references Topping (topping_id)
+    unit_id     smallint unsigned                  null comment 'Mã đơn vị tính',
+    name        varchar(5)                         not null comment 'Tên kích thước (ví dụ: S, M, L)',
+    description text                               null comment 'Mô tả',
+    created_at  datetime default CURRENT_TIMESTAMP null,
+    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint ProductSize_pk
+        unique (unit_id, name),
+    constraint ProductSize_ibfk_1
+        foreign key (unit_id) references UnitOfMeasure (unit_id)
 );
 
-create index order_item_id
-    on OrderTopping (order_product_id);
+create table if not exists ProductPrice
+(
+    product_price_id int unsigned auto_increment comment 'Mã giá sản phẩm'
+        primary key,
+    product_id       mediumint unsigned                 null comment 'Mã sản phẩm',
+    size_id          smallint unsigned                  null comment 'Mã kích thước',
+    price            decimal(10, 2)                     not null comment 'Giá',
+    created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
+    updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
+    constraint ProductPrice_pk
+        unique (product_id, size_id),
+    constraint ProductPrice_ibfk_1
+        foreign key (product_id) references Product (product_id),
+    constraint ProductPrice_ibfk_2
+        foreign key (size_id) references ProductSize (size_id)
+);
 
-create index topping_id
-    on OrderTopping (topping_id);
+create table if not exists OrderProduct
+(
+    order_product_id        int unsigned auto_increment comment 'Mã chi tiết đơn hàng'
+        primary key,
+    order_id                int unsigned                       not null comment 'Mã đơn hàng',
+    product_price_id        int unsigned                       not null comment 'Mã giá sản phẩm',
+    quantity                smallint unsigned                  not null comment 'Số lượng',
+    created_at              datetime default CURRENT_TIMESTAMP null,
+    updated_at              datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    `option`                varchar(500)                       null comment 'Tùy chọn cho việc lựa chọn lượng đá, đường',
+    parent_order_product_id int unsigned                       null comment 'Mã đặt hàng sản phẩm gốc, khi sản phẩm ở hàng này được đặt là Topping',
+    constraint OrderProduct_pk
+        unique (order_id, product_price_id),
+    constraint OrderProduct_ibfk_1
+        foreign key (order_id) references `Order` (order_id),
+    constraint OrderProduct_ibfk_2
+        foreign key (product_price_id) references ProductPrice (product_price_id),
+    constraint OrderProduct_ibfk_3
+        foreign key (parent_order_product_id) references OrderProduct (order_product_id)
+);
+
+create table if not exists OrderDiscount
+(
+    order_discount_id int unsigned auto_increment comment 'Mã giảm giá đơn hàng'
+        primary key,
+    order_product_id  int unsigned                       not null comment 'Mã chi tiết đơn hàng (nếu giảm giá áp dụng cho sản phẩm cụ thể)',
+    discount_id       int unsigned                       not null comment 'Mã chương trình giảm giá được áp dụng',
+    discount_amount   decimal(10, 2)                     not null comment 'Số tiền giảm giá được áp dụng',
+    created_at        datetime default CURRENT_TIMESTAMP null,
+    updated_at        datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint OrderDiscount_pk
+        unique (order_product_id, discount_id),
+    constraint OrderDiscount_ibfk_2
+        foreign key (discount_id) references Discount (discount_id),
+    constraint OrderDiscount_ibfk_3
+        foreign key (order_product_id) references OrderProduct (order_product_id)
+);
+
+create index order_id
+    on OrderProduct (order_id);
+
+create index product_price_id
+    on OrderProduct (product_price_id);
+
+create table if not exists ProductDiscount
+(
+    product_discount_id int unsigned auto_increment comment 'Mã định danh duy nhất cho mối quan hệ giữa sản phẩm và chương trình giảm giá'
+        primary key,
+    discount_id         int unsigned                       not null comment 'Liên kết với bảng Discount, xác định chương trình giảm giá áp dụng',
+    product_price_id    int unsigned                       not null comment 'Liên kết với bảng ProductPrice, xác định sản phẩm và kích thước được giảm giá',
+    min_prod_quantity   tinyint unsigned                   not null comment 'Số lượng tối thiểu của sản phẩm để áp dụng giảm giá',
+    created_at          datetime default CURRENT_TIMESTAMP null,
+    updated_at          datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint ProductDiscount_pk
+        unique (discount_id, product_price_id),
+    constraint ProductDiscount_ibfk_1
+        foreign key (discount_id) references Discount (discount_id),
+    constraint ProductDiscount_ibfk_2
+        foreign key (product_price_id) references ProductPrice (product_price_id)
+);
+
+create index discount_id
+    on ProductDiscount (discount_id);
+
+create index product_price_id
+    on ProductDiscount (product_price_id);
+
+create index product_id
+    on ProductPrice (product_id);
+
+create index size_id
+    on ProductPrice (size_id);
 
 create table if not exists flyway_schema_history
 (

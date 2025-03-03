@@ -1,6 +1,6 @@
 create table if not exists milk_tea_shop_dev.Coupon
 (
-    coupon_id   int auto_increment comment 'Mã coupon'
+    coupon_id   int unsigned auto_increment comment 'Mã coupon'
         primary key,
     coupon      varchar(15)                          not null comment 'Mã giảm giá',
     description text                                 null comment 'Mô tả',

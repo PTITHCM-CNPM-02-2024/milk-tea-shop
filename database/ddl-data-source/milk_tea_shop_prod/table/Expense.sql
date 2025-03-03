@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_prod.Expense
 (
-    expense_id          int auto_increment comment 'Mã chi phí'
+    expense_id          int unsigned auto_increment comment 'Mã chi phí'
         primary key,
-    account_id          int                                null comment 'Mã tài khoản',
-    expense_category_id int                                null comment 'Mã loại chi phí',
+    account_id          int unsigned                       null comment 'Mã tài khoản',
+    expense_category_id smallint unsigned                  null comment 'Mã loại chi phí',
     amount              decimal(10, 2)                     not null comment 'Số tiền',
     transaction_date    datetime default CURRENT_TIMESTAMP null comment 'Ngày giao dịch',
     description         text                               null comment 'Mô tả',

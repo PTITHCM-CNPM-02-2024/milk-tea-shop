@@ -1,6 +1,6 @@
 create table if not exists milk_tea_shop_prod.Store
 (
-    store_id     int auto_increment comment 'Mã cửa hàng'
+    store_id     tinyint unsigned auto_increment comment 'Mã cửa hàng'
         primary key,
     name         varchar(100)                       not null comment 'Tên cửa hàng',
     address      varchar(255)                       not null comment 'Địa chỉ',

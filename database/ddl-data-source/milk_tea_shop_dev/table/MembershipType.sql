@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_dev.MembershipType
 (
-    membership_type_id int auto_increment comment 'Mã loại thành viên'
+    membership_type_id tinyint unsigned auto_increment comment 'Mã loại thành viên'
         primary key,
     type               enum ('BRONZE', 'SILVER', 'GOLD', 'PLATINUM') not null comment 'Loại thành viên',
-    discount_value     int                                           not null comment 'Giá trị giảm giá',
+    discount_value     decimal(10, 3)                                not null comment 'Giá trị giảm giá',
     discount_unit      enum ('PERCENT', 'FIXED')                     not null comment 'Đơn vị giảm giá (PERCENT, FIXED)',
     required_point     int                                           not null comment 'Điểm yêu cầu',
     description        varchar(255)                                  null comment 'Mô tả',

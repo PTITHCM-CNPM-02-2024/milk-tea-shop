@@ -1,6 +1,6 @@
 create table if not exists milk_tea_shop_dev.Supplier
 (
-    supplier_id    int auto_increment comment 'Mã nhà cung cấp'
+    supplier_id    int unsigned auto_increment comment 'Mã nhà cung cấp'
         primary key,
     name           varchar(100)                       not null comment 'Tên nhà cung cấp',
     contact_person varchar(100)                       null comment 'Người liên hệ',

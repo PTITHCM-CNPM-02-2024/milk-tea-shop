@@ -3,7 +3,8 @@
 !data/
 !data/dev/
 !data/prod/
-
+!csv/
+!csv/*
 !.gitignore
 !HELP.md
 !.project

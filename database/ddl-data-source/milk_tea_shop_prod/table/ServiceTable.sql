@@ -1,8 +1,8 @@
 create table if not exists milk_tea_shop_prod.ServiceTable
 (
-    table_id     int auto_increment comment 'Mã bàn'
+    table_id     smallint unsigned auto_increment comment 'Mã bàn'
         primary key,
-    area_id      int                                  null comment 'Mã khu vực',
+    area_id      smallint unsigned                    null comment 'Mã khu vực',
     table_number varchar(10)                          not null comment 'Số bàn',
     is_available tinyint(1) default 1                 null comment 'Bàn có sẵn (1: Có, 0: Không)',
     created_at   datetime   default CURRENT_TIMESTAMP null,

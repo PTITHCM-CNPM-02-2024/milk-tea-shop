@@ -13,9 +13,10 @@ repositories{
 
 dependencies{
     implementation(("com.mts.backend:infrastructure"))
-    implementation(platform("com.ptithcm.mts-backend:platform"))
+    implementation(platform("com.mts.backend:platform"))
     runtimeOnly("com.mysql:mysql-connector-j")
     implementation("org.flywaydb:flyway-core")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.register("flywayCleanDev", FlywayCleanTask::class){

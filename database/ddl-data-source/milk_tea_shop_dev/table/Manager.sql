@@ -1,8 +1,8 @@
 create table if not exists milk_tea_shop_dev.Manager
 (
-    manager_id int auto_increment comment 'Mã quản lý'
+    manager_id int unsigned auto_increment comment 'Mã quản lý'
         primary key,
-    account_id int                                null comment 'Mã tài khoản',
+    account_id int unsigned                       null comment 'Mã tài khoản',
     last_name  varchar(35)                        not null comment 'Họ',
     first_name varchar(25)                        not null comment 'Tên',
     sex        enum ('MALE', 'FEMALE', 'OTHER')   null comment 'Giới tính',

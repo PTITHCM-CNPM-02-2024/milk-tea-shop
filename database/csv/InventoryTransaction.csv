@@ -1,0 +1,1 @@
+transaction_id,material_id,supplier_id,manager_id,transaction_type,quantity,transaction_date,unit_cost,batch_number,notes,created_at,updated_at

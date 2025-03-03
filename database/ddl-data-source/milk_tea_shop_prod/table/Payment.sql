@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_prod.Payment
 (
-    payment_id        int auto_increment comment 'Mã thanh toán'
+    payment_id        int unsigned auto_increment comment 'Mã thanh toán'
         primary key,
-    order_id          int                                      null comment 'Mã đơn hàng',
-    payment_method_id int                                      null comment 'Mã phương thức thanh toán',
+    order_id          int unsigned                             null comment 'Mã đơn hàng',
+    payment_method_id tinyint unsigned                         null comment 'Mã phương thức thanh toán',
     amount_paid       decimal(10, 2)                           not null comment 'Số tiền đã trả',
     change_amount     decimal(10, 2) default 0.00              null comment 'Tiền thừa',
     payment_time      timestamp      default CURRENT_TIMESTAMP null comment 'Thời gian thanh toán',

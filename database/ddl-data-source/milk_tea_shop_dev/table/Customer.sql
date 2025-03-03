@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_dev.Customer
 (
-    customer_id        int auto_increment comment 'Mã khách hàng'
+    customer_id        int unsigned auto_increment comment 'Mã khách hàng'
         primary key,
-    membership_type_id int                                 null comment 'Mã loại thành viên',
-    account_id         int                                 null comment 'Mã tài khoản',
+    membership_type_id tinyint unsigned                    null comment 'Mã loại thành viên',
+    account_id         int unsigned                        null comment 'Mã tài khoản',
     last_name          varchar(35)                         not null comment 'Họ',
     first_name         varchar(25)                         not null comment 'Tên',
     phone              varchar(15)                         not null comment 'Số điện thoại',

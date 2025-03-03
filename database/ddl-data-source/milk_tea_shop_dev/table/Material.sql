@@ -1,6 +1,6 @@
 create table if not exists milk_tea_shop_dev.Material
 (
-    material_id  int auto_increment comment 'Mã nguyên vật liệu'
+    material_id  mediumint unsigned auto_increment comment 'Mã nguyên vật liệu'
         primary key,
     name         varchar(100)                       not null comment 'Tên nguyên vật liệu',
     description  text                               null comment 'Mô tả',

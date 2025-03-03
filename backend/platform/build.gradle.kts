@@ -12,7 +12,7 @@ javaPlatform {
     allowDependencies()
 }
 
-group = "com.ptithcm.mts-backend"
+group = "com.mts.backend"
 version = "1.0-SNAPSHOT"
 
 extra["springModulithVersion"] = "1.3.1"
@@ -34,6 +34,7 @@ dependencies {
         api("org.springframework.modulith:spring-modulith-starter-core:1.3.2")
         api("org.springframework.modulith:spring-modulith-starter-jdbc:1.3.2")
         api("org.springframework.modulith:spring-modulith-starter-jpa:1.3.2")
+        api("org.springframework.boot:spring-boot-starter-logging:3.4.2")
     }
 }
 

@@ -1,0 +1,2 @@
+ALTER TABLE ProductSize
+    MODIFY name VARCHAR(5) NOT NULL;

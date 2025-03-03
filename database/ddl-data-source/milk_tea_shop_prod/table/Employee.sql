@@ -1,8 +1,8 @@
 create table if not exists milk_tea_shop_prod.Employee
 (
-    employee_id int auto_increment comment 'Mã nhân viên'
+    employee_id int unsigned auto_increment comment 'Mã nhân viên'
         primary key,
-    account_id  int                                null comment 'Mã tài khoản',
+    account_id  int unsigned                       null comment 'Mã tài khoản',
     position    varchar(50)                        not null comment 'Chức vụ',
     last_name   varchar(35)                        not null comment 'Họ',
     first_name  varchar(25)                        not null comment 'Tên',

@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_prod.ProductPrice
 (
-    product_price_id int auto_increment comment 'Mã giá sản phẩm'
+    product_price_id int unsigned auto_increment comment 'Mã giá sản phẩm'
         primary key,
-    product_id       int                                null comment 'Mã sản phẩm',
-    size_id          int                                null comment 'Mã kích thước',
+    product_id       mediumint unsigned                 null comment 'Mã sản phẩm',
+    size_id          smallint unsigned                  null comment 'Mã kích thước',
     price            decimal(10, 2)                     not null comment 'Giá',
     created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',

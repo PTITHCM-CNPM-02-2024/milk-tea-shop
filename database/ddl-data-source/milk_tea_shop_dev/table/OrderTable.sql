@@ -1,9 +1,9 @@
 create table if not exists milk_tea_shop_dev.OrderTable
 (
-    order_table_id int auto_increment comment 'Mã đơn hàng và bàn'
+    order_table_id int unsigned auto_increment comment 'Mã đơn hàng và bàn'
         primary key,
-    order_id       int                                not null comment 'Mã đơn hàng',
-    table_id       int                                not null comment 'Mã bàn',
+    order_id       int unsigned                       not null comment 'Mã đơn hàng',
+    table_id       smallint unsigned                  not null comment 'Mã bàn',
     check_in       datetime                           not null comment 'Thời gian vào bàn',
     check_out      datetime                           null comment 'Thời gian rời bàn',
     created_at     datetime default CURRENT_TIMESTAMP null,
