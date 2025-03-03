@@ -1,0 +1,13 @@
+*
+
+!data/
+!data/dev/
+!data/prod/
+!csv/
+!csv/*
+!.gitignore
+!HELP.md
+!.project
+!ddl-data-source/
+!ddl-data-source/**
+

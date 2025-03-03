@@ -1,0 +1,31 @@
+product_id,category_id,name,description,is_available,is_signature,image_path,created_at,updated_at
+1,1,SỮA TƯƠI TRÂN CHÂU ĐƯỜNG ĐEN,"Một sự kết hợp hoàn hảo giữa vị ngọt thanh của đường đen và sự béo ngậy của sữa tươi nguyên chất. Điểm nhấn chính là những viên trân châu dai mềm, ngấm đều hương đường, tạo nên hương vị khó quên.",1,0,,2025-02-28 15:33:33,2025-02-28 15:33:59
+2,1,SÔ-CÔ-LA TRÂN CHÂU ĐƯỜNG ĐEN,"Hương vị thơm nồng, đậm đà của socola hòa quyện cùng đường đen ngọt thanh. Trân châu dẻo dai làm tăng thêm sự thú vị cho mỗi ngụm thưởng thức. Đây là lựa chọn lý tưởng cho những ai yêu thích sự đậm đà và ngọt ngào.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+3,1,CA-CAO TRÂN CHÂU ĐƯỜNG ĐEN,"Một sự kết hợp tuyệt vời giữa vị đắng nhẹ của cacao nguyên chất và ngọt thanh của đường đen. Thức uống này vừa thơm vừa béo, mang lại cảm giác hài hòa và thư giãn.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+4,1,MATCHA TRÂN CHÂU ĐƯỜNG ĐEN,"Matcha thanh mát, thơm lừng hòa quyện cùng lớp đường đen ngọt ngào và trân châu dai mềm. Sự hòa quyện này đem đến một trải nghiệm trà xanh hiện đại mà không kém phần truyền thống.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+5,1,KHOAI MÔN TRÂN CHÂU ĐƯỜNG ĐEN,"Hương khoai môn tự nhiên, bùi bùi kết hợp cùng vị ngọt thanh của đường đen và trân châu dẻo dai. Một thức uống vừa thơm, vừa đậm vị quê nhà.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+6,1,HOA ĐẬU BIẾC TRÂN CHÂU ĐƯỜNG ĐEN,"Với sắc xanh bắt mắt từ hoa đậu biếc, kết hợp cùng vị ngọt nhẹ của đường đen và trân châu dẻo dai, đây không chỉ là thức uống ngon mà còn rất tốt cho sức khỏe.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+7,1,Ô-LONG TRÂN CHÂU ĐƯỜNG ĐEN,"Thưởng thức hương vị thanh tao, nhẹ nhàng của trà Oolong kết hợp cùng lớp đường đen ngọt dịu và trân châu mềm mại. Một sự lựa chọn lý tưởng để thư giãn và tận hưởng sự tinh tế.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+8,1,TRÀ SỮA TRÂN CHÂU ĐƯỜNG ĐEN,"Kinh điển nhưng không bao giờ lỗi thời, trà sữa thơm ngon béo nhẹ hòa quyện cùng đường đen ngọt dịu và trân châu dai mềm. Thức uống này luôn là ""must-try"" cho bất kỳ ai yêu thích trà sữa.",1,0,,2025-02-28 15:45:34,2025-02-28 15:45:34
+9,2,TRÀ SỮA TRUYỀN THỐNG,"Hương vị quen thuộc với sự hòa quyện tinh tế giữa trà đen và sữa tươi. Vị ngọt vừa phải, thơm mát, thích hợp cho mọi lứa tuổi.",1,0,,2025-02-28 15:57:32,2025-02-28 15:57:32
+10,2,TRÀ SỮA SÔ-CÔ-LA,"Đậm đà và ngọt ngào với hương socola thơm lừng, kết hợp cùng vị béo nhẹ của trà sữa.",1,0,,2025-02-28 15:57:32,2025-02-28 15:57:32
+11,2,TRÀ SỮA MAT-CHA,"Matcha thanh mát, thơm phức, kết hợp cùng sữa ngọt dịu tạo nên hương vị cân bằng, thư thái.",1,0,,2025-02-28 15:57:33,2025-02-28 15:57:33
+12,2,TRÀ SỮA CA-RA-MEO,"Sự hòa quyện của trà sữa béo mịn và caramel thơm ngọt, mang lại cảm giác ấm áp, đầy mê hoặc.",1,0,,2025-02-28 15:57:33,2025-02-28 15:57:33
+13,2,TRÀ SỮA HOKKAIDO,"Đậm đà, béo ngậy với sữa Hokkaido thơm ngon, mang phong cách Nhật Bản đặc trưng.",1,0,,2025-02-28 15:57:33,2025-02-28 15:57:33
+14,2,TRÀ SỮA HẠNH PHÚC,"Công thức pha chế đặc biệt, mang lại cảm giác ngọt ngào và niềm vui cho mọi người.",1,0,,2025-02-28 15:57:33,2025-02-28 15:57:33
+15,2,TRÀ SỮA BÁNH FLAN,"Sự hòa quyện giữa vị ngọt béo của trà sữa và topping bánh flan mềm mịn, thơm ngon.",1,0,,2025-02-28 15:57:33,2025-02-28 15:57:33
+16,3,HỒNG TRÀ KEM PHÔ MAI,"Hồng trà đậm đà với lớp kem cheese mặn ngọt hài hòa, tạo nên một ly trà độc đáo.",1,0,,2025-02-28 16:03:03,2025-02-28 16:03:03
+17,3,TRÀ GẠO RANG KEM PHÔ MAI,"Thơm lừng với vị trà gạo rang độc đáo, thêm kem cheese tạo nên một ly trà đậm đà, lạ miệng.",1,0,,2025-02-28 16:03:03,2025-02-28 16:03:03
+18,4,TRÀ Ô LONG MỘC HƯƠNG,"Trà Ô Long được ủ kỹ, mang hương thơm mộc mạc, tự nhiên, vị chát dịu, hậu ngọt thanh.",1,0,,2025-02-28 21:03:12,2025-02-28 21:03:12
+19,4,HỒNG TRÀ ĐÀI LOAN,"Hồng trà Đài Loan thượng hạng, màu sắc hổ phách, hương thơm nồng nàn, vị đậm đà.",1,0,,2025-02-28 21:03:12,2025-02-28 21:03:12
+20,4,TRÀ XANH HOA NHÀI,"Trà xanh tươi mát kết hợp với hương hoa nhài tinh tế, tạo nên thức uống thanh nhiệt, thư giãn.",1,0,,2025-02-28 21:03:12,2025-02-28 21:03:12
+21,4,TRÀ XANH BÍ ĐAO,"Trà xanh bí đao thanh mát, giải nhiệt, vị ngọt dịu, tốt cho sức khỏe.",1,0,,2025-02-28 21:03:12,2025-02-28 21:03:12
+22,6,THẠCH DỪA SƯƠNG SÁO,"Thạch dừa dai giòn kết hợp cùng sương sáo thanh mát, tạo nên sự hòa quyện độc đáo.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+23,6,BÁNH FLAN,"Bánh flan mềm mịn, béo ngậy, tan trong miệng với vị caramel đặc trưng.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+24,6,KEM VANI,"Kem vani mát lạnh, thơm ngon, vị ngọt dịu.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+25,6,THẠCH DỪA HƯƠNG VẢI,"Thạch dừa dai giòn, thơm hương vải ngọt ngào, thanh mát.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+26,6,TRÂN CHÂU HOÀNG KIM,"Trân châu hoàng kim dai ngon, màu sắc óng ánh, vị ngọt thanh.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+27,6,NHA ĐAM,"Nha đam giòn sần sật, thanh mát, tốt cho sức khỏe.",1,0,,2025-02-28 21:10:19,2025-02-28 21:12:16
+28,7,HẠT SEN,"Hạt sen bùi bùi, thơm ngon, giàu dinh dưỡng.",1,0,,2025-02-28 21:12:28,2025-02-28 21:12:28
+29,7,TRÂN CHÂU 3Q SẮC MÀU,"Trân châu 3Q dai giòn sần sật, nhiều màu sắc bắt mắt, hương vị đa dạng.",1,0,,2025-02-28 21:12:28,2025-02-28 21:12:28
+30,7,KHOAI MÔN NGHIỀN,"Khoai môn nghiền dẻo mịn, thơm bùi, vị ngọt tự nhiên.",1,0,,2025-02-28 21:12:28,2025-02-28 21:12:28

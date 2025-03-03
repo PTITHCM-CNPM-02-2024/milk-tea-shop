@@ -1,0 +1,9 @@
+[flyway]
+environment = "dev"
+baselineOnMigrate = true
+
+[environments.dev]
+url = "jdbc:mysql://localhost:3306/milk_tea_shop_prod"
+user = "root"
+password = "root"
+
