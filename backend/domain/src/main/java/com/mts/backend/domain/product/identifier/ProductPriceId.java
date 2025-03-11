@@ -1,0 +1,55 @@
+package com.mts.backend.domain.product.identifier;
+
+import com.mts.backend.shared.domain.Identifiable;
+
+import java.util.Objects;
+
+public class ProductPriceId implements Identifiable {
+    private final long value;
+    
+    private ProductPriceId(long value) {
+        this.value = value;
+    }
+    
+    public static ProductPriceId of (long value) {
+        return new ProductPriceId(value);
+    }
+    
+    public long getValue() {
+        return value;
+    }
+    public static ProductPriceId of(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Product price id cannot be null");
+        }
+        return new ProductPriceId(Long.parseLong(value));
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        ProductPriceId productPriceId = (ProductPriceId) o;
+        
+        return Objects.equals(value, productPriceId.value);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
+    }
+    
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    /**
+     * TODO: Cần kiểm tra xem có cần thiết không
+     */
+    public static ProductPriceId create() {
+        long random = Math.abs(System.currentTimeMillis());
+        return new ProductPriceId(random);
+    }
+}

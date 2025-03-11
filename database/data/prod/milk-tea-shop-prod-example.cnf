@@ -1,0 +1,14 @@
+[mysqld]
+# Đường dẫn đến thư mục chứa các file thực thi của MySQL
+#basedir=/home/PNguyen/development/mysql-8.4.3-linux-glibc2.28-x86_64
+# Đường dẫn đến thư mục chứa dữ liệu của MySQL
+#datadir=/home/PNguyen/Workspace/MyProject/milk-tea-shop/database/data/prod
+# Đường dẫn đến file socket
+#socket=/tmp/mysql.sock
+# Cổng kết nối
+#port=3307
+# Sử dụng cơ chế xác thực mặc định của MySQL
+#mysql_native_password=ON
+
+# Bỏ comment để sử dụng cấu hình này, và thay đổi 2 option basedir và datadir
+# Đây là cấu hình chỉ dành cho môi trường production

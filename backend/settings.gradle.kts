@@ -1,17 +1,24 @@
-rootProject.name = "mts_backend"
+rootProject.name = "backend"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-
 
 buildCache { 
     local { 
         directory = File(rootDir, "build-cache")
     }    
 }
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    includeBuild("build-logic")
+}
 includeBuild(".")
-includeBuild("infrastructure")
-includeBuild("platform")
-includeBuild("bootstrap")
+includeBuild("shared")
 includeBuild("domain")
 includeBuild("application")
+includeBuild("infrastructure")
+includeBuild("api")
+includeBuild("platform")

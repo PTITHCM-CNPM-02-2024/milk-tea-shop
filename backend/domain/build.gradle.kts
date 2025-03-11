@@ -3,8 +3,8 @@ plugins{
 }
 
 dependencies{
-    implementation(projects.common)
-    implementation(projects.product)
+    implementation("org.springframework.boot:spring-boot-starter")
+    api("com.mts.backend:shared")
 }
 
 group = "com.mts.backend"

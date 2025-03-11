@@ -1,6 +1,5 @@
 rootProject.name = "domain"
 
-include(":common", ":product")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement{
@@ -10,4 +9,7 @@ pluginManagement{
         mavenCentral()
     }
 }
+
+includeBuild("../shared")
+
 
