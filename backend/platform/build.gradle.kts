@@ -19,6 +19,7 @@ extra["springModulithVersion"] = "1.3.1"
 
 dependencies {
     constraints {
+        api("org.springframework.boot:spring-boot-starter:3.4.2")
         api("org.springframework.boot:spring-boot-starter-data-jdbc:3.4.2")
         api("org.springframework.boot:spring-boot-starter-data-jpa:3.4.2")
         api("org.springframework.boot:spring-boot-starter-jdbc:3.4.2")

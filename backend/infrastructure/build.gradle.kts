@@ -9,7 +9,11 @@ repositories{
 }
 
 dependencies{
-    implementation((projects.persistence))
+    api("com.mts.backend:application")
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    api("org.springframework.boot:spring-boot-starter")
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-security")
 }
 
 group = "com.mts.backend"

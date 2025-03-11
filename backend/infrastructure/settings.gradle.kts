@@ -1,7 +1,5 @@
 rootProject.name = "infrastructure"
 
-include(":persistence")
-
 pluginManagement{
     includeBuild("../build-logic")
     repositories {
@@ -9,3 +7,5 @@ pluginManagement{
         mavenCentral()
     }
 }
+
+includeBuild("../application")
