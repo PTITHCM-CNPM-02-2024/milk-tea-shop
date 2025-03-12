@@ -35,6 +35,10 @@ public class UnitOfMeasureId implements Identifiable {
         return Objects.equals(value, unitOfMeasureId.value);
     }
     
+    public int getValue() {
+        return value;
+    }
+    
     @Override
     public int hashCode() {
         return Integer.hashCode(value);
@@ -42,5 +46,11 @@ public class UnitOfMeasureId implements Identifiable {
     @Override
     public String toString () {
         return String.valueOf(value);
+    }
+    
+    // TODO: cần kiểm tra lại phương thức này
+    public static UnitOfMeasureId create(){
+        int random = Math.abs(Objects.hash(System.currentTimeMillis()));
+        return new UnitOfMeasureId(random);
     }
 }

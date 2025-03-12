@@ -13,7 +13,7 @@ public class QuantityOfProductSize extends AbstractValueObject {
         this.quantity = quantity;
     }
     
-    public int getQuantity() {
+    public int getValue() {
         return quantity;
     }
     

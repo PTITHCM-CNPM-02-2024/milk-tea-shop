@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,8 +13,8 @@ import java.util.Optional;
 @Setter
 @AllArgsConstructor
 @Builder
-public class CreateProductCommand implements ICommand<CommandResult> {
-    private    String name;
+public class CreateProductInformCommand implements ICommand<CommandResult> {
+    private  String name;
     private  String description;
     private  Integer categoryId;
     private  boolean available;
@@ -23,7 +22,6 @@ public class CreateProductCommand implements ICommand<CommandResult> {
     private  String imagePath;
     private  LocalDateTime createdAt;
     private  LocalDateTime updatedAt;
-    private  Map<Integer, BigDecimal> prices = new HashMap<>();
     
     public Optional<Integer> getCategoryId() {
         return Optional.ofNullable(categoryId);
@@ -36,11 +34,7 @@ public class CreateProductCommand implements ICommand<CommandResult> {
     public Optional<LocalDateTime> getUpdatedAt() {
         return Optional.ofNullable(updatedAt);
     }
-    
-    public Optional<Map<Integer, BigDecimal>> getPrices() {
-        return Optional.of(prices);
-    }
-    
+
     public Optional<String> getImagePath() {
         return Optional.ofNullable(imagePath);
     }

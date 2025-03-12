@@ -44,7 +44,7 @@ public class ProductSizeName extends AbstractValueObject {
         return name.toUpperCase().trim();
     }
     
-    public String getName() {
+    public String getValue() {
         return normalize(name);
     }
     
@@ -55,7 +55,7 @@ public class ProductSizeName extends AbstractValueObject {
     
     @Override
     public String toString() {
-        return getName();
+        return getValue();
     }
     
 }

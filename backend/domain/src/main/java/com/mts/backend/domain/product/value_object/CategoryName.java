@@ -14,7 +14,7 @@ public class CategoryName extends AbstractValueObject {
     private final String value;
 
     private CategoryName(String value) {
-        this.value = value;
+        this.value = normalize(value);
     }
     
     public static ValueObjectValidationResult create(String value) {

@@ -7,47 +7,63 @@ import com.mts.backend.domain.product.repository.ICategoryRepository;
 import com.mts.backend.domain.product.value_object.CategoryName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
-import com.mts.backend.shared.exception.DomainException;
-import org.springframework.stereotype.Component;
+import com.mts.backend.shared.exception.DuplicateException;
+import com.mts.backend.shared.exception.NotFoundException;
+import org.springframework.stereotype.Service;
 
-@Component
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@Service
 public class CreateCategoryCommandHandler implements ICommandHandler<CreateCategoryCommand, CommandResult> {
-    
-    
+    private final ICategoryRepository categoryRepository;
+
+    public CreateCategoryCommandHandler(ICategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
     /**
-     * @param command 
+     * @param command
      * @return
      */
     @Override
     public CommandResult handle(CreateCategoryCommand command) {
-        try {
+        Objects.requireNonNull(command, "Create category command is required");
+        
+        verifyParentCategoryIfSpecified(command.getParentId().map(CategoryId::of).orElse(null));
+        
+        verifyUniqueName(CategoryName.of(command.getName()));
 
-            Category category = new Category(
-                    CategoryId.create(),
-                    CategoryName.of(command.getName()),
-                    command.getDescription().orElse(null),
-                    command.getParentId().map(CategoryId::of).orElse(null),
-                    command.getCreatedAt(),
-                    command.getUpdatedAt()
-            );
-            
-            var createdCategory = categoryRepository.create(category);
-            
-            return CommandResult.success(createdCategory.getId().getValue());
-            
-        }catch(DomainException e){
-            return CommandResult.businessFail(e.getMessage());
-        }
-        catch (Exception e) {
-            return CommandResult.systemFail(e.getMessage());
-        }
+        Category category = new Category(
+                CategoryId.create(),
+                CategoryName.of(command.getName()),
+                command.getDescription().orElse(null),
+                command.getParentId().map(CategoryId::of).orElse(null),
+                command.getCreatedAt().orElse(LocalDateTime.now()),
+                command.getUpdatedAt().orElse(LocalDateTime.now())
+        );
+
+        var createdCategory = categoryRepository.create(category);
+
+        return CommandResult.success(createdCategory.getId().getValue());
+
     }
 
-    private final ICategoryRepository categoryRepository;
-    
-    public CreateCategoryCommandHandler(ICategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    private void verifyUniqueName(CategoryName name) {
+        Objects.requireNonNull(name, "Category name is required");
+
+        categoryRepository.findByName(name).ifPresent(c -> {
+            throw new DuplicateException("Category " + name.getValue() + " already exists");
+        });
     }
     
-    
+    private void verifyParentCategoryIfSpecified(CategoryId parentId) {
+        if (parentId == null) {
+            return;
+        }
+        
+        categoryRepository.findById(parentId).orElseThrow(() -> new NotFoundException("Danh mục cha không tồn tại"));   
+    }
+
+
 }

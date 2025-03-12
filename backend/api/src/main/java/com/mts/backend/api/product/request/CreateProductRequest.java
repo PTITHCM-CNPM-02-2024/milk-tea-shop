@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -14,21 +17,13 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateProductRequest implements Serializable {
+public class CreateProductRequest {
     String name;
     String description;
     Integer categoryId;
     boolean available;
     boolean signature;
     String imagePath;
-    Set<ProductPriceRequest> prices;
-
-    /**
-     * DTO for {@link com.mts.backend.domain.product.entity.ProductPrice}
-     */
-    @Data
-    public static class ProductPriceRequest implements Serializable {
-        Integer sizeIdValue;
-        BigDecimal priceAmount;
-    }
+    
+    Map<Integer, BigDecimal> prices = new HashMap<>();
 }

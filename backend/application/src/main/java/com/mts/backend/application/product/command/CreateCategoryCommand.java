@@ -23,12 +23,12 @@ public class CreateCategoryCommand implements ICommand<CommandResult>{
         return Optional.ofNullable(parentId);
     }
     
-    public LocalDateTime getCreatedAt() {
-        return createdAt == null ? LocalDateTime.now() : createdAt;
+    public Optional<LocalDateTime> getCreatedAt() {
+        return Optional.ofNullable(createdAt);
     }
     
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt == null ? LocalDateTime.now() : updatedAt;
+    public Optional<LocalDateTime> getUpdatedAt() {
+        return Optional.ofNullable(updatedAt);
     }
     
     public Optional<String> getDescription() {

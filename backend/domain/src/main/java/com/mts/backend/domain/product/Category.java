@@ -79,12 +79,12 @@ public class Category extends AbstractAggregateRoot<CategoryId>{
         return Optional.ofNullable(parentId);
     }
     
-    public Optional<LocalDateTime> getCreatedAt() {
-        return Optional.ofNullable(createdAt);
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
     
-    public Optional<LocalDateTime> getUpdatedAt() {
-        return Optional.ofNullable(updatedAt);
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
     
     
