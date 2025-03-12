@@ -10,6 +10,8 @@ import com.mts.backend.domain.product.value_object.ProductName;
 import com.mts.backend.shared.domain.AbstractAggregateRoot;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
+import com.mts.backend.shared.exception.DuplicateException;
+import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -32,6 +34,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
     public Product(@NonNull ProductId productId, @NonNull ProductName name,@Nullable String description, @Nullable String imagePath, boolean available, boolean signature, @Nullable CategoryId categoryId,@Nullable Set<ProductPrice> prices,@Nullable LocalDateTime createdAt,@Nullable LocalDateTime updatedAt) {
         super(productId);
         Objects.requireNonNull(name, "Tên sản phẩm không được null");
+        
         this.name = name;
         this.description = description == null ? "" : description;
         this.imagePath = imagePath == null ? "" : imagePath;
@@ -41,7 +44,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         this.available = available;
         this.signature = signature;
         
-        if (prices != null) {
+        if (prices != null && !prices.isEmpty()) {
             this.prices.addAll(prices);
         }
     }
@@ -61,7 +64,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         
         Optional<ProductPrice> existingPrice = findPriceBySizeId(productPrice.getSizeId());
         if (existingPrice.isPresent()) {
-            throw new DomainException("Giá sản phẩm cho kích thước này đã tồn tại");
+            throw new DuplicateException("Giá sản phẩm đã tồn tại");
         }
         
         ProductPrice newPrice = new ProductPrice(ProductPriceId.create(), getId(), productPrice.getSizeId(), productPrice.getPrice(), LocalDateTime.now(), LocalDateTime.now());
@@ -76,7 +79,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         ProductPrice productPrice = prices.stream()
                 .filter(p -> p.getId().equals(productPriceId))
                 .findFirst()
-                .orElseThrow(() -> new DomainException("Không tìm thấy giá sản phẩm"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
         
         productPrice.changePrice(newPrice);
         
@@ -130,6 +133,21 @@ public class Product extends AbstractAggregateRoot<ProductId> {
 
     public Set<ProductPrice> getPrices() {
         return Collections.unmodifiableSet(prices);
+    }
+    
+    public void changeDescription(String description) {
+        this.description = description;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    public void changeImagePath(String imagePath) {
+        this.imagePath = imagePath;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    public void changeSignature(boolean signature) {
+        this.signature = signature;
+        this.updatedAt = LocalDateTime.now();
     }
     
     public boolean isOrdered() {

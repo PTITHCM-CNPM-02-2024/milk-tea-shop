@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Getter
@@ -16,6 +15,9 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductSizeEntity extends BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +28,10 @@ public class ProductSizeEntity extends BaseEntity<Integer> {
     @Comment("Tên kích thước (ví dụ: S, M, L)")
     @Column(name = "name", nullable = false, length = 5)
     private String name;
+    
+    @Comment("Số lượng")
+    @Column(name = "quantity", columnDefinition = "smallint UNSIGNED")
+    private Integer quantity;
 
     @Comment("Mô tả")
     @Column(name = "description", length = 1000)
@@ -34,6 +40,6 @@ public class ProductSizeEntity extends BaseEntity<Integer> {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã đơn vị tính")
     @JoinColumn(name = "unit_id")
-    private UnitOfMeasure unit;
+    private UnitOfMeasureEntity unit;
 
 }

@@ -51,7 +51,7 @@ public class ProductName extends AbstractValueObject {
      * @return
      */
     private static String normalize(String value) {
-        return value.toUpperCase(Locale.of("vi", "VN")).trim();
+        return value.trim().toUpperCase();
     }
     
     public String getValue() {

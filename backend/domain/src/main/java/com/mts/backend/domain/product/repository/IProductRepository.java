@@ -1,11 +1,15 @@
 package com.mts.backend.domain.product.repository;
 
+import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.product.Product;
+import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
+import com.mts.backend.domain.product.value_object.ProductName;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Interface Repository cho Product Aggregate
@@ -17,6 +21,11 @@ public interface IProductRepository {
      * Tìm sản phẩm theo ID
      */
     Optional<Product> findById(ProductId id);
+    
+    /**
+     * Tìm sản phẩm theo tên
+     */
+    Optional<Product> findByName(ProductName name);
 
     /**
      * Tìm tất cả sản phẩm
@@ -52,10 +61,22 @@ public interface IProductRepository {
      * Kiểm tra sản phẩm tồn tại theo ID
      */
     boolean existsById(ProductId id);
-    
-    
+
+    /**
+     * Kiểm tra sản phẩm tồn tại theo tên
+     */
+    boolean existsByName(ProductName name);
+
+
     /**
      * Tạo mới sản phẩm
      */
     Product create(Product product);
+    
+    void save(Product product);
+
+    void updateInform(Product product);
+    
+    void addPrice(ProductId productId, Set<ProductPrice> prices);
+
 }

@@ -2,12 +2,17 @@ package com.mts.backend.application.product.command;
 
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
-@Getter
+@NoArgsConstructor
 @AllArgsConstructor
+@Data
+@Builder
 public class ChangeProductInformCommand implements ICommand<CommandResult>{
-    private final Integer id;
-    private final String name;
+    private Integer productId;
+    private String name;
+    private String description;
+    private Integer categoryId;
+    private boolean isAvailable;
+    private boolean isSignature;
 }

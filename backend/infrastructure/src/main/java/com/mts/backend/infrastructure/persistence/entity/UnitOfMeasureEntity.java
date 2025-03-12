@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Getter
@@ -16,7 +15,10 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class UnitOfMeasure extends BaseEntity <Integer> {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UnitOfMeasureEntity extends BaseEntity <Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã đơn vị tính")

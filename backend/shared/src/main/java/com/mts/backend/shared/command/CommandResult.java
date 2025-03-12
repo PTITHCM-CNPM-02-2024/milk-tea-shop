@@ -43,13 +43,16 @@ public class CommandResult {
         return failureReasons.isEmpty();
     }
     
-    public Object getSuccessObject(){
+    
+    public Object getData(){
         return successObject;
     }
     
     public List<String> getFailureReasons(){
         return failureReasons;
     }
+    
+    
     
     public FAILURE_TYPE getFailureType(){
         return failureType;
@@ -73,6 +76,14 @@ public class CommandResult {
     
     public static CommandResult notFoundFail(String failureReason){
         return new CommandResult(FAILURE_TYPE.NOT_FOUND, failureReason);
+    }
+    
+    public static CommandResult duplicateFail(String failureReason){
+        return new CommandResult(FAILURE_TYPE.DUPLICATE, failureReason);
+    }
+
+    public String getErrorMessage() {
+        return String.join(", ", failureReasons);
     }
 
     public enum FAILURE_TYPE {
