@@ -1,21 +1,19 @@
 package com.mts.backend.application.product;
 
-import com.mts.backend.application.product.command.AddProductPriceCommand;
-import com.mts.backend.application.product.command.ChangeProductInformCommand;
-import com.mts.backend.application.product.command.CreateProductInformCommand;
-import com.mts.backend.application.product.handler.AddProductPriceCommandHandler;
-import com.mts.backend.application.product.handler.ChangeProductInformCommandHandler;
-import com.mts.backend.application.product.handler.CreateProductInformCommandHandler;
+import com.mts.backend.application.product.command.*;
+import com.mts.backend.application.product.handler.*;
 import com.mts.backend.shared.command.AbstractCommandBus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProductCommandBus extends AbstractCommandBus{
     
-    public ProductCommandBus(CreateProductInformCommandHandler createProductCommandHandler, ChangeProductInformCommandHandler changeProductInformCommandHandler, AddProductPriceCommandHandler addProductPriceCommandHandler) {
+    public ProductCommandBus(CreateProductInformCommandHandler createProductCommandHandler, UpdateProductCommandHandler updateProductCommandHandler, AddProductPriceCommandHandler addProductPriceCommandHandler, UpdateProductPriceCommandHandler updateProductPriceCommandHandler, DeletePriceBySizeIdCommandHandler deletePriceBySizeIdCommandHandler) {
         register(CreateProductInformCommand.class, createProductCommandHandler);
-        register(ChangeProductInformCommand.class, changeProductInformCommandHandler);
+        register(UpdateProductInformCommand.class, updateProductCommandHandler);
         register(AddProductPriceCommand.class, addProductPriceCommandHandler);
+        register(UpdateProductPriceCommand.class, updateProductPriceCommandHandler);
+        register(DeletePriceBySizeIdCommand.class, deletePriceBySizeIdCommandHandler);
     }
     
     

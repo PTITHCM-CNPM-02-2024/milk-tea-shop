@@ -7,10 +7,8 @@ import com.mts.backend.domain.product.value_object.UnitSymbol;
 
 import java.util.Optional;
 
-public interface IUnitOfMeasureRepository {
+public interface IUnitRepository {
     boolean existsById(UnitOfMeasureId unitOfMeasureId);
-    
-    UnitOfMeasure create(UnitOfMeasure unitOfMeasure);
     
     Optional<UnitOfMeasure> findById(UnitOfMeasureId unitOfMeasureId);
     
@@ -19,7 +17,7 @@ public interface IUnitOfMeasureRepository {
      * @param unitOfMeasure
      * @return
      */
-    void save(UnitOfMeasure unitOfMeasure);
+    UnitOfMeasure save(UnitOfMeasure unitOfMeasure);
     
     Optional<UnitOfMeasure> findByName(UnitName name);
     

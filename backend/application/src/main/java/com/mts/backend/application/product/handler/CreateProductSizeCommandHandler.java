@@ -5,12 +5,11 @@ import com.mts.backend.domain.product.ProductSize;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.product.repository.IUnitOfMeasureRepository;
+import com.mts.backend.domain.product.repository.IUnitRepository;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
 import com.mts.backend.domain.product.value_object.QuantityOfProductSize;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
-import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
 
     private final ISizeRepository sizeRepository;
     
-    private final IUnitOfMeasureRepository unitOfMeasureRepository;
+    private final IUnitRepository unitOfMeasureRepository;
 
-    public CreateProductSizeCommandHandler(ISizeRepository sizeRepository, IUnitOfMeasureRepository unitOfMeasureRepository) {
+    public CreateProductSizeCommandHandler(ISizeRepository sizeRepository, IUnitRepository unitOfMeasureRepository) {
         this.sizeRepository = sizeRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
     }
@@ -37,9 +36,7 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
     @Override
     public CommandResult handle(CreateProductSizeCommand command) {
         Objects.requireNonNull(command.getName(), "Product size name is required");
-
-        mustExistUnitOfMeasure(UnitOfMeasureId.of(command.getUnitId()));
-
+        
         ProductSize productSize = new ProductSize(
                 ProductSizeId.create(),
                 ProductSizeName.of(command.getName()),
@@ -51,8 +48,9 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
         );
 
         verifyUniqueName(productSize.getName());
+        mustExistUnitOfMeasure(productSize.getUnitOfMeasure());
 
-        ProductSize createdProductSize = sizeRepository.create(productSize);
+        ProductSize createdProductSize = sizeRepository.save(productSize);
 
         return CommandResult.success(createdProductSize.getId().getValue());
 

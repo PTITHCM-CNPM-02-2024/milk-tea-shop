@@ -54,9 +54,9 @@ public class AddProductPriceCommandHandler implements ICommandHandler<AddProduct
             );
         }
 
-        productRepository.addPrice(product.getId(), product.getPrices());
-
-        return CommandResult.success("Thêm giá sản phẩm thành công");
+        var updatedProduct = productRepository.save(product);
+        
+        return CommandResult.success(updatedProduct.getId().getValue());
     }
 
     private Product mustBeExistProduct(ProductId productId) {

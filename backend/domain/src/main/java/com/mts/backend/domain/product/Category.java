@@ -40,17 +40,25 @@ public class Category extends AbstractAggregateRoot<CategoryId>{
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
     
-    public void changeName(CategoryName name) {
+    public boolean changeName(CategoryName name) {
+        Objects.requireNonNull(name, "Category name is required");
+        
+        if (name.equals(this.name)) {
+            return false;
+        }
+        
         this.name = name;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
-    public void changeName(String name) {
+    public boolean changeName(String name) {
         CategoryName newName = (CategoryName) checkAndAssign(CategoryName.create(name));
         if (!businessErrors.isEmpty()){
             throw new DomainBusinessLogicException(businessErrors);
         }
-        this.updatedAt = LocalDateTime.now();
+        
+        return changeName(newName);
     }
     
     public void changeDescription(String description) {
@@ -58,13 +66,19 @@ public class Category extends AbstractAggregateRoot<CategoryId>{
         this.updatedAt = LocalDateTime.now();
     }
     
-    public void changeParentId(CategoryId parentId) {
+    public boolean changeParentId(CategoryId parentId) {
+        
         if (parentId != null && parentId.equals(getId())) {
             throw new DomainException("Không thể chọn" + parentId + "làm cha của chính nó");
         }
         
+        if (parentId != null && parentId.equals(this.parentId)) {
+            return false;
+        }
+        
         this.parentId = parentId;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
     public CategoryName getName() {

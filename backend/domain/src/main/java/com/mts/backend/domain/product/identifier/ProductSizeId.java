@@ -1,5 +1,6 @@
 package com.mts.backend.domain.product.identifier;
 
+import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
@@ -11,6 +12,9 @@ public class ProductSizeId implements Identifiable {
     private ProductSizeId(int value) {
         if (value <= 0) {
             throw new IllegalArgumentException("Size id phải lớn hơn 0");
+        }
+        if (value > IdentifiableProvider.SMALLINT_UNSIGNED_MAX){
+            throw new IllegalArgumentException("Size id phải nhỏ hơn " + IdentifiableProvider.SMALLINT_UNSIGNED_MAX);
         }
         this.value = value;
     }
@@ -55,7 +59,6 @@ public class ProductSizeId implements Identifiable {
      * TODO: Đây là phương thức cần kiểm ra lại
      */
     public static ProductSizeId create() {
-        int random = Math.abs(UUID.randomUUID().hashCode());
-        return new ProductSizeId(random);
+        return new ProductSizeId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
     }
 }

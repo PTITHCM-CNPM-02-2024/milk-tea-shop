@@ -15,7 +15,7 @@ public class ProductName extends AbstractValueObject {
     private static final int MAX_LENGTH = 100;
     
     private ProductName(String value) {
-        this.value = value;
+        this.value = normalize(value);
     }
     
     public static ValueObjectValidationResult create(String value) {
@@ -51,7 +51,7 @@ public class ProductName extends AbstractValueObject {
      * @return
      */
     private static String normalize(String value) {
-        return value.trim().toUpperCase();
+        return value.trim().toUpperCase(Locale.of("vi", "VN"));
     }
     
     public String getValue() {

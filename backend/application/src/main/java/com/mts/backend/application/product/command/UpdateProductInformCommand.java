@@ -8,11 +8,12 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class ChangeProductInformCommand implements ICommand<CommandResult>{
+public class UpdateProductInformCommand implements ICommand<CommandResult>{
     private Integer productId;
     private String name;
     private String description;
     private Integer categoryId;
+    private String imagePath;
     private boolean isAvailable;
     private boolean isSignature;
 }

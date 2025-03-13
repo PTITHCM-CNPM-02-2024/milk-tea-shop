@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeProductInformRequest {
+@Data
+public class UpdateProductSizeRequest {
+    private Integer id;
+    private Integer unitId;
     private String name;
     private String description;
-    private Integer categoryId;
-    private boolean isAvailable;
-    private boolean isSignature;
+    private Integer quantity;
 }

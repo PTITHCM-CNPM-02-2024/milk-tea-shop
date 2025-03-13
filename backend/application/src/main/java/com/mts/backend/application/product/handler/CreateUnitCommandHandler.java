@@ -3,7 +3,7 @@ package com.mts.backend.application.product.handler;
 import com.mts.backend.application.product.command.CreateUnitCommand;
 import com.mts.backend.domain.product.UnitOfMeasure;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
-import com.mts.backend.domain.product.repository.IUnitOfMeasureRepository;
+import com.mts.backend.domain.product.repository.IUnitRepository;
 import com.mts.backend.domain.product.value_object.UnitName;
 import com.mts.backend.domain.product.value_object.UnitSymbol;
 import com.mts.backend.shared.command.CommandResult;
@@ -17,9 +17,9 @@ import java.util.Objects;
 @Service
 public class CreateUnitCommandHandler implements ICommandHandler<CreateUnitCommand, CommandResult> {
 
-    private final IUnitOfMeasureRepository unitRepository;
+    private final IUnitRepository unitRepository;
 
-    public CreateUnitCommandHandler(IUnitOfMeasureRepository unitRepository) {
+    public CreateUnitCommandHandler(IUnitRepository unitRepository) {
         this.unitRepository = unitRepository;
     }
 
@@ -47,7 +47,7 @@ public class CreateUnitCommandHandler implements ICommandHandler<CreateUnitComma
         // Check for duplicate symbol
         verifyUniqueSymbol(unit.getSymbol());
 
-        UnitOfMeasure createdUnit = unitRepository.create(unit);
+        UnitOfMeasure createdUnit = unitRepository.save(unit);
 
         return CommandResult.success(createdUnit.getId().getValue());
 

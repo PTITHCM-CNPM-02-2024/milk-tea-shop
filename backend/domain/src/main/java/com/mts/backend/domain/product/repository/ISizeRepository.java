@@ -9,9 +9,9 @@ import java.util.Optional;
 public interface ISizeRepository {
     boolean existsById(ProductSizeId productSizeId);
     
-    ProductSize create(ProductSize productSize);
-    
     Optional<ProductSize> findById(ProductSizeId productSizeId);
     
     Optional<ProductSize> findByName(ProductSizeName name);
+
+    ProductSize save(ProductSize productSize);
 }

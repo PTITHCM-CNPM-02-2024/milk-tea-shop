@@ -14,4 +14,6 @@ public interface ICategoryRepository {
     Optional<Category> findById(CategoryId categoryId);
     
     Optional<Category> findByName(CategoryName name);
+    
+    Category save(Category category);
 }
