@@ -36,30 +36,44 @@ public class UnitOfMeasure extends AbstractAggregateRoot <UnitOfMeasureId> {
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
     
-    public void changeName(UnitName name) {
+    public boolean changeName(UnitName name) {
+        Objects.requireNonNull(name, "Unit name is required");
+        if (name.equals(this.name)) {
+            return false;
+        }
         this.name = name;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
-    public void changeName(String name) {
+    public boolean changeName(String name) {
         UnitName newName = (UnitName) checkAndAssign(UnitName.create(name));
         if (!businessErrors.isEmpty()){
             throw new DomainBusinessLogicException(businessErrors);
         }
-        this.updatedAt = LocalDateTime.now();
+        
+        return changeName(newName);
     }
     
-    public void changeSymbol(UnitSymbol symbol) {
+    public boolean changeSymbol(UnitSymbol symbol) {
+        Objects.requireNonNull(symbol, "Unit symbol is required");
+        
+        if (symbol.equals(this.symbol)) {
+            return false;
+        }
+        
         this.symbol = symbol;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
-    public void changeSymbol(String symbol) {
+    public boolean changeSymbol(String symbol) {
         UnitSymbol newSymbol = (UnitSymbol) checkAndAssign(UnitSymbol.create(symbol));
         if (!businessErrors.isEmpty()){
             throw new DomainBusinessLogicException(businessErrors);
         }
-        this.updatedAt = LocalDateTime.now();
+        
+        return changeSymbol(newSymbol);
     }
     
     public void changeDescription(String description) {

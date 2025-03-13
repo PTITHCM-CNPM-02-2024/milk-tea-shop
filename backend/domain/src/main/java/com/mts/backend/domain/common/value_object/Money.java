@@ -18,7 +18,7 @@ public class Money extends AbstractValueObject implements Comparable<Money> {
     }
     
     public static ValueObjectValidationResult create(BigDecimal amount) {
-        Objects.requireNonNull(amount, "Số tiền không được để trống");
+        Objects.requireNonNull(amount, "BigDecimal is required");
         List<String> businessErrors = new ArrayList<>(List.of());
         
         if ( amount.doubleValue() < 0) {

@@ -30,9 +30,6 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
     public CommandResult handle(CreateCategoryCommand command) {
         Objects.requireNonNull(command, "Create category command is required");
         
-        verifyParentCategoryIfSpecified(command.getParentId().map(CategoryId::of).orElse(null));
-        
-        verifyUniqueName(CategoryName.of(command.getName()));
 
         Category category = new Category(
                 CategoryId.create(),
@@ -42,8 +39,12 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
                 command.getCreatedAt().orElse(LocalDateTime.now()),
                 command.getUpdatedAt().orElse(LocalDateTime.now())
         );
+        
+        verifyUniqueName(category.getName());
+        
+        verifyParentCategoryIfSpecified(category.getParentId().orElse(null));
 
-        var createdCategory = categoryRepository.create(category);
+        var createdCategory = categoryRepository.save(category);
 
         return CommandResult.success(createdCategory.getId().getValue());
 
@@ -53,16 +54,15 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
         Objects.requireNonNull(name, "Category name is required");
 
         categoryRepository.findByName(name).ifPresent(c -> {
-            throw new DuplicateException("Category " + name.getValue() + " already exists");
+            throw new DuplicateException("Category " + name.getValue() + " đã tồn tại");
         });
     }
     
     private void verifyParentCategoryIfSpecified(CategoryId parentId) {
-        if (parentId == null) {
-            return;
+        if (parentId != null && !categoryRepository.existsById(parentId)) {
+            throw new NotFoundException("Parent category " + parentId + " không tồn tại");
         }
         
-        categoryRepository.findById(parentId).orElseThrow(() -> new NotFoundException("Danh mục cha không tồn tại"));   
     }
 
 

@@ -41,32 +41,45 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
 
-    public void changeQuantity(QuantityOfProductSize quantity) {
+    public boolean changeQuantity(QuantityOfProductSize quantity) {
+        if (quantity.equals(this.quantity)) {
+            return false;
+        }
         this.quantity = quantity;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
 
-    public void changeQuantity(int quantity) {
+    public boolean changeQuantity(int quantity) {
         QuantityOfProductSize newQuantity = QuantityOfProductSize.of(quantity);
 
         if (!this.businessErrors.isEmpty()) {
             throw new DomainBusinessLogicException(this.businessErrors);
         }
-        this.updatedAt = LocalDateTime.now();
+
+        return changeQuantity(newQuantity);
+
     }
 
-    public void changeName(ProductSizeName name) {
+    public boolean changeName(ProductSizeName name) {
+        Objects.requireNonNull(name, "Product size name is required");
+        if (name.equals(this.name)) {
+            return false;
+        }
+
         this.name = name;
         this.updatedAt = LocalDateTime.now();
+        return true;
+
     }
 
-    public void changeName(String name) {
+    public boolean changeName(String name) {
         ProductSizeName newName = (ProductSizeName) checkAndAssign(ProductSizeName.create(name));
 
-        if (!this.businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(this.businessErrors);
+        if (!businessErrors.isEmpty()) {
+            throw new DomainBusinessLogicException(businessErrors);
         }
-        this.updatedAt = LocalDateTime.now();
+        return changeName(newName);
     }
 
     public void changeDescription(String description) {
@@ -99,7 +112,7 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
     public UnitOfMeasureId getUnitOfMeasure() {
         return unitOfMeasure;
     }
-    
+
     public QuantityOfProductSize getQuantity() {
         return quantity;
     }
@@ -110,6 +123,25 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+    
+    public boolean changeUnit(UnitOfMeasureId unitOfMeasure) {
+        if (unitOfMeasure.equals(this.unitOfMeasure)) {
+            return false;
+        }
+        this.unitOfMeasure = unitOfMeasure;
+        this.updatedAt = LocalDateTime.now();
+        return true;
+    }
+    
+    public boolean changeUnit(int unitOfMeasure) {
+        UnitOfMeasureId newUnitOfMeasure = UnitOfMeasureId.of(unitOfMeasure);
+        
+        if (!this.businessErrors.isEmpty()) {
+            throw new DomainBusinessLogicException(this.businessErrors);
+        }
+        
+        return changeUnit(newUnitOfMeasure);
     }
 
 

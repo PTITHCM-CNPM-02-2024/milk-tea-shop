@@ -1,6 +1,5 @@
 package com.mts.backend.domain.product.repository;
 
-import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
@@ -66,17 +65,17 @@ public interface IProductRepository {
      * Kiểm tra sản phẩm tồn tại theo tên
      */
     boolean existsByName(ProductName name);
-
+    
 
     /**
-     * Tạo mới sản phẩm
+     * Cập nhật thông tin sản phẩm
+     *
+     * @param product
      */
-    Product create(Product product);
-    
-    void save(Product product);
+    Product save(Product product);
 
     void updateInform(Product product);
     
-    void addPrice(ProductId productId, Set<ProductPrice> prices);
-
+    void createPrice(ProductId productId, Set<ProductPrice> prices);
+    
 }

@@ -1,5 +1,6 @@
 package com.mts.backend.domain.product.identifier;
 
+import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
@@ -11,6 +12,9 @@ public class CategoryId implements Identifiable {
     private CategoryId(int value) {
         if (value <= 0) {
             throw new IllegalArgumentException("Category id phải lớn hơn 0");
+        }
+        if (value > IdentifiableProvider.SMALLINT_UNSIGNED_MAX){
+            throw new IllegalArgumentException("Category id phải nhỏ hơn " + IdentifiableProvider.SMALLINT_UNSIGNED_MAX);
         }
         this.value = value;
     }
@@ -53,7 +57,6 @@ public class CategoryId implements Identifiable {
      * TODO: Đây là phương thức cần kiểm ra lại
      */
     public static CategoryId create() {
-        int random = Math.abs(UUID.randomUUID().hashCode());
-        return new CategoryId(random);
+        return new CategoryId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
     }
 }

@@ -1,5 +1,6 @@
 package com.mts.backend.domain.product.identifier;
 
+import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
@@ -8,6 +9,12 @@ public class ProductPriceId implements Identifiable {
     private final long value;
     
     private ProductPriceId(long value) {
+        if (value <= 0) {
+            throw new IllegalArgumentException("Product price id phải lớn hơn 0");
+        }
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX){
+            throw new IllegalArgumentException("Product price id phải nhỏ hơn " + IdentifiableProvider.INT_UNSIGNED_MAX);
+        }
         this.value = value;
     }
     
@@ -49,7 +56,6 @@ public class ProductPriceId implements Identifiable {
      * TODO: Cần kiểm tra xem có cần thiết không
      */
     public static ProductPriceId create() {
-        long random = Math.abs(System.currentTimeMillis());
-        return new ProductPriceId(random);
+        return new ProductPriceId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
 }

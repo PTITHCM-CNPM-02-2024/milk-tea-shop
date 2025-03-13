@@ -9,7 +9,6 @@ import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.value_object.ProductName;
 import com.mts.backend.shared.domain.AbstractAggregateRoot;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.lang.NonNull;
@@ -22,11 +21,11 @@ public class Product extends AbstractAggregateRoot<ProductId> {
 
     private ProductName name;
     private String description;
-    private final CategoryId categoryId;
+    private CategoryId categoryId;
     private boolean available;
     private boolean signature;
     private String imagePath;
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
     private final Set<ProductPrice> prices = new HashSet<>();
@@ -86,8 +85,15 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         this.updatedAt = LocalDateTime.now();
     }
     
-    public void addExistingPrice(ProductPrice productPrice) {
-        prices.add(productPrice);
+    public void changePrice(ProductSizeId productSizeId, Money newPrice) {
+        ProductPrice productPrice = prices.stream()
+                .filter(p -> p.getSizeId().equals(productSizeId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
+        
+        productPrice.changePrice(newPrice);
+        
+        this.updatedAt = LocalDateTime.now();
     }
 
     public String getDescription() {
@@ -122,12 +128,30 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         return updatedAt;
     }
 
-    public void changeName(String name) {
-        this.name = (ProductName) checkAndAssign(ProductName.create(name));
-        if (!businessErrors.isEmpty()) {
+    public boolean changeName(String name) {
+        ProductName newName = (ProductName) checkAndAssign(ProductName.create(name));
+        if (!businessErrors.isEmpty()){
             throw new DomainBusinessLogicException(businessErrors);
         }
+        
+        if (this.name.equals(newName)) {
+            return false;
+        }
+        
+        this.name = newName;
         this.updatedAt = LocalDateTime.now();
+        return true;
+    }
+    
+    public boolean changeName(ProductName name) {
+        Objects.requireNonNull(name, "Product name is required");
+        if (this.name.equals(name)) {
+            return false;
+        }
+        
+        this.name = name;
+        this.updatedAt = LocalDateTime.now();
+        return true;
     }
 
 
@@ -147,6 +171,29 @@ public class Product extends AbstractAggregateRoot<ProductId> {
     
     public void changeSignature(boolean signature) {
         this.signature = signature;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    public boolean changeCategory(CategoryId categoryId) {
+        Objects.requireNonNull(categoryId, "Category id is required");
+        
+        if (this.categoryId != null && this.categoryId.equals(categoryId)) {
+            return false;
+        }
+        
+        this.categoryId = categoryId;
+        this.updatedAt = LocalDateTime.now();
+        return true;
+    }
+    
+    public void delete(ProductSizeId productSizeId){
+        ProductPrice productPrice = prices.stream()
+                .filter(p -> p.getSizeId().equals(productSizeId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
+        
+        prices.remove(productPrice);
+        
         this.updatedAt = LocalDateTime.now();
     }
     

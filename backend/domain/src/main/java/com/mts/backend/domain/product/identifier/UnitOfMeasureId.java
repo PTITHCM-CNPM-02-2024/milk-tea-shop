@@ -1,5 +1,6 @@
 package com.mts.backend.domain.product.identifier;
 
+import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
@@ -11,6 +12,9 @@ public class UnitOfMeasureId implements Identifiable {
         if (value <= 0) {
             throw new IllegalArgumentException("Unit of measure id phải lớn hơn 0");
         }
+        if (value > IdentifiableProvider.SMALLINT_UNSIGNED_MAX){
+            throw new IllegalArgumentException("Unit of measure id phải nhỏ hơn " + IdentifiableProvider.SMALLINT_UNSIGNED_MAX);
+        }
         this.value = value;
     }
     
@@ -19,9 +23,7 @@ public class UnitOfMeasureId implements Identifiable {
     }
     
     public static UnitOfMeasureId of(String value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Unit of measure id cannot be null");
-        }
+        Objects.requireNonNull(value, "value is required");
         return new UnitOfMeasureId(Integer.parseInt(value));
     }
     
@@ -50,7 +52,6 @@ public class UnitOfMeasureId implements Identifiable {
     
     // TODO: cần kiểm tra lại phương thức này
     public static UnitOfMeasureId create(){
-        int random = Math.abs(Objects.hash(System.currentTimeMillis()));
-        return new UnitOfMeasureId(random);
+        return new UnitOfMeasureId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
     }
 }

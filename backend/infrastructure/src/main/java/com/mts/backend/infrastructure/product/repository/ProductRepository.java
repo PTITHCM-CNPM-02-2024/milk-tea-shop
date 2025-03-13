@@ -1,7 +1,6 @@
 package com.mts.backend.infrastructure.product.repository;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.product.Category;
 import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
@@ -19,11 +18,10 @@ import com.mts.backend.infrastructure.persistence.entity.ProductSizeEntity;
 import com.mts.backend.infrastructure.product.jpa.JpaProductPriceRepository;
 import com.mts.backend.infrastructure.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.exception.DuplicateException;
-import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -198,47 +196,42 @@ public class ProductRepository implements IProductRepository {
         return jpaProductRepository.existsByName(name.getValue());
     }
 
-    @Override
-    @Transactional
-    public Product create(Product product) {
-        Objects.requireNonNull(product, "Product is required");
-        
-        ProductEntity productEntity = ProductEntity.builder().description(product.getDescription())
-                .imagePath(product.getImagePath())
-                .isAvailable(product.isAvailable())
-                .isSignature(product.isSignature())
-                .name(product.getName().getValue())
-                .id(null)
-                .build();
-        
-        if (product.getCategoryId().isPresent()){
-            CategoryEntity categoryEntity = CategoryEntity.builder().id(product.getCategoryId().get().getValue()).build();
-            productEntity.setCategoryEntity(categoryEntity);
-        }
-        
-        jpaProductRepository.save(productEntity);
-        
-        return new Product(
-                ProductId.of(productEntity.getId()),
-                product.getName(),
-                product.getDescription(),
-                product.getImagePath(),
-                product.isAvailable(),
-                product.isSignature(),
-                product.getCategoryId().orElse(null),
-                null,
-                productEntity.getCreatedAt().orElse(null),
-                productEntity.getUpdatedAt().orElse(null)
-        );
-        
-    }
+    
 
     /**
+     * Viết lại phương thức save.
+     * Ý tưởng:
+     * - Nếu sản phẩm không tồn tại thì tạo mới sản phẩm
+     * - Nếu sản phẩm tồn tại thì cập nhật thông tin sản phẩm
      * @param product
      */
     @Override
     @Transactional
-    public void save(Product product) {
+    public Product save(Product product) {
+        Objects.requireNonNull(product, "Product is required");
+        
+        try {
+            if (jpaProductRepository.existsById(product.getId().getValue())){
+                return update(product);
+            } else {
+                return create(product);
+            }
+        }catch (Exception e){
+            throw new RuntimeException("Không thể lưu thông tin sản phẩm: " + e.getMessage());
+        }
+        
+    }
+
+    /**
+     * @param product 
+     */
+    @Override
+    public void updateInform(Product product) {
+        
+    }
+
+    @Transactional
+    protected Product create(Product product){
         Objects.requireNonNull(product, "Product is required");
         
         ProductEntity productEntity = ProductEntity.builder()
@@ -250,97 +243,131 @@ public class ProductRepository implements IProductRepository {
                 .id(product.getId().getValue())
                 .build();
         
-        if (product.getCategoryId().isPresent()){
-            CategoryEntity categoryEntity = CategoryEntity.builder().id(product.getCategoryId().get().getValue()).build();
-            productEntity.setCategoryEntity(categoryEntity);
-        }
+        productEntity.setCreatedAt(product.getCreatedAt());
+        productEntity.setUpdatedAt(product.getUpdatedAt());
         
-        jpaProductRepository.save(productEntity);
+        CategoryEntity categoryEntity = CategoryEntity.builder().id(product.getCategoryId().isPresent() ? product.getCategoryId().get().getValue() : null).build();
         
-        for (ProductPrice price : product.getPrices()) {
-            ProductPriceEntity priceEntity = ProductPriceEntity.builder()
-                    .id(price.getId().getValue())
-                    .price(price.getPrice().getAmount())
-                    .productEntity(productEntity)
-                    .size(ProductSizeEntity.builder().id(price.getSizeId().getValue()).build())
-                    .build();
-            jpaProductPriceRepository.save(priceEntity);
-        }
+        productEntity.setCategoryEntity(categoryEntity);
         
+        jpaProductRepository.insertProduct(productEntity);
+        
+        create(product.getId(), product.getPrices());
+        
+        return product;
     }
+    
 
-    @Override
     @Transactional
-    public void updateInform(Product product) {
+    public Product update(Product product) {
         Objects.requireNonNull(product, "Sản phẩm không được null");
-
-        try {
-
-            verifyUniqueProductName(product.getName());
-
-            CategoryEntity existingCategoryEntity = getCategoryEntityIfExists(product.getCategoryId());
-
-            ProductEntity productEntity = jpaProductRepository.findById(product.getId().getValue())
-                    .orElseThrow(() -> new NotFoundException("Sản phẩm không tồn tại"));
-
-            productEntity.setName(product.getName().getValue());
-            productEntity.setDescription(product.getDescription());
-            productEntity.setImagePath(product.getImagePath());
-            productEntity.setIsAvailable(product.isAvailable());
-            productEntity.setIsSignature(product.isSignature());
-            productEntity.setCategoryEntity(existingCategoryEntity);
-            productEntity.setUpdatedAt(product.getUpdatedAt());
-            jpaProductRepository.save(productEntity);
-
-        } catch (DomainException | DuplicateException | NotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DomainException("Không thể cập nhật thông tin sản phẩm: " + e.getMessage());
-        }
+        
+        ProductEntity productEntity = ProductEntity.builder()
+                .description(product.getDescription())
+                .imagePath(product.getImagePath())
+                .isAvailable(product.isAvailable())
+                .isSignature(product.isSignature())
+                .name(product.getName().getValue())
+                .id(product.getId().getValue())
+                .build();
+        
+        CategoryEntity categoryEntity = CategoryEntity.builder().id(product.getCategoryId().isPresent() ? product.getCategoryId().get().getValue() : null).build();
+        
+        productEntity.setCategoryEntity(categoryEntity);
+        
+        jpaProductRepository.updateProduct(productEntity);
+        
+        update(product.getId(), product.getPrices());
+        
+        return product;
     }
 
-    private void verifyUniqueProductName(ProductName name) {
-        jpaProductRepository.findByName(name.getValue())
-                .ifPresent(p -> {
-                    ProductName existingName = ProductName.of(p.getName());
-                    if (existingName.equals(name)) {
-                        throw new DuplicateException("Tên sản phẩm \"" + name.getValue() + "\" đã tồn tại");
-                    }
-                });
-    }
-
-    private CategoryEntity getCategoryEntityIfExists(Optional<CategoryId> categoryId) {
-        if (categoryId.isEmpty()) {
-            return null;
-        }
-
-        Category category = categoryRepository.findById(categoryId.get())
-                .orElseThrow(() -> new NotFoundException("Danh mục không tồn tại"));
-
-        CategoryEntity categoryEntity = new CategoryEntity();
-        categoryEntity.setId(category.getId().getValue());
-        return categoryEntity;
-    }
-
-    private void savePrices(Set<ProductPrice> prices, ProductEntity productEntity) {
-        if (prices == null || prices.isEmpty()) {
+    @Transactional
+    protected void update(ProductId productId, Set<ProductPrice> domainPrices) {
+        Objects.requireNonNull(productId, "Product ID is required");
+        if (domainPrices == null ) {
             return;
         }
 
-        prices.forEach(price -> {
-            ProductPriceEntity priceEntity = new ProductPriceEntity();
-            priceEntity.setProductEntity(productEntity);
-            priceEntity.setPrice(price.getPrice().getAmount());
+        // Get existing prices from database
+        Set<ProductPriceEntity> dbPrices = jpaProductPriceRepository.findPricesByProductId(productId.getValue());
 
-            ProductSizeEntity sizeEntity = sizeRepository.findById(price.getSizeId()).map(size -> {
-                ProductSizeEntity sizeEntity1 = new ProductSizeEntity();
-                sizeEntity1.setId(size.getId().getValue());
-                return sizeEntity1;
-            }).orElseThrow(() -> new NotFoundException("Kích thước sản phẩm không tồn tại"));
+        // Map existing prices by size ID for easier comparison
+        Map<Integer, ProductPriceEntity> dbPriceMap = new HashMap<>();
+        for (ProductPriceEntity entity : dbPrices) {
+            dbPriceMap.put(entity.getSize().getId(), entity);
+        }
 
-            priceEntity.setSize(sizeEntity);
-            jpaProductPriceRepository.save(priceEntity);
-        });
+        // Map new prices by size ID
+        Map<Integer, ProductPrice> domainPriceMap = new HashMap<>();
+        for (ProductPrice price : domainPrices) {
+            domainPriceMap.put(price.getSizeId().getValue(), price);
+        }
+
+        // Lists for different operations
+        List<ProductPriceEntity> pricesToUpdate = new ArrayList<>();
+        List<ProductPriceEntity> pricesToCreate = new ArrayList<>();
+        List<Long> pricesToDelete = new ArrayList<>();
+
+        // Find prices to update or delete
+        for (ProductPriceEntity dbPrice : dbPrices) {
+            int sizeId = dbPrice.getSize().getId();
+            if (domainPriceMap.containsKey(sizeId)) {
+                // Update existing price
+                ProductPrice domainPrice = domainPriceMap.get(sizeId);
+                dbPrice.setPrice(domainPrice.getPrice().getAmount());
+                pricesToUpdate.add(dbPrice);
+            } else {
+                // Delete price not in domain set
+                pricesToDelete.add(dbPrice.getId());
+            }
+        }
+
+        // Find prices to create
+        for (ProductPrice domainPrice : domainPrices) {
+            int sizeId = domainPrice.getSizeId().getValue();
+            if (!dbPriceMap.containsKey(sizeId)) {
+                ProductPriceEntity priceEntity = ProductPriceEntity.builder()
+                        .price(domainPrice.getPrice().getAmount())
+                        .productEntity(ProductEntity.builder().id(productId.getValue()).build())
+                        .size(ProductSizeEntity.builder().id(sizeId).build())
+                        .build();
+                pricesToCreate.add(priceEntity);
+            }
+        }
+
+        // Execute price operations
+        for (Long priceId : pricesToDelete) {
+            jpaProductPriceRepository.deleteProductPrice(priceId);
+        }
+
+        for (ProductPriceEntity price : pricesToUpdate) {
+            jpaProductPriceRepository.updateProductPrice(price);
+        }
+
+        for (ProductPriceEntity price : pricesToCreate) {
+            jpaProductPriceRepository.insertProductPrice(price);
+        }
+    }
+
+    private void create(ProductId id, Set<ProductPrice> prices) {
+        if (prices == null || prices.isEmpty()) {
+            return;
+        }
+        
+        try {
+            for (ProductPrice price : prices) {
+                ProductPriceEntity priceEntity = ProductPriceEntity.builder()
+                        .id(price.getId().getValue())
+                        .price(price.getPrice().getAmount())
+                        .productEntity(ProductEntity.builder().id(id.getValue()).build())
+                        .size(ProductSizeEntity.builder().id(price.getSizeId().getValue()).build())
+                        .build();
+                jpaProductPriceRepository.insertProductPrice(priceEntity);
+            }
+        }catch (RuntimeException e){
+            throw new DomainException("Không thể tạo giá sản phẩm: " + e.getMessage());
+        }
     }
     
     private Set<ProductPrice> findPricesByProductId(ProductId productId) {
@@ -365,7 +392,7 @@ public class ProductRepository implements IProductRepository {
     
     @Override
     @Transactional
-    public void addPrice(ProductId id, Set<ProductPrice> prices) {
+    public void createPrice(ProductId id, Set<ProductPrice> prices) {
         Objects.requireNonNull(id, "ProductID is required");
         Objects.requireNonNull(prices, "Prices is required");
 

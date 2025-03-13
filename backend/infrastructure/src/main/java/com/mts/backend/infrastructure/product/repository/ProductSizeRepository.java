@@ -1,11 +1,10 @@
 package com.mts.backend.infrastructure.product.repository;
 
 import com.mts.backend.domain.product.ProductSize;
-import com.mts.backend.domain.product.UnitOfMeasure;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.product.repository.IUnitOfMeasureRepository;
+import com.mts.backend.domain.product.repository.IUnitRepository;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
 import com.mts.backend.domain.product.value_object.QuantityOfProductSize;
 import com.mts.backend.infrastructure.persistence.entity.ProductSizeEntity;
@@ -13,8 +12,7 @@ import com.mts.backend.infrastructure.persistence.entity.UnitOfMeasureEntity;
 import com.mts.backend.infrastructure.product.jpa.JpaProductSizeRepository;
 import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
-import com.mts.backend.shared.exception.NotFoundException;
-import org.springframework.stereotype.Component;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,16 +23,11 @@ import java.util.Optional;
 public class ProductSizeRepository implements ISizeRepository{
     
     private final JpaProductSizeRepository jpaProductSizeRepository;
-    
-    private final IUnitOfMeasureRepository unitOfMeasureRepository;
-    
-    public ProductSizeRepository(JpaProductSizeRepository jpaProductSizeRepository, IUnitOfMeasureRepository unitOfMeasureRepository) {
+
+    public ProductSizeRepository(JpaProductSizeRepository jpaProductSizeRepository, IUnitRepository unitOfMeasureRepository) {
         this.jpaProductSizeRepository = jpaProductSizeRepository;
-        this.unitOfMeasureRepository = unitOfMeasureRepository;
     }
     /**
-     * @param productSizeId 
-     * @return
      */
     @Override
     public boolean existsById(ProductSizeId productSizeId) {
@@ -42,12 +35,8 @@ public class ProductSizeRepository implements ISizeRepository{
         return jpaProductSizeRepository.existsById(productSizeId.getValue());
     }
 
-    /**
-     * @param productSize 
-     * @return
-     */
-    @Override
-    public ProductSize create(ProductSize productSize) {
+    
+    protected ProductSize create(ProductSize productSize) {
         Objects.requireNonNull(productSize, "Kích thước sản phẩm không được null");
         
         try {
@@ -56,20 +45,13 @@ public class ProductSizeRepository implements ISizeRepository{
                     .description(productSize.getDescription().orElse(""))
                     .quantity(productSize.getQuantity().getValue())
                     .unit(UnitOfMeasureEntity.builder().id(productSize.getUnitOfMeasure().getValue()).build())
-                    .id(null)
+                    .id(productSize.getId().getValue())
                     .build();
             
-            jpaProductSizeRepository.save(productSizeEntity);
+            jpaProductSizeRepository.insertProductSize(productSizeEntity);
             
-            return new ProductSize(
-                    ProductSizeId.of(productSizeEntity.getId()),
-                    ProductSizeName.of(productSizeEntity.getName()),
-                    UnitOfMeasureId.of(productSizeEntity.getUnit().getId()),
-                    QuantityOfProductSize.of(productSizeEntity.getQuantity()),
-                    productSizeEntity.getDescription(),
-                    productSizeEntity.getCreatedAt().orElse(LocalDateTime.now()),
-                    productSizeEntity.getUpdatedAt().orElse(LocalDateTime.now())
-            );
+            return productSize;
+            
         }catch (Exception e) {
             throw new DomainException("Không thể tạo kích thước sản phẩm", e);
         }
@@ -124,5 +106,42 @@ public class ProductSizeRepository implements ISizeRepository{
                         throw new DuplicateException("Tên kích thước sản phẩm \"" + name.getValue() + "\" đã tồn tại");
                     }
                 });
+    }
+    
+    @Override
+    @Transactional
+    public ProductSize save(ProductSize productSize) {
+        Objects.requireNonNull(productSize, "Product size is required");
+        
+        try {
+            if (jpaProductSizeRepository.existsById(productSize.getId().getValue())) {
+                return update(productSize);
+            }else {
+                return create(productSize);
+            }
+        }catch (Exception e) {
+            throw new DomainException("Không thể lưu kích thước sản phẩm", e);
+        }
+    }
+    
+    @Transactional
+    protected ProductSize update(ProductSize productSize) {
+        Objects.requireNonNull(productSize, "Product size is required");
+        
+        try {
+            ProductSizeEntity productSizeEntity = ProductSizeEntity.builder()
+                    .name(productSize.getName().getValue())
+                    .description(productSize.getDescription().orElse(""))
+                    .quantity(productSize.getQuantity().getValue())
+                    .unit(UnitOfMeasureEntity.builder().id(productSize.getUnitOfMeasure().getValue()).build())
+                    .id(productSize.getId().getValue())
+                    .build();
+            
+            jpaProductSizeRepository.updateProductSize(productSizeEntity);
+            
+            return productSize;
+        }catch (Exception e) {
+            throw new DomainException("Không thể cập nhật kích thước sản phẩm", e);
+        }
     }
 }

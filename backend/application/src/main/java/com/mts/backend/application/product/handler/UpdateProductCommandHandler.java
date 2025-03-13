@@ -1,63 +1,61 @@
 package com.mts.backend.application.product.handler;
 
-import com.mts.backend.application.product.command.CreateProductInformCommand;
+import com.mts.backend.application.product.command.UpdateProductInformCommand;
 import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.repository.ICategoryRepository;
 import com.mts.backend.domain.product.repository.IProductRepository;
-import com.mts.backend.domain.product.repository.ISizeRepository;
 import com.mts.backend.domain.product.value_object.ProductName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
+import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
-public class
-CreateProductInformCommandHandler implements ICommandHandler<CreateProductInformCommand, CommandResult> {
+public class UpdateProductCommandHandler implements ICommandHandler<UpdateProductInformCommand, CommandResult> {
     private final IProductRepository productRepository;
     private final ICategoryRepository categoryRepository;
-
-    public CreateProductInformCommandHandler(IProductRepository productRepository, ICategoryRepository categoryRepository, ISizeRepository sizeRepository) {
+    
+    public UpdateProductCommandHandler(IProductRepository productRepository, ICategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
-
+    /**
+     * @param command 
+     * @return
+     */
     @Override
-    public CommandResult handle(CreateProductInformCommand command) {
+    public CommandResult handle(UpdateProductInformCommand command) {
+        Objects.requireNonNull(command.getProductId(), "Product id is required");
         
-        Objects.requireNonNull(command.getName(), "Product name is required");
-
+        var product = mustBeExistProduct(ProductId.of(command.getProductId()));
         
-        verifyUniqueName(ProductName.of(command.getName()));
+        product.changeAvailable(command.isAvailable());
+        product.changeSignature(command.isSignature());
+        product.changeDescription(command.getDescription());
+        product.changeImagePath(command.getImagePath());
+        product.changeCategory(CategoryId.of(command.getCategoryId()));
         
-        verifyCategoryExists(command.getCategoryId().map(CategoryId::of).orElse(null));
-
-        Product product = new Product(
-                ProductId.create(),
-                ProductName.of(command.getName()),
-                command.getDescription().orElse(""),
-                command.getImagePath().orElse(""),
-                command.isAvailable(),
-                command.isSignature(),
-                command.getCategoryId().map(CategoryId::of).orElse(null),
-                null,
-                command.getCreatedAt().orElse(LocalDateTime.now()),
-                command.getUpdatedAt().orElse(LocalDateTime.now())
-        );
+        if (product.changeName(ProductName.of(command.getName()))) {
+            verifyUniqueName(product.getName());
+        }
         
-        Product result = productRepository.save(product);
+        var updatedProduct = productRepository.save(product);
         
-        return CommandResult.success(result.getId().getValue());
+        return CommandResult.success(updatedProduct.getId().getValue());
+    }
+    
+    private Product mustBeExistProduct(ProductId productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new NotFoundException("Sản phẩm " + productId + " không tồn tại"));
     }
     
     private void verifyUniqueName(ProductName name) {
         Objects.requireNonNull(name, "Product name is required");
-
+        
         productRepository.findByName(name).ifPresent(p -> {
             throw new DuplicateException("Product " + name.getValue() + " đã tồn tại");
         });
@@ -68,5 +66,5 @@ CreateProductInformCommandHandler implements ICommandHandler<CreateProductInform
             throw new DuplicateException("Category " + categoryId.getValue() + " không tồn tại");
         }
     }
-    
 }
+

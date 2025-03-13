@@ -6,8 +6,8 @@ import com.mts.backend.domain.product.repository.ICategoryRepository;
 import com.mts.backend.domain.product.value_object.CategoryName;
 import com.mts.backend.infrastructure.persistence.entity.CategoryEntity;
 import com.mts.backend.infrastructure.product.jpa.JpaCategoryRepository;
-import com.mts.backend.shared.exception.DuplicateException;
-import com.mts.backend.shared.exception.NotFoundException;
+import com.mts.backend.shared.exception.DomainException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -33,36 +33,18 @@ public class CategoryRepository implements ICategoryRepository {
     
     @Override
     public Category create(Category category) {
-        Objects.requireNonNull(category, "Category không được null");
+        Objects.requireNonNull(category, "Category is required");
         
-        CategoryEntity parentEntity = null;
-        
-        if (category.getParentId().isPresent()) {
-            parentEntity = CategoryEntity.builder()
-                    .id(category.getParentId().get().getValue())
-                    .build();
-        }
-
-        CategoryEntity categoryEntity = CategoryEntity.builder()
+        CategoryEntity entity = CategoryEntity.builder()
                 .name(category.getName().getValue())
-                .description(category.getDescription().orElse(null))
-                .parentCategoryEntity(parentEntity)
-                .id(null)
+                .description(category.getDescription().orElse(""))
+                .parentCategoryEntity(category.getParentId().map(parentId -> CategoryEntity.builder().id(parentId.getValue()).build()).orElse(null))
+                .id(category.getId().getValue())
                 .build();
         
-        categoryEntity.setCreatedAt(category.getCreatedAt());
-        categoryEntity.setUpdatedAt(category.getUpdatedAt());
+        jpaCategoryRepository.insertCategory(entity);
         
-        jpaCategoryRepository.save(categoryEntity);
-        
-        return new Category(
-                CategoryId.of(categoryEntity.getId()),
-                category.getName(),
-                category.getDescription().orElse(null),
-                category.getParentId().orElse(null),
-                category.getCreatedAt(),
-                category.getUpdatedAt()
-        );
+        return category;
     }
 
     /**
@@ -72,7 +54,7 @@ public class CategoryRepository implements ICategoryRepository {
     @Override
     public Optional<Category> findById(CategoryId categoryId) {
         
-        Objects.requireNonNull(categoryId, "Category Id không được null");
+        Objects.requireNonNull(categoryId, "Category ID is required");
         
         return jpaCategoryRepository.findById(categoryId.getValue())
                 .map(entity -> new Category(
@@ -105,120 +87,34 @@ public class CategoryRepository implements ICategoryRepository {
                 ));
     }
 
-    private void verifyUniqueName(CategoryName name) {
-        jpaCategoryRepository.findByName(name.getValue())
-                .ifPresent(entity -> {
-                    CategoryName existingName = CategoryName.of(entity.getName());
-                    if (name.equals(existingName)) {
-                        throw new DuplicateException("Tên danh mục \"" + name.getValue() + "\" đã tồn tại");
-                    }
-                });
+    @Transactional
+    public Category save(Category category){
+        Objects.requireNonNull(category, "Category is required");
+        
+        try {
+            if (jpaCategoryRepository.existsById(category.getId().getValue())){
+                return update(category);
+            }else {
+                return create(category);
+            }
+        }catch (Exception e) {
+            throw new DomainException("Không thể lưu danh mục", e);
+        }
     }
-    
-    private Optional<CategoryEntity> verifyParentCategory(Optional<CategoryId> parentId) {
-        return parentId.flatMap(categoryId -> jpaCategoryRepository.findById(categoryId.getValue())
-                .or(() -> {
-                    throw new NotFoundException("Không tìm thấy danh mục cha có ID " + categoryId.getValue());
-                }));
-
+        
+    @Transactional
+    protected Category update(Category category) {
+        Objects.requireNonNull(category, "Category is required");
+        
+        CategoryEntity entity = CategoryEntity.builder()
+                .id(category.getId().getValue())
+                .name(category.getName().getValue())
+                .description(category.getDescription().orElse(""))
+                .parentCategoryEntity(category.getParentId().map(parentId -> CategoryEntity.builder().id(parentId.getValue()).build()).orElse(null))
+                .build();
+        
+        jpaCategoryRepository.updateCategory(entity);
+        
+        return category;
     }
-    
-    private Category mapToDomain(CategoryEntity entity, Category originalCategory) {
-        return new Category(
-                CategoryId.of(entity.getId()),
-                originalCategory.getName(),
-                originalCategory.getDescription().orElse(null),
-                originalCategory.getParentId().orElse(null),
-                entity.getCreatedAt().orElse(null),
-                entity.getUpdatedAt().orElse(null)
-        );
-    }
-//    /**
-//     * @param category
-//     * @return
-//     */
-//    @Override
-//    public Category create(Category category) {
-//        try {
-//
-//            Optional<CategoryId> parentId = Objects.requireNonNull(category, "Category không được null").getParentId();
-//
-//
-//            Optional<CategoryEntity> parentCategoryEntity = Optional.empty();
-//            if (parentId.isPresent()) {
-//
-//                parentCategoryEntity = jpaCategoryRepository.findById(parentId.get().getValue());
-//
-//                if (parentCategoryEntity.isEmpty()) {
-//                    throw new DomainException("Không tìm thấy danh mục cha");
-//                }
-//            }
-//
-//            Optional<CategoryEntity> existingCategory = jpaCategoryRepository.findByName(category.getName().getValue());
-//            if (existingCategory.isPresent()) {
-//                CategoryName existingName = CategoryName.of(existingCategory.get().getName());
-//                if (category.getName().equals(existingName)) {
-//                    throw new DomainException("Tên danh mục \"" + category.getName().getValue() + "\" đã tồn tại");
-//                }
-//            }
-//
-//            CategoryEntity categoryEntity = CategoryEntity.builder()
-//                    .name(category.getName().getValue())
-//                    .description(category.getDescription().orElse(null))
-//                    .parentCategoryEntity(parentCategoryEntity.orElse(null))
-//                    .build();
-//
-//            categoryEntity.setCreatedAt(category.getCreatedAt());
-//            categoryEntity.setUpdatedAt(category.getUpdatedAt());
-//
-//            CategoryEntity createdCategoryEntity = jpaCategoryRepository.save(categoryEntity);
-//
-//            return new Category(
-//                    CategoryId.of(createdCategoryEntity.getId()),
-//                    category.getName(),
-//                    category.getDescription().orElse(null),
-//                    category.getParentId().orElse(null),
-//                    category.getCreatedAt(),
-//                    category.getUpdatedAt()
-//            );
-//        } catch (Exception e) {
-//            throw new DomainException(e.getMessage());
-//        }
-//    }
-//
-//    /**
-//     * @param categoryId
-//     * @return
-//     */
-//    @Override
-//    public Category findParentCategory(CategoryId categoryId) {
-//        return null;
-//    }
-//
-//    /**
-//     * @param categoryId
-//     * @return
-//     */
-//    @Override
-//    public Optional<Category> findById(CategoryId categoryId) {
-//        Objects.requireNonNull(categoryId, "Category Id không được null");
-//        try {
-//            Optional<CategoryEntity> categoryEntity = jpaCategoryRepository.findById(categoryId.getValue());
-//
-//            if (categoryEntity.isEmpty()) {
-//                return Optional.empty();
-//            }
-//
-//            return Optional.of(new Category(
-//                    CategoryId.of(categoryEntity.get().getId()),
-//                    CategoryName.of(categoryEntity.get().getName()),
-//                    categoryEntity.get().getDescription(),
-//                    categoryEntity.get().getParentCategoryEntity() == null ? null : CategoryId.of(categoryEntity.get().getParentCategoryEntity().getId()),
-//                    categoryEntity.get().getCreatedAt().orElse(null),
-//                    categoryEntity.get().getUpdatedAt().orElse(null)
-//            ));
-//        } catch (Exception e) {
-//            throw new DomainException(e.getMessage());
-//        }
-//    }
 }
