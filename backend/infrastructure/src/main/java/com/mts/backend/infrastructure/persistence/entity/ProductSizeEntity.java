@@ -39,7 +39,7 @@ public class ProductSizeEntity extends BaseEntity<Integer> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã đơn vị tính")
-    @JoinColumn(name = "unit_id")
+    @JoinColumn(name = "unit_id", nullable = false)
     private UnitOfMeasureEntity unit;
 
 }

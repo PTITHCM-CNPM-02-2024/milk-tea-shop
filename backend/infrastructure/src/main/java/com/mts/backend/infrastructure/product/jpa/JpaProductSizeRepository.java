@@ -35,4 +35,12 @@ public interface JpaProductSizeRepository extends JpaRepository<ProductSizeEntit
     @Transactional
     @Query(value = "DELETE FROM milk_tea_shop_prod.ProductSize WHERE size_id = :id", nativeQuery = true)
     void deleteProductSize(@Param("id") @NonNull Integer id);
+
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM milk_tea_shop_prod.ProductSize WHERE UPPER(name) = UPPER(:name) AND unit_id = :unitId)", nativeQuery = true)
+    boolean existsByNameAndUnitId(@Param("name") @NonNull String name, @Param("unitId") @NonNull Integer unitId);
+
+    @Query("select p from ProductSizeEntity p where p.name = ?1 and p.unit.id = ?2")
+    Optional<ProductSizeEntity> findByNameAndUnit(@NonNull String name, @NonNull Integer id);
+
+
 }

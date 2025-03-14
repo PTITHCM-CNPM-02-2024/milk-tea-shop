@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -123,7 +124,61 @@ public class ProductSizeRepository implements ISizeRepository{
             throw new DomainException("Không thể lưu kích thước sản phẩm", e);
         }
     }
-    
+
+    /**
+     * @param name 
+     * @param unitOfMeasure
+     * @return
+     */
+    @Override
+    public boolean existsByNameAndUnit(ProductSizeName name, UnitOfMeasureId unitOfMeasure) {
+        Objects.requireNonNull(name, "Product size name is required");
+        Objects.requireNonNull(unitOfMeasure, "Unit of measure is required");
+        
+        return jpaProductSizeRepository.existsByNameAndUnitId(name.getValue(), unitOfMeasure.getValue());
+    }
+
+    /**
+     * @param name 
+     * @param unitOfMeasure
+     * @return
+     */
+    @Override
+    public Optional<ProductSize> findByNameAndUnit(ProductSizeName name, UnitOfMeasureId unitOfMeasure) {
+        Objects.requireNonNull(name, "Product size name is required");
+        Objects.requireNonNull(unitOfMeasure, "Unit of measure is required");
+        
+        return jpaProductSizeRepository.findByNameAndUnit(name.getValue(), unitOfMeasure.getValue())
+                .map(p -> new ProductSize(
+                        ProductSizeId.of(p.getId()),
+                        ProductSizeName.of(p.getName()),
+                        UnitOfMeasureId.of(p.getUnit().getId()),
+                        QuantityOfProductSize.of(p.getQuantity()),
+                        p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
+                        p.getUpdatedAt().orElse(LocalDateTime.now())
+                ));
+    }
+
+    /**
+     * @return 
+     */
+    @Override
+    public List<ProductSize> findAll() {
+        return jpaProductSizeRepository.findAll()
+                .stream()
+                .map(p -> new ProductSize(
+                        ProductSizeId.of(p.getId()),
+                        ProductSizeName.of(p.getName()),
+                        UnitOfMeasureId.of(p.getUnit().getId()),
+                        QuantityOfProductSize.of(p.getQuantity()),
+                        p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
+                        p.getUpdatedAt().orElse(LocalDateTime.now())
+                ))
+                .toList();
+    }
+
     @Transactional
     protected ProductSize update(ProductSize productSize) {
         Objects.requireNonNull(productSize, "Product size is required");

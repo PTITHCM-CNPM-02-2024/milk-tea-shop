@@ -37,13 +37,11 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
 
         var size = mustBeExistSize(ProductSizeId.of(command.getId()));
 
-        if (size.changeName(ProductSizeName.of(command.getName()))) {
-            verifyUniqueName(size.getName());
+        if (size.changeName(ProductSizeName.of(command.getName())) || size.changeUnit(UnitOfMeasureId.of(command.getUnitId()))) {
+            mustExistUnitOfMeasure(size.getUnitOfMeasure());
+            verifyTupleUnique(size.getName(), size.getUnitOfMeasure());
         }
-
-        if (size.changeUnit(UnitOfMeasureId.of(command.getUnitId()))) {
-            verifyUniqueUnit(size.getUnitOfMeasure());
-        }
+        
         size.changeDescription(command.getDescription());
         size.changeQuantity(command.getQuantity());
 
@@ -57,21 +55,21 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
         return sizeRepository.findById(sizeId)
                 .orElseThrow(() -> new NotFoundException("Size " + sizeId + " không tồn tại"));
     }
-
-    private void verifyUniqueName(ProductSizeName name) {
-        Objects.requireNonNull(name, "Size name is required");
-
-        sizeRepository.findByName(name).ifPresent(s -> {
-            throw new NotFoundException("Size " + name.getValue() + " đã tồn tại");
-        });
+    
+    private void mustExistUnitOfMeasure(UnitOfMeasureId unitId) {
+        Objects.requireNonNull(unitId, "UnitOfMeasureId is required");
+        unitRepository.findById(unitId)
+                .orElseThrow(() -> new NotFoundException("Unit " + unitId + " không tồn tại"));
     }
 
-    private void verifyUniqueUnit(UnitOfMeasureId unit) {
-        Objects.requireNonNull(unit, "Unit is required");
-
-        if (!unitRepository.existsById(unit)) {
-            throw new NotFoundException("Đơn vị " + unit + " không tồn tại");
-        }
+    private void verifyTupleUnique(ProductSizeName name, UnitOfMeasureId unit) {
+        Objects.requireNonNull(name, "ProductSizeName is required");
+        Objects.requireNonNull(unit, "UnitOfMeasureId is required");
+        
+        sizeRepository.findByNameAndUnit(name, unit)
+                .ifPresent(size -> {
+                    throw new NotFoundException("Size, Unit " + name.getValue() + ", " + unit.getValue() + " đã tồn tại");
+                });
     }
 
 

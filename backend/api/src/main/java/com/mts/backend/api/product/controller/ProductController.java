@@ -5,18 +5,27 @@ import com.mts.backend.api.product.request.AddProductPriceRequest;
 import com.mts.backend.api.product.request.UpdateProductInformRequest;
 import com.mts.backend.api.product.request.CreateProductRequest;
 import com.mts.backend.application.product.ProductCommandBus;
+import com.mts.backend.application.product.ProductQueryBus;
 import com.mts.backend.application.product.command.*;
+import com.mts.backend.application.product.query.DefaultProductQuery;
+import com.mts.backend.application.product.query.AvailableOrderProductQuery;
+import com.mts.backend.application.product.query.SignatureProductQuery;
+import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController implements IController {
     private final ProductCommandBus productCommandBus;
+    private final ProductQueryBus productQueryBus;
     
-    public ProductController(ProductCommandBus productCommandBus) {
+    public ProductController(ProductCommandBus productCommandBus , ProductQueryBus productQueryBus) {
         this.productCommandBus = productCommandBus;
+        this.productQueryBus = productQueryBus;
     }
     
     @PostMapping
@@ -50,6 +59,16 @@ public class ProductController implements IController {
         var result = productCommandBus.dispatch(updateProductInformCommand);
         
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((int)result.getData(), "Thông tin sản phẩm đã được cập nhật")) : handleError(result);
+    }
+    
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getProductDetail() {
+        DefaultProductQuery getProductDetailCommand = DefaultProductQuery.builder()
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
     }
     
     @PostMapping("/{id}/prices")
@@ -104,5 +123,40 @@ public class ProductController implements IController {
         var result = productCommandBus.dispatch(deleteProductPriceCommand);
         
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success("Giá sản phẩm đã được xóa")) : handleError(result);
+    }
+    
+    @GetMapping("/available")
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getUnavailableOrderProductDetail() {
+        AvailableOrderProductQuery getProductDetailCommand = AvailableOrderProductQuery.builder()
+                .isOrdered(true)
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("/not-available")
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getAvailableOrderProductDetail() {
+        
+        AvailableOrderProductQuery getProductDetailCommand = AvailableOrderProductQuery.builder()
+                .isOrdered(false)
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getSignatureProductDetail(@RequestParam(value = "isAvailableOrder", required = false, defaultValue = "true") Boolean isAvailableOrder, @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
+        SignatureProductQuery getProductDetailCommand = SignatureProductQuery.builder()
+                .isSignature(isSignature)
+                .build();
+        getProductDetailCommand.setOrdered(isAvailableOrder);
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
     }
 }

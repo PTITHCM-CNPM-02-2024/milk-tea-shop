@@ -19,7 +19,7 @@ public class AbstractQueryBus implements IQueryBus {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <R, Q extends IQuery<R>> R execute(Q query) {
+    public <R, Q extends IQuery<R>> R dispatch(Q query) {
         IQueryHandler<Q, R> handler = (IQueryHandler<Q, R>) handlers.get(query.getClass());
         
         if (handler == null) {
