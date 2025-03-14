@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -91,6 +92,17 @@ public class UnitRepository implements IUnitRepository {
         Objects.requireNonNull(symbol, "Unit of measure is required");
         return jpaUnitOfMeasureRepository.findBySymbol(symbol.getValue())
                 .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())));
+    }
+
+    /**
+     * @return 
+     */
+    @Override
+    public List<UnitOfMeasure> findAll() {
+        return jpaUnitOfMeasureRepository.findAll()
+                .stream()
+                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())))
+                .toList();
     }
 
     private void verifyUniqueName(UnitName name) {

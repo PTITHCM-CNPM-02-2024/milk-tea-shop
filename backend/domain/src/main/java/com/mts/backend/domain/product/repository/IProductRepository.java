@@ -32,6 +32,20 @@ public interface IProductRepository {
     List<Product> findAll();
 
     /**
+     * Tìm tất cả sản phẩm đang có sẵn
+     */
+    List<Product> findAllAvailable();
+
+    List<Product> findAllSignature();
+
+    /**
+     * Tìm tất cả sản phẩm có thể bán
+     */
+    List<Product> findAllForSale();
+
+
+
+    /**
      * Tìm sản phẩm theo tên (tìm gần đúng)
      */
     List<Product> findByNameContaining(String name);

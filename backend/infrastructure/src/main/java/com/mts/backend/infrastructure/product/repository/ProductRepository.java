@@ -21,7 +21,6 @@ import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -91,7 +90,47 @@ public class ProductRepository implements IProductRepository {
      */
     @Override
     public List<Product> findAll() {
-        return List.of();
+        Set<Product> products = new HashSet<>();
+        
+        jpaProductRepository.findAll().forEach(productEntity -> {
+            Product product = new Product(
+                    ProductId.of(productEntity.getId()),
+                    ProductName.of(productEntity.getName()),
+                    productEntity.getDescription(),
+                    productEntity.getImagePath(),
+                    productEntity.getIsAvailable(),
+                    productEntity.getIsSignature(),
+                    Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
+                    findPricesByProductId(ProductId.of(productEntity.getId())),
+                    productEntity.getCreatedAt().orElse(null),
+                    productEntity.getUpdatedAt().orElse(null)
+            );
+            products.add(product);
+        });
+        
+        return new ArrayList<>(products);
+    }
+    
+    @Override
+    public List<Product> findAllAvailable(){
+        var products = findAll();
+        
+        return products.stream().filter(Product::isAvailable).toList();
+    }
+    
+    
+    @Override
+    public List<Product> findAllSignature(){
+        var products = findAll();
+        
+        return products.stream().filter(Product::isSignature).toList();
+    }
+    
+    @Override
+    public List<Product> findAllForSale(){
+        var products = findAll();
+        
+        return products.stream().filter(Product::isOrdered).toList();
     }
 
     /**

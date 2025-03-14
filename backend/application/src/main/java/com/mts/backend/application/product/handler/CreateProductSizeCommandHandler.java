@@ -47,19 +47,22 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
                 command.getUpdatedAt().orElse(LocalDateTime.now())
         );
 
-        verifyUniqueName(productSize.getName());
         mustExistUnitOfMeasure(productSize.getUnitOfMeasure());
-
+        
+        verifyTupleUnique(productSize.getName(), productSize.getUnitOfMeasure());
+        
         ProductSize createdProductSize = sizeRepository.save(productSize);
 
         return CommandResult.success(createdProductSize.getId().getValue());
 
     }
     
-    private void verifyUniqueName(ProductSizeName name) {
+    private void verifyTupleUnique(ProductSizeName name, UnitOfMeasureId unit) {
         Objects.requireNonNull(name, "ProductSizeName is required");
-        sizeRepository.findByName(name).ifPresent(productSize -> {
-            throw new DuplicateException("Kích thước " + name.getValue() + " đã tồn tại");
+        Objects.requireNonNull(unit, "UnitOfMeasureId is required");
+        
+        sizeRepository.findByNameAndUnit(name, unit).ifPresent(size -> {
+            throw new DuplicateException("Size, Unit " + name.getValue() + ", " + unit.getValue() + " đã tồn tại");
         });
     }
     

@@ -10,6 +10,7 @@ import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -85,6 +86,24 @@ public class CategoryRepository implements ICategoryRepository {
                         entity.getCreatedAt().orElse(null),
                         entity.getUpdatedAt().orElse(null)
                 ));
+    }
+
+    /**
+     * @return 
+     */
+    @Override
+    public List<Category> findAll() {
+        return jpaCategoryRepository.findAll()
+                .stream()
+                .map(entity -> new Category(
+                        CategoryId.of(entity.getId()),
+                        CategoryName.of(entity.getName()),
+                        entity.getDescription(),
+                        entity.getParentCategoryEntity() == null ? null : CategoryId.of(entity.getParentCategoryEntity().getId()),
+                        entity.getCreatedAt().orElse(null),
+                        entity.getUpdatedAt().orElse(null)
+                ))
+                .toList();
     }
 
     @Transactional

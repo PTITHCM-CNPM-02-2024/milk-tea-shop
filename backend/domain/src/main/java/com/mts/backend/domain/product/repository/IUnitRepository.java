@@ -5,6 +5,7 @@ import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.value_object.UnitName;
 import com.mts.backend.domain.product.value_object.UnitSymbol;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUnitRepository {
@@ -22,4 +23,6 @@ public interface IUnitRepository {
     Optional<UnitOfMeasure> findByName(UnitName name);
     
     Optional<UnitOfMeasure> findBySymbol(UnitSymbol unitOfMeasure);
+    
+    List<UnitOfMeasure> findAll();
 }
