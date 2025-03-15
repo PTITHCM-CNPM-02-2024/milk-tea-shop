@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="1.6">
+      <module name="backend" target="23" />
+      <module name="backend.main" target="23" />
+      <module name="backend.test" target="23" />
+      <module name="com.ptithcm.backend.main" target="23" />
+      <module name="com.ptithcm.backend.test" target="23" />
+      <module name="employee" target="23" />
+      <module name="employee.main" target="23" />
+      <module name="employee.test" target="23" />
+      <module name="milk-tea-shop (1)" target="23" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="backend" options="-parameters" />
+      <module name="milk-tea-shop" options="-parameters" />
+      <module name="milk-tea-shop (1)" options="-parameters" />
+    </option>
+  </component>
+</project>
