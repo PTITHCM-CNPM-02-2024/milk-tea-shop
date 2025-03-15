@@ -14,6 +14,7 @@ dependencies{
     api("org.springframework.boot:spring-boot-starter")
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-security")
+    api("jakarta.persistence:jakarta.persistence-api")
 }
 
 group = "com.mts.backend"

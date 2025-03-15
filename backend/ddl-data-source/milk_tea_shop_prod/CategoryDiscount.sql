@@ -1,6 +1,6 @@
 create table milk_tea_shop_prod.CategoryDiscount
 (
-    category_discount_id int unsigned auto_increment
+    category_discount_id int unsigned auto_increment comment 'Mã định danh duy nhất cho mối quan hệ giữa danh mục và chương trình giảm giá'
         primary key,
     discount_id          int unsigned                       not null comment 'Liên kết với bảng Discount, xác định chương trình giảm giá áp dụng',
     category_id          smallint unsigned                  not null comment 'Liên kết với bảng Category, xác định danh mục được giảm giá',

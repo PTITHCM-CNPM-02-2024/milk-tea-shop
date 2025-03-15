@@ -29,7 +29,7 @@ public class ServiceTable extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã khu vực")
     @JoinColumn(name = "area_id")
-    private Area area;
+    private AreaEntity areaEntity;
 
     @Comment("Số bàn")
     @Column(name = "table_number", nullable = false, length = 10)

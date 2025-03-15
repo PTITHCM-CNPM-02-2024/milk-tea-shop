@@ -36,14 +36,14 @@ public class Customer extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
-    private Account account;
+    private AccountEntity accountEntity;
 
     @Comment("Họ")
-    @Column(name = "last_name", nullable = false, length = 35)
+    @Column(name = "last_name", nullable = false, length = 70)
     private String lastName;
 
     @Comment("Tên")
-    @Column(name = "first_name", nullable = false, length = 25)
+    @Column(name = "first_name", nullable = false, length = 70)
     private String firstName;
 
     @Comment("Số điện thoại")

@@ -19,7 +19,7 @@ import org.hibernate.type.SqlTypes;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Area extends BaseEntity<Integer> {
+public class AreaEntity extends BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã khu vực")
