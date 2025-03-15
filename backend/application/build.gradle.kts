@@ -14,4 +14,5 @@ dependencies{
     api("com.mts.backend:domain")
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     api("org.springframework.boot:spring-boot-starter")
+    api("org.springframework.boot:spring-boot-starter-security")
 }

@@ -26,7 +26,7 @@ public class Manager extends BaseEntity <Long> {
     @OneToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
-    private Account account;
+    private AccountEntity accountEntity;
 
     @Comment("Họ")
     @Column(name = "last_name", nullable = false, length = 35)

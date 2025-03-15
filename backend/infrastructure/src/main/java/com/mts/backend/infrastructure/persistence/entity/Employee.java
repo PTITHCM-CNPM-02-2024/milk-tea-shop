@@ -26,7 +26,7 @@ public class Employee extends BaseEntity<Long> {
     @OneToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
-    private Account account;
+    private AccountEntity accountEntity;
 
     @Comment("Chức vụ")
     @Column(name = "position", nullable = false, length = 50)

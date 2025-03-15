@@ -7,6 +7,7 @@ public class IdentifiableProvider {
     private static final SecureRandom secureRandom = new SecureRandom();
 
     // Giá trị tối đa cho các kiểu dữ liệu MySQL
+    public static final int TINYINT_UNSIGNED_MAX = 255;
     public static final int SMALLINT_UNSIGNED_MAX = 65535;        // 2^16 - 1
     public static final int MEDIUMINT_UNSIGNED_MAX = 16777215;    // 2^24 - 1
     public static final long INT_UNSIGNED_MAX = 4294967295L;      // 2^32 - 1
@@ -95,6 +96,33 @@ public class IdentifiableProvider {
         long timestamp = System.currentTimeMillis();
         long random = secureRandom.nextInt(65536); // 2^16
         return ((timestamp) ^ random) & INT_UNSIGNED_MAX;
+    }
+
+
+    /**
+     * Tạo số ngẫu nhiên kiểu TINYINT UNSIGNED (0-255)
+     */
+    public static int generateUnsignedTinyInt() {
+        return secureRandom.nextInt(TINYINT_UNSIGNED_MAX + 1);
+    }
+
+    /**
+     * Tạo số ngẫu nhiên kiểu TINYINT UNSIGNED trong khoảng chỉ định
+     */
+    public static int generateUnsignedTinyInt(int min, int max) {
+        if (min < 0) min = 0;
+        if (max > TINYINT_UNSIGNED_MAX) max = TINYINT_UNSIGNED_MAX;
+        return min + secureRandom.nextInt(max - min + 1);
+    }
+
+    /**
+     * Tạo ID ngẫu nhiên dựa trên thời gian cho TINYINT UNSIGNED
+     * Kết hợp timestamp với số ngẫu nhiên
+     */
+    public static int generateTimeBasedUnsignedTinyInt() {
+        long timestamp = System.currentTimeMillis();
+        int random = secureRandom.nextInt(16); // 2^4
+        return ((int)(timestamp & 0xFF) ^ random) & TINYINT_UNSIGNED_MAX;
     }
     
 }

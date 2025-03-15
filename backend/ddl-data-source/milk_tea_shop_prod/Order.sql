@@ -7,7 +7,7 @@ create table milk_tea_shop_prod.`Order`
     order_time     timestamp default CURRENT_TIMESTAMP null comment 'Thời gian đặt hàng',
     total_amount   decimal(11, 3)                      not null comment 'Tổng tiền',
     final_amount   decimal(11, 3)                      not null comment 'Thành tiền',
-    customize_note varchar(1000)                       null,
+    customize_note varchar(1000)                       null comment 'Ghi chú tùy chỉnh',
     created_at     datetime  default CURRENT_TIMESTAMP null,
     updated_at     datetime  default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Order_ibfk_1

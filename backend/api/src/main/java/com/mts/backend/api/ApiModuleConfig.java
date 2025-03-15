@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScans(
         {
                 @ComponentScan("com.mts.backend.api.product.*"),
+                @ComponentScan("com.mts.backend.api.account.*"),
         }
 )
 public class ApiModuleConfig {

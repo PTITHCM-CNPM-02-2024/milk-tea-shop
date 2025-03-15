@@ -2,12 +2,14 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import java.time.Instant;
+
+import static java.sql.Types.TIMESTAMP;
 
 @Getter
 @Setter
@@ -21,7 +23,10 @@ import java.time.Instant;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Account extends BaseEntity<Long>{
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AccountEntity extends BaseEntity<Long>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã tài khoản")
@@ -31,7 +36,7 @@ public class Account extends BaseEntity<Long>{
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã vai trò")
     @JoinColumn(name = "role_id")
-    private Role role;
+    private RoleEntity roleEntity;
 
     @Comment("Tên đăng nhập")
     @Column(name = "username", nullable = false, length = 50)
@@ -48,7 +53,18 @@ public class Account extends BaseEntity<Long>{
 
     @Comment("Lần đăng nhập cuối")
     @Column(name = "last_login")
+    @JdbcTypeCode(TIMESTAMP)
     private Instant lastLogin;
-    
+
+
+    @Comment("Tài khoản có bị khóa hay không (Có: 1, Không:0)")
+    @ColumnDefault("0")
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked = false;
+
+    @Comment("Kiểm tra tính hợp lệ của token")
+    @ColumnDefault("'0'")
+    @Column(name = "token_version", columnDefinition = "int UNSIGNED")
+    private Long tokenVersion;
 
 }

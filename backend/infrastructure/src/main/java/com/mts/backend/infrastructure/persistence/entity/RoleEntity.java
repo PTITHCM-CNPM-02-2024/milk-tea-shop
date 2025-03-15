@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Getter
@@ -16,11 +15,14 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Role extends BaseEntity<Short> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class RoleEntity extends BaseEntity<Integer> {
     @Id
     @Comment("Mã vai trò")
     @Column(name = "role_id", columnDefinition = "tinyint UNSIGNED")
-    private Short id;
+    private Integer id;
 
     @Comment("Tên vai trò (ví dụ: admin, staff, customer)")
     @Column(name = "name", nullable = false, length = 50)
