@@ -1,9 +1,9 @@
 package com.mts.backend.infrastructure.persistence.entity;
 
+import com.mts.backend.domain.common.value_object.Gender;
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Getter
@@ -16,7 +16,10 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Manager extends BaseEntity <Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ManagerEntity extends BaseEntity <Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã quản lý")
