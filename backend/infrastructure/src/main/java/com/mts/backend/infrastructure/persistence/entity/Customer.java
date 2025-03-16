@@ -1,5 +1,6 @@
 package com.mts.backend.infrastructure.persistence.entity;
 
+import com.mts.backend.domain.common.value_object.Gender;
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

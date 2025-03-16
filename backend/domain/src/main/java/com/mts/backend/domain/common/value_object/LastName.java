@@ -27,11 +27,12 @@ public class LastName extends AbstractValueObject {
         }
         
         if (value.length() > 70) {
-            businessErrors.add("Họ quá dài (tối đa 35 ký tự)");
+            businessErrors.add("Họ quá dài (tối đa 70 ký tự)");
         }
         
         if (!VIETNAMESE_NAME_PATTERN.matcher(value).matches()) {
-            businessErrors.add("Họ không hợp lệ");
+            // TODO: FIX THIS
+            //businessErrors.add("Họ không hợp lệ");
         }
         
         if (businessErrors.isEmpty()) {
@@ -41,6 +42,16 @@ public class LastName extends AbstractValueObject {
         return new ValueObjectValidationResult(null, businessErrors);
         
     }
+    
+    public static LastName of(String value) {
+        ValueObjectValidationResult result = create(value);
+        
+        if (result.getBusinessErrors().isEmpty()) {
+            return new LastName(value);
+        }
+        
+        throw new IllegalArgumentException("Họ không hợp lệ: " + result.getBusinessErrors());
+    }
     /**
      * @return 
      */
@@ -49,7 +60,7 @@ public class LastName extends AbstractValueObject {
         return List.of(value);
     }
     
-    private String getValue() {
+    public String getValue() {
         return normalize(value);
     }
     
@@ -57,7 +68,12 @@ public class LastName extends AbstractValueObject {
      * @param value 
      * @return 
      */
-    private String normalize(String value) {
+    private static String normalize(String value) {
         return value.trim().toUpperCase();
+    }
+    
+    @Override
+    public String toString() {
+        return value;
     }
 }
