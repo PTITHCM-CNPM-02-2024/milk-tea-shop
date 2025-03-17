@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScans({@ComponentScan("com.mts.backend.application.product.*"),
         @ComponentScan("com.mts.backend.application.account.*"),
         @ComponentScan("com.mts.backend.application.staff.*"),
+        @ComponentScan("com.mts.backend.application.customer.*"),
         @ComponentScan("com.mts.backend.application.*")})
 public class ApplicationModuleConfig {
 }

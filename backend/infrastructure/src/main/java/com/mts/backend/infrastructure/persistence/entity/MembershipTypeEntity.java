@@ -1,9 +1,9 @@
 package com.mts.backend.infrastructure.persistence.entity;
 
+import com.mts.backend.domain.customer.value_object.DiscountUnit;
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
@@ -20,16 +20,15 @@ import java.time.LocalDateTime;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class MembershipType extends BaseEntity <Short> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MembershipTypeEntity extends BaseEntity <Integer> {
     @Id
     @Comment("Mã loại thành viên")
     @Column(name = "membership_type_id", columnDefinition = "tinyint UNSIGNED")
-    private Short id;
-
-    @Comment("Loại thành viên")
-    @Column(name = "type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Type type;
+    private Integer id;
+    
 
     @Comment("Giá trị giảm giá")
     @Column(name = "discount_value", nullable = false, precision = 10, scale = 3)
@@ -57,11 +56,8 @@ public class MembershipType extends BaseEntity <Short> {
     @Column(name = "is_active")
     private Boolean isActive;
     
-    public  enum DiscountUnit {
-        PERCENT, FIXED
-    }
-    
-    public enum Type {
-        BRONZE, SILVER, GOLD, PLATINUM
-    }
+    @Comment("Loại thành viên")
+    @Column(name = "type", nullable = false, length = 50)
+    private String type;
+
 }

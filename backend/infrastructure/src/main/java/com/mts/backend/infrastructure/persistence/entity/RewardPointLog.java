@@ -24,7 +24,7 @@ public class RewardPointLog extends BaseEntity <Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã khách hàng")
     @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private CustomerEntity customerEntity;
 
     @Comment("Số điểm thưởng")
     @Column(name = "reward_point", nullable = false)

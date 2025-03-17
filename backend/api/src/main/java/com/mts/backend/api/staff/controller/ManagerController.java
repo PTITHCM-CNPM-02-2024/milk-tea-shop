@@ -1,7 +1,7 @@
 package com.mts.backend.api.staff.controller;
 
 import com.mts.backend.api.common.IController;
-import com.mts.backend.api.staff.request.ManagerRequest;
+import com.mts.backend.api.staff.request.CreateManagerRequest;
 import com.mts.backend.api.staff.request.UpdateManagerRequest;
 import com.mts.backend.application.staff.ManagerCommandBus;
 import com.mts.backend.application.staff.ManagerQueryBus;
@@ -28,7 +28,7 @@ public class ManagerController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createManager(@RequestBody ManagerRequest request) {
+    public ResponseEntity<ApiResponse<Long>> createManager(@RequestBody CreateManagerRequest request) {
         var command = CreateManagerCommand.builder().build();
         
         command.setEmail(request.getEmail());

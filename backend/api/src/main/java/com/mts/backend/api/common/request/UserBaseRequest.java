@@ -1,4 +1,4 @@
-package com.mts.backend.api.staff.request;
+package com.mts.backend.api.common.request;
 
 import lombok.Data;
 

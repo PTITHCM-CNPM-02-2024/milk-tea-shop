@@ -3,8 +3,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 import com.mts.backend.domain.common.value_object.Gender;
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
@@ -22,7 +21,10 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Customer extends BaseEntity<Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CustomerEntity extends BaseEntity<Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã khách hàng")
@@ -32,7 +34,7 @@ public class Customer extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã loại thành viên")
     @JoinColumn(name = "membership_type_id")
-    private MembershipType membershipType;
+    private MembershipTypeEntity membershipTypeEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
@@ -52,7 +54,7 @@ public class Customer extends BaseEntity<Long> {
     private String phone;
 
     @Comment("Email")
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = true, length = 100)
     private String email;
 
     @Comment("Điểm hiện tại")
