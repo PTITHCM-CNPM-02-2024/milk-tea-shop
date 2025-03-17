@@ -1,4 +1,4 @@
-package com.mts.backend.api.staff.request;
+package com.mts.backend.api.customer.request;
 
 import com.mts.backend.api.common.request.UserBaseRequest;
 import lombok.*;
@@ -8,6 +8,6 @@ import lombok.*;
 @Data
 @Builder
 @EqualsAndHashCode(callSuper = false)
-public class UpdateManagerRequest extends UserBaseRequest {
-    private Long id;
+public class CreateCustomerRequest extends UserBaseRequest {
+    private Integer memberId;
 }

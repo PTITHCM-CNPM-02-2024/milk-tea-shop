@@ -30,7 +30,7 @@ public class Order extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã khách hàng")
     @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private CustomerEntity customerEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã nhân viên")
