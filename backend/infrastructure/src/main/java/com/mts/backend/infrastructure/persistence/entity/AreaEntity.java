@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -19,6 +18,9 @@ import org.hibernate.type.SqlTypes;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AreaEntity extends BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +38,7 @@ public class AreaEntity extends BaseEntity<Integer> {
     private String description;
 
     @Comment("Số bàn tối đa")
-    @Column(name = "max_tables", nullable = false)
+    @Column(name = "max_tables", nullable = true)
     private Integer maxTables;
 
     @Comment("Trạng thái hoạt động (1: Có, 0: Không)")

@@ -2,7 +2,6 @@ package com.mts.backend.domain.common.value_object;
 
 import com.mts.backend.shared.value_object.AbstractValueObject;
 import com.mts.backend.shared.value_object.ValueObjectValidationResult;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class Email extends AbstractValueObject {
     
     public static ValueObjectValidationResult create(String value){
         Objects.requireNonNull(value, "Email is required");
-        List<String> errors = new ArrayList<>(List.of());
+        List<String> errors = new ArrayList<>();
         
         if (value.isBlank()) {
             errors.add("Email không được để trống");
@@ -48,6 +47,15 @@ public class Email extends AbstractValueObject {
             return new Email(value);
         }
         throw new IllegalArgumentException("Email không hợp lệ: " + result.getBusinessErrors());
+    }
+    
+    public String getValue() {
+        return value;
+    }
+    
+    @Override
+    public String toString() {
+        return value;
     }
     /**
      * @return 

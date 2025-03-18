@@ -7,7 +7,6 @@ import com.mts.backend.application.product.ProductSizeCommandBus;
 import com.mts.backend.application.product.SizeQueryBus;
 import com.mts.backend.application.product.command.CreateProductSizeCommand;
 import com.mts.backend.application.product.command.UpdateProductSizeCommand;
-import com.mts.backend.application.product.query.DefaultCategoryQuery;
 import com.mts.backend.application.product.query.DefaultSizeQuery;
 import com.mts.backend.application.product.response.SizeDetailResponse;
 import com.mts.backend.shared.response.ApiResponse;

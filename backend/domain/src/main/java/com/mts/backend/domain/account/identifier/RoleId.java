@@ -1,6 +1,5 @@
 package com.mts.backend.domain.account.identifier;
 
-import com.mts.backend.domain.account.Role;
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 

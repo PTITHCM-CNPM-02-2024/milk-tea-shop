@@ -4,7 +4,6 @@ import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class CategoryId implements Identifiable {
     private final int value;

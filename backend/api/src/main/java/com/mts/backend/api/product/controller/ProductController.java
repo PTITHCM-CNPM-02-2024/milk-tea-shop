@@ -2,13 +2,13 @@ package com.mts.backend.api.product.controller;
 
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.product.request.AddProductPriceRequest;
-import com.mts.backend.api.product.request.UpdateProductInformRequest;
 import com.mts.backend.api.product.request.CreateProductRequest;
+import com.mts.backend.api.product.request.UpdateProductInformRequest;
 import com.mts.backend.application.product.ProductCommandBus;
 import com.mts.backend.application.product.ProductQueryBus;
 import com.mts.backend.application.product.command.*;
-import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.query.AvailableOrderProductQuery;
+import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.query.SignatureProductQuery;
 import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.shared.response.ApiResponse;

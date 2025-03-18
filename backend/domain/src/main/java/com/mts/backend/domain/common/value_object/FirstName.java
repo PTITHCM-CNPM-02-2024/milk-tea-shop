@@ -1,5 +1,6 @@
 package com.mts.backend.domain.common.value_object;
 
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.value_object.AbstractValueObject;
 import com.mts.backend.shared.value_object.ValueObjectValidationResult;
 
@@ -35,22 +36,15 @@ public class FirstName extends AbstractValueObject {
         }
         
         if (!VIETNAMESE_NAME_PATTERN.matcher(value).matches()) {
-            businessErrors.add("Tên không hợp lệ");
+            // TODO: FIX THIS
+            //businessErrors.add("Tên không hợp lệ");
         }
         
-
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isLetter(value.charAt(i))) {
-                businessErrors.add("Tên không hợp lệ");
-                break;
-            }
-        }
-
         if (businessErrors.isEmpty()) {
             return new ValueObjectValidationResult(new FirstName(value), businessErrors);
         }
 
-        return new ValueObjectValidationResult(new FirstName(value), businessErrors);
+        return new ValueObjectValidationResult(null, businessErrors);
     }
 
     public static FirstName of(String value) {
@@ -58,7 +52,7 @@ public class FirstName extends AbstractValueObject {
         if (result.getBusinessErrors().isEmpty()) {
             return new FirstName(value);
         }
-        throw new IllegalArgumentException("Tên không hợp lệ: " + result.getBusinessErrors());
+        throw new DomainException("Tên không hợp lệ: " + result.getBusinessErrors());
     }
 
 
