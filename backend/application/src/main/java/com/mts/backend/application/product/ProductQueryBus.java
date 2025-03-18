@@ -1,7 +1,7 @@
 package com.mts.backend.application.product;
 
-import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.query.AvailableOrderProductQuery;
+import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.query.SignatureProductQuery;
 import com.mts.backend.application.product.query_handler.GetAllAvailableOrderProductQueryHandler;
 import com.mts.backend.application.product.query_handler.GetAllProductQueryHandler;

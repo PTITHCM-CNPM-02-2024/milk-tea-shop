@@ -5,7 +5,6 @@ import com.mts.backend.application.customer.response.CustomerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.FirstName;
-import com.mts.backend.domain.common.value_object.Gender;
 import com.mts.backend.domain.common.value_object.LastName;
 import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.customer.identifier.CustomerId;

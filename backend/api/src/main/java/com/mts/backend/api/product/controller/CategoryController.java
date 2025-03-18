@@ -5,7 +5,6 @@ import com.mts.backend.api.product.request.CreateCategoryRequest;
 import com.mts.backend.application.product.CategoryCommandBus;
 import com.mts.backend.application.product.command.CreateCategoryCommand;
 import com.mts.backend.application.product.command.UpdateCategoryCommand;
-import com.mts.backend.application.product.handler.CreateCategoryCommandHandler;
 import com.mts.backend.application.product.query.DefaultCategoryQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.CategoryQueryBus;

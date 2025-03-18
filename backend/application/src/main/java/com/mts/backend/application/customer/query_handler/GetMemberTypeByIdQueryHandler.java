@@ -2,7 +2,6 @@ package com.mts.backend.application.customer.query_handler;
 
 import com.mts.backend.application.customer.query.MemberTypeByIdQuery;
 import com.mts.backend.application.customer.response.MemberTypeDetailResponse;
-import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
 import com.mts.backend.shared.command.CommandResult;

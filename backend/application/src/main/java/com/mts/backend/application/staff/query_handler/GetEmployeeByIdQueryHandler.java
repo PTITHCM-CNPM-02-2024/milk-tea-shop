@@ -1,6 +1,5 @@
 package com.mts.backend.application.staff.query_handler;
 
-import com.mts.backend.application.account.query_handler.GetAccountByIdQueryHandler;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
 import com.mts.backend.domain.account.Account;

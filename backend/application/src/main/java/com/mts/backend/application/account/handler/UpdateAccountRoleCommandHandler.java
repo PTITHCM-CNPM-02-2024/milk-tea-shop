@@ -1,6 +1,5 @@
 package com.mts.backend.application.account.handler;
 
-import com.mts.backend.application.account.command.UpdateAccountCommand;
 import com.mts.backend.application.account.command.UpdateAccountRoleCommand;
 import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;

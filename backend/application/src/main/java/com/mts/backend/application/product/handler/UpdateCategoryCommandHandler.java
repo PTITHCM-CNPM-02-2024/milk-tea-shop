@@ -6,7 +6,6 @@ import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.repository.ICategoryRepository;
 import com.mts.backend.domain.product.value_object.CategoryName;
 import com.mts.backend.shared.command.CommandResult;
-import com.mts.backend.shared.command.ICommand;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;

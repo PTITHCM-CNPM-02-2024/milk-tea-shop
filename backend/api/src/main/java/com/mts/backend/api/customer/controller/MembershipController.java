@@ -9,7 +9,6 @@ import com.mts.backend.application.customer.command.CreateMembershipCommand;
 import com.mts.backend.application.customer.command.UpdateMemberCommand;
 import com.mts.backend.application.customer.query.DefaultMemberQuery;
 import com.mts.backend.application.customer.query.MemberTypeByIdQuery;
-import com.mts.backend.application.customer.query_handler.GetMemberTypeByIdQueryHandler;
 import com.mts.backend.application.customer.response.MemberTypeDetailResponse;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
