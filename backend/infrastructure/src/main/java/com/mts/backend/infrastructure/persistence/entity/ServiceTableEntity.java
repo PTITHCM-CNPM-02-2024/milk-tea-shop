@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
@@ -19,7 +18,10 @@ import org.hibernate.annotations.Comment;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class ServiceTable extends BaseEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ServiceTableEntity extends BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã bàn")
@@ -37,7 +39,7 @@ public class ServiceTable extends BaseEntity {
 
     @Comment("Bàn có sẵn (1: Có, 0: Không)")
     @ColumnDefault("1")
-    @Column(name = "is_available")
-    private Boolean isAvailable;
+    @Column(name = "is_active")
+    private Boolean isActive;
 
 }

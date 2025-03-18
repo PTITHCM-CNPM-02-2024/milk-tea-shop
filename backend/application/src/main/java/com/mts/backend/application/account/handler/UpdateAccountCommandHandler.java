@@ -4,16 +4,11 @@ import com.mts.backend.application.account.command.UpdateAccountCommand;
 import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.repository.IAccountRepository;
-import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

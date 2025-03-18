@@ -1,6 +1,5 @@
 package com.mts.backend.application.staff.response;
 
-import com.mts.backend.application.account.response.AccountDetailResponse;
 import lombok.*;
 
 @NoArgsConstructor

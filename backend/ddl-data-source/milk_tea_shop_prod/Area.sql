@@ -4,7 +4,7 @@ create table milk_tea_shop_prod.Area
         primary key,
     name        char(3)                              not null comment 'Tên khu vực',
     description varchar(255)                         null comment 'Mô tả',
-    max_tables  int                                  not null comment 'Số bàn tối đa',
+    max_tables  int                                  null,
     is_active   tinyint(1) default 1                 null comment 'Trạng thái hoạt động (1: Có, 0: Không)',
     created_at  datetime   default CURRENT_TIMESTAMP null,
     updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,

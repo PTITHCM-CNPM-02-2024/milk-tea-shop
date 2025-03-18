@@ -1,9 +1,9 @@
 package com.mts.backend.domain.product;
 
 import com.mts.backend.domain.common.value_object.Money;
+import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
-import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.ProductPriceId;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.value_object.ProductName;

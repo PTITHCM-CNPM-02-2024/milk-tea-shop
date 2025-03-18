@@ -2,7 +2,6 @@ package com.mts.backend.domain.common.value_object;
 
 import com.mts.backend.shared.value_object.AbstractValueObject;
 import com.mts.backend.shared.value_object.ValueObjectValidationResult;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
 
 import java.util.ArrayList;
 import java.util.List;

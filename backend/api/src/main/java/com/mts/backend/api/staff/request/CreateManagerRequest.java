@@ -2,7 +2,10 @@ package com.mts.backend.api.staff.request;
 
 
 import com.mts.backend.api.common.request.UserBaseRequest;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data

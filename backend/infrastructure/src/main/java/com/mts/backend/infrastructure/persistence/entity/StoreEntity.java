@@ -2,11 +2,11 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -16,11 +16,14 @@ import java.time.LocalDate;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Store extends BaseEntity <Short> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StoreEntity extends BaseEntity <Integer> {
     @Id
     @Comment("Mã cửa hàng")
     @Column(name = "store_id", columnDefinition = "tinyint UNSIGNED")
-    private Short id;
+    private Integer id;
 
     @Comment("Tên cửa hàng")
     @Column(name = "name", nullable = false, length = 100)
@@ -45,5 +48,12 @@ public class Store extends BaseEntity <Short> {
     @Comment("Mã số thuế")
     @Column(name = "tax_code", length = 20)
     private String taxCode;
+
+    @Comment("Thời gian mở cửa")
+    @Column(name = "opening_time", nullable = false)
+    private LocalTime openingTime;
+
+    @Column(name = "closing_time", nullable = false)
+    private LocalTime closingTime;
 
 }
