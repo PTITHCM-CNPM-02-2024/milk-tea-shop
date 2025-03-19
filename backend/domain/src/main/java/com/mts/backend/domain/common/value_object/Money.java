@@ -80,6 +80,7 @@ public class Money extends AbstractValueObject implements Comparable<Money> {
         return amount.doubleValue();
     }
     
+    
     @Override
     public String toString() {
         return amount.toString();

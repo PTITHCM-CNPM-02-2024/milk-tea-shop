@@ -1,5 +1,6 @@
 package com.mts.backend.infrastructure.store.repository;
 
+import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.store.Store;
 import com.mts.backend.domain.store.identifier.StoreId;
@@ -35,6 +36,7 @@ public class StoreRepository implements IStoreRepository {
                 StoreName.of(e.getName()),
                 Address.of(e.getAddress()),
                 PhoneNumber.of(e.getPhone()),
+                Email.of(e.getEmail()),
                 e.getTaxCode(),
                 e.getOpeningTime(),
                 e.getClosingTime(),

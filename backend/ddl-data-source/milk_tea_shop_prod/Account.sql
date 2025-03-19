@@ -2,7 +2,7 @@ create table milk_tea_shop_prod.Account
 (
     account_id    int unsigned auto_increment comment 'Mã tài khoản'
         primary key,
-    role_id       tinyint unsigned                       not null,
+    role_id       tinyint unsigned                       not null comment 'Mã vai trò',
     username      varchar(50)                            not null comment 'Tên đăng nhập',
     password_hash varchar(255)                           not null comment 'Mật khẩu đã mã hóa',
     is_active     tinyint(1)   default 1                 null comment 'Tài khoản hoạt động (1: Có, 0: Không)',

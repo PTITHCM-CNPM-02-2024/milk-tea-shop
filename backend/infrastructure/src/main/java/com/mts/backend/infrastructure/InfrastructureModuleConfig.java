@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
                 @ComponentScan(basePackages = "com.mts.backend.infrastructure.customer.*"),
                 @ComponentScan(basePackages = "com.mts.backend.infrastructure.aop"),
                 @ComponentScan(basePackages = "com.mts.backend.infrastructure.store.*"),
+                @ComponentScan(basePackages = "com.mts.backend.infrastructure.promotion.*"),
         }
 )
 @EntityScan(basePackages = {

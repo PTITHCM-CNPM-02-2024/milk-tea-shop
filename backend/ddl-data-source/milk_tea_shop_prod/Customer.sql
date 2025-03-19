@@ -2,10 +2,10 @@ create table milk_tea_shop_prod.Customer
 (
     customer_id        int unsigned auto_increment comment 'Mã khách hàng'
         primary key,
-    membership_type_id tinyint unsigned                    not null,
+    membership_type_id tinyint unsigned                    not null comment 'Mã loại thành viên',
     account_id         int unsigned                        null comment 'Mã tài khoản',
-    last_name          varchar(70)                         null,
-    first_name         varchar(70)                         null,
+    last_name          varchar(70)                         null comment 'Họ',
+    first_name         varchar(70)                         null comment 'Tên',
     phone              varchar(15)                         not null comment 'Số điện thoại',
     email              varchar(100)                        null comment 'Email',
     current_points     int       default 0                 null comment 'Điểm hiện tại',
