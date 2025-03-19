@@ -28,7 +28,7 @@ public class OrderDiscount extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @Comment("Mã chương trình giảm giá được áp dụng")
     @JoinColumn(name = "discount_id", nullable = false)
-    private Discount discount;
+    private DiscountEntity discountEntity;
 
     @Comment("Số tiền giảm giá được áp dụng")
     @Column(name = "discount_amount", nullable = false, precision = 11, scale = 3)

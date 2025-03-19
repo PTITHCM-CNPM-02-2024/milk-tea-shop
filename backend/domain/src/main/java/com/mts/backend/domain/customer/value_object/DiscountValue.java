@@ -35,6 +35,10 @@ public class DiscountValue extends AbstractValueObject {
             errors.add("Giá trị giảm giá không được lớn hơn 100 khi đơn vị là phần trăm");
         }
         
+        if (unit != null && unit.ordinal() == 0 && value != null && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
+            errors.add("Giá trị giảm giá không được nhỏ hơn 1000 khi đơn vị là tiền");
+        }
+        
         if (errors.isEmpty()) {
             return new ValueObjectValidationResult(new DiscountValue(value, unit), errors);
         }

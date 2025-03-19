@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
         @ComponentScan("com.mts.backend.application.staff.*"),
         @ComponentScan("com.mts.backend.application.customer.*"),
         @ComponentScan("com.mts.backend.application.store.*"),
+        @ComponentScan("com.mts.backend.application.promotion.*"),
         @ComponentScan("com.mts.backend.application.*")})
+
 public class ApplicationModuleConfig {
 }

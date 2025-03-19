@@ -2,9 +2,9 @@ create table milk_tea_shop_prod.MembershipType
 (
     membership_type_id tinyint unsigned auto_increment comment 'Mã loại thành viên'
         primary key,
-    type               varchar(50)                          not null,
+    type               varchar(50)                          not null comment 'Loại thành viên',
     discount_value     decimal(10, 3)                       not null comment 'Giá trị giảm giá',
-    discount_unit      enum ('PERCENTAGE', 'FIXED')         not null comment 'Đơn vị giảm giá (PERCENT, FIXED)',
+    discount_unit      enum ('FIXED', 'PERCENTAGE')         not null comment 'Đơn vị giảm giá (PERCENT, FIXED)',
     required_point     int                                  not null comment 'Điểm yêu cầu',
     description        varchar(255)                         null comment 'Mô tả',
     valid_until        datetime                             null comment 'Ngày hết hạn',

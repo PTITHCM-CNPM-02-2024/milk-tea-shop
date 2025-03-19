@@ -1,9 +1,9 @@
 package com.mts.backend.infrastructure.persistence.entity;
 
+import com.mts.backend.domain.customer.value_object.DiscountUnit;
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
@@ -18,37 +18,45 @@ import java.time.LocalDateTime;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Discount extends BaseEntity<Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DiscountEntity extends BaseEntity<Long> {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã định danh duy nhất cho chương trình giảm giá")
     @Column(name = "discount_id", columnDefinition = "int UNSIGNED")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Comment("Liên kết với bảng DiscountType, xác định loại giảm giá (ví dụ: giảm giá theo mùa, khuyến mãi đặc biệt, v.v.)")
-    @JoinColumn(name = "discount_type_id", nullable = false)
-    private DiscountType discountType;
-
+    @OneToOne(fetch = FetchType.LAZY)
     @Comment("Liên kết với mã giảm giá (coupon), NULL nếu không yêu cầu mã giảm giá")
-    @Column(name = "coupon_id", columnDefinition = "int UNSIGNED")
-    private Long couponId;
+    @JoinColumn(name = "coupon_id", nullable = false)
+    private CouponEntity couponEntity;
 
     @Comment("Giá trị giảm giá (phần trăm hoặc số tiền cố định)")
     @Column(name = "discount_value", nullable = false, precision = 11, scale = 3)
     private BigDecimal discountValue;
 
     @Comment("Giới hạn số tiền giảm giá tối đa, NULL nếu không giới hạn")
-    @Column(name = "max_discount_amount", precision = 11, scale = 3)
+    @Column(name = "max_discount_amount", nullable = false, precision = 11, scale = 3)
     private BigDecimal maxDiscountAmount;
 
+    @Comment("Số lượng sản phẩm tối thiểu cần mua để khuyến mãi")
+    @ColumnDefault("'1'")
+    @Column(name = "min_required_product", columnDefinition = "smallint UNSIGNED")
+    private Integer minRequiredProduct;
+
+
     @Comment("Thời điểm bắt đầu hiệu lực của chương trình giảm giá")
-    @Column(name = "valid_from", nullable = false)
+    @Column(name = "valid_from")
     private LocalDateTime validFrom;
+
 
     @Comment("Thời điểm kết thúc hiệu lực của chương trình giảm giá")
     @Column(name = "valid_until", nullable = false)
     private LocalDateTime validUntil;
+
 
     @Comment("Số lần đã sử dụng chương trình giảm giá này")
     @ColumnDefault("'0'")
@@ -59,16 +67,29 @@ public class Discount extends BaseEntity<Long> {
     @Column(name = "max_uses", columnDefinition = "int UNSIGNED")
     private Long maxUses;
 
+
     @Comment("Số lần tối đa mỗi khách hàng được sử dụng chương trình giảm giá này, NULL nếu không giới hạn")
     @Column(name = "max_uses_per_customer", columnDefinition = "smallint UNSIGNED")
     private Integer maxUsesPerCustomer;
 
     @Comment("Trạng thái kích hoạt: 1 - đang hoạt động, 0 - không hoạt động")
     @ColumnDefault("1")
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = false;
+
     
-    public static enum ApplyType {
-        BEST, COMBINE
-    }
+    @Column(name="discount_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DiscountUnit discountUnit;
+
+    @Column(name = "name", nullable = false, length = 500)
+    private String name;
+
+    @Column(name = "description", length = 1000)
+    private String description;
+
+    @Comment("Gái trị đơn hàng tối thiểu có thể áp dụng")
+    @Column(name = "min_required_order_value", nullable = false, precision = 11, scale = 3)
+    private BigDecimal minRequiredOrderValue;
+
 }

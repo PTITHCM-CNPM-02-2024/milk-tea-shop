@@ -1,11 +1,11 @@
 package com.mts.backend.api.store.request;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 @EqualsAndHashCode(callSuper = false)
 public class UpdateStoreRequest extends StoreBaseRequest {
 }
