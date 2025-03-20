@@ -1,14 +1,12 @@
 package com.mts.backend.domain.product.repository;
 
 import com.mts.backend.domain.product.Product;
-import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.value_object.ProductName;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Interface Repository cho Product Aggregate
@@ -89,7 +87,5 @@ public interface IProductRepository {
     Product save(Product product);
 
     void updateInform(Product product);
-    
-    void createPrice(ProductId productId, Set<ProductPrice> prices);
-    
+
 }

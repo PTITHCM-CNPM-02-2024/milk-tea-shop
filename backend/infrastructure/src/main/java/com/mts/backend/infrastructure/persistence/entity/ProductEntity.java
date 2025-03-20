@@ -26,7 +26,7 @@ public class ProductEntity extends BaseEntity<Integer> {
     @Column(name = "product_id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @Comment("Mã danh mục")
     @JoinColumn(name = "category_id")
     private CategoryEntity categoryEntity;

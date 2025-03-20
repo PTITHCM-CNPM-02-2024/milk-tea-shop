@@ -27,7 +27,7 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
     @NonNull
     private LocalDateTime updatedAt;
 
-    public ProductSize(@NonNull ProductSizeId productSizeId, @NonNull ProductSizeName name, @NonNull UnitOfMeasureId unitOfMeasure, @NonNull QuantityOfProductSize quantity, String description, @Nullable LocalDateTime createdAt, @Nullable LocalDateTime updatedAt) {
+    public ProductSize(@NonNull ProductSizeId productSizeId, @NonNull ProductSizeName name, @NonNull UnitOfMeasureId unitOfMeasure, @NonNull QuantityOfProductSize quantity, String description, @Nullable LocalDateTime updatedAt) {
         super(productSizeId);
 
         this.name = Objects.requireNonNull(name, "Tên kích thước sản phẩm không được null");
@@ -36,8 +36,8 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
 
         this.quantity = Objects.requireNonNull(quantity, "Số lượng kích thước sản phẩm không được null");
         ;
-        this.description = description == null ? "" : description;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+        this.description = description;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
 
@@ -49,17 +49,7 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
         this.updatedAt = LocalDateTime.now();
         return true;
     }
-
-    public boolean changeQuantity(int quantity) {
-        QuantityOfProductSize newQuantity = QuantityOfProductSize.of(quantity);
-
-        if (!this.businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(this.businessErrors);
-        }
-
-        return changeQuantity(newQuantity);
-
-    }
+    
 
     public boolean changeName(ProductSizeName name) {
         Objects.requireNonNull(name, "Product size name is required");
@@ -72,15 +62,7 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
         return true;
 
     }
-
-    public boolean changeName(String name) {
-        ProductSizeName newName = (ProductSizeName) checkAndAssign(ProductSizeName.create(name));
-
-        if (!businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(businessErrors);
-        }
-        return changeName(newName);
-    }
+    
 
     public void changeDescription(String description) {
         this.description = description;
@@ -90,20 +72,8 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
     public Optional<String> getDescription() {
         return Optional.ofNullable(description);
     }
-
-    public void changeUnitOfMeasure(UnitOfMeasureId unitOfMeasure) {
-        this.unitOfMeasure = unitOfMeasure;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void changeUnitOfMeasure(int unitOfMeasure) {
-        UnitOfMeasureId newUnitOfMeasure = UnitOfMeasureId.of(unitOfMeasure);
-
-        if (!this.businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(this.businessErrors);
-        }
-        this.updatedAt = LocalDateTime.now();
-    }
+    
+    
 
     public ProductSizeName getName() {
         return name;
@@ -134,15 +104,5 @@ public class ProductSize extends AbstractAggregateRoot<ProductSizeId> {
         return true;
     }
     
-    public boolean changeUnit(int unitOfMeasure) {
-        UnitOfMeasureId newUnitOfMeasure = UnitOfMeasureId.of(unitOfMeasure);
-        
-        if (!this.businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(this.businessErrors);
-        }
-        
-        return changeUnit(newUnitOfMeasure);
-    }
-
 
 }

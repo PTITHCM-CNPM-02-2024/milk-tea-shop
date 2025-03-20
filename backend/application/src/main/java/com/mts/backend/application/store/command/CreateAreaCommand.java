@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,5 +18,13 @@ public class CreateAreaCommand  implements ICommand<CommandResult> {
     private String name;
     private String description;
     private Integer maxTable;
-    private boolean isActive;
+    private Boolean isActive;
+    
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
+    }
+    
+    public Optional<Integer> getMaxTable() {
+        return Optional.ofNullable(maxTable);
+    }
 }

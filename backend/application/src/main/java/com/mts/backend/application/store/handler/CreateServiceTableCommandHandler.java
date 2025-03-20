@@ -37,7 +37,7 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
     @Override
     public CommandResult handle(CreateServiceTableCommand command) {
         Objects.requireNonNull(command, "Create service table command is required");
-        Optional<Area> area = mustExitTableIfSpecificAndNonMaxTable(AreaId.of(command.getAreaId()));
+        Optional<Area> area = mustExitTableIfSpecificAndNonMaxTable(command.getAreaId().map(AreaId::of).orElse(null));
         
         AreaId areaId = area.map(AbstractAggregateRoot::getId).orElse(null);
         
@@ -57,8 +57,9 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
     }
 
     private Optional<Area> mustExitTableIfSpecificAndNonMaxTable(AreaId areaId) {
-        Objects.requireNonNull(areaId, "AreaId is required");
-
+        if (areaId == null) {
+            return Optional.empty();
+        }
         var area = areaRepository.findById(areaId);
         if (area.isEmpty()) {
             throw new NotFoundException("Khu vực không tồn tại");

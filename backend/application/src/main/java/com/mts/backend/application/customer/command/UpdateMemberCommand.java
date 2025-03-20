@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,5 +23,9 @@ public class UpdateMemberCommand implements ICommand<CommandResult>{
     private BigDecimal discountValue;
     private Integer requiredPoints;
     private LocalDateTime validUntil;
-    private boolean isActive;
+    private Boolean isActive;
+    
+    public Optional<String> description() {
+        return Optional.ofNullable(description);
+    }
 }

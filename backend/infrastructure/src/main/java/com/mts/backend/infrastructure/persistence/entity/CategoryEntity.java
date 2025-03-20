@@ -33,7 +33,7 @@ public class CategoryEntity extends BaseEntity<Integer> {
     @Column(name = "description", length = 1000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @Comment("Mã danh mục sản phẩm cha")
     @JoinColumn(name = "parent_category_id")
     private CategoryEntity parentCategoryEntity;

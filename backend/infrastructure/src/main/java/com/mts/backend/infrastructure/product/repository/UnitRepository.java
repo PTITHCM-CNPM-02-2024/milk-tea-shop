@@ -8,7 +8,6 @@ import com.mts.backend.domain.product.value_object.UnitSymbol;
 import com.mts.backend.infrastructure.persistence.entity.UnitOfMeasureEntity;
 import com.mts.backend.infrastructure.product.jpa.JpaUnitOfMeasureRepository;
 import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.exception.DuplicateException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,9 @@ public class UnitRepository implements IUnitRepository {
      */
     @Override
     public boolean existsById(UnitOfMeasureId unitOfMeasureId) {
-        return false;
+        Objects.requireNonNull(unitOfMeasureId, "Unit of measure id is required");
+        
+        return jpaUnitOfMeasureRepository.existsById(unitOfMeasureId.getValue());
     }
 
     /**
@@ -65,7 +66,7 @@ public class UnitRepository implements IUnitRepository {
         try {
 
             return jpaUnitOfMeasureRepository.findById(unitOfMeasureId.getValue())
-                    .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())));
+                    .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getUpdatedAt().orElse(LocalDateTime.now())));
         } catch (Exception e) {
             throw new DomainException("Không thể tìm đơn vị tính", e);
         }
@@ -80,7 +81,7 @@ public class UnitRepository implements IUnitRepository {
         Objects.requireNonNull(name, "Unit name is required");
 
         return jpaUnitOfMeasureRepository.findByName(name.getValue())
-                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())));
+                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(),  uom.getUpdatedAt().orElse(LocalDateTime.now())));
     }
 
     /**
@@ -91,7 +92,7 @@ public class UnitRepository implements IUnitRepository {
     public Optional<UnitOfMeasure> findBySymbol(UnitSymbol symbol) {
         Objects.requireNonNull(symbol, "Unit of measure is required");
         return jpaUnitOfMeasureRepository.findBySymbol(symbol.getValue())
-                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())));
+                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getUpdatedAt().orElse(LocalDateTime.now())));
     }
 
     /**
@@ -101,30 +102,10 @@ public class UnitRepository implements IUnitRepository {
     public List<UnitOfMeasure> findAll() {
         return jpaUnitOfMeasureRepository.findAll()
                 .stream()
-                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(), uom.getCreatedAt().orElse(LocalDateTime.now()), uom.getUpdatedAt().orElse(LocalDateTime.now())))
+                .map(uom -> new UnitOfMeasure(UnitOfMeasureId.of(uom.getId()), UnitName.of(uom.getName()), UnitSymbol.of(uom.getSymbol()), uom.getDescription(),uom.getUpdatedAt().orElse(LocalDateTime.now())))
                 .toList();
     }
 
-    private void verifyUniqueName(UnitName name) {
-        jpaUnitOfMeasureRepository.findByName(name.getValue())
-                .ifPresent(uom -> {
-                    UnitName check = UnitName.of(uom.getName());
-
-                    if (check.equals(name)) {
-                        throw new DuplicateException("Tên đơn vị " + name.getValue() + " đã tồn tại");
-                    }
-                });
-    }
-
-    private void verifyUniqueSymbol(UnitOfMeasure unitOfMeasure) {
-        jpaUnitOfMeasureRepository.findBySymbol(unitOfMeasure.getSymbol().getValue())
-                .ifPresent(uom -> {
-                    if (uom.getSymbol().equals(unitOfMeasure.getSymbol().getValue())) {
-                        throw new DuplicateException("Ký hiệu đơn vị " + unitOfMeasure.getSymbol().getValue() + " đã tồn tại");
-                    }
-                });
-    }
-    
     @Transactional
     public UnitOfMeasure save(UnitOfMeasure unitOfMeasure){
         Objects.requireNonNull(unitOfMeasure, "Unit of measure is required");
@@ -135,7 +116,7 @@ public class UnitRepository implements IUnitRepository {
             }else {
                 return create(unitOfMeasure);
             }
-        }catch (RuntimeException e){
+        }catch (Exception e){
             throw new DomainException("Không thể lưu đơn vị tính", e);
         }
     }

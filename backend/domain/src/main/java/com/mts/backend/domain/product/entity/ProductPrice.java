@@ -19,34 +19,27 @@ public class ProductPrice extends AbstractEntity<ProductPriceId> {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ProductPrice(@NonNull ProductPriceId id, @NonNull ProductId productId, @NonNull ProductSizeId productSizeId, @NonNull Money price, @Nullable LocalDateTime createdAt, @Nullable LocalDateTime updatedAt ) {
+    public ProductPrice(@NonNull ProductPriceId id, @NonNull ProductId productId, @NonNull ProductSizeId productSizeId, @NonNull Money price, @Nullable LocalDateTime updatedAt ) {
         super(id);
         
-        Objects.requireNonNull(productId, "productId không được null");
-        Objects.requireNonNull(productSizeId, "sizeId không được null");
-        Objects.requireNonNull(price, "price không được null");
-
-        this.productId = productId;
-        this.productSizeId = productSizeId;
+        this.productId = Objects.requireNonNull(productId, "Product id is required");
+        this.productSizeId = Objects.requireNonNull(productSizeId, "Product size id is required");
         this.price = price;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
 
     /**
      * Cập nhật giá
      */
-    public void changePrice(Money newPrice) {
-
-        Money validPrice = (Money) checkAndAssign(Money.create(newPrice.getAmount()));
-
-        if (!businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(businessErrors);
+    public boolean changePrice(@NonNull Money price) {
+        if (this.price.equals(price)) {
+            return false;
         }
-
-        this.price = validPrice;
+        
+        this.price = price;
         this.updatedAt = LocalDateTime.now();
-
+        return true;
     }
 
     public ProductId getProductId() {

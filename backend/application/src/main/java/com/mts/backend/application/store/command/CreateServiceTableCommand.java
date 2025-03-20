@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -15,6 +17,9 @@ public class CreateServiceTableCommand implements ICommand<CommandResult> {
     
     private Integer areaId;
     private String name;
-    private String description;
     
+    public Optional<Integer> getAreaId() {
+        return Optional.ofNullable(areaId);
+    }
+
 }

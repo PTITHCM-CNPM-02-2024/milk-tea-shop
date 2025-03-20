@@ -7,6 +7,7 @@ import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.repository.ISizeRepository;
 import com.mts.backend.domain.product.repository.IUnitRepository;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
+import com.mts.backend.domain.product.value_object.QuantityOfProductSize;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -43,7 +44,7 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
         }
         
         size.changeDescription(command.getDescription());
-        size.changeQuantity(command.getQuantity());
+        size.changeQuantity(QuantityOfProductSize.of(command.getQuantity()));
 
         var updatedSize = sizeRepository.save(size);
 

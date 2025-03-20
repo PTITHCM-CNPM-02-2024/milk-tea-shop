@@ -30,7 +30,7 @@ public class ProductPriceEntity extends BaseEntity<Long> {
     @Column(name = "product_price_id", columnDefinition = "int UNSIGNED")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @Comment("Mã sản phẩm")
     @JoinColumn(name = "product_id")
     private ProductEntity productEntity;
@@ -39,7 +39,7 @@ public class ProductPriceEntity extends BaseEntity<Long> {
     @Column(name = "price", nullable = false, precision = 11, scale = 3)
     private BigDecimal price;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @Comment("Mã kích thước")
     @JoinColumn(name = "size_id")
     private ProductSizeEntity size;

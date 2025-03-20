@@ -20,7 +20,7 @@ import java.time.Instant;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Order extends BaseEntity<Long> {
+public class OrderEntity extends BaseEntity<Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã đơn hàng")

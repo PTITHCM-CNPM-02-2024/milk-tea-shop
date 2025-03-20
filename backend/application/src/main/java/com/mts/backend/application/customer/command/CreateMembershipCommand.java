@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +20,10 @@ public class CreateMembershipCommand implements ICommand<CommandResult> {
     private String description;
     private String discountUnit;
     private BigDecimal discountValue;
-    private int requiredPoints;
+    private Integer requiredPoints;
     private LocalDateTime validUntil;
+    
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
+    }
 }

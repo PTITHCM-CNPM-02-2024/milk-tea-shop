@@ -18,8 +18,8 @@ public class MemberTypeDetailResponse {
     private String name;
     private String description;
     private LocalDateTime validUntil;
-    private boolean isActive;
-    private int requiredPoints;
+    private Boolean isActive;
+    private Integer requiredPoints;
     private String discountUnit;
     private BigDecimal discountValue;
 }

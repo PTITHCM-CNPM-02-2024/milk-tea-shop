@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * DTO for {@link com.mts.backend.domain.product.entity.ProductPrice}
@@ -13,5 +14,5 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddProductPriceRequest {
-    ArrayList<ProductPriceRequest> productPrices;
+    Set<ProductPriceRequest> productPrices;
 }

@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 @Component
 public class LoggingConfig {
 
-    private static final String LOG_SEPARATOR = "=".repeat(50);
+    private static final String LOG_SEPARATOR = "=".repeat(20);
 
     @Around("execution(* com.mts.backend.application..*.*(..))")
     public Object logAroundApplicationLayerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -67,6 +67,69 @@ public class LoggingConfig {
      */
     @Around("execution(* com.mts.backend.api..*.*(..))")
     public Object logAroundApiLayerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        String methodName = signature.getName();
+        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
+
+        String parameters = getParametersAsString(joinPoint, signature);
+
+        logger.info("{}\n▶ START: {}.{}({})", LOG_SEPARATOR, className, methodName, parameters);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Object result = joinPoint.proceed();
+            long executionTime = System.currentTimeMillis() - startTime;
+            logger.info("✓ SUCCESS: {}.{} - completed in {} ms", className, methodName, executionTime);
+            return result;
+        } catch (Exception e) {
+            long executionTime = System.currentTimeMillis() - startTime;
+            logger.error("✗ ERROR: {}.{} - failed after {} ms - {}: {}",
+                    className, methodName, executionTime,
+                    e.getClass().getSimpleName(), e.getMessage());
+            throw e;
+        } finally {
+            logger.info("◼ END: {}.{}\n{}", className, methodName, LOG_SEPARATOR);
+        }
+    }
+    
+    
+    /**
+     * Log around domain layer methods
+     */
+    @Around("execution(* com.mts.backend.domain..*.*(..))")
+    public Object logAroundDomainLayerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String className = joinPoint.getTarget().getClass().getSimpleName();
+        String methodName = signature.getName();
+        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
+
+        String parameters = getParametersAsString(joinPoint, signature);
+
+        logger.info("{}\n▶ START: {}.{}({})", LOG_SEPARATOR, className, methodName, parameters);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Object result = joinPoint.proceed();
+            long executionTime = System.currentTimeMillis() - startTime;
+            logger.info("✓ SUCCESS: {}.{} - completed in {} ms", className, methodName, executionTime);
+            return result;
+        } catch (Exception e) {
+            long executionTime = System.currentTimeMillis() - startTime;
+            logger.error("✗ ERROR: {}.{} - failed after {} ms - {}: {}",
+                    className, methodName, executionTime,
+                    e.getClass().getSimpleName(), e.getMessage());
+            throw e;
+        } finally {
+            logger.info("◼ END: {}.{}\n{}", className, methodName, LOG_SEPARATOR);
+        }
+    }
+    
+    /**
+     * Log around infrastructure layer methods
+     */
+    @Around("execution(* com.mts.backend.infrastructure..*.*(..))")
+    public Object logAroundInfrastructureLayerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = signature.getName();

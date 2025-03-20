@@ -2,8 +2,7 @@ package com.mts.backend.infrastructure.persistence.entity;
 
 import com.mts.backend.infrastructure.persistence.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
@@ -15,24 +14,20 @@ import java.time.Instant;
 @Entity
 @Table(name = "Payment", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "payment_method_id", columnList = "payment_method_id")
-}, uniqueConstraints = {
-        @UniqueConstraint(name = "order_id", columnNames = {"order_id"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class Payment extends BaseEntity <Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PaymentEntity extends BaseEntity <Long> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("Mã thanh toán")
     @Column(name = "payment_id", columnDefinition = "int UNSIGNED")
     private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @Comment("Mã đơn hàng")
-    @JoinColumn(name = "order_id")
-    private Order order;
 
     @Comment("Số tiền đã trả")
     @Column(name = "amount_paid", nullable = false, precision = 11, scale = 3)
@@ -52,5 +47,10 @@ public class Payment extends BaseEntity <Long> {
     @Comment("Mã phương thức thanh toán")
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @Comment("Mã đơn hàng")
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderEntity orderEntity;
 
 }

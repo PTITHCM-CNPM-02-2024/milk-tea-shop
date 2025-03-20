@@ -28,31 +28,32 @@ public class ProductSizeController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createProductSize(@RequestBody CreateProductSizeRequest request) {
+    public ResponseEntity<ApiResponse<?>> createProductSize(@RequestBody CreateProductSizeRequest request) {
 
         CreateProductSizeCommand command = CreateProductSizeCommand.builder().name(request.getName()).unitId(request.getUnitId()).description(request.getDescription()).quantity(request.getQuantity()).build();
         
         var result = productSizeCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData())) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateProductSize(@PathVariable("id") Integer id, @RequestBody UpdateProductSizeRequest request) {
+    public ResponseEntity<ApiResponse<?>> updateProductSize(@PathVariable("id") Integer id,
+                                                            @RequestBody UpdateProductSizeRequest request) {
         UpdateProductSizeCommand command = UpdateProductSizeCommand.builder().id(id).name(request.getName()).unitId(request.getUnitId()).description(request.getDescription()).quantity(request.getQuantity()).build();
         
         var result = productSizeCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData(), "Thông tin sản phẩm đã được cập nhật")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData(), "Thông tin sản phẩm đã được cập nhật")) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SizeDetailResponse>>> getAllProductSize() {
+    public ResponseEntity<ApiResponse<?>> getAllProductSize() {
         DefaultSizeQuery query = DefaultSizeQuery.builder().build();
         
         var result = sizeQueryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<SizeDetailResponse>) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData())) : handleError(result);
         
     }
 }

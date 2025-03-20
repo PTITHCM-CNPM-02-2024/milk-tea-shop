@@ -2,13 +2,13 @@ package com.mts.backend.api.product.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreateUnitRequest {
-    private String name;
-    private String symbol;
-    private String description;
+@SuperBuilder
+@EqualsAndHashCode(callSuper = false)
+public class CreateUnitRequest extends UnitBaseRequest {
 }

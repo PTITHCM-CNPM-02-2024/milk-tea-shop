@@ -55,7 +55,7 @@ public class AreaRepository implements IAreaRepository {
             }
             return create(area);
         }catch (Exception e){
-            throw e;
+            throw new  RuntimeException("Không thể lưu khu vực", e);
         }
     }
 

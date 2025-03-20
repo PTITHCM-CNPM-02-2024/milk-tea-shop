@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductCommandBus extends AbstractCommandBus{
     
-    public ProductCommandBus(CreateProductInformCommandHandler createProductCommandHandler, UpdateProductCommandHandler updateProductCommandHandler, AddProductPriceCommandHandler addProductPriceCommandHandler, UpdateProductPriceCommandHandler updateProductPriceCommandHandler, DeletePriceBySizeIdCommandHandler deletePriceBySizeIdCommandHandler) {
-        register(CreateProductInformCommand.class, createProductCommandHandler);
+    public ProductCommandBus(CreateProductCommandHandler createProductCommandHandler, UpdateProductCommandHandler updateProductCommandHandler, AddProductPriceCommandHandler addProductPriceCommandHandler, UpdateProductPriceCommandHandler updateProductPriceCommandHandler, DeletePriceBySizeIdCommandHandler deletePriceBySizeIdCommandHandler) {
+        register(CreateProductCommand.class, createProductCommandHandler);
         register(UpdateProductInformCommand.class, updateProductCommandHandler);
         register(AddProductPriceCommand.class, addProductPriceCommandHandler);
         register(UpdateProductPriceCommand.class, updateProductPriceCommandHandler);

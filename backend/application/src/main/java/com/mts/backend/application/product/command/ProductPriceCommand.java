@@ -1,9 +1,6 @@
 package com.mts.backend.application.product.command;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,7 +8,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Data
+@EqualsAndHashCode
 public class ProductPriceCommand {
     Integer sizeId;
+    @EqualsAndHashCode.Exclude
     BigDecimal price;
 }

@@ -28,7 +28,7 @@ public class UnitController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
+    public ResponseEntity<ApiResponse<?>> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
         CreateUnitCommand command = CreateUnitCommand.builder().name(createUnitRequest.getName()).description(createUnitRequest.getDescription()).symbol(createUnitRequest.getSymbol()).build();
         
         var result = unitCommandBus.dispatch(command);
@@ -37,7 +37,8 @@ public class UnitController implements IController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateUnit(@PathVariable("id") Integer id, @RequestBody UpdateUnitRequest updateUnitRequest){
+    public ResponseEntity<ApiResponse<?>> updateUnit(@PathVariable("id") Integer id,
+                                                     @RequestBody UpdateUnitRequest updateUnitRequest){
         UpdateUnitCommand command = UpdateUnitCommand.builder().id(id).name(updateUnitRequest.getName()).description(updateUnitRequest.getDescription()).symbol(updateUnitRequest.getSymbol()).build();
         
         var result = unitCommandBus.dispatch(command);
@@ -46,11 +47,11 @@ public class UnitController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UnitDetailResponse>>> getAllUnit(){
+    public ResponseEntity<ApiResponse<?>> getAllUnit(){
         DefaultUnitQuery query = DefaultUnitQuery.builder().build();
         
         var result = unitQueryBus.dispatch(query);
             
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<UnitDetailResponse>) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
 }

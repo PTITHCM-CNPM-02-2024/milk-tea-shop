@@ -36,34 +36,37 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         PhoneNumber phoneNumber = PhoneNumber.of(command.getPhone());
         verifyUniquePhoneNumber(phoneNumber);
         
-        Email email = command.getEmail() != null ? mustUniqueEmail(Email.of(command.getEmail())) : null;
+        Email email = command.getEmail().map(Email::of).orElse(null);
+        mustUniqueEmailIfSpecific(email);
         
-        AccountId accountId = command.getAccountId() != null ? mustExistAccountIfPresent(AccountId.of(command.getAccountId())) : null;
+        AccountId accountId = command.getAccountId().map(AccountId::of).orElse(null);
+        mustExistAccountIfPresent(accountId);
+        
+        Gender gender = command.getGender().map(Gender::valueOf).orElse(null);
         
         MembershipTypeId membershipTypeId = mustExistMembershipType(MembershipTypeId.of(command.getMembershipId()));
 
         Customer cus = new Customer(
                 CustomerId.create(),
-                command.getFirstName() != null ? FirstName.of(command.getFirstName()) : null,
-                command.getLastName() != null ? LastName.of(command.getLastName()) : null,
+                command.getFirstName().map(FirstName::of).orElse(null),
+                command.getLastName().map(LastName::of).orElse(null),
                 phoneNumber,
                 email,
-                command.getGender() != null ? Gender.valueOf(command.getGender()) : null,
+                gender,
                 RewardPoint.of(0),
                 membershipTypeId,
                 accountId,
                 LocalDateTime.now());
         
-        return CommandResult.success(customerRepository.save(cus).getId().getValue());
+        var savedCustomer     = customerRepository.save(cus);
         
+        return CommandResult.success(savedCustomer.getId().getValue());
     }
     
-    private AccountId mustExistAccountIfPresent(AccountId id){
-        if (id == null) {
-            return null;
+    private void mustExistAccountIfPresent(AccountId id){
+        if (id != null && !accountRepository.existsById(id)){
+            throw new NotFoundException("Account không tồn tại");
         }
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Account không tồn tại")).getId();
     }
     
     private MembershipTypeId mustExistMembershipType(MembershipTypeId id){
@@ -79,11 +82,9 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         }
     }
     
-    private Email mustUniqueEmail(Email email){
-        Objects.requireNonNull(email, "Email is required");
-        if (customerRepository.existsByEmail(email)){
+    private void mustUniqueEmailIfSpecific(Email email){
+        if (email != null && customerRepository.existsByEmail(email)){
             throw new NotFoundException("Email đã tồn tại");
         }
-        return email;
     }
 }
