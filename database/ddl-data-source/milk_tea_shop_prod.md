@@ -245,7 +245,7 @@ class flyway_schema_history {
 }
 
 Account  -->  Role : role_id
-Category  -->  Category : parent_category_id:category_id
+Category  -->  Category : parent_category_id
 Customer  -->  Account : account_id
 Customer  -->  MembershipType : membership_type_id
 Discount  -->  Coupon : coupon_id
@@ -256,7 +256,7 @@ Order  -->  Employee : employee_id
 OrderDiscount  -->  Discount : discount_id
 OrderDiscount  -->  OrderProduct : order_product_id
 OrderProduct  -->  Order : order_id
-OrderProduct  -->  OrderProduct : parent_order_product_id:order_product_id
+OrderProduct  -->  OrderProduct : parent_order_product_id
 OrderProduct  -->  ProductPrice : product_price_id
 OrderTable  -->  Order : order_id
 OrderTable  -->  ServiceTable : table_id
