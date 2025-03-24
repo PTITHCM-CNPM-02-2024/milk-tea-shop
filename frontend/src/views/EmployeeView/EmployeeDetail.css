@@ -1,0 +1,363 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100vh; /* Chiều cao bằng 100% màn hình */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+    overflow-y: hidden;
+}
+
+
+.employee {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background-color: rgba(219, 219, 219, 0.25);
+}
+
+/*employee__menu_bar*/
+.employee__menu_bar {
+    width: 5%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* employee__list_product */
+.employee__list_product {
+    width: 68%;
+    height: 100%;
+    padding: 20px;
+}
+
+.list_product__header {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.welcome_content {
+    font-size: 14px;
+}
+
+.welcome_content__1{
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.welcome_content__2{
+    color: rgba(205, 203, 202, 1);
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    width: 364px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background-color: white;
+}
+
+.search-container:hover{
+    border-color: #a29696;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    color: rgba(27, 20, 20, 1);
+    font-size: 16px;
+}
+
+.list_product__body {
+    width: 100%;
+    height: calc(100% - 60px);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.category_product{
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 160px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.category_product::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.category_product__hoahong, .category_product__topping, .category_product__brown_sugar, .category_product__special, .category_product__machiato, .category_product__milk_tea{
+    width: 200px;
+    height: 150px;
+    border-radius: 18px;
+    border: 2px solid rgba(205, 203, 202, 1);
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+.category_product__hoahong.category_product__topping.category_product__brown_sugar.category_product__special.category_product__machiato.category_product__milk_tea:hover{
+    border-color: rgba(239, 157, 108, 1);
+}
+
+.topping_img{
+    width: 160px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.hoahong_img, .milk_tea_img, .special_img, .machiato_img, .brown_img{
+    width: 100px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.hoahong_title, .topping_title, .milk_tea_title, .brown_title, .special_title, .machiato_title{
+    width: 100%;
+    height: 20px;
+    font-size: 16px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.menu_product{
+    position: relative;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: calc(100% - 150px);
+}
+
+.menu_product__header{
+    width: 100%;
+    height: 40px;
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu_product_title_1{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.menu_product_title_2{
+    font-size: 16px;
+}
+
+.brown_list{
+    width: 100%;
+    height: calc(100% - 40px);
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6%;
+}
+
+.product_detail{
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 47%;
+    height: 240px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 0 10px;
+}
+
+.product_content_image{
+    width: 100%;
+    height: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.product_image{
+    width: 45%;
+    height: 90%;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.product_content{
+    width: 55%;
+    height: 100%;
+    padding-left: 10px;
+    padding-top: 9px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.product_name{
+    height: 22%;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.product_description{
+    display: flex;
+    align-content: center;
+
+    margin: 18px 0;
+    height: 38.9%;
+    font-size: 15px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product_price{
+    width: 100%;
+    height: 18%;
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product_value{
+    font-weight: bold;
+}
+
+.product_size{
+    width: 30%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.product_btn_size{
+    padding: 5px;
+    border-radius: 48%;
+    border: 1px solid rgba(205, 203, 202, 1);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 10;
+    font-size: 16px;
+}
+
+.product_btn_size:hover{
+    /*border-color: rgba(239, 157, 108, 1);*/
+    background-color: #dddddd;
+}
+
+.product_view{
+    width: 80%;
+    height: 16%;
+    margin-bottom: 10px;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(224, 111, 44, 1);
+    color: white;
+    font-size: 16px;
+}
+
+.product_view:hover{
+    background-color: rgba(224, 111, 44, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+.list_product__footer {
+    /* Thêm style cho footer */
+}
+
+/* employee__service_table */
+.employee__service_table {
+    width: 27%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 20px;
+}
+
+.table_header{
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.user_avatar{
+    width: 66px;
+    height: 66px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.user_info{
+    margin-left: 10px;
+    width: calc(100% - 66px);
+    height: 66px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50% 50%;
+}
+
+.user_role{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.user_name{
+    font-size: 16px;
+    align-content: flex-end;
+}
+
