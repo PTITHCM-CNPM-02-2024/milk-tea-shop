@@ -18,6 +18,7 @@ import java.util.Objects;
 public class CreateAreaCommandHandler implements ICommandHandler<CreateAreaCommand, CommandResult> {
     private final IAreaRepository areaRepository;
     
+    
     public CreateAreaCommandHandler(IAreaRepository areaRepository){
         this.areaRepository = areaRepository;
     }
