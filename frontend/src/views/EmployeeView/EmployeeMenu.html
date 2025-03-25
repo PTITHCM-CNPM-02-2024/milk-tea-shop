@@ -11,9 +11,15 @@
 <body>
 <div class="employee">
     <div class="employee__menu_bar">
-        <i class="fas fa-coffee"></i>
-        <i class="fas fa-home"></i>
-        <i class="fas fa-heart"></i>
+        <i class="logo_store fa-solid fa-mug-hot" title="Logo"></i>
+
+        <button class="employee_home" title="Home">
+            <i class="fa-solid fa-house"></i>
+        </button>
+
+        <button class="employee_profile" title="Profile">
+            <i class="fa-solid fa-user"></i>
+        </button>
     </div>
 
     <div class="employee__list_product">
@@ -930,11 +936,46 @@
         </div>
 
         <div class="table_body">
+            <div class="table_area">
+                <div class="table_title">Table service</div>
 
+                <div class="choose_area">
+                    <div class="area">Sân vườn</div>
+
+                    <button class="area_btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="list_area" style="display: none">
+                <button class="list_area_content">Sân vườn</button>
+            </div>
+
+            <div class="table_diagram">
+                <button class="table_info">
+                    <i class="table_icon fa-regular fa-square"></i>
+                    <div class="table_number">A111</div>
+                </button>
+            </div>
+
+            <div class="table_description">
+                <div class="table_empty">
+                    <i class="table_empty_icon fa-regular fa-square"></i>
+                    <div class="table_explain">Bàn đang trống</div>
+                </div>
+
+                <div class="table_occupied">
+                    <i class="table_occupied_icon fa-regular fa-square-check"></i>
+                    <div class="table_explain">Bàn đang có người ngồi</div>
+                </div>
+            </div>
         </div>
 
         <div class="table_footer">
-
+            <button class="new_order">
+                NEW ORDER
+            </button>
         </div>
     </div>
 </div>
