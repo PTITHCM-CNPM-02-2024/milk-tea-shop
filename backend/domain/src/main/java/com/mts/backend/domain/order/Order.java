@@ -433,6 +433,14 @@ public class Order extends AbstractAggregateRoot<OrderId> {
         this.finalAmount  = finalTotal;
     }
 
+    public void cancel() {
+        if (this.status == OrderStatus.COMPLETED) {
+            throw new DomainException("Đơn hàng đã hoàn thành, không thể hủy");
+        }
+
+        this.status = OrderStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
 
 
 }

@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ProductController implements IController {
     private final ProductCommandBus productCommandBus;
     private final ProductQueryBus productQueryBus;
