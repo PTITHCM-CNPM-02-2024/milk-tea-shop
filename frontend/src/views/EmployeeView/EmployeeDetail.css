@@ -16,18 +16,41 @@ html, body {
     width: 100%;
     height: 100%;
     display: flex;
-    background-color: rgba(219, 219, 219, 0.25);
+    background-color: #F2F2F2;
 }
 
 /*employee__menu_bar*/
 .employee__menu_bar {
     width: 5%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 1);
+    background-color: #6F4E37;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 20px 0 20px 0;
+}
+
+.logo_store{
+    font-size: 40px;
+    margin-bottom: 80px;
+    border-bottom: 1px #282828;
+    color: rgb(255, 254, 206);
+}
+
+.employee_home, .employee_profile{
+    width: 100%;
+    height: 40px;
+    font-size: 20px;
+    margin-bottom: 34px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    background-color: transparent;
+    color: whitesmoke;
+}
+
+.employee_profile:hover, .employee_home:hover{
+    color: rgb(255, 254, 206);
+    background-color: rgba(255, 255, 255, 0.47);
 }
 
 /* employee__list_product */
@@ -50,6 +73,7 @@ html, body {
 }
 
 .welcome_content__1{
+    color: #6F4E37;
     font-size: 24px;
     font-weight: bold;
 }
@@ -64,9 +88,9 @@ html, body {
     gap: 10px;
     padding: 10px;
     width: 364px;
-    border: 1px solid #ddd;
+    border: 1px solid #D2B48C;
     border-radius: 20px;
-    background-color: white;
+    background-color: #FFFBF5;
 }
 
 .search-container:hover{
@@ -79,6 +103,11 @@ html, body {
     width: 100%;
     color: rgba(27, 20, 20, 1);
     font-size: 16px;
+    background-color: #FFFBF5;
+}
+
+.search-input::placeholder{
+    color: #A9A9A9;
 }
 
 .list_product__body {
@@ -122,10 +151,10 @@ html, body {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    background-color: white;
+    background-color: #FAF3E0;
 }
 
-.category_product__hoahong.category_product__topping.category_product__brown_sugar.category_product__special.category_product__machiato.category_product__milk_tea:hover{
+.category_product__hoahong:hover, .category_product__topping:hover, .category_product__brown_sugar:hover, .category_product__special:hover, .category_product__machiato:hover, .category_product__milk_tea:hover{
     border-color: rgba(239, 157, 108, 1);
 }
 
@@ -150,6 +179,8 @@ html, body {
     display: flex;
     align-content: center;
     justify-content: center;
+    color: #6F4E37;
+    font-weight: 20;
 }
 
 .menu_product{
@@ -325,11 +356,8 @@ html, body {
 }
 
 .table_header{
-    position: relative;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 80px;
+    height: 14%;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -361,3 +389,183 @@ html, body {
     align-content: flex-end;
 }
 
+.table_body{
+    width: 100%;
+    height: 78%;
+    background-color: rgba(242, 242, 242, 0.29);
+}
+
+.table_area{
+    position: relative;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table_title{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.choose_area{
+    width: 50%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.area{
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.area_btn{
+    width: 25px;
+    height: 25px;
+    border-radius: 10px;
+    border: 1px solid #282828;
+    cursor: pointer;
+    background-color: white;
+}
+
+.area_btn:hover{
+    background-color: #dddddd;
+}
+
+.list_area{
+    position: absolute;
+    top: 133px;
+    right: 20px;
+    width: auto;
+    max-width: 100px;
+    height: auto;
+    max-height: 150px ;
+    background-color: white;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.list_area_content{
+    font-size: 14px;
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid #4a4545;
+}
+
+.list_area_content:hover{
+    background-color: #ebe9e9;
+}
+
+.table_diagram{
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 58%;
+    z-index: 1;
+    margin-top: 10px;
+    border: 1px #ebe9e9;
+    background-color: white;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.table_info{
+    width: calc(28% - 20px);
+    height: 70px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    background-color: white;
+    border-radius: 10px;
+    border: 2px solid #a39a9a;
+}
+
+.table_info:hover{
+    border: 2px solid #49e4e1;
+    color: rgba(115, 189, 187, 0.86);
+}
+
+.table_icon{
+    font-size: 40px;
+}
+
+.table_number{
+    font-size: 16px;
+}
+
+.table_description{
+    width: 100%;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+}
+
+.table_empty, .table_occupied{
+    height: 50%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.table_empty_icon, .table_occupied_icon{
+    font-size: 25px;
+}
+
+.table_explain{
+    margin-left: 10px;
+}
+
+.table_footer{
+    width: 100%;
+    height: 8%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.new_order{
+    width: 200px;
+    height: 30px;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(224, 111, 44, 1);
+    color: white;
+    font-size: 16px;
+}
+
+.new_order:hover{
+    background-color: rgba(224, 111, 44, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.25);
+}
