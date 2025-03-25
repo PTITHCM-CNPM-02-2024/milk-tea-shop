@@ -1,6 +1,6 @@
 package com.mts.backend.infrastructure.customer.jpa;
 
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
 import com.mts.backend.infrastructure.persistence.entity.MembershipTypeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,7 +20,8 @@ public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTyp
   @Modifying
   @Transactional
   @Query(value = "INSERT INTO milk_tea_shop_prod.MembershipType (membership_type_id, type,  discount_value, discount_unit, required_point, description, valid_until, is_active) " +
-          "VALUES (:#{#entity.id}, :#{#entity.type}, :#{#entity.discountValue}, :#{#entity.discountUnit.name()}, :#{#entity.requiredPoint}, :#{#entity.description}, :#{#entity.validUntil}, :#{#entity.isActive})",
+          "VALUES (:#{#entity.id}, :#{#entity.type}, :#{#entity.discountValue}, :#{#entity.discountUnit.name()}, :#{#entity" +
+          ".requiredPoint}, :#{#entity.description}, :#{#entity.validUntil}, :#{#entity.isActive})",
           nativeQuery = true)
   void insertMembership(@Param("entity") MembershipTypeEntity entity);
   
@@ -46,8 +47,8 @@ public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTyp
 
   @Query("""
           select distinct m from MembershipTypeEntity m
-          where m.discountUnit = :discountUnit and m.discountValue = :discountValue""")
-  Set<MembershipTypeEntity> findDistinctByDiscountUnitAndDiscountValue(@Param("discountUnit") @NonNull DiscountUnit discountUnit, @Param("discountValue") @NonNull BigDecimal discountValue);
+          where m.discountUnit = :discountUnit and m.discountValue = :memberDiscountValue""")
+  Set<MembershipTypeEntity> findDistinctByDiscountUnitAndDiscountValue(@Param("discountUnit") @NonNull DiscountUnit discountUnit, @Param("memberDiscountValue") @NonNull BigDecimal memberDiscountValue);
 
 
 }

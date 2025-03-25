@@ -1,11 +1,11 @@
 package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.CreateMembershipCommand;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -27,7 +27,7 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
     public CommandResult handle(CreateMembershipCommand command) {
         Objects.requireNonNull(command, "Create membership command is required");
 
-        DiscountValue discountValue = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        MemberDiscountValue memberDiscountValue = MemberDiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
         
         MemberTypeName name = MemberTypeName.of(command.getName());
         
@@ -38,7 +38,7 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
         MembershipType membershipType = new MembershipType(
                 MembershipTypeId.create(),
                 MemberTypeName.of(command.getName()),
-                discountValue,
+                memberDiscountValue,
                 command.getRequiredPoints(),
                 command.getDescription(),
                 validUntil,

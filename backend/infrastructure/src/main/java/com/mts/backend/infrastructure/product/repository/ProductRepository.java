@@ -21,6 +21,7 @@ import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -56,7 +57,6 @@ public class ProductRepository implements IProductRepository {
                             productEntity.getIsSignature(),
                             Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                             findPricesByProductId(id),
-                            productEntity.getCreatedAt().orElse(null),
                             productEntity.getUpdatedAt().orElse(null)
                     );
                 });
@@ -80,7 +80,6 @@ public class ProductRepository implements IProductRepository {
                         productEntity.getIsSignature(),
                         Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                         findPricesByProductId(ProductId.of(productEntity.getId())),
-                        productEntity.getCreatedAt().orElse(null),
                         productEntity.getUpdatedAt().orElse(null)
                 ));
     }
@@ -102,7 +101,6 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                     findPricesByProductId(ProductId.of(productEntity.getId())),
-                    productEntity.getCreatedAt().orElse(null),
                     productEntity.getUpdatedAt().orElse(null)
             );
             products.add(product);
@@ -169,7 +167,6 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                     Set.of(),
-                    productEntity.getCreatedAt().orElse(null),
                     productEntity.getUpdatedAt().orElse(null)
             );
             products.add(product);
@@ -196,7 +193,6 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                     Set.of(),
-                    productEntity.getCreatedAt().orElse(null),
                     productEntity.getUpdatedAt().orElse(null)
             );
             products.add(product);
@@ -262,11 +258,32 @@ public class ProductRepository implements IProductRepository {
     }
 
     /**
-     * @param product 
+     * @param id 
+     * @return
      */
     @Override
-    public void updateInform(Product product) {
+    public Optional<Product> findByPriceId(ProductPriceId id) {
+        Objects.requireNonNull(id, "ProductPriceId is required");
         
+        var productPriceEntity = jpaProductPriceRepository.findById(id.getValue());
+        
+        if (productPriceEntity.isEmpty()){
+            return Optional.empty();
+        }
+        
+        var productEntity = productPriceEntity.get().getProductEntity();
+        
+        return Optional.of(new Product(
+                ProductId.of(productEntity.getId()),
+                ProductName.of(productEntity.getName()),
+                productEntity.getDescription(),
+                productEntity.getImagePath(),
+                productEntity.getIsAvailable(),
+                productEntity.getIsSignature(),
+                Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
+                findPricesByProductId(ProductId.of(productEntity.getId())),
+                productEntity.getUpdatedAt().orElse(LocalDateTime.now())
+        ));
     }
 
     @Transactional
@@ -419,8 +436,7 @@ public class ProductRepository implements IProductRepository {
                     productId,
                     ProductSizeId.of(priceEntity.getSize().getId()),
                     Money.of(priceEntity.getPrice()),
-                    priceEntity.getCreatedAt().orElse(null),
-                    priceEntity.getUpdatedAt().orElse(null)
+                    priceEntity.getUpdatedAt().orElse(LocalDateTime.now())
             );
             prices.add(price);
         });

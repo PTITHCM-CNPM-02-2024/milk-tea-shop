@@ -2,17 +2,15 @@ package com.mts.backend.application.promotion.handler;
 
 import com.mts.backend.application.promotion.command.UpdateDiscountCommand;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
-import com.mts.backend.domain.promotion.Coupon;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
 import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.domain.promotion.repository.ICouponRepository;
 import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
+import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
 import com.mts.backend.shared.command.CommandResult;
-import com.mts.backend.shared.command.ICommand;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -34,7 +32,7 @@ public class UpdateDiscountCommandHandler implements ICommandHandler<UpdateDisco
         
         Discount discount = mustExistDiscount(DiscountId.of(command.getId()));
         CouponId checkCouponId = CouponId.of(command.getCouponId());
-        var newVal = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        var newVal = PromotionDiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()), Money.of(command.getMaxDiscountAmount()));
         
         if (discount.changeCouponId(checkCouponId)){
             verifyUniqueCoupon(checkCouponId);
@@ -42,8 +40,7 @@ public class UpdateDiscountCommandHandler implements ICommandHandler<UpdateDisco
         
         discount.changeName(DiscountName.of(command.getName()));
         discount.changeDescription(command.getDescription());
-        discount.changeValue(newVal);
-        discount.changeMaxDiscountAmount(Money.of(command.getMaxDiscountAmount()));
+        discount.changeDiscountValue(newVal);
         discount.changeMinRequiredOrderValue(Money.of(command.getMinimumOrderValue()));
         discount.changeMinRequiredProduct(command.getMinimumRequiredProduct());
         discount.changeValidFrom(command.getValidFrom());

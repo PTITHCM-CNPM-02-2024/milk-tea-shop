@@ -38,7 +38,7 @@ public class GetDiscountByCouponQueryHandler implements IQueryHandler<DiscountBy
                 .couponId(discount.getCouponId().getValue())
                 .discountValue(discount.getDiscountValue().getValue())
                 .discountUnit(discount.getDiscountValue().getUnit().toString())
-                .maxDiscountAmount(discount.getMaxDiscountAmount().getAmount())
+                .maxDiscountAmount(discount.getDiscountValue().getMaxDiscountValue().getAmount())
                 .minimumOrderValue(discount.getMinRequiredOrderValue().getAmount())
                 .minimumRequiredProduct(discount.getMinRequiredProduct().orElse(null))
                 .validFrom(discount.getValidFrom().orElse(null))

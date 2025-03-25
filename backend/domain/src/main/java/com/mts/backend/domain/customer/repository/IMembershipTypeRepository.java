@@ -1,8 +1,8 @@
 package com.mts.backend.domain.customer.repository;
 
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public interface IMembershipTypeRepository {
 
     Optional<MembershipType> findByName(String name);
 
-    Optional<MembershipType> findByDiscountValue(DiscountValue discountValue);
+    Optional<MembershipType> findByDiscountValue(MemberDiscountValue memberDiscountValue);
 
     List<MembershipType> findAll();
 }

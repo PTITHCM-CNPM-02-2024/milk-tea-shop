@@ -46,7 +46,6 @@ CreateProductInformCommandHandler implements ICommandHandler<CreateProductInform
                 command.isSignature(),
                 command.getCategoryId().map(CategoryId::of).orElse(null),
                 null,
-                command.getCreatedAt().orElse(LocalDateTime.now()),
                 command.getUpdatedAt().orElse(LocalDateTime.now())
         );
         

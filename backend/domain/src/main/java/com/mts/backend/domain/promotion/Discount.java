@@ -1,10 +1,10 @@
 package com.mts.backend.domain.promotion;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
+import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
 import com.mts.backend.shared.domain.AbstractAggregateRoot;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
@@ -25,9 +25,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
     @NonNull
     private CouponId couponId;
     @NonNull
-    private DiscountValue value;
-    @NonNull
-    private Money maxDiscountAmount;
+    private PromotionDiscountValue value;
     @NonNull
     private Money minRequiredOrderValue;
     @Nullable
@@ -46,13 +44,14 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
     private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
     
-    public Discount(@NonNull DiscountId id, @NonNull DiscountName name, @Nullable String description, @NonNull CouponId couponId, @NonNull DiscountValue value, @NonNull Money maxDiscountAmount, @NonNull Money minRequiredOrderValue, @Nullable Integer minRequiredProduct, @Nullable LocalDateTime validFrom, @NonNull LocalDateTime validUntil, @Nullable Long maxUsage, @Nullable Integer maxUsagePerCustomer, @Nullable Long currentUsage, boolean isActive, LocalDateTime updatedAt) {
+    public Discount(@NonNull DiscountId id, @NonNull DiscountName name, @Nullable String description,
+                    @NonNull CouponId couponId, @NonNull PromotionDiscountValue value,
+                    @NonNull Money minRequiredOrderValue, @Nullable Integer minRequiredProduct, @Nullable LocalDateTime validFrom, @NonNull LocalDateTime validUntil, @Nullable Long maxUsage, @Nullable Integer maxUsagePerCustomer, @Nullable Long currentUsage, boolean isActive, LocalDateTime updatedAt) {
         super(id);
         this.name = Objects.requireNonNull(name, "Discount name must not be null");
         this.description = description;
         this.couponId = couponId;
-        this.value = value;
-        this.maxDiscountAmount = Objects.requireNonNull(maxDiscountAmount, "Max discount amount must not be null");
+        this.value = Objects.requireNonNull(value, "Discount value must not be null");
         this.minRequiredOrderValue = Objects.requireNonNull(minRequiredOrderValue, "Min required order value must not be null");
         this.minRequiredProduct = minRequiredProduct;
         this.validFrom = validFrom;
@@ -63,11 +62,11 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         this.isActive = isActive;
         this.updatedAt = updatedAt;
         
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
     }
     
     private void valid(LocalDateTime validFrom, LocalDateTime validUntil, Long maxUsage, Integer maxUsagePerCustomer,
-                       Long currentUsage, Money maxDiscountAmount, Money minRequiredOrderValue, Integer minRequiredProduct){
+                       Long currentUsage, Money minRequiredOrderValue, Integer minRequiredProduct){
         List<String> errors = new ArrayList<>();
         
         if (validFrom != null && validUntil != null && validFrom.isAfter(validUntil)){
@@ -82,9 +81,6 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
             errors.add("Số lần đã sử dụng" + currentUsage + " phải nhỏ hơn số lần sử dụng tối đa" + maxUsage);
         }
         
-        if (maxDiscountAmount != null && maxDiscountAmount.getValue() < 0){
-            errors.add("Số tiền giảm giá tối đa" + maxDiscountAmount + " phải lớn hơn 0");
-        }
         
         if (minRequiredOrderValue != null && minRequiredOrderValue.getValue() < 0){
             errors.add("Giá trị đơn hàng tối thiểu cần mua" + minRequiredOrderValue + " phải lớn hơn 0");
@@ -137,7 +133,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         return true;
     }
     
-    public boolean changeValue(@NonNull DiscountValue value){
+    public boolean changeDiscountValue(@NonNull PromotionDiscountValue value){
         if (this.value.equals(value)){
             return false;
         }
@@ -147,16 +143,6 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         return true;
     }
     
-    public boolean changeMaxDiscountAmount(@NonNull Money maxDiscountAmount){
-        if (Objects.equals(this.maxDiscountAmount, maxDiscountAmount)){
-            return false;
-        }
-        
-        this.maxDiscountAmount = maxDiscountAmount;
-        this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
-        return true;
-    }
     
     
     public boolean changeMinRequiredOrderValue(@NonNull Money minRequiredOrderValue){
@@ -166,7 +152,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.minRequiredOrderValue = minRequiredOrderValue;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -177,7 +163,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.minRequiredProduct = minRequiredProduct;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -188,7 +174,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.validFrom = validFrom;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -200,7 +186,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.validUntil = validUntil;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -211,7 +197,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.maxUsage = maxUsage;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -222,7 +208,8 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.maxUsagePerCustomer = maxUsagePerCustomer;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue,
+                minRequiredProduct);
         return true;
     }
     
@@ -233,7 +220,7 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         
         this.currentUsage = currentUsage;
         this.updatedAt = LocalDateTime.now();
-        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, maxDiscountAmount, minRequiredOrderValue, minRequiredProduct);
+        valid(validFrom, validUntil, maxUsage, maxUsagePerCustomer, currentUsage, minRequiredOrderValue, minRequiredProduct);
         return true;
     }
     
@@ -269,12 +256,8 @@ public class Discount extends AbstractAggregateRoot<DiscountId> {
         return couponId;
     }
     
-    public DiscountValue getDiscountValue() {
+    public PromotionDiscountValue getDiscountValue() {
         return value;
-    }
-    
-    public Money getMaxDiscountAmount() {
-        return maxDiscountAmount;
     }
     
     public Money getMinRequiredOrderValue() {

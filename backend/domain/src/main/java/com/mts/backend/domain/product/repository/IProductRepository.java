@@ -4,6 +4,7 @@ import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
+import com.mts.backend.domain.product.identifier.ProductPriceId;
 import com.mts.backend.domain.product.value_object.ProductName;
 
 import java.util.List;
@@ -87,8 +88,8 @@ public interface IProductRepository {
      * @param product
      */
     Product save(Product product);
-
-    void updateInform(Product product);
+    
+    Optional<Product> findByPriceId(ProductPriceId id);
     
     void createPrice(ProductId productId, Set<ProductPrice> prices);
     

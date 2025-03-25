@@ -176,6 +176,12 @@ public class Customer extends AbstractAggregateRoot<CustomerId> {
         return Optional.ofNullable(accountId);
     }
     
-    
+    public String getFullName(){
+        if (firstName == null && lastName == null){
+            return "";
+        }
+        
+        return firstName + " " + lastName;
+    }
     
 }

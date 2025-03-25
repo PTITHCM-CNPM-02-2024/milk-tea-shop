@@ -1,9 +1,9 @@
 package com.mts.backend.infrastructure.customer.repository;
 
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.infrastructure.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.infrastructure.persistence.entity.MembershipTypeEntity;
@@ -33,12 +33,12 @@ public class MembershipTypeRepository implements IMembershipTypeRepository {
         Objects.requireNonNull(membershipTypeId, "Membership type id is required");
 
         return jpaMembershipTypeRepository.findById(membershipTypeId.getValue()).map(e -> {
-            DiscountValue discountValue = DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
+            MemberDiscountValue memberDiscountValue = MemberDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
 
             return new MembershipType(
                     MembershipTypeId.of(e.getId()),
                     MemberTypeName.of(e.getType()),
-                    discountValue,
+                    memberDiscountValue,
                     e.getRequiredPoint(),
                     e.getDescription(),
                     e.getValidUntil(),
@@ -134,12 +134,12 @@ public class MembershipTypeRepository implements IMembershipTypeRepository {
         Objects.requireNonNull(name, "Name is required");
 
         return jpaMembershipTypeRepository.findByType(name).map(e -> {
-            DiscountValue discountValue = DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
+            MemberDiscountValue memberDiscountValue = MemberDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
 
             return new MembershipType(
                     MembershipTypeId.of(e.getId()),
                     MemberTypeName.of(e.getType()),
-                    discountValue,
+                    memberDiscountValue,
                     e.getRequiredPoint(),
                     e.getDescription(),
                     e.getValidUntil(),
@@ -151,18 +151,18 @@ public class MembershipTypeRepository implements IMembershipTypeRepository {
     }
     
     @Override
-    public Optional<MembershipType> findByDiscountValue(DiscountValue discountValue) {
-        Objects.requireNonNull(discountValue, "Discount value is required");
+    public Optional<MembershipType> findByDiscountValue(MemberDiscountValue memberDiscountValue) {
+        Objects.requireNonNull(memberDiscountValue, "Discount value is required");
 
-        var re = jpaMembershipTypeRepository.findDistinctByDiscountUnitAndDiscountValue(discountValue.getUnit(), discountValue.getValue());
+        var re = jpaMembershipTypeRepository.findDistinctByDiscountUnitAndDiscountValue(memberDiscountValue.getUnit(), memberDiscountValue.getValue());
         
         return re.stream().findFirst().map(e -> {
-            DiscountValue discountValue1 = DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
+            MemberDiscountValue memberDiscountValue1 = MemberDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
 
             return new MembershipType(
                     MembershipTypeId.of(e.getId()),
                     MemberTypeName.of(e.getType()),
-                    discountValue1,
+                    memberDiscountValue1,
                     e.getRequiredPoint(),
                     e.getDescription(),
                     e.getValidUntil(),
@@ -176,12 +176,12 @@ public class MembershipTypeRepository implements IMembershipTypeRepository {
     public List<MembershipType> findAll() {
         return jpaMembershipTypeRepository.findAll().stream()
                 .map(e -> {
-                    DiscountValue discountValue = DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
+                    MemberDiscountValue memberDiscountValue = MemberDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit());
 
                     return new MembershipType(
                             MembershipTypeId.of(e.getId()),
                             MemberTypeName.of(e.getType()),
-                            discountValue,
+                            memberDiscountValue,
                             e.getRequiredPoint(),
                             e.getDescription(),
                             e.getValidUntil(),

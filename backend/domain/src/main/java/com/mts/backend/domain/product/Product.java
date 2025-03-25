@@ -9,6 +9,7 @@ import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.value_object.ProductName;
 import com.mts.backend.shared.domain.AbstractAggregateRoot;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.lang.NonNull;
@@ -18,26 +19,30 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class Product extends AbstractAggregateRoot<ProductId> {
-
+    @NonNull
     private ProductName name;
+    @Nullable
     private String description;
+    @Nullable
     private CategoryId categoryId;
+    
     private boolean available;
     private boolean signature;
+    @NonNull
     private String imagePath;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
     private final Set<ProductPrice> prices = new HashSet<>();
 
-    public Product(@NonNull ProductId productId, @NonNull ProductName name,@Nullable String description, @Nullable String imagePath, boolean available, boolean signature, @Nullable CategoryId categoryId,@Nullable Set<ProductPrice> prices,@Nullable LocalDateTime createdAt,@Nullable LocalDateTime updatedAt) {
+    public Product(@NonNull ProductId productId, @NonNull ProductName name, @Nullable String description, @Nullable String imagePath, boolean available, boolean signature, @Nullable CategoryId categoryId, @Nullable Set<ProductPrice> prices, @Nullable LocalDateTime updatedAt) {
         super(productId);
         Objects.requireNonNull(name, "Tên sản phẩm không được null");
         
         this.name = name;
-        this.description = description == null ? "" : description;
-        this.imagePath = imagePath == null ? "" : imagePath;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+        this.description = description;
+        this.imagePath = imagePath;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
         this.categoryId = categoryId;
         this.available = available;
@@ -66,7 +71,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
             throw new DuplicateException("Giá sản phẩm đã tồn tại");
         }
         
-        ProductPrice newPrice = new ProductPrice(ProductPriceId.create(), getId(), productPrice.getSizeId(), productPrice.getPrice(), LocalDateTime.now(), LocalDateTime.now());
+        ProductPrice newPrice = new ProductPrice(ProductPriceId.create(), getId(), productPrice.getSizeId(), productPrice.getPrice(), LocalDateTime.now());
         
         prices.add(newPrice);
         
@@ -92,6 +97,23 @@ public class Product extends AbstractAggregateRoot<ProductId> {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
         
         productPrice.changePrice(newPrice);
+        
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    public void changePrice(Map<ProductSizeId, Money> newPrices) {
+        if (newPrices.isEmpty()) {
+            throw new DomainException("Giá sản phẩm không được để trống");
+        }
+        
+        for (Map.Entry<ProductSizeId, Money> entry : newPrices.entrySet()) {
+            ProductPrice productPrice = prices.stream()
+                    .filter(p -> p.getSizeId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
+            
+            productPrice.changePrice(entry.getValue());
+        }
         
         this.updatedAt = LocalDateTime.now();
     }
@@ -127,21 +149,7 @@ public class Product extends AbstractAggregateRoot<ProductId> {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-
-    public boolean changeName(String name) {
-        ProductName newName = (ProductName) checkAndAssign(ProductName.create(name));
-        if (!businessErrors.isEmpty()){
-            throw new DomainBusinessLogicException(businessErrors);
-        }
-        
-        if (this.name.equals(newName)) {
-            return false;
-        }
-        
-        this.name = newName;
-        this.updatedAt = LocalDateTime.now();
-        return true;
-    }
+    
     
     public boolean changeName(ProductName name) {
         Objects.requireNonNull(name, "Product name is required");
@@ -159,14 +167,25 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         return Collections.unmodifiableSet(prices);
     }
     
-    public void changeDescription(String description) {
+    public boolean changeDescription(String description) {
+        if (Objects.equals(this.description, description)) {
+            return false;
+        }
+        
         this.description = description;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
-    public void changeImagePath(String imagePath) {
+    public boolean changeImagePath(String imagePath) {
+        
+        if (Objects.equals(this.imagePath, imagePath)) {
+            return false;
+        }
+        
         this.imagePath = imagePath;
         this.updatedAt = LocalDateTime.now();
+        return true;
     }
     
     public void changeSignature(boolean signature) {
@@ -196,6 +215,32 @@ public class Product extends AbstractAggregateRoot<ProductId> {
         
         this.updatedAt = LocalDateTime.now();
     }
+    
+    public void delete(ProductPriceId productPriceId){
+        ProductPrice productPrice = prices.stream()
+                .filter(p -> p.getId().equals(productPriceId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giá sản phẩm"));
+        
+        prices.remove(productPrice);
+        
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    
+    public Optional<ProductPrice> getPrice(ProductPriceId productPriceId){
+        return prices.stream()
+                .filter(p -> p.getId().equals(productPriceId))
+                .findFirst();
+    }
+    
+    public Optional<ProductPrice> getPrice(ProductSizeId productSizeId){
+        return prices.stream()
+                .filter(p -> p.getSizeId().equals(productSizeId))
+                .findFirst();
+    }
+    
+    
     
     public boolean isOrdered() {
         return available && !prices.isEmpty();
