@@ -23,7 +23,9 @@
     "vue-loader": "^17.4.2",
     "vue-template-compiler": "^2.7.16",
     "vuetify-loader": "^2.0.0-alpha.9",
-    "webpack-plugin-vuetify": "^2.0.0-alpha.0"
+    "webpack-plugin-vuetify": "^2.0.0-alpha.0",
+    "axios": "^1.8.4",
+    "@mdi/font": "^7.4.47"
   },
   "type": "module"
 }

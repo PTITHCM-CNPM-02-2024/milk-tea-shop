@@ -73,9 +73,14 @@ public class CashProvider implements IPaymentProvider{
             errors.add("Thanh toán đã được thực hiện");
         }
         
-        if (order.getStatus().isPresent() && order.getStatus().get() == OrderStatus.COMPLETED && order.getStatus().get() == OrderStatus.CANCELLED)
+        if (order.getStatus().isPresent() && order.getStatus().get() == OrderStatus.COMPLETED)
         {
-            errors.add("Không thể thanh toán cho đơn hàng đã hoàn thành hoặc đã hủy");
+            errors.add("Không thể thanh toán cho đơn hàng đã hoàn thành");
+        }
+        
+        if (order.getStatus().isPresent() && order.getStatus().get() == OrderStatus.CANCELLED)
+        {
+            errors.add("Không thể thanh toán cho đơn hàng đã hủy");
         }
         
         
