@@ -37,7 +37,8 @@ public class CreateUnitCommandHandler implements ICommandHandler<CreateUnitComma
                 UnitName.of(command.getName()),
                 UnitSymbol.of(command.getSymbol()),
                 command.getDescription().orElse(""),
-                LocalDateTime.now()
+                command.getCreatedAt().orElse(LocalDateTime.now()),
+                command.getUpdatedAt().orElse(LocalDateTime.now())
         );
 
         // Check for duplicate name

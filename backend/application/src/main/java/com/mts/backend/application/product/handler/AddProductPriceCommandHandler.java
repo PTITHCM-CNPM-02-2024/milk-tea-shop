@@ -48,6 +48,7 @@ public class AddProductPriceCommandHandler implements ICommandHandler<AddProduct
                             product.getId(),
                             ProductSizeId.of(price.getSizeId()),
                             Money.of(price.getPrice()),
+                            LocalDateTime.now(),
                             LocalDateTime.now()
                     )
             );

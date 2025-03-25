@@ -2,13 +2,15 @@ package com.mts.backend.api.product.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-@SuperBuilder
-@EqualsAndHashCode(callSuper = false)
-public class UpdateProductSizeRequest extends ProductSizeBaseRequest {
+public class UpdateProductSizeRequest {
+    private Integer id;
+    private Integer unitId;
+    private String name;
+    private String description;
+    private Integer quantity;
 }

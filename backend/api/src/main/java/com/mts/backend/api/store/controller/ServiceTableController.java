@@ -34,6 +34,7 @@ public class ServiceTableController implements IController {
         var command = CreateServiceTableCommand.builder()
                 .name(request.getName())
                 .areaId(request.getAreaId())
+                .description(request.getDescription())
                 .build();
         
         var result = commandBus.dispatch(command);

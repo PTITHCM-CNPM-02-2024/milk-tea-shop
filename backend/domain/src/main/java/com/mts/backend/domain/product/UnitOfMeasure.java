@@ -26,13 +26,13 @@ public class UnitOfMeasure extends AbstractAggregateRoot <UnitOfMeasureId> {
     /**
      * @param unitOfMeasureId
      */
-    public UnitOfMeasure (@NonNull UnitOfMeasureId  unitOfMeasureId, @NonNull UnitName name, @NonNull UnitSymbol symbol, @Nullable String description, @Nullable LocalDateTime updatedAt) {
+    public UnitOfMeasure (@NonNull UnitOfMeasureId  unitOfMeasureId,@NonNull UnitName name,@NonNull UnitSymbol symbol,@Nullable String description,@Nullable LocalDateTime createdAt,@Nullable LocalDateTime updatedAt) {
         super(unitOfMeasureId);
         
-        this.name = Objects.requireNonNull(name, "Unit name is required");
-        this.symbol = Objects.requireNonNull(symbol, "Unit symbol is required");
-        this.description = description ;
-        this.createdAt =  LocalDateTime.now();
+        this.name = Objects.requireNonNull(name, "Tên đơn vị không được null");
+        this.symbol = Objects.requireNonNull(symbol, "Ký hiệu đơn vị không được null");
+        this.description = description == null ? "" : description;
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
     

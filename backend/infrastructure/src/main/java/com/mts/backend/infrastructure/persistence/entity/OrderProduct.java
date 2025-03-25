@@ -29,7 +29,7 @@ public class OrderProduct extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @Comment("Mã đơn hàng")
     @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity orderEntity;
+    private Order order;
 
     @Comment("Số lượng")
     @Column(name = "quantity", columnDefinition = "smallint UNSIGNED", nullable = false)

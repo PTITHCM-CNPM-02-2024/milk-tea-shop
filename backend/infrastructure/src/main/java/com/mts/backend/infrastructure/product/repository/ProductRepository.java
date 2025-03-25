@@ -21,7 +21,6 @@ import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -57,7 +56,8 @@ public class ProductRepository implements IProductRepository {
                             productEntity.getIsSignature(),
                             Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                             findPricesByProductId(id),
-                            productEntity.getUpdatedAt().orElse(LocalDateTime.now())
+                            productEntity.getCreatedAt().orElse(null),
+                            productEntity.getUpdatedAt().orElse(null)
                     );
                 });
     }
@@ -80,7 +80,8 @@ public class ProductRepository implements IProductRepository {
                         productEntity.getIsSignature(),
                         Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                         findPricesByProductId(ProductId.of(productEntity.getId())),
-                        productEntity.getUpdatedAt().orElse(LocalDateTime.now())
+                        productEntity.getCreatedAt().orElse(null),
+                        productEntity.getUpdatedAt().orElse(null)
                 ));
     }
 
@@ -101,7 +102,9 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
                     findPricesByProductId(ProductId.of(productEntity.getId())),
-                    productEntity.getCreatedAt().orElse(LocalDateTime.now()));
+                    productEntity.getCreatedAt().orElse(null),
+                    productEntity.getUpdatedAt().orElse(null)
+            );
             products.add(product);
         });
         
@@ -165,8 +168,9 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsAvailable(),
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
-                    findPricesByProductId(ProductId.of(productEntity.getId())),
-                    productEntity.getUpdatedAt().orElse(LocalDateTime.now())
+                    Set.of(),
+                    productEntity.getCreatedAt().orElse(null),
+                    productEntity.getUpdatedAt().orElse(null)
             );
             products.add(product);
         });
@@ -191,8 +195,9 @@ public class ProductRepository implements IProductRepository {
                     productEntity.getIsAvailable(),
                     productEntity.getIsSignature(),
                     Optional.ofNullable(productEntity.getCategoryEntity()).map(CategoryEntity::getId).map(CategoryId::of).orElse(null),
-                    findPricesByProductId(ProductId.of(productEntity.getId())),
-                    productEntity.getUpdatedAt().orElse(LocalDateTime.now())
+                    Set.of(),
+                    productEntity.getCreatedAt().orElse(null),
+                    productEntity.getUpdatedAt().orElse(null)
             );
             products.add(product);
         });
@@ -383,9 +388,8 @@ public class ProductRepository implements IProductRepository {
             jpaProductPriceRepository.insertProductPrice(price);
         }
     }
-    
-    @Transactional
-    protected void create(ProductId id, Set<ProductPrice> prices) {
+
+    private void create(ProductId id, Set<ProductPrice> prices) {
         if (prices == null || prices.isEmpty()) {
             return;
         }
@@ -415,7 +419,8 @@ public class ProductRepository implements IProductRepository {
                     productId,
                     ProductSizeId.of(priceEntity.getSize().getId()),
                     Money.of(priceEntity.getPrice()),
-                    priceEntity.getUpdatedAt().orElse(LocalDateTime.now())
+                    priceEntity.getCreatedAt().orElse(null),
+                    priceEntity.getUpdatedAt().orElse(null)
             );
             prices.add(price);
         });
@@ -423,5 +428,26 @@ public class ProductRepository implements IProductRepository {
         
         return prices;
     }
+    
+    @Override
+    @Transactional
+    public void createPrice(ProductId id, Set<ProductPrice> prices) {
+        Objects.requireNonNull(id, "ProductID is required");
+        Objects.requireNonNull(prices, "Prices is required");
 
+        Set<ProductPriceEntity> newPrices = new HashSet<>();
+
+        for (ProductPrice price : prices) {
+            ProductPriceEntity priceEntity = ProductPriceEntity.builder()
+                    .id(null)
+                    .price(price.getPrice().getAmount())
+                    .productEntity(ProductEntity.builder().id(id.getValue()).build())
+                    .size(ProductSizeEntity.builder().id(price.getSizeId().getValue()).build())
+                    .build();
+            newPrices.add(priceEntity);
+        }
+
+        jpaProductPriceRepository.saveAll(newPrices);
+
+    }
 }

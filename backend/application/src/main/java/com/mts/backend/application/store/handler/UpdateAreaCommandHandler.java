@@ -34,7 +34,7 @@ public class UpdateAreaCommandHandler implements ICommandHandler<UpdateAreaComma
             verifyUniqueName(area.getAreaName());
         }
         
-        area.changeDescription(command.getDescription().orElse(null));
+        area.changeDescription(command.getDescription());
         
         var savedArea = areaRepository.save(area);
         

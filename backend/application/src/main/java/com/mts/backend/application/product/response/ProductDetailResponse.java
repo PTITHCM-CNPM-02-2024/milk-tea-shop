@@ -23,7 +23,7 @@ public class ProductDetailResponse {
     
     private String category;
     
-    private Boolean isSignature;
+    private boolean isSignature;
     
     private String image_url;
     

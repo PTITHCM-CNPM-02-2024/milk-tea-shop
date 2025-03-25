@@ -29,9 +29,9 @@ public class CreateAreaCommandHandler implements ICommandHandler<CreateAreaComma
         var area = new Area(
                 AreaId.create(),
                 AreaName.of(command.getName()),
-                command.getDescription().orElse(null),
-                command.getMaxTable().map(MaxTable::of).orElse(null),
-                command.getIsActive(),
+                command.getDescription(),
+                command.getMaxTable() != null ? MaxTable.of(command.getMaxTable()) : null,
+                command.isActive(),
                 LocalDateTime.now());
         
         verifyUniqueName(area.getAreaName());

@@ -36,6 +36,7 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
                 CategoryName.of(command.getName()),
                 command.getDescription().orElse(null),
                 command.getParentId().map(CategoryId::of).orElse(null),
+                command.getCreatedAt().orElse(LocalDateTime.now()),
                 command.getUpdatedAt().orElse(LocalDateTime.now())
         );
         

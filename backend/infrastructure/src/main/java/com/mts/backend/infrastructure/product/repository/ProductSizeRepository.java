@@ -21,16 +21,14 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class ProductSizeRepository implements ISizeRepository {
-
+public class ProductSizeRepository implements ISizeRepository{
+    
     private final JpaProductSizeRepository jpaProductSizeRepository;
 
     public ProductSizeRepository(JpaProductSizeRepository jpaProductSizeRepository, IUnitRepository unitOfMeasureRepository) {
         this.jpaProductSizeRepository = jpaProductSizeRepository;
     }
-
     /**
-     *
      */
     @Override
     public boolean existsById(ProductSizeId productSizeId) {
@@ -38,10 +36,10 @@ public class ProductSizeRepository implements ISizeRepository {
         return jpaProductSizeRepository.existsById(productSizeId.getValue());
     }
 
-
+    
     protected ProductSize create(ProductSize productSize) {
         Objects.requireNonNull(productSize, "Kích thước sản phẩm không được null");
-
+        
         try {
             ProductSizeEntity productSizeEntity = ProductSizeEntity.builder()
                     .name(productSize.getName().getValue())
@@ -50,24 +48,24 @@ public class ProductSizeRepository implements ISizeRepository {
                     .unit(UnitOfMeasureEntity.builder().id(productSize.getUnitOfMeasure().getValue()).build())
                     .id(productSize.getId().getValue())
                     .build();
-
+            
             jpaProductSizeRepository.insertProductSize(productSizeEntity);
-
+            
             return productSize;
-
-        } catch (Exception e) {
+            
+        }catch (Exception e) {
             throw new DomainException("Không thể tạo kích thước sản phẩm", e);
         }
     }
 
     /**
-     * @param productSizeId
+     * @param productSizeId 
      * @return
      */
     @Override
     public Optional<ProductSize> findById(ProductSizeId productSizeId) {
         Objects.requireNonNull(productSizeId, "Id kích thước sản phẩm không được null");
-
+        
         return jpaProductSizeRepository.findById(productSizeId.getValue())
                 .map(p -> new ProductSize(
                         ProductSizeId.of(p.getId()),
@@ -75,18 +73,19 @@ public class ProductSizeRepository implements ISizeRepository {
                         UnitOfMeasureId.of(p.getUnit().getId()),
                         QuantityOfProductSize.of(p.getQuantity()),
                         p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
                         p.getUpdatedAt().orElse(LocalDateTime.now())
                 ));
     }
 
     /**
-     * @param name
+     * @param name 
      * @return
      */
     @Override
     public Optional<ProductSize> findByName(ProductSizeName name) {
         Objects.requireNonNull(name, "Product size name is required");
-
+        
         return jpaProductSizeRepository.findByName(name.getValue())
                 .map(p -> new ProductSize(
                         ProductSizeId.of(p.getId()),
@@ -94,6 +93,7 @@ public class ProductSizeRepository implements ISizeRepository {
                         UnitOfMeasureId.of(p.getUnit().getId()),
                         QuantityOfProductSize.of(p.getQuantity()),
                         p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
                         p.getUpdatedAt().orElse(LocalDateTime.now())
                 ));
     }
@@ -108,25 +108,25 @@ public class ProductSizeRepository implements ISizeRepository {
                     }
                 });
     }
-
+    
     @Override
     @Transactional
     public ProductSize save(ProductSize productSize) {
         Objects.requireNonNull(productSize, "Product size is required");
-
+        
         try {
             if (jpaProductSizeRepository.existsById(productSize.getId().getValue())) {
                 return update(productSize);
-            } else {
+            }else {
                 return create(productSize);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Không thể lưu kích thước sản phẩm", e);
+        }catch (Exception e) {
+            throw new DomainException("Không thể lưu kích thước sản phẩm", e);
         }
     }
 
     /**
-     * @param name
+     * @param name 
      * @param unitOfMeasure
      * @return
      */
@@ -134,12 +134,12 @@ public class ProductSizeRepository implements ISizeRepository {
     public boolean existsByNameAndUnit(ProductSizeName name, UnitOfMeasureId unitOfMeasure) {
         Objects.requireNonNull(name, "Product size name is required");
         Objects.requireNonNull(unitOfMeasure, "Unit of measure is required");
-
+        
         return jpaProductSizeRepository.existsByNameAndUnitId(name.getValue(), unitOfMeasure.getValue());
     }
 
     /**
-     * @param name
+     * @param name 
      * @param unitOfMeasure
      * @return
      */
@@ -147,7 +147,7 @@ public class ProductSizeRepository implements ISizeRepository {
     public Optional<ProductSize> findByNameAndUnit(ProductSizeName name, UnitOfMeasureId unitOfMeasure) {
         Objects.requireNonNull(name, "Product size name is required");
         Objects.requireNonNull(unitOfMeasure, "Unit of measure is required");
-
+        
         return jpaProductSizeRepository.findByNameAndUnit(name.getValue(), unitOfMeasure.getValue())
                 .map(p -> new ProductSize(
                         ProductSizeId.of(p.getId()),
@@ -155,12 +155,13 @@ public class ProductSizeRepository implements ISizeRepository {
                         UnitOfMeasureId.of(p.getUnit().getId()),
                         QuantityOfProductSize.of(p.getQuantity()),
                         p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
                         p.getUpdatedAt().orElse(LocalDateTime.now())
                 ));
     }
 
     /**
-     * @return
+     * @return 
      */
     @Override
     public List<ProductSize> findAll() {
@@ -172,6 +173,7 @@ public class ProductSizeRepository implements ISizeRepository {
                         UnitOfMeasureId.of(p.getUnit().getId()),
                         QuantityOfProductSize.of(p.getQuantity()),
                         p.getDescription(),
+                        p.getCreatedAt().orElse(LocalDateTime.now()),
                         p.getUpdatedAt().orElse(LocalDateTime.now())
                 ))
                 .toList();
@@ -180,18 +182,21 @@ public class ProductSizeRepository implements ISizeRepository {
     @Transactional
     protected ProductSize update(ProductSize productSize) {
         Objects.requireNonNull(productSize, "Product size is required");
-
-        ProductSizeEntity productSizeEntity = ProductSizeEntity.builder()
-                .name(productSize.getName().getValue())
-                .description(productSize.getDescription().orElse(""))
-                .quantity(productSize.getQuantity().getValue())
-                .unit(UnitOfMeasureEntity.builder().id(productSize.getUnitOfMeasure().getValue()).build())
-                .id(productSize.getId().getValue())
-                .build();
-
-        jpaProductSizeRepository.updateProductSize(productSizeEntity);
-
-        return productSize;
- 
+        
+        try {
+            ProductSizeEntity productSizeEntity = ProductSizeEntity.builder()
+                    .name(productSize.getName().getValue())
+                    .description(productSize.getDescription().orElse(""))
+                    .quantity(productSize.getQuantity().getValue())
+                    .unit(UnitOfMeasureEntity.builder().id(productSize.getUnitOfMeasure().getValue()).build())
+                    .id(productSize.getId().getValue())
+                    .build();
+            
+            jpaProductSizeRepository.updateProductSize(productSizeEntity);
+            
+            return productSize;
+        }catch (Exception e) {
+            throw new DomainException("Không thể cập nhật kích thước sản phẩm", e);
+        }
     }
 }

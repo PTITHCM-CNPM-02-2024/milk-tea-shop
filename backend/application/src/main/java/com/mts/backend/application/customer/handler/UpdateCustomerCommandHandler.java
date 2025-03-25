@@ -27,24 +27,17 @@ public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCusto
         
         Customer customer = mustExistCustomer(CustomerId.of(command.getId()));
         
-        FirstName firstName = command.getFirstName().map(FirstName::of).orElse(null);
-        LastName lastName = command.getLastName().map(LastName::of).orElse(null);
-        
-        PhoneNumber phoneNumber = PhoneNumber.of(command.getPhone());
-        if (customer.changePhoneNumber(phoneNumber)) {
-            verifyUniquePhoneNumber(phoneNumber);
+        if (command.getEmail() != null && customer.changeEmail(Email.of(command.getEmail())) && customer.getEmail().isPresent()) {
+            verifyUniqueEmail(customer.getEmail().get());
         }
         
-        Email email = command.getEmail().map(Email::of).orElse(null);
-        if (customer.changeEmail(email)) {
-            verifyUniqueEmail(email);
+        if (command.getPhone() != null && customer.changePhoneNumber(PhoneNumber.of(command.getPhone()))) {
+            verifyUniquePhoneNumber(customer.getPhoneNumber());
         }
         
-        Gender gender = command.getGender().map(Gender::valueOf).orElse(null);
-        
-        customer.changeFirstName(firstName);
-        customer.changeLastName(lastName);
-        customer.changeGender(gender);
+        customer.changeFirstName(command.getFirstName() != null ? FirstName.of(command.getFirstName()) : null);
+        customer.changeLastName(command.getLastName() != null ? LastName.of(command.getLastName()) : null);
+        customer.changeGender(command.getGender() != null ? Gender.valueOf(command.getGender()) : null);
         
         var updatedCustomer = customerRepository.save(customer);
         

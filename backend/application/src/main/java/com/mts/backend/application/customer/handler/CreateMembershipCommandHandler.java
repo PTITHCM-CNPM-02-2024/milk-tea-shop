@@ -40,7 +40,7 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
                 MemberTypeName.of(command.getName()),
                 discountValue,
                 command.getRequiredPoints(),
-                command.getDescription().orElse(null),
+                command.getDescription(),
                 validUntil,
                 true,
                 LocalDateTime.now()

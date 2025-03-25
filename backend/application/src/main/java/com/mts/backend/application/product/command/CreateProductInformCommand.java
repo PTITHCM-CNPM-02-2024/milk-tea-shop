@@ -7,26 +7,33 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Set;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
-public class CreateProductCommand implements ICommand<CommandResult> {
+public class CreateProductInformCommand implements ICommand<CommandResult> {
     private  String name;
     private  String description;
     private  Integer categoryId;
-    private  Boolean available;
-    private  Boolean signature;
+    private  boolean available;
+    private  boolean signature;
     private  String imagePath;
-    @Builder.Default
-    private Set<ProductPriceCommand> productPrices  = new HashSet<>();
-
+    private  LocalDateTime createdAt;
+    private  LocalDateTime updatedAt;
+    
     public Optional<Integer> getCategoryId() {
         return Optional.ofNullable(categoryId);
+    }
+    
+    public Optional<LocalDateTime> getCreatedAt() {
+        return Optional.ofNullable(createdAt);
+    }
+    
+    public Optional<LocalDateTime> getUpdatedAt() {
+        return Optional.ofNullable(updatedAt);
     }
 
     public Optional<String> getImagePath() {

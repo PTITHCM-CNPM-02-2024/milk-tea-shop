@@ -3,7 +3,6 @@ package com.mts.backend.api.product.controller;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.product.request.AddProductPriceRequest;
 import com.mts.backend.api.product.request.CreateProductRequest;
-import com.mts.backend.api.product.request.ProductBaseRequest;
 import com.mts.backend.api.product.request.UpdateProductInformRequest;
 import com.mts.backend.application.product.ProductCommandBus;
 import com.mts.backend.application.product.ProductQueryBus;
@@ -30,24 +29,15 @@ public class ProductController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createProduct(@RequestBody CreateProductRequest productBaseRequest) {
-        CreateProductCommand createProductInformCommand = CreateProductCommand.builder()
-                .name(productBaseRequest.getName())
-                .description(productBaseRequest.getDescription())
-                .categoryId(productBaseRequest.getCategoryId())
-                .available(productBaseRequest.getAvailable())
-                .signature(productBaseRequest.getSignature())
-                .imagePath(productBaseRequest.getImagePath())
+    public ResponseEntity<ApiResponse<Integer>> createProduct(@RequestBody CreateProductRequest createProductRequest) {
+        CreateProductInformCommand createProductInformCommand = CreateProductInformCommand.builder()
+                .name(createProductRequest.getName())
+                .description(createProductRequest.getDescription())
+                .categoryId(createProductRequest.getCategoryId())
+                .available(createProductRequest.isAvailable())
+                .signature(createProductRequest.isSignature())
+                .imagePath(createProductRequest.getImagePath())
                 .build();
-        
-        if (productBaseRequest.getPrices() != null){
-            for (var productPrice : productBaseRequest.getPrices().entrySet()) {
-                createProductInformCommand.getProductPrices().add(ProductPriceCommand.builder()
-                        .sizeId(productPrice.getKey())
-                        .price(productPrice.getValue())
-                        .build());
-            }
-        }
         
         var result = productCommandBus.dispatch(createProductInformCommand);
         
@@ -62,8 +52,8 @@ public class ProductController implements IController {
                 .name(updateProductInformRequest.getName())
                 .description(updateProductInformRequest.getDescription())
                 .categoryId(updateProductInformRequest.getCategoryId())
-                .isAvailable(updateProductInformRequest.getIsAvailable())
-                .isSignature(updateProductInformRequest.getIsSignature())
+                .isAvailable(updateProductInformRequest.isAvailable())
+                .isSignature(updateProductInformRequest.isSignature())
                 .build();
         
         var result = productCommandBus.dispatch(updateProductInformCommand);
@@ -72,18 +62,17 @@ public class ProductController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getProductDetail() {
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getProductDetail() {
         DefaultProductQuery getProductDetailCommand = DefaultProductQuery.builder()
                 .build();
         
         var result = productQueryBus.dispatch(getProductDetailCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
     }
     
     @PostMapping("/{id}/prices")
-    public ResponseEntity<ApiResponse<?>> createProductPrice(@PathVariable("id") Integer id,
-                                                             @RequestBody AddProductPriceRequest addProductPriceRequest) {
+    public ResponseEntity<ApiResponse<String>> createProductPrice(@PathVariable("id") Integer id, @RequestBody AddProductPriceRequest addProductPriceRequest) {
 
         AddProductPriceCommand addProductPriceCommand = AddProductPriceCommand.builder()
                 .productId(id)
@@ -100,15 +89,12 @@ public class ProductController implements IController {
         
         var result = productCommandBus.dispatch(addProductPriceCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(), "Giá sản phẩm đã được " +
-                "thay đổi")) :
-                handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success("Giá sản phẩm đã được thay đổi")) : handleError(result);
         
     }
     
     @PutMapping("/{id}/prices")
-    public ResponseEntity<ApiResponse<?>> updateProductPrice(@PathVariable("id") Integer id,
-                                                             @RequestBody AddProductPriceRequest addProductPriceRequest) {
+    public ResponseEntity<ApiResponse<String>> updateProductPrice(@PathVariable("id") Integer id, @RequestBody AddProductPriceRequest addProductPriceRequest) {
         UpdateProductPriceCommand updateProductPriceCommand = UpdateProductPriceCommand.builder()
                 .productId(id)
                 .build();
@@ -124,14 +110,11 @@ public class ProductController implements IController {
         
         var result = productCommandBus.dispatch(updateProductPriceCommand);
         
-        return result.isSuccess() ?
-                ResponseEntity.ok(ApiResponse.success( result.getData(), "Giá sản phẩm đã được thay đổi")) :
-                handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success("Giá sản phẩm đã được thay đổi")) : handleError(result);
     }
     
     @DeleteMapping("/{id}/prices/{sizeId}")
-    public ResponseEntity<ApiResponse<?>> deleteProductPrice(@PathVariable("id") Integer id,
-                                                             @PathVariable("sizeId") Integer sizeId) {
+    public ResponseEntity<ApiResponse<String>> deleteProductPrice(@PathVariable("id") Integer id, @PathVariable("sizeId") Integer sizeId) {
         DeletePriceBySizeIdCommand deleteProductPriceCommand = DeletePriceBySizeIdCommand.builder()
                 .productId(id)
                 .sizeId(sizeId)
@@ -139,37 +122,34 @@ public class ProductController implements IController {
         
         var result = productCommandBus.dispatch(deleteProductPriceCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(), "Giá sản phẩm đã được " +
-                "xóa")) :
-                handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success("Giá sản phẩm đã được xóa")) : handleError(result);
     }
     
     @GetMapping("/available")
-    public ResponseEntity<ApiResponse<?>> getUnavailableOrderProductDetail() {
-        AvailableOrderProductQuery getProductDetailCommand = AvailableOrderProductQuery.builder()
-                .isOrdered(false)
-                .build();
-        
-        var result = productQueryBus.dispatch(getProductDetailCommand);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
-    }
-    
-    @GetMapping("/not-available")
-    public ResponseEntity<ApiResponse<?>> getAvailableOrderProductDetail() {
-        
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getUnavailableOrderProductDetail() {
         AvailableOrderProductQuery getProductDetailCommand = AvailableOrderProductQuery.builder()
                 .isOrdered(true)
                 .build();
         
         var result = productQueryBus.dispatch(getProductDetailCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("/not-available")
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getAvailableOrderProductDetail() {
+        
+        AvailableOrderProductQuery getProductDetailCommand = AvailableOrderProductQuery.builder()
+                .isOrdered(false)
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
     }
     
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<?>> getSignatureProductDetail(@RequestParam(value = "isAvailableOrder",
-            required = false, defaultValue = "true") Boolean isAvailableOrder, @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
+    public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getSignatureProductDetail(@RequestParam(value = "isAvailableOrder", required = false, defaultValue = "true") Boolean isAvailableOrder, @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
         SignatureProductQuery getProductDetailCommand = SignatureProductQuery.builder()
                 .isSignature(isSignature)
                 .build();
@@ -177,6 +157,6 @@ public class ProductController implements IController {
         
         var result = productQueryBus.dispatch(getProductDetailCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<ProductDetailResponse>)result.getData())) : handleError(result);
     }
 }

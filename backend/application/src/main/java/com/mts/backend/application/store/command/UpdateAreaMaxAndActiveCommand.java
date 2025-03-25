@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class UpdateAreaMaxAndActiveCommand implements ICommand<CommandResult> {
     private Integer areaId;
     private Integer maxTable;
-    private Boolean isActive;
+    private boolean isActive;
 }

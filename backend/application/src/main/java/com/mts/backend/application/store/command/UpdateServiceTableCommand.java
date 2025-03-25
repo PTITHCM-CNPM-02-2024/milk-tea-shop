@@ -16,5 +16,5 @@ public class UpdateServiceTableCommand implements ICommand<CommandResult> {
     private Integer id;
     private String name;
     private Integer areaId;
-    private Boolean isActive;
+    private boolean isActive;
 }

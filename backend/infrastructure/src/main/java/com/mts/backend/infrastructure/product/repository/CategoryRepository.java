@@ -10,7 +10,6 @@ import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,7 +63,8 @@ public class CategoryRepository implements ICategoryRepository {
                         CategoryName.of(entity.getName()),
                         entity.getDescription(),
                         entity.getParentCategoryEntity() == null ? null : CategoryId.of(entity.getParentCategoryEntity().getId()),
-                        entity.getUpdatedAt().orElse(LocalDateTime.now())
+                        entity.getCreatedAt().orElse(null),
+                        entity.getUpdatedAt().orElse(null)
                 ));
         
     }
@@ -83,7 +83,8 @@ public class CategoryRepository implements ICategoryRepository {
                         CategoryName.of(entity.getName()),
                         entity.getDescription(),
                         entity.getParentCategoryEntity() == null ? null : CategoryId.of(entity.getParentCategoryEntity().getId()),
-                        entity.getUpdatedAt().orElse(LocalDateTime.now())
+                        entity.getCreatedAt().orElse(null),
+                        entity.getUpdatedAt().orElse(null)
                 ));
     }
 
@@ -99,7 +100,8 @@ public class CategoryRepository implements ICategoryRepository {
                         CategoryName.of(entity.getName()),
                         entity.getDescription(),
                         entity.getParentCategoryEntity() == null ? null : CategoryId.of(entity.getParentCategoryEntity().getId()),
-                        entity.getUpdatedAt().orElse(LocalDateTime.now())
+                        entity.getCreatedAt().orElse(null),
+                        entity.getUpdatedAt().orElse(null)
                 ))
                 .toList();
     }

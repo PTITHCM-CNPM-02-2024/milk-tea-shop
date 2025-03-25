@@ -44,7 +44,7 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
         
         membershipType.changeValidUntil(command.getValidUntil());
         
-        membershipType.changeActive(command.getIsActive());
+        membershipType.changeActive(command.isActive());
         
         
         var updatedMembershipType = membershipTypeRepository.save(membershipType);

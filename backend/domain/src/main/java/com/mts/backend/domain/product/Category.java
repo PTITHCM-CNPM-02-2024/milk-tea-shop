@@ -13,11 +13,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class Category extends AbstractAggregateRoot<CategoryId>{
-    @NonNull
     private CategoryName name;
-    @Nullable
+    
     private String description;
-    @Nullable
+    
     private CategoryId parentId;
     
     private final LocalDateTime createdAt;
@@ -26,21 +25,19 @@ public class Category extends AbstractAggregateRoot<CategoryId>{
     /**
      * @param categoryId
      */
-    public Category(@NonNull CategoryId categoryId, @NonNull CategoryName name, @Nullable String description, @Nullable CategoryId parentId, @Nullable LocalDateTime updatedAt) {
+    public Category(@NonNull CategoryId categoryId, @NonNull CategoryName name, @Nullable String description,@Nullable CategoryId parentId,@Nullable LocalDateTime createdAt,@Nullable LocalDateTime updatedAt) {
         super(categoryId);
         
-        
-        this.name = Objects.requireNonNull(name, "Category name is required");
-        this.description = description ;
-        this.parentId = parentId;
-        this.createdAt =  LocalDateTime.now() ;
-        this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
-    }
-    
-    private void valid() {
+        Objects.requireNonNull(name, "Tên danh mục không được null");
         if (parentId != null && parentId.equals(getId())) {
             throw new DomainException("Không thể chọn" + parentId + "làm cha của chính nó");
         }
+        
+        this.name = name;
+        this.description = description == null ? "" : description;
+        this.parentId = parentId;
+        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+        this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
     
     public boolean changeName(CategoryName name) {
@@ -55,27 +52,31 @@ public class Category extends AbstractAggregateRoot<CategoryId>{
         return true;
     }
     
-    public boolean changeDescription(String description) {
-        
-        if (Objects.equals(this.description, description)) {
-            return false;
+    public boolean changeName(String name) {
+        CategoryName newName = (CategoryName) checkAndAssign(CategoryName.create(name));
+        if (!businessErrors.isEmpty()){
+            throw new DomainBusinessLogicException(businessErrors);
         }
         
+        return changeName(newName);
+    }
+    
+    public void changeDescription(String description) {
         this.description = description;
         this.updatedAt = LocalDateTime.now();
-        return true;
     }
     
     public boolean changeParentId(CategoryId parentId) {
         
+        if (parentId != null && parentId.equals(getId())) {
+            throw new DomainException("Không thể chọn" + parentId + "làm cha của chính nó");
+        }
         
         if (parentId != null && parentId.equals(this.parentId)) {
             return false;
         }
         
         this.parentId = parentId;
-        valid();
-        
         this.updatedAt = LocalDateTime.now();
         return true;
     }

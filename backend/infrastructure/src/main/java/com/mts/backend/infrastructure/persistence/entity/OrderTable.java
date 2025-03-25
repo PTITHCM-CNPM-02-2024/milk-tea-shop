@@ -31,7 +31,7 @@ public class OrderTable extends BaseEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @Comment("Mã đơn hàng")
     @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity orderEntity;
+    private Order order;
 
     @Comment("Thời gian vào bàn")
     @Column(name = "check_in", nullable = false)

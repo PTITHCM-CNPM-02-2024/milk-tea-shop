@@ -42,8 +42,9 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
                 ProductSizeName.of(command.getName()),
                 UnitOfMeasureId.of(command.getUnitId()),
                 QuantityOfProductSize.of(command.getQuantity()),
-                command.getDescription().orElse(null),
-                LocalDateTime.now()
+                command.getDescription().orElse(""),
+                command.getCreatedAt().orElse(LocalDateTime.now()),
+                command.getUpdatedAt().orElse(LocalDateTime.now())
         );
 
         mustExistUnitOfMeasure(productSize.getUnitOfMeasure());
@@ -61,7 +62,7 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
         Objects.requireNonNull(unit, "UnitOfMeasureId is required");
         
         sizeRepository.findByNameAndUnit(name, unit).ifPresent(size -> {
-            throw new DuplicateException("Kích thước, Đơn vị " + name.getValue() + ", " + unit.getValue() + " đã tồn tại");
+            throw new DuplicateException("Size, Unit " + name.getValue() + ", " + unit.getValue() + " đã tồn tại");
         });
     }
     

@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -20,21 +18,4 @@ public class UpdateCustomerCommand implements ICommand<CommandResult> {
     private String email;
     private String gender;
     private String phone;
-    
-    public Optional<String> getFirstName() {
-        return Optional.ofNullable(firstName);
-    }
-    
-    public Optional<String> getLastName() {
-        return Optional.ofNullable(lastName);
-    }
-    
-    public Optional<String> getEmail() {
-        return Optional.ofNullable(email);
-    }
-    
-    public Optional<String> getGender() {
-        return Optional.ofNullable(gender);
-    }
-    
 }

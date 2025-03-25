@@ -16,7 +16,7 @@ public class CustomerDetailResponse {
     private String email;
     private String gender;
     private String phone;
-    private Integer rewardPoint;
+    private int rewardPoint;
     private Integer membershipId;
     private Long accountId;
 }

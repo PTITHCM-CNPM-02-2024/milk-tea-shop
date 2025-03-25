@@ -36,7 +36,7 @@ public class UpdateAreaMaxAndActiveCommandHandler implements ICommandHandler<Upd
         var maxTable = command.getMaxTable() != null ? MaxTable.of(command.getMaxTable()) : null;
         
         area.changeMaxTable(maxTable);
-        area.changeIsActive(command.getIsActive());
+        area.changeIsActive(command.isActive());
         
         var event = new ChangeAreaMaxAndActiveEvent(this,
                 ChangeAreaMaxAndActiveEvent.Data.builder().maxTable(maxTable).isActive(area.isActive()).id(area.getId()).build());

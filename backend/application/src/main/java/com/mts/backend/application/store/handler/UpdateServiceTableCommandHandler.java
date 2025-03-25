@@ -42,7 +42,7 @@ public class UpdateServiceTableCommandHandler implements ICommandHandler<UpdateS
 
         AreaId areaId = command.getAreaId() != null ? mustExistArea(AreaId.of(command.getAreaId())) : null;
         serviceTable.changeAreaId(areaId);
-         serviceTable.changeIsActive(command.getIsActive());
+         serviceTable.changeIsActive(command.isActive());
          
          if (serviceTable.isActive() && areaId != null){
              allowActiveWhenAreaExistAndActive(areaId);
