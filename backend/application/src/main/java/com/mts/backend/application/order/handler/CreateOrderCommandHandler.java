@@ -197,6 +197,9 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
             var table = serviceTableRepository.findById(ServiceTableId.of(tbl.getServiceTableId()))
                     .orElseThrow(() -> new DomainException("Đơn hàng không thể tạo do bàn không tồn tại"));
             
+            if(!table.isActive()){
+                throw new DomainException("Bàn %s không hoạt động".formatted(table.getTableNumber().getValue()));
+            }
             order.addTable(table.getId());
         }
         

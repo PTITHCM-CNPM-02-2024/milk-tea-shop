@@ -121,6 +121,12 @@ public class Payment extends AbstractAggregateRoot<PaymentId> {
         return true;
     }
     
+    public void cancel() {
+        canModifyPayment();
+        this.status = PaymentStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
     public Optional<PaymentStatus> getStatus() {
         return Optional.ofNullable(status);
     }
