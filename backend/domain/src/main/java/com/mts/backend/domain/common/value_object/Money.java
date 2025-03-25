@@ -21,8 +21,8 @@ public class Money extends AbstractValueObject implements Comparable<Money> {
         Objects.requireNonNull(amount, "BigDecimal is required");
         List<String> businessErrors = new ArrayList<>(List.of());
         
-        if ( amount.doubleValue() < 0) {
-            businessErrors.add("Số tiền không hợp lệ");
+        if ( amount.doubleValue() < 1000) {
+            businessErrors.add("Đơn vị tiền là VNĐ, số tiền phải lớn hơn 1000");
         }
 
         if (businessErrors.isEmpty()) {
@@ -51,14 +51,25 @@ public class Money extends AbstractValueObject implements Comparable<Money> {
         return new Money(amount.subtract(money.amount));
     }
     
-    public Money multiply(double value){
-        if(value < 0){
+    
+    public Money multiply(BigDecimal value){
+        
+        if (value.doubleValue() < 0) {
             throw new IllegalArgumentException("Số lượng không hợp lệ");
         }
-        
-        BigDecimal newValue = amount.multiply(BigDecimal.valueOf(value));
+        BigDecimal newValue = amount.multiply(value);
         return new Money(newValue);
     }
+    
+    public Money divide(BigDecimal value){
+        if (value.doubleValue() <= 0) {
+            throw new IllegalArgumentException("Số lượng không hợp lệ");
+        }
+        BigDecimal newValue = amount.divide(value, DEFAULT_SCALE, RoundingMode.HALF_UP);
+        return new Money(newValue);
+    }
+    
+    public static final Money ZERO = new Money(BigDecimal.ZERO);
     
     public Money discount(double percentageOff){
         if(percentageOff < 0 || percentageOff > 100){

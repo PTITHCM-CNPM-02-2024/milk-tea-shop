@@ -1,0 +1,91 @@
+package com.mts.backend.domain.common.value_object;
+
+import com.mts.backend.shared.value_object.AbstractValueObject;
+import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemberDiscountValue extends AbstractValueObject {
+    private final BigDecimal value;
+    private final DiscountUnit unit;
+    private MemberDiscountValue(BigDecimal value, DiscountUnit unit){
+        this.value = value.setScale(3, RoundingMode.HALF_UP);
+        this.unit = unit;
+    }
+    
+    public static ValueObjectValidationResult create(BigDecimal value, DiscountUnit unit){
+        List<String> errors = new ArrayList<>();
+        
+        if(value == null){
+            errors.add("Giá trị giảm giá không được để trống");
+        }
+        
+        if(value != null && value.compareTo(BigDecimal.ZERO) < 0){
+            errors.add("Giá trị giảm giá không được nhỏ hơn 0");
+        }
+        
+        if(unit == null){
+            errors.add("Đơn vị giảm giá không được để trống");
+        }
+        
+        if (unit != null && unit.ordinal() == 1 && value != null && value.compareTo(BigDecimal.valueOf(100)) > 0) {
+            errors.add("Giá trị giảm giá không được lớn hơn 100 khi đơn vị là phần trăm");
+        }
+        
+        if (unit != null && unit.ordinal() == 0 && value != null && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
+            errors.add("Giá trị giảm giá không được nhỏ hơn 1000 khi đơn vị là tiền");
+        }
+        
+        if (errors.isEmpty()) {
+            return new ValueObjectValidationResult(new MemberDiscountValue(value, unit), errors);
+        }
+        
+        return new ValueObjectValidationResult(null, errors);
+    }
+    
+    public static MemberDiscountValue of(BigDecimal value, DiscountUnit unit){
+        ValueObjectValidationResult result = create(value, unit);
+        
+        if(result.getBusinessErrors().isEmpty()){
+            return new MemberDiscountValue(value, unit);
+        }
+        
+        throw new IllegalArgumentException("Giá trị giảm giá không hợp lệ: " + result.getBusinessErrors());
+    }
+    
+    public BigDecimal getValue() {
+        return value;
+    }
+    
+    public DiscountUnit getUnit() {
+        return unit;
+    }
+    
+    public boolean isPercentage() {
+        return unit == DiscountUnit.PERCENTAGE;
+    }
+    
+    public boolean isMoney() {
+        return unit == DiscountUnit.FIXED;
+    }
+    
+    @Override
+    protected Iterable<Object> getEqualityComponents() {
+        return List.of(value, unit);
+    }
+    
+    @Override
+    public String toString() {
+        if (unit == DiscountUnit.PERCENTAGE) {
+            return value + "%";
+        }
+        return value + "đ";
+    }
+    
+    
+    
+    
+}

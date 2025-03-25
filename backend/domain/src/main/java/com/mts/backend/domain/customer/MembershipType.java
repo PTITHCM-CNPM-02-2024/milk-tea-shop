@@ -1,7 +1,7 @@
 package com.mts.backend.domain.customer;
 
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.domain.AbstractAggregateRoot;
 import org.springframework.lang.NonNull;
@@ -15,7 +15,7 @@ public class MembershipType extends AbstractAggregateRoot<MembershipTypeId> {
     @NonNull
     private MemberTypeName name;
     @NonNull
-    private DiscountValue discountValue;
+    private MemberDiscountValue memberDiscountValue;
     private int requiredPoint;
     @Nullable
     private String description;
@@ -25,14 +25,14 @@ public class MembershipType extends AbstractAggregateRoot<MembershipTypeId> {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
-    public MembershipType(@NonNull MembershipTypeId id,@NonNull MemberTypeName name,@NonNull DiscountValue discountValue, int requiredPoint,@Nullable String description,@NonNull LocalDateTime validUntil, boolean isActive, LocalDateTime updatedAt) {
+    public MembershipType(@NonNull MembershipTypeId id, @NonNull MemberTypeName name, @NonNull MemberDiscountValue memberDiscountValue, int requiredPoint, @Nullable String description, @NonNull LocalDateTime validUntil, boolean isActive, LocalDateTime updatedAt) {
         super(id);
         
         if (requiredPoint < 0) {
             throw new IllegalArgumentException("Required point must be greater than or equal to 0");
         }
         this.name = Objects.requireNonNull(name, "Name is required");
-        this.discountValue = Objects.requireNonNull(discountValue, "Discount value is required");
+        this.memberDiscountValue = Objects.requireNonNull(memberDiscountValue, "Discount value is required");
         this.requiredPoint = requiredPoint;
         this.description = description;
         this.validUntil = Objects.requireNonNull(validUntil, "Valid until is required");
@@ -45,8 +45,8 @@ public class MembershipType extends AbstractAggregateRoot<MembershipTypeId> {
         return name;
     }
     
-    public DiscountValue getDiscountValue() {
-        return discountValue;
+    public MemberDiscountValue getDiscountValue() {
+        return memberDiscountValue;
     }
     
     public int getRequiredPoint() {
@@ -83,11 +83,11 @@ public class MembershipType extends AbstractAggregateRoot<MembershipTypeId> {
         return true;
     }
     
-    public boolean changeDiscountValue(DiscountValue discountValue) {
-        if (this.discountValue.equals(discountValue)) {
+    public boolean changeDiscountValue(MemberDiscountValue memberDiscountValue) {
+        if (this.memberDiscountValue.equals(memberDiscountValue)) {
             return false;
         }
-        this.discountValue = discountValue;
+        this.memberDiscountValue = memberDiscountValue;
         this.updatedAt = LocalDateTime.now();
         return true;
     }

@@ -1,11 +1,11 @@
 package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.UpdateMemberCommand;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -34,9 +34,9 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
             verifyUniqueName(membershipType.getName());
         }
 
-        DiscountValue discountValue = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        MemberDiscountValue memberDiscountValue = MemberDiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
         
-        membershipType.changeDiscountValue(discountValue);
+        membershipType.changeDiscountValue(memberDiscountValue);
         
         membershipType.changeRequiredPoint(command.getRequiredPoints());
         

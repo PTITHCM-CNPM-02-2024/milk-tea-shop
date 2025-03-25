@@ -16,10 +16,10 @@ public class ProductPrice extends AbstractEntity<ProductPriceId> {
     private final ProductId productId;
     private final ProductSizeId productSizeId;
     private Money price;
-    private final LocalDateTime createdAt;
+    private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 
-    public ProductPrice(@NonNull ProductPriceId id, @NonNull ProductId productId, @NonNull ProductSizeId productSizeId, @NonNull Money price, @Nullable LocalDateTime createdAt, @Nullable LocalDateTime updatedAt ) {
+    public ProductPrice(@NonNull ProductPriceId id, @NonNull ProductId productId, @NonNull ProductSizeId productSizeId, @NonNull Money price,  @Nullable LocalDateTime updatedAt ) {
         super(id);
         
         Objects.requireNonNull(productId, "productId không được null");
@@ -29,7 +29,6 @@ public class ProductPrice extends AbstractEntity<ProductPriceId> {
         this.productId = productId;
         this.productSizeId = productSizeId;
         this.price = price;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
     }
 

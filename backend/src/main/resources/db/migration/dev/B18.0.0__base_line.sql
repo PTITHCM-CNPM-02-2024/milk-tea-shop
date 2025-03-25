@@ -31,11 +31,10 @@ create table Coupon
 (
     coupon_id   int unsigned auto_increment comment 'Mã coupon'
         primary key,
-    coupon      varchar(15)                          not null comment 'Mã giảm giá',
-    description varchar(1000)                        null comment 'Mô tả',
-    is_active   tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
-    created_at  datetime   default CURRENT_TIMESTAMP null comment 'Ngày tạo',
-    updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    coupon      varchar(15)                        not null comment 'Mã giảm giá',
+    description varchar(1000)                      null comment 'Mô tả',
+    created_at  datetime default CURRENT_TIMESTAMP null comment 'Ngày tạo',
+    updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint coupon
         unique (coupon)
 );
@@ -221,14 +220,15 @@ create table `Order`
 (
     order_id       int unsigned auto_increment comment 'Mã đơn hàng'
         primary key,
-    customer_id    int unsigned                        null comment 'Mã khách hàng',
-    employee_id    int unsigned                        null comment 'Mã nhân viên',
-    order_time     timestamp default CURRENT_TIMESTAMP null comment 'Thời gian đặt hàng',
-    total_amount   decimal(11, 3)                      not null comment 'Tổng tiền',
-    final_amount   decimal(11, 3)                      not null comment 'Thành tiền',
-    customize_note varchar(1000)                       null comment 'Ghi chú tùy chỉnh',
-    created_at     datetime  default CURRENT_TIMESTAMP null,
-    updated_at     datetime  default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    customer_id    int unsigned                                  null comment 'Mã khách hàng',
+    employee_id    int unsigned                                  null comment 'Mã nhân viên',
+    order_time     timestamp default CURRENT_TIMESTAMP           null comment 'Thời gian đặt hàng',
+    total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
+    final_amount   decimal(11, 3)                                null comment 'Thành tiền',
+    status         enum ('PROCESSING', 'CANCELLED', 'COMPLETED') null comment 'Trạng thái đơn hàng',
+    customize_note varchar(1000)                                 null comment 'Ghi chú tùy chỉnh',
+    created_at     datetime  default CURRENT_TIMESTAMP           null,
+    updated_at     datetime  default CURRENT_TIMESTAMP           null on update CURRENT_TIMESTAMP,
     constraint Order_ibfk_1
         foreign key (customer_id) references Customer (customer_id),
     constraint Order_ibfk_2
@@ -238,19 +238,35 @@ create table `Order`
 create index employee_id
     on `Order` (employee_id);
 
+create table OrderDiscount
+(
+    order_discount_id int unsigned auto_increment comment 'Mã giảm giá đơn hàng'
+        primary key,
+    order_id          int unsigned                       not null comment 'Mã đơn  hàng áp dụng giảm giá',
+    discount_id       int unsigned                       not null comment 'Mã chương trình giảm giá được áp dụng',
+    discount_amount   decimal(11, 3)                     not null comment 'Số tiền giảm giá được áp dụng',
+    created_at        datetime default CURRENT_TIMESTAMP null,
+    updated_at        datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    constraint OrderDiscount_pk
+        unique (order_id, discount_id),
+    constraint OrderDiscount_ibfk_1
+        foreign key (order_id) references `Order` (order_id),
+    constraint OrderDiscount_ibfk_2
+        foreign key (discount_id) references Discount (discount_id)
+);
+
 create table Payment
 (
     payment_id        int unsigned auto_increment comment 'Mã thanh toán'
         primary key,
     order_id          int unsigned                             not null comment 'Mã đơn hàng',
     payment_method_id tinyint unsigned                         not null comment 'Mã phương thức thanh toán',
-    amount_paid       decimal(11, 3)                           not null comment 'Số tiền đã trả',
+    status            enum ('PROCESSING', 'CANCELLED', 'PAID') null comment 'Trạng thái thanh toán',
+    amount_paid       decimal(11, 3)                           null comment 'Số tiền đã trả',
     change_amount     decimal(11, 3) default 0.000             null comment 'Tiền thừa',
     payment_time      timestamp      default CURRENT_TIMESTAMP null comment 'Thời gian thanh toán',
     created_at        datetime       default CURRENT_TIMESTAMP null,
     updated_at        datetime       default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint order_id
-        unique (order_id),
     constraint Payment_ibfk_1
         foreign key (order_id) references `Order` (order_id),
     constraint Payment_ibfk_2
@@ -385,40 +401,20 @@ create table ProductPrice
 
 create table OrderProduct
 (
-    order_product_id        int unsigned auto_increment comment 'Mã chi tiết đơn hàng'
+    order_product_id int unsigned auto_increment comment 'Mã chi tiết đơn hàng'
         primary key,
-    order_id                int unsigned                       not null comment 'Mã đơn hàng',
-    product_price_id        int unsigned                       not null comment 'Mã giá sản phẩm',
-    parent_order_product_id int unsigned                       null comment 'Mã đặt hàng sản phẩm gốc, khi sản phẩm ở hàng này được đặt là Topping',
-    quantity                smallint unsigned                  not null comment 'Số lượng',
-    `option`                varchar(500)                       null comment 'Tùy chọn cho việc lựa chọn lượng đá, đường ',
-    created_at              datetime default CURRENT_TIMESTAMP null,
-    updated_at              datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    order_id         int unsigned                       not null comment 'Mã đơn hàng',
+    product_price_id int unsigned                       not null comment 'Mã giá sản phẩm',
+    quantity         smallint unsigned                  not null comment 'Số lượng',
+    `option`         varchar(500)                       null comment 'Tùy chọn cho việc lựa chọn lượng đá, đường ',
+    created_at       datetime default CURRENT_TIMESTAMP null,
+    updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint OrderProduct_pk
         unique (order_id, product_price_id),
     constraint OrderProduct_ibfk_1
         foreign key (order_id) references `Order` (order_id),
     constraint OrderProduct_ibfk_2
-        foreign key (product_price_id) references ProductPrice (product_price_id),
-    constraint OrderProduct_ibfk_3
-        foreign key (parent_order_product_id) references OrderProduct (order_product_id)
-);
-
-create table OrderDiscount
-(
-    order_discount_id int unsigned auto_increment comment 'Mã giảm giá đơn hàng'
-        primary key,
-    order_product_id  int unsigned                       not null comment 'Mã chi tiết đơn hàng (nếu giảm giá áp dụng cho sản phẩm cụ thể)',
-    discount_id       int unsigned                       not null comment 'Mã chương trình giảm giá được áp dụng',
-    discount_amount   decimal(11, 3)                     not null comment 'Số tiền giảm giá được áp dụng',
-    created_at        datetime default CURRENT_TIMESTAMP null,
-    updated_at        datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint OrderDiscount_pk
-        unique (order_product_id, discount_id),
-    constraint OrderDiscount_ibfk_2
-        foreign key (discount_id) references Discount (discount_id),
-    constraint OrderDiscount_ibfk_3
-        foreign key (order_product_id) references OrderProduct (order_product_id)
+        foreign key (product_price_id) references ProductPrice (product_price_id)
 );
 
 create index order_id

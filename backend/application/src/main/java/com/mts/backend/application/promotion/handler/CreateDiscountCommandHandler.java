@@ -1,16 +1,16 @@
 package com.mts.backend.application.promotion.handler;
 
 import com.mts.backend.application.promotion.command.CreateDiscountCommand;
-import com.mts.backend.application.promotion.command.DiscountCommand;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.domain.promotion.repository.ICouponRepository;
 import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
+import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
@@ -42,14 +42,14 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
         CouponId couponId = CouponId.of(command.getCouponId());
         mustExitsCoupon(couponId);
 
-        DiscountValue value = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        PromotionDiscountValue value = PromotionDiscountValue.of(command.getDiscountValue(),
+                DiscountUnit.valueOf(command.getDiscountUnit()), Money.of(command.getMaxDiscountAmount()));
         Discount discount = new Discount(
                 DiscountId.create(),
                 name,
                 command.getDescription(),
                 couponId,
                 value,
-                Money.of(command.getMaxDiscountAmount()),
                 Money.of(command.getMinimumOrderValue()),
                 command.getMinimumRequiredProduct(),
                 command.getValidFrom(),

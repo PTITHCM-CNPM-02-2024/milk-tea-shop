@@ -1,12 +1,13 @@
 package com.mts.backend.infrastructure.promotion.repository;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
+import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
 import com.mts.backend.infrastructure.persistence.entity.CouponEntity;
 import com.mts.backend.infrastructure.persistence.entity.DiscountEntity;
 import com.mts.backend.infrastructure.promotion.jpa.JpaDiscountRepository;
@@ -39,8 +40,7 @@ public class DiscountRepository implements IDiscountRepository {
                         DiscountName.of(e.getName()),
                         e.getDescription(),
                         CouponId.of(e.getCouponEntity().getId()),
-                        DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit()),
-                        Money.of(e.getMaxDiscountAmount()),
+                        PromotionDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit(), Money.of(e.getMaxDiscountAmount())),
                         Money.of(e.getMinRequiredOrderValue()),
                         e.getMinRequiredProduct(),
                         e.getValidFrom(),
@@ -88,7 +88,7 @@ public class DiscountRepository implements IDiscountRepository {
                 .maxUsesPerCustomer(discount.getMaxUsagePerCustomer().orElse(null))
                 .validFrom(discount.getValidFrom().orElse(null))
                 .validUntil(discount.getValidUntil())
-                .maxDiscountAmount(discount.getMaxDiscountAmount().getAmount())
+                .maxDiscountAmount(discount.getDiscountValue().getMaxDiscountValue().getAmount())
                 .minRequiredOrderValue(discount.getMinRequiredOrderValue().getAmount())
                 .minRequiredProduct(discount.getMinRequiredProduct().orElse(null))
                 .build();
@@ -120,7 +120,7 @@ public class DiscountRepository implements IDiscountRepository {
                 .maxUsesPerCustomer(discount.getMaxUsagePerCustomer().orElse(null))
                 .validFrom(discount.getValidFrom().orElse(null))
                 .validUntil(discount.getValidUntil())
-                .maxDiscountAmount(discount.getMaxDiscountAmount().getAmount())
+                .maxDiscountAmount(discount.getDiscountValue().getMaxDiscountValue().getAmount())
                 .minRequiredOrderValue(discount.getMinRequiredOrderValue().getAmount())
                 .minRequiredProduct(discount.getMinRequiredProduct().orElse(null))
                 .build();
@@ -150,8 +150,7 @@ public class DiscountRepository implements IDiscountRepository {
                         DiscountName.of(e.getName()),
                         e.getDescription(),
                         CouponId.of(e.getCouponEntity().getId()),
-                        DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit()),
-                        Money.of(e.getMaxDiscountAmount()),
+                        PromotionDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit(), Money.of(e.getMaxDiscountAmount())),
                         Money.of(e.getMinRequiredOrderValue()),
                         e.getMinRequiredProduct(),
                         e.getValidFrom(),
@@ -175,8 +174,7 @@ public class DiscountRepository implements IDiscountRepository {
                         DiscountName.of(e.getName()),
                         e.getDescription(),
                         CouponId.of(e.getCouponEntity().getId()),
-                        DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit()),
-                        Money.of(e.getMaxDiscountAmount()),
+                        PromotionDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit(), Money.of(e.getMaxDiscountAmount())),
                         Money.of(e.getMinRequiredOrderValue()),
                         e.getMinRequiredProduct(),
                         e.getValidFrom(),
@@ -244,8 +242,7 @@ public class DiscountRepository implements IDiscountRepository {
                         DiscountName.of(e.getName()),
                         e.getDescription(),
                         CouponId.of(e.getCouponEntity().getId()),
-                        DiscountValue.of(e.getDiscountValue(), e.getDiscountUnit()),
-                        Money.of(e.getMaxDiscountAmount()),
+                        PromotionDiscountValue.of(e.getDiscountValue(), e.getDiscountUnit(), Money.of(e.getMaxDiscountAmount())),
                         Money.of(e.getMinRequiredOrderValue()),
                         e.getMinRequiredProduct(),
                         e.getValidFrom(),
