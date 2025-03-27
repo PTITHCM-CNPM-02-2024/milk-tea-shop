@@ -1,13 +1,14 @@
 package com.mts.backend.domain.payment.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.domain.Identifiable;
 
 public class PaymentId implements Identifiable {
     
-    private final long value;
+    private final CouponId value;
     
-    private PaymentId (long value) {
+    private PaymentId (CouponId value) {
         
         if (value <= 0) {
             throw new IllegalArgumentException("Payment id must be greater than 0");
@@ -19,7 +20,7 @@ public class PaymentId implements Identifiable {
         this.value = value;
     }
     
-    public static PaymentId of(long value) {
+    public static PaymentId of(CouponId value) {
         return new PaymentId(value);
     }
     
@@ -31,7 +32,7 @@ public class PaymentId implements Identifiable {
         return new PaymentId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
+    public CouponId getValue() {
         return value;
     }
     

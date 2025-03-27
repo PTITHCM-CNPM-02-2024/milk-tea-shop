@@ -1,5 +1,7 @@
 package com.mts.backend.domain.common.provider;
 
+import com.mts.backend.domain.promotion.identifier.CouponId;
+
 import java.security.SecureRandom;
 
 public class IdentifiableProvider {

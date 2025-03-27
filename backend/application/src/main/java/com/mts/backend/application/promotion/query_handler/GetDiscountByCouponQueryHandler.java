@@ -3,6 +3,7 @@ package com.mts.backend.application.promotion.query_handler;
 import com.mts.backend.application.promotion.query.DiscountByCouponQuery;
 import com.mts.backend.application.promotion.response.DiscountDetailResponse;
 import com.mts.backend.domain.promotion.identifier.CouponId;
+import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -14,9 +15,9 @@ import java.util.Objects;
 @Service
 public class GetDiscountByCouponQueryHandler implements IQueryHandler<DiscountByCouponQuery, CommandResult> {
 
-    private final IDiscountRepository discountRepository;
+    private final JpaDiscountRepository discountRepository;
 
-    public GetDiscountByCouponQueryHandler(IDiscountRepository discountRepository) {
+    public GetDiscountByCouponQueryHandler(JpaDiscountRepository discountRepository) {
         this.discountRepository = discountRepository;
     }
 
@@ -28,24 +29,25 @@ public class GetDiscountByCouponQueryHandler implements IQueryHandler<DiscountBy
     public CommandResult handle(DiscountByCouponQuery query) {
         Objects.requireNonNull(query, "Discount by coupon query is required");
 
-        var discount = discountRepository.findByCouponId(CouponId.of(query.getCouponId())).orElseThrow(() -> new NotFoundException(
+        var discount =
+                discountRepository.findByCouponEntity_Coupon(query.getCouponId()).orElseThrow(() -> new NotFoundException(
                 "Không tìm thấy mã giảm giá"));
 
         var response = DiscountDetailResponse.builder()
                 .id(discount.getId().getValue())
                 .name(discount.getName().getValue())
                 .description(discount.getDescription())
-                .couponId(discount.getCouponId().getValue())
-                .discountValue(discount.getDiscountValue().getValue())
-                .discountUnit(discount.getDiscountValue().getUnit().toString())
-                .maxDiscountAmount(discount.getDiscountValue().getMaxDiscountValue().getAmount())
-                .minimumOrderValue(discount.getMinRequiredOrderValue().getAmount())
+                .couponId(discount.getCouponEntity().getId().getValue())
+                .discountValue(discount.getPromotionDiscountValue().getValue())
+                .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
+                .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())
+                .minimumOrderValue(discount.getMinRequiredOrderValue().getValue())
                 .minimumRequiredProduct(discount.getMinRequiredProduct().orElse(null))
                 .validFrom(discount.getValidFrom().orElse(null))
                 .validUntil(discount.getValidUntil())
-                .maxUsage(discount.getMaxUsage().orElse(null))
-                .maxUsagePerCustomer(discount.getMaxUsagePerCustomer().orElse(null))
-                .isActive(discount.isActive())
+                .maxUsage(discount.getMaxUse().orElse(null))
+                .maxUsagePerCustomer(discount.getMaxUsesPerCustomer().orElse(null))
+                .isActive(discount.getActive())
                 .build();
         
         return CommandResult.success(response);

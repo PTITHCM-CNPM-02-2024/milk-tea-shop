@@ -1,12 +1,13 @@
 package com.mts.backend.domain.staff.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.domain.Identifiable;
 
 public class ManagerId implements Identifiable {
-    private final long value;
+    private final CouponId value;
     
-    private ManagerId(long value) {
+    private ManagerId(CouponId value) {
         if (value <= 0) {
             throw new IllegalArgumentException("Id must be greater than 0");
         }
@@ -17,7 +18,7 @@ public class ManagerId implements Identifiable {
         this.value = value;
     }
     
-    public static ManagerId of(long value) {
+    public static ManagerId of(CouponId value) {
         return new ManagerId(value);
     }
     
@@ -25,7 +26,7 @@ public class ManagerId implements Identifiable {
         return new ManagerId(Long.parseLong(value));
     }
     
-    public long getValue() {
+    public CouponId getValue() {
         return value;
     }
     

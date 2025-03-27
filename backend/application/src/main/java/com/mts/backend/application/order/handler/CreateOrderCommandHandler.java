@@ -17,7 +17,6 @@ import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.entity.ProductPrice;
 import com.mts.backend.domain.product.identifier.ProductId;
-import com.mts.backend.domain.product.identifier.ProductPriceId;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.repository.IProductRepository;
 import com.mts.backend.domain.promotion.Discount;
@@ -85,12 +84,12 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
                 OrderBasicResponse.builder().customerId(saveOrder.getCustomerId().isPresent() ?
                         saveOrder.getCustomerId().get().getValue() : null)
                         .employeeId(saveOrder.getEmployeeId().getValue())
-                        .finalAmount(saveOrder.getFinalAmount().map(Money::getAmount).orElse(null))
+                        .finalAmount(saveOrder.getFinalAmount().map(Money::getValue).orElse(null))
                         .note(saveOrder.getCustomizeNote().orElse(null))
                         .orderId(saveOrder.getId().getValue())
                         .orderStatus(saveOrder.getStatus().map(OrderStatus::name).orElse(null))
                         .orderTime(saveOrder.getOrderTime())
-                        .totalAmount(saveOrder.getTotalAmount().map(Money::getAmount).orElse(null))
+                        .totalAmount(saveOrder.getTotalAmount().map(Money::getValue).orElse(null))
                         .build();
         
         return CommandResult.success(response);

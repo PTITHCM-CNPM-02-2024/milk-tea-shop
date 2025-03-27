@@ -2,9 +2,11 @@ package com.mts.backend.application.promotion.query_handler;
 
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
 import com.mts.backend.application.promotion.response.CouponDetailResponse;
+import com.mts.backend.domain.promotion.jpa.JpaCouponRepository;
 import com.mts.backend.domain.promotion.repository.ICouponRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,9 +15,9 @@ import java.util.Objects;
 
 @Service
 public class GetAllCouponQueryHandler implements IQueryHandler<DefaultCouponQuery, CommandResult> {
-    private final ICouponRepository couponRepository;
+    private final JpaCouponRepository couponRepository;
     
-    public GetAllCouponQueryHandler(ICouponRepository couponRepository) {
+    public GetAllCouponQueryHandler(JpaCouponRepository couponRepository) {
         this.couponRepository = couponRepository;
     }
     /**
@@ -26,7 +28,7 @@ public class GetAllCouponQueryHandler implements IQueryHandler<DefaultCouponQuer
     public CommandResult handle(DefaultCouponQuery query) {
         Objects.requireNonNull(query, "Default coupon query is required");
         
-        var coupons = couponRepository.findAll();
+        var coupons = couponRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
         List<CouponDetailResponse> responses = new ArrayList<>();
         
@@ -34,7 +36,7 @@ public class GetAllCouponQueryHandler implements IQueryHandler<DefaultCouponQuer
             responses.add(CouponDetailResponse.builder()
                     .id(coupon.getId().getValue())
                     .coupon(coupon.getCoupon().getValue())
-                    .description(coupon.getDescription())
+                    .description(coupon.getDescription().orElse(null))
                     .build());
         });
         

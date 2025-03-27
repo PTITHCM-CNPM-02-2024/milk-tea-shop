@@ -5,6 +5,7 @@ import com.mts.backend.api.order.request.OrderBaseRequest;
 import com.mts.backend.application.order.OrderCommandBus;
 import com.mts.backend.application.order.command.*;
 import com.mts.backend.domain.order.identifier.OrderId;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,7 @@ public class OrderController implements IController {
 
     
     @PutMapping("{orderId}/cancel")
-    public ResponseEntity<ApiResponse<?>> cancelOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<ApiResponse<?>> cancelOrder(@PathVariable("orderId") CouponId orderId) {
         var command = CancelledOrderCommand.builder()
                 .id(OrderId.of(orderId))
                 .build();

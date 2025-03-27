@@ -37,6 +37,7 @@ dependencies {
         api("org.springframework.modulith:spring-modulith-starter-jpa:1.3.2")
         api("org.springframework.boot:spring-boot-starter-logging:3.4.2")
         api("org.springframework.boot:spring-boot-starter-actuator:3.4.2")
+        api("org.springframework.boot:spring-boot-starter-validation:3.4.2")
     }
 }
 

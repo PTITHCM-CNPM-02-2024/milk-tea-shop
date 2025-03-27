@@ -48,12 +48,12 @@ public class CashProvider implements IPaymentProvider{
         
         var paymentSaved = paymentRepository.save(payment);
         
-        var message = "Vui lòng thanh toán %sVNĐ".formatted(order.getFinalAmount().get().getAmount());
+        var message = "Vui lòng thanh toán %sVNĐ".formatted(order.getFinalAmount().get().getValue());
         
         return PaymentInitResponse.processing(
                 paymentSaved.getId().getValue(),
                 message,
-                order.getFinalAmount().get().getAmount());
+                order.getFinalAmount().get().getValue());
                 
         
     }

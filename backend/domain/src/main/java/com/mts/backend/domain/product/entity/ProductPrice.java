@@ -37,7 +37,7 @@ public class ProductPrice extends AbstractEntity<ProductPriceId> {
      */
     public void changePrice(Money newPrice) {
 
-        Money validPrice = (Money) checkAndAssign(Money.create(newPrice.getAmount()));
+        Money validPrice = (Money) checkAndAssign(Money.create(newPrice.getValue()));
 
         if (!businessErrors.isEmpty()) {
             throw new DomainBusinessLogicException(businessErrors);

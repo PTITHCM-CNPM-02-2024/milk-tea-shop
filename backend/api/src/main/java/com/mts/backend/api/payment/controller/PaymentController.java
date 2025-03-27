@@ -10,8 +10,8 @@ import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.response.ApiResponse;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +40,7 @@ public class PaymentController implements IController {
     }
     
     @PostMapping("/{paymentId}/{methodId}/complete")
-    public ResponseEntity<?> completePayment(@PathVariable("paymentId") Long paymentId,
+    public ResponseEntity<?> completePayment(@PathVariable("paymentId") CouponId paymentId,
                                                           @PathVariable("methodId") Integer methodId,
                                                           @RequestBody PaymentTransactionRequest request) {
         

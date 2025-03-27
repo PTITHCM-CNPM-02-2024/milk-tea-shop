@@ -14,8 +14,6 @@ import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-
 @RestController
 @RequestMapping("/api/v1/discounts")
 public class DiscountController implements IController {
@@ -67,7 +65,7 @@ public class DiscountController implements IController {
                 .validUntil((request.getValidUntil()))
                 .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
                 .maxUsage(request.getMaxUsage())
-                .isActive(request.getIsActive())
+                .active(request.getIsActive())
                 .build();
         
         var result = commandBus.dispatch(command);

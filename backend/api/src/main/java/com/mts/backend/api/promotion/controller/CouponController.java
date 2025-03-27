@@ -9,6 +9,9 @@ import com.mts.backend.application.promotion.command.CreateCouponCommand;
 import com.mts.backend.application.promotion.command.UpdateCouponCommand;
 import com.mts.backend.application.promotion.query.CouponByIdQuery;
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
+import com.mts.backend.domain.promotion.Coupon;
+import com.mts.backend.domain.promotion.identifier.CouponId;
+import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +31,9 @@ public class CouponController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createCoupon(@RequestBody CreateCouponRequest request) {
         var command = CreateCouponCommand.builder()
-                .coupon(request.getCoupon())
+                .coupon(CouponCode.builder()
+                        .value(request.getCoupon())
+                        .build())
                 .description(request.getDescription())
                 .build();
         
@@ -42,8 +47,10 @@ public class CouponController implements IController {
     public ResponseEntity<ApiResponse<?>> updateCoupon(@PathVariable("id") Long id, @RequestBody UpdateCouponRequest request) {
         
         var command = UpdateCouponCommand.builder()
-                .id(id)
-                .coupon(request.getCoupon())
+                .id(CouponId.of(id))
+                .coupon(CouponCode.builder()
+                        .value(request.getCoupon())
+                        .build())
                 .description(request.getDescription())
                 .build();
         
@@ -53,8 +60,12 @@ public class CouponController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllCoupon() {
-        var command = DefaultCouponQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllCoupon(@RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size) {
+        var command = DefaultCouponQuery.builder().
+                page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(command);
         
@@ -64,7 +75,7 @@ public class CouponController implements IController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getCouponById(@PathVariable("id") Long id) {
         var command = CouponByIdQuery.builder()
-                .id(id)
+                .id(CouponId.of(id))
                 .build();
         
         var result = queryBus.dispatch(command);

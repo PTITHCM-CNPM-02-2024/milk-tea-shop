@@ -1,93 +1,95 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.UpdateServiceTableCommand;
-import com.mts.backend.domain.store.ServiceTable;
+import com.mts.backend.domain.store.ServiceTableEntity;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
-import com.mts.backend.domain.store.repository.IAreaRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
+import com.mts.backend.domain.store.jpa.JpaAreaRepository;
+import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.domain.store.value_object.TableNumber;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+
 @Service
 public class UpdateServiceTableCommandHandler implements ICommandHandler<UpdateServiceTableCommand, CommandResult> {
-    private final IServiceTableRepository serviceTableRepository;
-    private final IAreaRepository areaRepository;
 
-    public UpdateServiceTableCommandHandler(IServiceTableRepository serviceTableRepository,
-                                            IAreaRepository areaRepository) {
-        this.serviceTableRepository = serviceTableRepository;
-        this.areaRepository = areaRepository;
+    private final JpaServiceTableRepository jpaServiceTableRepository;
+    private final JpaAreaRepository jpaAreaRepository;
+
+    public UpdateServiceTableCommandHandler(JpaServiceTableRepository jpaServiceTableRepository,
+                                            JpaAreaRepository jpaAreaRepository) {
+        this.jpaServiceTableRepository = jpaServiceTableRepository;
+        this.jpaAreaRepository = jpaAreaRepository;
     }
 
-    /**
-     * @param command
-     * @return
-     */
     @Override
+    @Transactional
     public CommandResult handle(UpdateServiceTableCommand command) {
         Objects.requireNonNull(command, "Update service table command is required");
-        
-        var serviceTable = mustExistTable(ServiceTableId.of(command.getId()));
-        
-        if (serviceTable.changeTableNumber(TableNumber.of(command.getName()))){
-            verifyUniqueName(serviceTable.getTableNumber());
+        Objects.requireNonNull(command.getId(), "Service table id is required");
+
+        // Find the service table
+        ServiceTableEntity serviceTable = findServiceTable(command.getId());
+
+        // Update table number if provided
+        if (serviceTable.changeTableNumber(command.getName())){
+            verifyUniqueTableNumber(serviceTable.getTableNumber());
         }
+        // Update area if provided
+        updateAreaIfNeeded(serviceTable, command.getAreaId().orElse(null));
 
+        // Update active status and validate
+        updateActiveStatus(serviceTable, command.isActive());
 
-        AreaId areaId = command.getAreaId() != null ? mustExistArea(AreaId.of(command.getAreaId())) : null;
-        serviceTable.changeAreaId(areaId);
-         serviceTable.changeIsActive(command.isActive());
-         
-         if (serviceTable.isActive() && areaId != null){
-             allowActiveWhenAreaExistAndActive(areaId);
-         }
-
-        var savedServiceTable = serviceTableRepository.save(serviceTable);
+        // Save changes
+        ServiceTableEntity savedServiceTable = jpaServiceTableRepository.save(serviceTable);
 
         return CommandResult.success(savedServiceTable.getId().getValue());
     }
-    
-    private ServiceTable mustExistTable(ServiceTableId id){
-        Objects.requireNonNull(id, "Service table id is required");
-        
-        return serviceTableRepository.findById(id)
+
+    @Transactional
+    protected ServiceTableEntity findServiceTable(ServiceTableId id) {
+        return jpaServiceTableRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bàn không tồn tại"));
     }
 
-    private void verifyUniqueName(TableNumber number) {
+    @Transactional
+    protected void verifyUniqueTableNumber(TableNumber number) {
         Objects.requireNonNull(number, "Table number is required");
 
-        if (serviceTableRepository.existsByName(number)) {
-            throw new DuplicateException("Số bàn đã tồn tại");
+        jpaServiceTableRepository.findByTableNumber(number.getValue())
+                .ifPresent(existingTable -> {
+                    throw new DuplicateException("Số bàn đã tồn tại");
+                });
+    }
+
+    private void updateAreaIfNeeded(ServiceTableEntity serviceTable, AreaId areaId) {
+        if (areaId != null) {
+            var area = jpaAreaRepository.findById(areaId)
+                    .orElseThrow(() -> new NotFoundException("Khu vực không tồn tại"));
+            serviceTable.setAreaEntity(area);
         }
     }
 
-    private AreaId mustExistArea(AreaId areaId) {
-        Objects.requireNonNull(areaId, "Area id is required");
-
-        if (!areaRepository.existsById(areaId)) {
-            throw new NotFoundException("Khu vực không tồn tại");
+    private void updateActiveStatus(ServiceTableEntity serviceTable, boolean isActive) {
+        // Only need to validate when activating
+        if (isActive) {
+            validateAreaForActiveTable(serviceTable);
         }
-
-        return areaId;
+        serviceTable.changeIsActive(isActive);
     }
-    
-    private void allowActiveWhenAreaExistAndActive(AreaId areaId){
-        if (areaId == null){
-            return;
-        }
-        
-        var area = areaRepository.findById(areaId)
-                .orElseThrow(() -> new NotFoundException("Khu vực không tồn tại"));
-        
-        if (!area.isActive()){
-            throw new NotFoundException("Khu vực không hoạt động, không thể kích hoạt bàn");
+
+    private void validateAreaForActiveTable(ServiceTableEntity serviceTable) {
+        if (serviceTable.getAreaEntity().isEmpty()) return;
+        if (!serviceTable.getAreaEntity().get().getActive()) {
+            throw new DomainException("Khu vực" + serviceTable.getAreaEntity().get().getName() + " không hoạt động");
         }
     }
 }

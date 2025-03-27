@@ -196,18 +196,18 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
         // Total amount
         template = template.replace("{{totalAmount}}",
-                currency.format(order.getTotalAmount().orElse(Money.ZERO).getAmount()));
+                currency.format(order.getTotalAmount().orElse(Money.ZERO).getValue()));
         
         // Final amount
         template = template.replace("{{grandTotal}}",
-                currency.format(order.getFinalAmount().orElse(Money.ZERO).getAmount()));
+                currency.format(order.getFinalAmount().orElse(Money.ZERO).getValue()));
         
         // Total discount
         Money totalDiscount = order.getOrderDiscounts().stream()
                 .map(OrderDiscount::getDiscountAmount)
                 .reduce(Money.ZERO, Money::add);
 
-        template = template.replace("{{discountAmount}}", currency.format(totalDiscount.getAmount()));
+        template = template.replace("{{discountAmount}}", currency.format(totalDiscount.getValue()));
 
         return template;
     }
@@ -256,10 +256,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                     return OrderProductDetailResponse.builder()
                             .productName(product.getName().getValue())
                             .size(size.getName().getValue())
-                            .price(productPrice.getPrice().getAmount())
+                            .price(productPrice.getPrice().getValue())
                             .quantity(orderProduct.getQuantity())
                             .productOption(orderProduct.getOption())
-                            .totalPrice(productPrice.getPrice().getAmount()
+                            .totalPrice(productPrice.getPrice().getValue()
                                     .multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
                             .build();
                 })
@@ -285,7 +285,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                             .discountValue(orderDiscount.getDiscountValue()
                                     .map(PromotionDiscountValue::getDescription)
                                     .orElse(""))
-                            .discountAmount(orderDiscount.getDiscountAmount().getAmount())
+                            .discountAmount(orderDiscount.getDiscountAmount().getValue())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -300,10 +300,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return PaymentDetailResponse.builder()
                 .paymentMethod(paymentMethod.getName().getValue())
                 .amountPaid(payment.getAmountPaid()
-                        .map(Money::getAmount)
+                        .map(Money::getValue)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy số tiền đã thanh toán")))
                 .change(payment.getChangeAmount()
-                        .map(Money::getAmount)
+                        .map(Money::getValue)
                         .orElse(BigDecimal.ZERO))
                 .build();
     }

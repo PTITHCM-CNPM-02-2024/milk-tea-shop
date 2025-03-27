@@ -406,8 +406,8 @@ public class Order extends AbstractAggregateRoot<OrderId> {
 //                    yield subtotal.multiply(percentValue).divide(BigDecimal.valueOf(100));
                     //check percent value money <= max discount value
                     var discountAmountValue = subtotal.multiply(percentValue).divide(BigDecimal.valueOf(100));
-                    if (discountAmountValue.compareTo(mayBeDiscountValue.getMaxDiscountValue()) > 0) {
-                        yield mayBeDiscountValue.getMaxDiscountValue();
+                    if (discountAmountValue.compareTo(mayBeDiscountValue.getMaxDiscountAmount()) > 0) {
+                        yield mayBeDiscountValue.getMaxDiscountAmount();
                     } else {
                         yield discountAmountValue;
                     }

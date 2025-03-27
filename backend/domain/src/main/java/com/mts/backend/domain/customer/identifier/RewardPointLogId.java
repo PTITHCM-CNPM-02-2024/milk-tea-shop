@@ -1,13 +1,14 @@
 package com.mts.backend.domain.customer.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.domain.Identifiable;
 
 public class RewardPointLogId implements Identifiable {
     
-    private final long id;
+    private final CouponId id;
     
-    private RewardPointLogId(long id) {
+    private RewardPointLogId(CouponId id) {
         
         if (id <= 0) {
             throw new IllegalArgumentException("RewardPointLog id must be greater than 0");
@@ -18,7 +19,7 @@ public class RewardPointLogId implements Identifiable {
         this.id = id;
     }
     
-    public static RewardPointLogId of(long id) {
+    public static RewardPointLogId of(CouponId id) {
         return new RewardPointLogId(id);
     }
     
@@ -30,7 +31,7 @@ public class RewardPointLogId implements Identifiable {
         return new RewardPointLogId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
+    public CouponId getValue() {
         return id;
     }
     

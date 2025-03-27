@@ -19,9 +19,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
                 @ComponentScan(basePackages = "com.mts.backend.infrastructure.promotion.*"),
         }
 )
-@EntityScan(basePackages = {
-        "com.mts.backend.infrastructure.persistence",
-        "com.mts.backend.infrastructure.persistence.entity"})
-@EnableJpaRepositories
+//@EntityScan(basePackages = {
+//        "com.mts.backend.infrastructure.persistence",
+//        "com.mts.backend.infrastructure.persistence.entity"})
+//@EnableJpaRepositories
 public class InfrastructureModuleConfig {
 }

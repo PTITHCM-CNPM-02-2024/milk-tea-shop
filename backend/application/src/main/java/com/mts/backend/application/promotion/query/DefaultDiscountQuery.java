@@ -13,4 +13,6 @@ import org.springframework.stereotype.Service;
 @Builder
 @Data
 public class DefaultDiscountQuery implements IQuery<CommandResult>{
+    private Integer size;
+    private Integer page;
 }

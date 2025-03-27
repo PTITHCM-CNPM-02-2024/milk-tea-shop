@@ -1,14 +1,15 @@
 package com.mts.backend.domain.product.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.domain.Identifiable;
 
 import java.util.Objects;
 
 public class ProductPriceId implements Identifiable {
-    private final long value;
+    private final CouponId value;
     
-    private ProductPriceId(long value) {
+    private ProductPriceId(CouponId value) {
         if (value <= 0) {
             throw new IllegalArgumentException("Product price id phải lớn hơn 0");
         }
@@ -18,11 +19,11 @@ public class ProductPriceId implements Identifiable {
         this.value = value;
     }
     
-    public static ProductPriceId of (long value) {
+    public static ProductPriceId of (CouponId value) {
         return new ProductPriceId(value);
     }
     
-    public long getValue() {
+    public CouponId getValue() {
         return value;
     }
     public static ProductPriceId of(String value) {

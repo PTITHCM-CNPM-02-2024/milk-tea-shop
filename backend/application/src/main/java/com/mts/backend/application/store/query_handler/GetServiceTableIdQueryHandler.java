@@ -3,8 +3,10 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
 import com.mts.backend.domain.store.ServiceTable;
+import com.mts.backend.domain.store.ServiceTableEntity;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
+import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.domain.store.repository.IAreaRepository;
 import com.mts.backend.domain.store.repository.IServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -16,12 +18,10 @@ import java.util.Objects;
 @Service
 public class GetServiceTableIdQueryHandler implements IQueryHandler<ServiceTableByIdQuery, CommandResult> {
     
-    private final IServiceTableRepository serviceTableRepository;
-    private final IAreaRepository areaRepository;
+    private final JpaServiceTableRepository serviceTableRepository;
     
-    public GetServiceTableIdQueryHandler(IServiceTableRepository serviceTableRepository, IAreaRepository areaRepository) {
+    public GetServiceTableIdQueryHandler(JpaServiceTableRepository serviceTableRepository, IAreaRepository areaRepository) {
         this.serviceTableRepository = serviceTableRepository;
-        this.areaRepository = areaRepository;
     }
     /**
      * @param query 
@@ -31,30 +31,20 @@ public class GetServiceTableIdQueryHandler implements IQueryHandler<ServiceTable
     public CommandResult handle(ServiceTableByIdQuery query) {
         Objects.requireNonNull(query, "Get service table by id query is required");
         
-        var re = mustExistServiceTable(ServiceTableId.of(query.getId()));
+        var re = mustExistServiceTable(query.getId());
         
         ServiceTableDetailResponse response = ServiceTableDetailResponse.builder()
                 .id(re.getId().getValue())
                 .name(re.getTableNumber().getValue())
-                .isActive(re.isActive()).build();
-        
-        if (re.getAreaId().isPresent()){
-            verifyAreaIfExist(re.getAreaId().get());
-        }
-        
-        response.setAreaId(re.getAreaId().map(AreaId::getValue).orElse(null));
+                .isActive(re.getActive())
+                        .areaId(re.getAreaEntity().map(a -> a.getId().getValue()).orElse(null))
+                        .build();
         
         return CommandResult.success(response);
     }
     
-    private ServiceTable mustExistServiceTable(ServiceTableId id){
-        return serviceTableRepository.findById(id)
+    private ServiceTableEntity mustExistServiceTable(ServiceTableId id){
+        return serviceTableRepository.findByIdWithArea(id)
                 .orElseThrow(() -> new NotFoundException("Bàn không tồn tại"));
-    }
-    
-    private void verifyAreaIfExist(AreaId areaId){
-        if (areaId != null && !areaRepository.existsById(areaId)){
-            throw new NotFoundException("Khu vực không tồn tại");
-        }
     }
 }

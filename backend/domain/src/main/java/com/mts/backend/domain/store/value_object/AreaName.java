@@ -1,66 +1,55 @@
 package com.mts.backend.domain.store.value_object;
 
-import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AreaName extends AbstractValueObject {
-    private final String value;
+@Value
+@Builder
+public class AreaName {
+    String value;
     private static final int MAX_LENGTH = 3;
-    private AreaName(String value){
+    
+    private AreaName(String value) {
+        Objects.requireNonNull(value);
+        
+        List<String> errors = new ArrayList<>();
+        
+        if (value.length() > MAX_LENGTH) {
+            errors.add("Tên khu vực phải có đúng" + MAX_LENGTH + "ký tự");
+        }
+        
+        if (value.isBlank()){
+            errors.add("Tên bàn không được để trống");
+        }
+        
+        if (!errors.isEmpty()){
+            throw new DomainBusinessLogicException(errors);
+        }
+        
         this.value = normalize(value);
     }
     
     private static String normalize(String value){
         return value.trim().toUpperCase();
     }
-    
-    public static ValueObjectValidationResult create(String value){
-        Objects.requireNonNull(value, "Area name is required");
         
-        List<String> errors = new ArrayList<>();
-        
-        if (value.length() != MAX_LENGTH){
-            errors.add("Tên khu vực phải có " + MAX_LENGTH + " ký tự");
+    @Converter(autoApply = true)
+    public static class AreaNameConverter implements AttributeConverter<AreaName, String> {
+        @Override
+        public String convertToDatabaseColumn(AreaName attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
         }
-        
-        if (errors.isEmpty()){
-            return new ValueObjectValidationResult(new AreaName(value), errors);
+    
+        @Override
+        public AreaName convertToEntityAttribute(String dbData) {
+            return Objects.isNull(dbData) ? null : AreaName.builder().value(dbData).build();
         }
-        
-        return new ValueObjectValidationResult(null, errors);
-    } 
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value);
     }
-    
-    public String getValue(){
-        return value;
-    }
-    
-    public static AreaName of(String value){
-        ValueObjectValidationResult result = create(value);
-        
-        if (result.getBusinessErrors().isEmpty()){
-            return new AreaName(value);
-        }
-        throw new DomainException("Tên khu vực không hợp lệ" + result.getBusinessErrors());
-    }
-    
-    @Override
-    public String toString() {
-        return normalize(value);
-    }
-    
-    
-    
-    
 }

@@ -1,11 +1,15 @@
 package com.mts.backend.domain.store.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import jakarta.validation.constraints.NotNull;
+import lombok.Value;
 
-public class ServiceTableId implements Identifiable {
-    
-    private final int serviceTableId;
+import java.io.Serializable;
+
+@Value
+public class ServiceTableId implements Serializable {
+    int value;
     
     private ServiceTableId(int id){
         if (id <= 0) {
@@ -15,7 +19,7 @@ public class ServiceTableId implements Identifiable {
             throw new IllegalArgumentException("Invalid serviceTableId");
         }
         
-        this.serviceTableId = id;
+        this.value = id;
     }
     
     public static ServiceTableId of (int id){
@@ -30,22 +34,16 @@ public class ServiceTableId implements Identifiable {
         return new ServiceTableId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        ServiceTableId that = (ServiceTableId) o;
-        
-        return serviceTableId == that.serviceTableId;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(serviceTableId);
-    }
     
-    public int getValue(){
-        return serviceTableId;
+    public static final class ServiceTableIdConverter implements AttributeConverter<ServiceTableId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(ServiceTableId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public ServiceTableId convertToEntityAttribute(Integer dbData) {
+            return ServiceTableId.of(dbData);
+        }
     }
 }

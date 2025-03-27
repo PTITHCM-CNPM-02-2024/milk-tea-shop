@@ -1,20 +1,23 @@
 package com.mts.backend.domain.store.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
+import java.io.Serializable;
 
-public class AreaId implements Identifiable {
-    private final int areaId;
+@Value
+public class AreaId implements Serializable {
+    int value;
     
-    private AreaId(int areaId) {
-        if (areaId <= 0) {
+    private AreaId(int value) {
+        if (value <= 0) {
             throw new IllegalArgumentException("Invalid areaId");
         }
-        if (areaId > IdentifiableProvider.SMALLINT_UNSIGNED_MAX) {
+        if (value > IdentifiableProvider.SMALLINT_UNSIGNED_MAX) {
             throw new IllegalArgumentException("Invalid areaId");
         }
-        this.areaId = areaId;
+        this.value = value;
     }
     
     public static AreaId of (int areaId) {
@@ -25,26 +28,25 @@ public class AreaId implements Identifiable {
         return new AreaId(Integer.parseInt(areaId));
     }
     
-    public int getValue(){
-        return areaId;
-    }
-    
     public static AreaId create(){
         return new AreaId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class AreaIdConverter implements AttributeConverter<AreaId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(AreaId attribute) {
+            return attribute.getValue();
+        }
         
-        AreaId areaId1 = (AreaId) o;
-        
-        return areaId == areaId1.areaId;
+        @Override
+        public AreaId convertToEntityAttribute(Integer dbData) {
+            return AreaId.of(dbData);
+        }
     }
+    
     
     @Override
     public String toString() {
-        return String.valueOf(areaId);
+        return String.valueOf(value);
     }
 }

@@ -2,6 +2,7 @@ package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.DefaultAreaQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
+import com.mts.backend.domain.store.jpa.JpaAreaRepository;
 import com.mts.backend.domain.store.repository.IAreaRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;
@@ -10,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,9 +21,9 @@ import java.util.Objects;
 
 @Service
 public class GetAllAreaQueryHandler implements IQueryHandler<DefaultAreaQuery, CommandResult> {
-    private final IAreaRepository areaRepository;
+    private final JpaAreaRepository areaRepository;
     
-    public GetAllAreaQueryHandler(IAreaRepository areaRepository) {
+    public GetAllAreaQueryHandler(JpaAreaRepository areaRepository) {
         this.areaRepository = areaRepository;
     }
     /**
@@ -31,17 +34,17 @@ public class GetAllAreaQueryHandler implements IQueryHandler<DefaultAreaQuery, C
     public CommandResult handle(DefaultAreaQuery query) {
         Objects.requireNonNull(query,"DefaultAreaQuery is required");
         
-        var areas = areaRepository.findAll();
+        var areas = areaRepository.findAll(Pageable.ofSize(query.getSize()));
         
         List<AreaDetailResponse> responses = new ArrayList<>();
         
         areas.forEach(area -> {
             var response = AreaDetailResponse.builder()
                     .id(area.getId().getValue())
-                    .name(area.getAreaName().getValue())
+                    .name(area.getName().getValue())
                     .description(area.getDescription().orElse(null))
                     .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
-                    .isActive(area.isActive())
+                    .isActive(area.getActive())
                     .build();
             
             responses.add(response);

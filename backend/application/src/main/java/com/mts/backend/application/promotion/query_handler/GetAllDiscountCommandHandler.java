@@ -2,9 +2,11 @@ package com.mts.backend.application.promotion.query_handler;
 
 import com.mts.backend.application.promotion.query.DefaultDiscountQuery;
 import com.mts.backend.application.promotion.response.DiscountDetailResponse;
+import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,13 +15,14 @@ import java.util.Objects;
 
 @Service
 public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscountQuery, CommandResult> {
-    private final IDiscountRepository discountRepository;
+    private final JpaDiscountRepository discountRepository;
 
-    public GetAllDiscountCommandHandler(IDiscountRepository discountRepository) {
+    public GetAllDiscountCommandHandler(JpaDiscountRepository discountRepository) {
         this.discountRepository = discountRepository;
     }
 
     @Override
+    @Transactional
     public CommandResult handle(DefaultDiscountQuery query) {
         Objects.requireNonNull(query, "Default discount query is required");
 
@@ -32,17 +35,17 @@ public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscou
                     .id(discount.getId().getValue())
                     .name(discount.getName().getValue())
                     .description(discount.getDescription())
-                    .couponId(discount.getCouponId().getValue())
-                    .discountValue(discount.getDiscountValue().getValue())
-                    .discountUnit(discount.getDiscountValue().getUnit().toString())
-                    .maxDiscountAmount(discount.getDiscountValue().getMaxDiscountValue().getAmount())
-                    .minimumOrderValue(discount.getMinRequiredOrderValue().getAmount())
+                    .couponId(discount.getCouponEntity().getId().getValue())
+                    .discountValue(discount.getPromotionDiscountValue().getValue())
+                    .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
+                    .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())
+                    .minimumOrderValue(discount.getMinRequiredOrderValue().getValue())
                     .minimumRequiredProduct(discount.getMinRequiredProduct().orElse(null))
                     .validFrom(discount.getValidFrom().orElse(null))
                     .validUntil(discount.getValidUntil())
-                    .maxUsage(discount.getMaxUsage().orElse(null))
-                    .maxUsagePerCustomer(discount.getMaxUsagePerCustomer().orElse(null))
-                    .isActive(discount.isActive())
+                    .maxUsage(discount.getMaxUse().orElse(null))
+                    .maxUsagePerCustomer(discount.getMaxUsesPerCustomer().orElse(null))
+                    .isActive(discount.getActive())
                     .build());
         });
 

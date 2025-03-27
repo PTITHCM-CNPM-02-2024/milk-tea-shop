@@ -3,18 +3,23 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.StoreByIdQuery;
 import com.mts.backend.application.store.response.StoreDetailResponse;
 import com.mts.backend.domain.store.Store;
+import com.mts.backend.domain.store.StoreEntity;
 import com.mts.backend.domain.store.identifier.StoreId;
+import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.domain.store.repository.IStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.query.IQueryHandler;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, CommandResult> {
     
-    private final IStoreRepository storeRepository;
+    private final JpaStoreRepository storeRepository;
     
-    public GetStoreByIdQueryHandler(IStoreRepository storeRepository) {
+    public GetStoreByIdQueryHandler(JpaStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
     /**
@@ -23,26 +28,26 @@ public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, C
      */
     @Override
     public CommandResult handle(StoreByIdQuery query) {
-        var storeId = StoreId.of(query.getId());
+        Objects.requireNonNull(query, "Store by id query is required");
         
-        var store = mustExistStore(storeId);
+        var store = mustExistStore(query.getId());
         
         var response = StoreDetailResponse.builder()
                 .id(store.getId().getValue())
-                .name(store.getStoreName().getValue())
+                .name(store.getName().getValue())
                 .address(store.getAddress().getValue())
-                .phone(store.getPhoneNumber().getValue())
+                .phone(store.getPhone().getValue())
                 .email(store.getEmail().getValue())
                 .taxCode(store.getTaxCode())
-                .openTime(store.getOpenTime())
-                .closeTime(store.getCloseTime())
+                .openTime(store.getOpeningTime())
+                .closeTime(store.getClosingTime())
                 .build();
         
         return CommandResult.success(response);
     }
     
-    private Store mustExistStore(StoreId id) {
+    private StoreEntity mustExistStore(StoreId id) {
         return storeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Store not found"));
+                .orElseThrow(() -> new DomainException("Cửa hàng" + id.getValue() + " không tồn tại"));
     }
 }

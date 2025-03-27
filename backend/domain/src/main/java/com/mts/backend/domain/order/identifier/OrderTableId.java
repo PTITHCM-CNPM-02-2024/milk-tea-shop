@@ -1,13 +1,14 @@
 package com.mts.backend.domain.order.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
+import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.domain.Identifiable;
 
 public class OrderTableId implements Identifiable {
     
-    private final long id;
+    private final CouponId id;
     
-    private OrderTableId(long id) {
+    private OrderTableId(CouponId id) {
         
         if (id <= 0) {
             throw new IllegalArgumentException("OrderTableId id must be greater than 0");
@@ -18,7 +19,7 @@ public class OrderTableId implements Identifiable {
         this.id = id;
     }
     
-    public static OrderTableId of(long id) {
+    public static OrderTableId of(CouponId id) {
         return new OrderTableId(id);
     }
     
@@ -30,7 +31,7 @@ public class OrderTableId implements Identifiable {
         return new OrderTableId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
+    public CouponId getValue() {
         return id;
     }
     

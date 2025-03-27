@@ -49,7 +49,7 @@ public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<Av
             }
 
             for (var price : product.getPrices()) {
-                ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getAmount()).currency("VND").build();
+                ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getValue()).currency("VND").build();
 
                 var size = sizeRepository.findById(price.getSizeId()).orElseThrow(() -> new RuntimeException("Size not found"));
 
