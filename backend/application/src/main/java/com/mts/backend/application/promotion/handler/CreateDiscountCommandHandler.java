@@ -46,10 +46,10 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
                 .build();
 
         DiscountEntity discount = DiscountEntity.builder()
-                .id(DiscountId.create())
+                .id(DiscountId.create().getValue())
                 .name(command.getName())
                 .description(command.getDescription().orElse(null))
-                .couponEntity(couponRepository.getReferenceById(command.getCouponId()))
+                .couponEntity(couponRepository.getReferenceById(command.getCouponId().getValue()))
                 .promotionDiscountValue(value)
                 .minRequiredOrderValue(command.getMinimumOrderValue())
                 .minRequiredProduct(command.getMinimumRequiredProduct().orElse(null))
@@ -65,13 +65,13 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
             throw new NotFoundException("Không tìm thấy mã giảm giá");
         }
         
-        return CommandResult.success(discount.getId().getValue());
+        return CommandResult.success(discount.getId());
     }
     
     private void verifyUniqueCoupon(CouponId couponId){
         Objects.requireNonNull(couponId, "Coupon id is required");
         
-        if (!discountRepository.existsByCouponEntity_Id(couponId)){
+        if (!discountRepository.existsByCouponEntity_Id(couponId.getValue())){
             throw new DuplicateException("Coupon " + couponId + " đã tồn tại");
         }
     }

@@ -1,25 +1,28 @@
 package com.mts.backend.domain.order.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.domain.promotion.identifier.CouponId;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class OrderProductId implements Identifiable {
+import java.io.Serializable;
+
+@Value
+public class OrderProductId implements Serializable {
     
-    private final CouponId id;
+   Long value;
     
-    private OrderProductId(CouponId id) {
+    private OrderProductId(long value) {
         
-        if (id <= 0) {
+        if (value <= 0) {
             throw new IllegalArgumentException("OrderProductId id must be greater than 0");
         }
         
-        if (id > IdentifiableProvider.INT_UNSIGNED_MAX)
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX)
             throw new IllegalArgumentException("OrderProductId id must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
-        this.id = id;
+        this.value = value;
     }
     
-    public static OrderProductId of(CouponId id) {
+    public static OrderProductId of(long id) {
         return new OrderProductId(id);
     }
     
@@ -27,28 +30,24 @@ public class OrderProductId implements Identifiable {
         return new OrderProductId(Long.parseLong(id));
     }
     
+    public static OrderProductId of(Long id) {
+        return new OrderProductId(id);
+    }
+    
     public static OrderProductId create(){
         return new OrderProductId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public CouponId getValue() {
-        return id;
-    }
     
-    @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderProductId orderProductId)) return false;
-        return id == orderProductId.id;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(id);
+    public static final class OrderProductIdConverter implements AttributeConverter<OrderProductId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(OrderProductId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public OrderProductId convertToEntityAttribute(Long dbData) {
+            return OrderProductId.of(dbData);
+        }
     }
 }

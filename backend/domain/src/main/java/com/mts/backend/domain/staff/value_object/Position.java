@@ -1,67 +1,48 @@
 package com.mts.backend.domain.staff.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-public class Position extends AbstractValueObject {
-    private final String position;
-    private final short MAX_LENGTH = 50;
-    private Position(String position) {
-        Objects.requireNonNull(position, "Position is required");
-        this.position = normalize(position);
-    }
-    
-    public static ValueObjectValidationResult create(String position){
-        Objects.requireNonNull(position, "Position is required");
+@Value
+@Builder
+public class Position{
+    String value;
+    private final static short MAX_LENGTH = 50;
+    private Position(String value) {
+        Objects.requireNonNull(value, "Position is required");
         List<String> errors = new ArrayList<>();
-        
-        if(position.length() > 50){
+
+        if(value.length() > 50){
             errors.add("Tên chức vụ không được vượt quá 50 ký tự");
         }
-        
-        if(position.isBlank()){
+
+        if(value.isBlank()){
             errors.add("Tên chức vụ không được để trống");
         }
         
-        if(errors.isEmpty()){
-            return new ValueObjectValidationResult(new Position(position), errors);
+        if(!errors.isEmpty()){
+            throw new DomainBusinessLogicException(errors);
         }
-        
-        return new ValueObjectValidationResult(null, errors);
+        this.value = normalize(value);
     }
-    
-    public static Position of(String position) {
-        ValueObjectValidationResult result = create(position);
-        
-        if(result.getBusinessErrors().isEmpty()){
-            return new Position(position);
-        }
-        
-        throw new IllegalArgumentException("Tên chức vụ không hợp lệ: " + result.getBusinessErrors());
-        
-    }
-    
     private static String normalize(String position) {
         return position.trim().toUpperCase();
     }
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(position);
-    }
-    
-    public String getValue() {
-        return normalize(position);
-    }
-    
-    @Override
-    public String toString() {
-        return position;
+    public static final class PositionConverter implements AttributeConverter<Position, String> {
+        @Override
+        public String convertToDatabaseColumn(Position position) {
+            return Objects.isNull(position) ? null : position.getValue();
+        }
+        
+        @Override
+        public Position convertToEntityAttribute(String value) {
+            return Objects.isNull(value) ? null : new Position(value);
+        }
     }
 }

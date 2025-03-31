@@ -27,14 +27,15 @@ import java.util.Optional;
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
 @Builder
-public class ServiceTableEntity extends BaseEntity<ServiceTableId> {
+@Getter
+@Setter
+public class ServiceTableEntity extends BaseEntity<Integer> {
     @Id
     @Comment("Mã bàn")
     @Getter
     @Column(name = "table_id", columnDefinition = "smallint UNSIGNED")
-    @Convert(converter = ServiceTableId.ServiceTableIdConverter.class)
     @NotNull
-    private ServiceTableId id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã khu vực")
@@ -56,7 +57,8 @@ public class ServiceTableEntity extends BaseEntity<ServiceTableId> {
     @Getter
     private Boolean active;
 
-    public ServiceTableEntity(ServiceTableId id, @Nullable AreaEntity areaEntity, @NotNull TableNumber tableNumber, Boolean active) {
+    public ServiceTableEntity(Integer id, @Nullable AreaEntity areaEntity, @NotNull TableNumber tableNumber,
+                              Boolean active) {
         this.id = id;
         this.areaEntity = areaEntity;
         this.tableNumber = tableNumber;

@@ -42,7 +42,7 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
 
         var isActive = area.map(AreaEntity::getActive).orElse(true);
         var serviceTable = ServiceTableEntity.builder()
-                .id(ServiceTableId.create())
+                .id(ServiceTableId.create().getValue())
                 .tableNumber(name)
                 .areaEntity(area.orElse(null))
                 .active(isActive)
@@ -50,7 +50,7 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
 
         var savedServiceTable = jpaServiceTableRepository.save(serviceTable);
 
-        return CommandResult.success(savedServiceTable.getId().getValue());
+        return CommandResult.success(savedServiceTable.getId());
     }
 
     @Transactional
@@ -59,10 +59,11 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
             return Optional.empty();
         }
 
-        var area = jpaAreaRepository.findById(areaId).orElseThrow(() -> new NotFoundException("Khu vực" + areaId + " không tồn tại"));
+        var area = jpaAreaRepository.findById(areaId.getValue()).orElseThrow(() -> new NotFoundException("Khu vực" + areaId + 
+                " không tồn tại"));
         
 
-        var count = jpaServiceTableRepository.countByAreaEntity_Id(areaId);
+        var count = jpaServiceTableRepository.countByAreaEntity_Id(areaId.getValue());
 
         if (area.getMaxTable().isPresent() && count >= area.getMaxTable().get().getValue()) {
             throw new NotFoundException("Khu vực đã đạt số bàn tối đa");
@@ -75,7 +76,7 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
     protected TableNumber verifyUniqueName(TableNumber number) {
         Objects.requireNonNull(number, "TableNumber is required");
 
-        if (jpaServiceTableRepository.existsByTableNumber(number.getValue())) {
+        if (jpaServiceTableRepository.existsByTableNumber(number)) {
             throw new DuplicateException("Tên bàn đã tồn tại");
         }
 

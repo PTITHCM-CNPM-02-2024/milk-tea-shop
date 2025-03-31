@@ -12,16 +12,12 @@ import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
-import com.mts.backend.application.store.query_handler.GetAllAreaActiveQueryHandler;
-import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/areas")
@@ -39,6 +35,7 @@ public class AreaController implements IController {
     public ResponseEntity<ApiResponse<?>> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
                 .name(AreaName.builder().value(request.getName()).build())
+                .isActive(request.getIsActive())
                 .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
                 .build();
 

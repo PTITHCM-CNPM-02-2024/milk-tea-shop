@@ -2,9 +2,11 @@ package com.mts.backend.application.customer.query_handler;
 
 import com.mts.backend.application.customer.query.DefaultMemberQuery;
 import com.mts.backend.application.customer.response.MemberTypeDetailResponse;
-import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
+import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,9 +16,9 @@ import java.util.Objects;
 @Service
 public class GetAllMemberTypeQueryHandler implements IQueryHandler<DefaultMemberQuery, CommandResult> {
 
-    private final IMembershipTypeRepository membershipTypeRepository;
+    private final JpaMembershipTypeRepository membershipTypeRepository;
 
-    public GetAllMemberTypeQueryHandler(IMembershipTypeRepository membershipTypeRepository) {
+    public GetAllMemberTypeQueryHandler(JpaMembershipTypeRepository membershipTypeRepository) {
         this.membershipTypeRepository = membershipTypeRepository;
     }
 
@@ -25,19 +27,19 @@ public class GetAllMemberTypeQueryHandler implements IQueryHandler<DefaultMember
     public CommandResult handle(DefaultMemberQuery query) {
         Objects.requireNonNull(query, "Default member query is required");
 
-        var memberTypes = membershipTypeRepository.findAll();
+        var memberTypes = membershipTypeRepository.findAll(PageRequest.of(query.getPage(), query.getSize()));
 
         List<MemberTypeDetailResponse> responses = new ArrayList<>();
 
         memberTypes.forEach(memberType -> {
             responses.add(MemberTypeDetailResponse.builder()
-                    .id(memberType.getId().getValue())
-                    .name(memberType.getName().getValue())
-                    .discountUnit(memberType.getDiscountValue().getUnit().name())
-                    .discountValue(memberType.getDiscountValue().getValue())
+                    .id(memberType.getId())
+                    .name(memberType.getType().getValue())
+                    .discountUnit(memberType.getMemberDiscountValue().getUnit().name())
+                    .discountValue(memberType.getMemberDiscountValue().getValue())
                     .requiredPoints(memberType.getRequiredPoint())
-                    .validUntil(memberType.getValidUntil())
-                    .isActive(memberType.isActive())
+                    .validUntil(memberType.getValidUntil().orElse(null))
+                    .isActive(memberType.getActive())
                     .build());
         });
 

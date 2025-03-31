@@ -2,60 +2,52 @@ package com.mts.backend.application.staff.query_handler;
 
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
 import com.mts.backend.application.staff.response.ManagerDetailResponse;
-import com.mts.backend.domain.account.Account;
-import com.mts.backend.domain.account.identifier.AccountId;
-import com.mts.backend.domain.account.repository.IAccountRepository;
-import com.mts.backend.domain.staff.Manager;
+import com.mts.backend.domain.account.jpa.JpaAccountRepository;
+import com.mts.backend.domain.staff.ManagerEntity;
 import com.mts.backend.domain.staff.identifier.ManagerId;
-import com.mts.backend.domain.staff.repository.IManagerRepository;
+import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
 import com.mts.backend.shared.query.IQueryHandler;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
 public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuery, CommandResult> {
-    private final IManagerRepository managerRepository;
-    private final IAccountRepository accountRepository;
+    private final JpaManagerRepository managerRepository;
+    private final JpaAccountRepository accountRepository;
     
-    public GetManagerByIdQueryHandler(IManagerRepository managerRepository, IAccountRepository accountRepository) {
+    public GetManagerByIdQueryHandler(JpaManagerRepository managerRepository, JpaAccountRepository accountRepository) {
         this.managerRepository = managerRepository;
         this.accountRepository = accountRepository;
     }
     
     @Override
+    @Transactional
     public CommandResult handle(ManagerByIdQuery query) {
         Objects.requireNonNull(query, "Manager by id query is required");
-        var manager = mustExistManager(ManagerId.of(query.getId()));
-        
-        var account = mustExistAccount(manager.getAccountId());
+        var manager = mustExistManager((query.getId()));
         
         var response = ManagerDetailResponse.builder().build();
         
-        response.setId(manager.getId().getValue());
+        response.setId(manager.getId());
         response.setFirstName(manager.getFirstName().getValue());
         response.setLastName(manager.getLastName().getValue());
         response.setEmail(manager.getEmail().getValue());
-        response.setPhone(manager.getPhoneNumber().getValue());
+        response.setPhone(manager.getPhone().getValue());
         response.setGender(manager.getGender().toString());
-        response.setAccountId(account.getId().getValue());
+        response.setAccountId(manager.getAccountEntity().getId());
         
         return CommandResult.success(response);
     }
     
-    private Manager mustExistManager(ManagerId id){
+    private ManagerEntity mustExistManager(ManagerId id){
         Objects.requireNonNull(id, "Manager id is required");
         
-        return managerRepository.findById(id)
+        return managerRepository.findByIdWithJoinFetch(id)
                 .orElseThrow(() -> new NotFoundException("Quản lý không tồn tại"));
     }
     
-    private Account mustExistAccount(AccountId accountId){
-        Objects.requireNonNull(accountId, "Account id is required");
-        
-        return accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("Tài khoản không tồn tại"));
-    }
 }

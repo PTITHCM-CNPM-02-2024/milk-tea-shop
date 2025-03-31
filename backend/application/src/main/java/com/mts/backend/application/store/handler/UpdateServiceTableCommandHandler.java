@@ -40,7 +40,7 @@ public class UpdateServiceTableCommandHandler implements ICommandHandler<UpdateS
 
         // Update table number if provided
         if (serviceTable.changeTableNumber(command.getName())){
-            verifyUniqueTableNumber(serviceTable.getTableNumber());
+            verifyUniqueTableNumber(command.getId(), command.getName());
         }
         // Update area if provided
         updateAreaIfNeeded(serviceTable, command.getAreaId().orElse(null));
@@ -51,31 +51,34 @@ public class UpdateServiceTableCommandHandler implements ICommandHandler<UpdateS
         // Save changes
         ServiceTableEntity savedServiceTable = jpaServiceTableRepository.save(serviceTable);
 
-        return CommandResult.success(savedServiceTable.getId().getValue());
+        return CommandResult.success(savedServiceTable.getId());
     }
 
     @Transactional
     protected ServiceTableEntity findServiceTable(ServiceTableId id) {
-        return jpaServiceTableRepository.findById(id)
+        return jpaServiceTableRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Bàn không tồn tại"));
     }
 
     @Transactional
-    protected void verifyUniqueTableNumber(TableNumber number) {
+    protected void verifyUniqueTableNumber(ServiceTableId id, TableNumber number) {
         Objects.requireNonNull(number, "Table number is required");
 
-        jpaServiceTableRepository.findByTableNumber(number.getValue())
-                .ifPresent(existingTable -> {
-                    throw new DuplicateException("Số bàn đã tồn tại");
-                });
+         if(jpaServiceTableRepository.existsByIdNotAndTableNumber(id.getValue(), number)) {
+            throw new DuplicateException("Bàn " + number + " đã tồn tại");
+         }
     }
 
     private void updateAreaIfNeeded(ServiceTableEntity serviceTable, AreaId areaId) {
-        if (areaId != null) {
-            var area = jpaAreaRepository.findById(areaId)
-                    .orElseThrow(() -> new NotFoundException("Khu vực không tồn tại"));
-            serviceTable.setAreaEntity(area);
+        if (areaId == null) {
+            serviceTable.setAreaEntity(null);
+            return;
         }
+        if (!jpaAreaRepository.existsById(areaId.getValue())) {
+            throw new NotFoundException("Khu vực không tồn tại");
+        }
+        
+        serviceTable.setAreaEntity(jpaAreaRepository.getReferenceById(areaId.getValue()));
     }
 
     private void updateActiveStatus(ServiceTableEntity serviceTable, boolean isActive) {

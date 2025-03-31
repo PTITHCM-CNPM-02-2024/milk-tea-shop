@@ -24,6 +24,7 @@ dependencies{
     runtimeOnly("com.mysql:mysql-connector-j")
     implementation("org.flywaydb:flyway-core")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.springframework.boot:spring-boot-configuration-processor:3.4.2")
 }
 
 tasks.register("flywayCleanDev", FlywayCleanTask::class){

@@ -10,7 +10,6 @@ import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
-import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +39,7 @@ public class PaymentController implements IController {
     }
     
     @PostMapping("/{paymentId}/{methodId}/complete")
-    public ResponseEntity<?> completePayment(@PathVariable("paymentId") CouponId paymentId,
+    public ResponseEntity<?> completePayment(@PathVariable("paymentId") Long paymentId,
                                                           @PathVariable("methodId") Integer methodId,
                                                           @RequestBody PaymentTransactionRequest request) {
         
@@ -48,7 +47,7 @@ public class PaymentController implements IController {
             .paymentId(PaymentId.of(paymentId))
             .paymentMethodId(PaymentMethodId.of(methodId))
             .transactionId(System.currentTimeMillis())
-            .amount(Money.of(request.getAmount()))
+            .amount(Money.builder().value(request.getAmount()).build())
             .build();
     
     var result = paymentCommandBus.dispatch(command);

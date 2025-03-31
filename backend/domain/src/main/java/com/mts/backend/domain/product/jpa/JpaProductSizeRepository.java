@@ -1,7 +1,10 @@
 package com.mts.backend.domain.product.jpa;
 
-import com.mts.backend.domain.persistence.entity.ProductSizeEntity;
+import com.mts.backend.domain.product.ProductSizeEntity;
+import com.mts.backend.domain.product.value_object.ProductSizeName;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,38 +12,34 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface JpaProductSizeRepository extends JpaRepository<ProductSizeEntity, Integer> {
-    @Query("select p from ProductSizeEntity p where upper(p.name) = upper(?1)")
-    Optional<ProductSizeEntity> findByName(@NonNull String name);
-    
-
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO milk_tea_shop_prod.ProductSize (size_id, unit_id, name, quantity, description) VALUES (:#{#entity.id}, :#{#entity.unit.id}, :#{#entity.name}, :#{#entity.quantity}, :#{#entity.description})", nativeQuery = true)
-    void insertProductSize(@Param("entity") @NonNull ProductSizeEntity entity);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE milk_tea_shop_prod.ProductSize SET " +
-            "name = :#{#entity.name}, " +
-            "quantity = :#{#entity.quantity}, " +
-            "description = :#{#entity.description} " +
-            "WHERE size_id = :#{#entity.id}", nativeQuery = true)
-    void updateProductSize(@Param("entity") @NonNull ProductSizeEntity entity);
+    @Query("select p from ProductSizeEntity p where p.name = :name")
+    Optional<ProductSizeEntity> findByName(@NonNull ProductSizeName name);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM milk_tea_shop_prod.ProductSize WHERE size_id = :id", nativeQuery = true)
     void deleteProductSize(@Param("id") @NonNull Integer id);
 
-    @Query(value = "SELECT EXISTS(SELECT 1 FROM milk_tea_shop_prod.ProductSize WHERE UPPER(name) = UPPER(:name) AND unit_id = :unitId)", nativeQuery = true)
-    boolean existsByNameAndUnitId(@Param("name") @NonNull String name, @Param("unitId") @NonNull Integer unitId);
+    @Query("select (count(p) > 0) from ProductSizeEntity p where p.name = :name and p.unit.id = :id")
+    boolean existsByNameAndUnit_Id(@Param("name") @NonNull ProductSizeName name, @Param("id") @NonNull Integer id);
+
+    @Query("select (count(p) > 0) from ProductSizeEntity p where p.id <> :id and p.unit.id = :id1 and p.name = :name")
+    boolean existsByIdNotAndUnit_IdAndName(@Param("id") @NonNull Integer id, @Param("id1") @NonNull Integer id1, @Param("name") @NonNull ProductSizeName name);
+
 
     @Query("select p from ProductSizeEntity p where p.name = ?1 and p.unit.id = ?2")
-    Optional<ProductSizeEntity> findByNameAndUnit(@NonNull String name, @NonNull Integer id);
+    Optional<ProductSizeEntity> findByNameAndUnit(@NonNull ProductSizeName name, @NonNull Integer id);
 
+    @EntityGraph(attributePaths = {"unit"})
+    @Query("select p from ProductSizeEntity p")
+    List<ProductSizeEntity> findAllWithJoinFetch(Pageable pageable);
 
+    @Query("select p from ProductSizeEntity p")
+    @EntityGraph(value = "ProductSizeEntity.withUnit", type = EntityGraph.EntityGraphType.FETCH)
+    List<ProductSizeEntity> findAllWithJoinFetch();
 }

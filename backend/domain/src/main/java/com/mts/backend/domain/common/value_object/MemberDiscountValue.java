@@ -1,91 +1,81 @@
 package com.mts.backend.domain.common.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemberDiscountValue extends AbstractValueObject {
-    private final BigDecimal value;
-    private final DiscountUnit unit;
-    private MemberDiscountValue(BigDecimal value, DiscountUnit unit){
-        this.value = value.setScale(3, RoundingMode.HALF_UP);
-        this.unit = unit;
-    }
-    
-    public static ValueObjectValidationResult create(BigDecimal value, DiscountUnit unit){
+@Value
+@Builder
+@Embeddable
+@NoArgsConstructor(force = true)
+public class MemberDiscountValue {
+    @NotNull
+    BigDecimal value;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    DiscountUnit unit;
+
+    private MemberDiscountValue(BigDecimal value, DiscountUnit unit) {
         List<String> errors = new ArrayList<>();
-        
-        if(value == null){
+
+        if (value == null) {
             errors.add("Giá trị giảm giá không được để trống");
         }
-        
-        if(value != null && value.compareTo(BigDecimal.ZERO) < 0){
+
+        if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
             errors.add("Giá trị giảm giá không được nhỏ hơn 0");
         }
-        
-        if(unit == null){
+
+        if (unit == null) {
             errors.add("Đơn vị giảm giá không được để trống");
         }
-        
+
         if (unit != null && unit.ordinal() == 1 && value != null && value.compareTo(BigDecimal.valueOf(100)) > 0) {
             errors.add("Giá trị giảm giá không được lớn hơn 100 khi đơn vị là phần trăm");
         }
-        
+
         if (unit != null && unit.ordinal() == 0 && value != null && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
             errors.add("Giá trị giảm giá không được nhỏ hơn 1000 khi đơn vị là tiền");
         }
-        
-        if (errors.isEmpty()) {
-            return new ValueObjectValidationResult(new MemberDiscountValue(value, unit), errors);
+
+
+        if (!errors.isEmpty()) {
+            throw new DomainBusinessLogicException(errors);
         }
-        
-        return new ValueObjectValidationResult(null, errors);
+
+
+        this.value = value.setScale(3, RoundingMode.HALF_UP);
+        this.unit = unit;
     }
-    
-    public static MemberDiscountValue of(BigDecimal value, DiscountUnit unit){
-        ValueObjectValidationResult result = create(value, unit);
-        
-        if(result.getBusinessErrors().isEmpty()){
-            return new MemberDiscountValue(value, unit);
-        }
-        
-        throw new IllegalArgumentException("Giá trị giảm giá không hợp lệ: " + result.getBusinessErrors());
-    }
-    
-    public BigDecimal getValue() {
-        return value;
-    }
-    
-    public DiscountUnit getUnit() {
-        return unit;
-    }
-    
+    @Transient
     public boolean isPercentage() {
         return unit == DiscountUnit.PERCENTAGE;
     }
-    
+
+    @Transient
     public boolean isMoney() {
         return unit == DiscountUnit.FIXED;
     }
     
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value, unit);
-    }
-    
-    @Override
-    public String toString() {
-        if (unit == DiscountUnit.PERCENTAGE) {
-            return value + "%";
+    public String getDescription() {
+        if (isPercentage()) {
+            return "Giảm giá " + value + "%";
+        } else if (isMoney()) {
+            return "Giảm giá " + value + " VNĐ";
         }
-        return value + "đ";
+        return "";
     }
-    
-    
-    
-    
+
+
 }

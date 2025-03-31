@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 @Repository
-public interface JpaStoreRepository extends JpaRepository<StoreEntity, StoreId> {
+public interface JpaStoreRepository extends JpaRepository<StoreEntity, Integer> {
     @Query("select count(s) from StoreEntity s where s.id is not null")
     long countByIdNotNull();
 

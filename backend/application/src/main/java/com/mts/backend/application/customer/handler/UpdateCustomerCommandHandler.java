@@ -2,51 +2,53 @@ package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.UpdateCustomerCommand;
 import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.customer.Customer;
+import com.mts.backend.domain.customer.CustomerEntity;
 import com.mts.backend.domain.customer.identifier.CustomerId;
-import com.mts.backend.domain.customer.repository.ICustomerRepository;
+import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
 public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCustomerCommand, CommandResult> {
-    private final ICustomerRepository customerRepository;
+    private final JpaCustomerRepository customerRepository;
 
-    public UpdateCustomerCommandHandler(ICustomerRepository customerRepository) {
+    public UpdateCustomerCommandHandler(JpaCustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
     
     @Override
+    @Transactional
     public CommandResult handle(UpdateCustomerCommand command) {
         Objects.requireNonNull(command, "Update customer command is required");
         
-        Customer customer = mustExistCustomer(CustomerId.of(command.getId()));
+        CustomerEntity customer = mustExistCustomer(command.getId());
         
-        if (command.getEmail() != null && customer.changeEmail(Email.of(command.getEmail())) && customer.getEmail().isPresent()) {
-            verifyUniqueEmail(customer.getEmail().get());
+        if (customer.changeEmail(command.getEmail().orElse(null))) {
+            verifyUniqueEmail(customer.getEmail().orElse(null));
         }
         
-        if (command.getPhone() != null && customer.changePhoneNumber(PhoneNumber.of(command.getPhone()))) {
-            verifyUniquePhoneNumber(customer.getPhoneNumber());
+        if (customer.changePhone(command.getPhone())) {
+            verifyUniquePhoneNumber(customer.getPhone());
         }
         
-        customer.changeFirstName(command.getFirstName() != null ? FirstName.of(command.getFirstName()) : null);
-        customer.changeLastName(command.getLastName() != null ? LastName.of(command.getLastName()) : null);
-        customer.changeGender(command.getGender() != null ? Gender.valueOf(command.getGender()) : null);
+        customer.changeFirstName(command.getFirstName().orElse(null));
+        customer.changeLastName(command.getLastName().orElse(null));
+        customer.changeGender(command.getGender().orElse(null));
         
         var updatedCustomer = customerRepository.save(customer);
         
-        return CommandResult.success(updatedCustomer.getId().getValue());
+        return CommandResult.success(updatedCustomer.getId());
     }
     
-    private Customer mustExistCustomer(CustomerId customerId) {
+    private CustomerEntity mustExistCustomer(CustomerId customerId) {
         Objects.requireNonNull(customerId, "Customer id is required");
-        return customerRepository.findById(customerId)
+        return customerRepository.findById(customerId.getValue())
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));
     }
     private void verifyUniquePhoneNumber(PhoneNumber phoneNumber) {
@@ -57,7 +59,9 @@ public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCusto
     }
     
     private void verifyUniqueEmail(Email email) {
-        Objects.requireNonNull(email, "Email is required");
+        if (email == null) {
+            return;
+        }
         if (customerRepository.existsByEmail(email)) {
             throw new DuplicateException("Email đã tồn tại");
         }

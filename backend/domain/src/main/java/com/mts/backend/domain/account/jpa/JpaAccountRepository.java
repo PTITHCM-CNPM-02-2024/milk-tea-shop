@@ -1,36 +1,25 @@
 package com.mts.backend.domain.account.jpa;
 
-import com.mts.backend.domain.persistence.entity.AccountEntity;
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.value_object.Username;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface JpaAccountRepository extends JpaRepository<AccountEntity, Long> {
+  @Query("select a from AccountEntity a where a.username = :username")
+  Optional<AccountEntity> findByUsername(@Param("username") @NonNull Username username);
 
-  @Modifying
-  @Transactional
-  @Query(value = "INSERT INTO milk_tea_shop_prod.Account (account_id, role_id, username, password_hash, is_active, is_locked, last_login, token_version) " +
-          "VALUES (:#{#entity.id}, :#{#entity.roleEntity.id}, :#{#entity.username}, :#{#entity.passwordHash}, :#{#entity.isActive}, :#{#entity.isLocked}, :#{#entity.lastLogin}, :#{#entity.tokenVersion})",
-          nativeQuery = true)
-  void insertAccount(@Param("entity") AccountEntity entity);
-
-  @Modifying
-  @Transactional
-  @Query(value = "UPDATE milk_tea_shop_prod.Account SET " +
-          "role_id = :#{#entity.roleEntity.id}, " +
-          "username = :#{#entity.username}, " +
-          "password_hash = :#{#entity.passwordHash}, " +
-          "is_locked = :#{#entity.isLocked}, " +
-          "token_version = :#{#entity.tokenVersion}, " +
-          "is_active = :#{#entity.isActive}, " +
-          "last_login = :#{#entity.lastLogin} " +
-          "WHERE account_id = :#{#entity.id}",
-          nativeQuery = true)
-  void updateAccount(@Param("entity") AccountEntity entity);
+  @Query("select (count(a) > 0) from AccountEntity a where a.id <> :id and a.username = :username")
+  boolean existsByIdNotAndUsername(@Param("id") @NonNull Long id, @Param("username") @NonNull Username username);
 
   @Modifying
   @Transactional
@@ -39,5 +28,5 @@ public interface JpaAccountRepository extends JpaRepository<AccountEntity, Long>
   void deleteAccount(@Param("id") Long id);
   
     @Query("select (count(a) > 0) from AccountEntity a where a.username = :username")
-    boolean existsByUsername(@Param("username") String username);
+    boolean existsByUsername(@Param("username") Username username);
 }

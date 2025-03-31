@@ -1,9 +1,8 @@
 package com.mts.backend.domain.persistence;
 
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -14,10 +13,12 @@ import java.util.Optional;
 public abstract class AbstractAuditableEntity<U, PK extends Serializable>  implements IAuditableEntity<U, PK, LocalDateTime> {
     @Transient
     private @Nullable U createdBy;
+    @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
     @Transient
     private @Nullable U updatedBy;
+    @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
@@ -59,5 +60,17 @@ public abstract class AbstractAuditableEntity<U, PK extends Serializable>  imple
     @Override
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

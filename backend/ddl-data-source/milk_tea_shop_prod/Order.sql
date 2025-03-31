@@ -4,13 +4,14 @@ create table milk_tea_shop_prod.`Order`
         primary key,
     customer_id    int unsigned                                  null comment 'Mã khách hàng',
     employee_id    int unsigned                                  null comment 'Mã nhân viên',
-    order_time     timestamp default CURRENT_TIMESTAMP           null comment 'Thời gian đặt hàng',
+    order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
     total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
     final_amount   decimal(11, 3)                                null comment 'Thành tiền',
     status         enum ('PROCESSING', 'CANCELLED', 'COMPLETED') null comment 'Trạng thái đơn hàng',
     customize_note varchar(1000)                                 null comment 'Ghi chú tùy chỉnh',
-    created_at     datetime  default CURRENT_TIMESTAMP           null,
-    updated_at     datetime  default CURRENT_TIMESTAMP           null on update CURRENT_TIMESTAMP,
+    point          int unsigned default '1'                      null,
+    created_at     datetime     default CURRENT_TIMESTAMP        null,
+    updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
     constraint Order_ibfk_1
         foreign key (customer_id) references milk_tea_shop_prod.Customer (customer_id),
     constraint Order_ibfk_2

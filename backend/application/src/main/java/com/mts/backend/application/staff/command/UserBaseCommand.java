@@ -1,13 +1,21 @@
 package com.mts.backend.application.staff.command;
 
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.common.value_object.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-public abstract class UserBaseCommand {
-    protected String firstName;
-    protected String lastName;
-    protected String email;
-    protected String gender;
-    protected String phone;
-    protected Long accountId;
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public  class UserBaseCommand {
+    protected FirstName firstName;
+    protected LastName lastName;
+    protected Email email;
+    protected Gender gender;
+    protected PhoneNumber phone;
+    protected AccountId accountId;
 }

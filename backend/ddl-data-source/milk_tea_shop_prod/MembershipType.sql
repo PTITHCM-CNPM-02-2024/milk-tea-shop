@@ -12,6 +12,8 @@ create table milk_tea_shop_prod.MembershipType
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint MembershipType_pk
-        unique (type)
+        unique (type),
+    constraint MembershipType_pk_2
+        unique (required_point)
 );
 

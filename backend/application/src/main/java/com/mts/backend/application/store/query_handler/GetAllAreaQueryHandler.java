@@ -3,15 +3,9 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.domain.store.jpa.JpaAreaRepository;
-import com.mts.backend.domain.store.repository.IAreaRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +34,7 @@ public class GetAllAreaQueryHandler implements IQueryHandler<DefaultAreaQuery, C
         
         areas.forEach(area -> {
             var response = AreaDetailResponse.builder()
-                    .id(area.getId().getValue())
+                    .id(area.getId())
                     .name(area.getName().getValue())
                     .description(area.getDescription().orElse(null))
                     .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))

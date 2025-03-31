@@ -26,13 +26,12 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StoreEntity extends BaseEntity <StoreId> {
+public class StoreEntity extends BaseEntity <Integer> {
     @Id
     @Comment("Mã cửa hàng")
     @Column(name = "store_id", columnDefinition = "tinyint UNSIGNED")
-    @Convert(converter = StoreId.StoreIdConverter.class)
     @NotNull
-    private StoreId id;
+    private Integer id;
 
     @Comment("Tên cửa hàng")
     @Column(name = "name", nullable = false, length = 100)

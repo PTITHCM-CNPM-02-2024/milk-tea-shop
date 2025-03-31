@@ -11,7 +11,6 @@ import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
-import com.mts.backend.domain.store.ServiceTable;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.value_object.TableNumber;
@@ -19,8 +18,6 @@ import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @RestController

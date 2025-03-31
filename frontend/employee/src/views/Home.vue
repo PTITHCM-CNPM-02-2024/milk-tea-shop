@@ -265,7 +265,7 @@ import { ref, computed } from 'vue'
 import {
   LayoutDashboardIcon, ShoppingCartIcon, ClockIcon, ReceiptIcon,
   SettingsIcon, HelpCircleIcon, LogOutIcon, SearchIcon, BellIcon,
-  CupSodaIcon, CoffeeIcon, MilkshakeIcon, CakeIcon, FruitIcon, IceCreamIcon,
+  CupSodaIcon, CoffeeIcon, CakeIcon, IceCreamIcon,
   PlusIcon, CalendarIcon, ShoppingBagIcon, CreditCardIcon, XIcon
 } from 'lucide-vue-next'
 

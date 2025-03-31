@@ -1,25 +1,27 @@
 package com.mts.backend.domain.order.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.domain.promotion.identifier.CouponId;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class OrderTableId implements Identifiable {
+import java.io.Serializable;
+
+@Value
+public class OrderTableId implements Serializable {
+    Long value;
     
-    private final CouponId id;
-    
-    private OrderTableId(CouponId id) {
+    private OrderTableId(long value) {
         
-        if (id <= 0) {
+        if (value <= 0) {
             throw new IllegalArgumentException("OrderTableId id must be greater than 0");
         }
         
-        if (id > IdentifiableProvider.INT_UNSIGNED_MAX)
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX)
             throw new IllegalArgumentException("OrderTableId id must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
-        this.id = id;
+        this.value = value;
     }
     
-    public static OrderTableId of(CouponId id) {
+    public static OrderTableId of(long id) {
         return new OrderTableId(id);
     }
     
@@ -27,28 +29,23 @@ public class OrderTableId implements Identifiable {
         return new OrderTableId(Long.parseLong(id));
     }
     
+    public static OrderTableId of(Long id) {
+        return new OrderTableId(id);
+    }
+    
     public static OrderTableId create(){
         return new OrderTableId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public CouponId getValue() {
-        return id;
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderTableId orderTableId)) return false;
-        return id == orderTableId.id;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(id);
+    public final static class OrderTableIdConverter implements AttributeConverter<OrderTableId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(OrderTableId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public OrderTableId convertToEntityAttribute(Long dbData) {
+            return OrderTableId.of(dbData);
+        }
     }
 }

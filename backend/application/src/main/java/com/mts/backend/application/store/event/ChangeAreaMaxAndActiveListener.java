@@ -2,7 +2,6 @@ package com.mts.backend.application.store.event;
 
 import com.mts.backend.application.store.handler.UpdateAreaMaxAndActiveCommandHandler;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationListener;
@@ -12,7 +11,7 @@ import java.util.Objects;
 
 @Service
 public class ChangeAreaMaxAndActiveListener implements ApplicationListener<ChangeAreaMaxAndActiveEvent> {
-    private JpaServiceTableRepository serviceTableRepository;
+    private final JpaServiceTableRepository serviceTableRepository;
     
     public ChangeAreaMaxAndActiveListener(JpaServiceTableRepository serviceTableRepository) {
         this.serviceTableRepository = serviceTableRepository;
@@ -29,7 +28,7 @@ public class ChangeAreaMaxAndActiveListener implements ApplicationListener<Chang
             return;
         }
         
-        var listTable = serviceTableRepository.findByAreaEntity_Id(eventCommand.getId());
+        var listTable = serviceTableRepository.findByAreaEntity_Id(eventCommand.getId().getValue());
         
         if (listTable.isEmpty()){
             return;

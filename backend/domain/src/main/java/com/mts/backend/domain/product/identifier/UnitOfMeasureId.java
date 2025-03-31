@@ -1,12 +1,14 @@
 package com.mts.backend.domain.product.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import lombok.Value;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class UnitOfMeasureId implements Identifiable {
-    private final int value;
+@Value
+public class UnitOfMeasureId implements Serializable {
+    int value;
     
     private UnitOfMeasureId(int value) {
         if (value <= 0) {
@@ -27,31 +29,20 @@ public class UnitOfMeasureId implements Identifiable {
         return new UnitOfMeasureId(Integer.parseInt(value));
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        UnitOfMeasureId unitOfMeasureId = (UnitOfMeasureId) o;
-        
-        return Objects.equals(value, unitOfMeasureId.value);
-    }
-    
-    public int getValue() {
-        return value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(value);
-    }
-    @Override
-    public String toString () {
-        return String.valueOf(value);
-    }
-    
     // TODO: cần kiểm tra lại phương thức này
     public static UnitOfMeasureId create(){
         return new UnitOfMeasureId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
+    }
+    
+    public static final class UnitOfMeasureIdConverter implements jakarta.persistence.AttributeConverter<UnitOfMeasureId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(UnitOfMeasureId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public UnitOfMeasureId convertToEntityAttribute(Integer dbData) {
+            return new UnitOfMeasureId(dbData);
+        }
     }
 }

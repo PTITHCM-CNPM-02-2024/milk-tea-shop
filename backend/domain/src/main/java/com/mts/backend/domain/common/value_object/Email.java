@@ -1,8 +1,6 @@
 package com.mts.backend.domain.common.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
 import jakarta.persistence.AttributeConverter;
 import lombok.Builder;
 import lombok.Value;
@@ -41,7 +39,6 @@ public class Email{
         }
         this.value = value;
     }
-    
     public static final class EmailConverter implements AttributeConverter<Email, String> {
         @Override
         public String convertToDatabaseColumn(Email attribute) {

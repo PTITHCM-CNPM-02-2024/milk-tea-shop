@@ -2,7 +2,7 @@
   <v-app-bar color="primary" density="comfortable">
     <div class="d-flex align-center">
       <v-img
-          src="/images/logo.png"
+          src="../images/logo.jpg"
           alt="Logo trà sữa"
           class="me-3"
           max-height="40"

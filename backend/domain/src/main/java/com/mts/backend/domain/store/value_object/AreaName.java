@@ -2,7 +2,6 @@ package com.mts.backend.domain.store.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import lombok.*;
 

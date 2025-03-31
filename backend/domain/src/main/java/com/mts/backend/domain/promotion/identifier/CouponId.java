@@ -7,7 +7,7 @@ import lombok.Value;
 import java.io.Serializable;
 @Value
 public class CouponId implements Serializable {
-    long value;
+    Long value;
     
     private  CouponId(long value){
         if (value <= 0){
@@ -28,7 +28,7 @@ public class CouponId implements Serializable {
         return of(Long.parseLong(value));
     }
     
-    public long getValue() {
+    public Long getValue() {
         return value;
     }
     

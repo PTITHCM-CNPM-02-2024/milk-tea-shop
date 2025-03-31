@@ -1,33 +1,24 @@
 package com.mts.backend.application.product.query_handler;
 
 import com.mts.backend.application.product.query.DefaultProductQuery;
+import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
-import com.mts.backend.domain.product.identifier.CategoryId;
-import com.mts.backend.domain.product.repository.ICategoryRepository;
-import com.mts.backend.domain.product.repository.IProductRepository;
-import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.product.repository.IUnitRepository;
+import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class GetAllProductQueryHandler implements IQueryHandler<DefaultProductQuery, CommandResult> {
-    private final IProductRepository productRepository;
-    private final ICategoryRepository categoryRepository;
-    private final IUnitRepository unitRepository;
-    private final ISizeRepository sizeRepository;
+    private final JpaProductRepository productRepository;
     
-    public GetAllProductQueryHandler(IProductRepository productRepository, ICategoryRepository categoryRepository, IUnitRepository unitRepository, ISizeRepository sizeRepository) {
+    public GetAllProductQueryHandler(JpaProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.unitRepository = unitRepository;
-        this.sizeRepository = sizeRepository;
     }
     
     
@@ -35,37 +26,34 @@ public class GetAllProductQueryHandler implements IQueryHandler<DefaultProductQu
     public CommandResult handle(DefaultProductQuery query) {
         Objects.requireNonNull(query);
         
-        var products = productRepository.findAll();
+        var products = productRepository.findAllWithDetails(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
         List<ProductDetailResponse> responses = new ArrayList<>();
-        
+
         products.forEach(product -> {
-            ProductDetailResponse response = ProductDetailResponse.builder().id(product.getId().getValue()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).isSignature(product.isSignature()).build();
+            ProductDetailResponse response =
+                    ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
 
-            if (product.getCategoryId().isPresent()) {
-                Optional<CategoryId> categoryId = product.getCategoryId();
-                response.setCategory(categoryRepository.findById(categoryId.get()).map(category -> category.getName().getValue()).orElse(""));
-            }
+            product.getCategoryEntity().ifPresent(category -> {
+                response.setCategory(CategoryDetailResponse.builder().id(category.getId()).name(category.getName().getValue()).build());
+            });
 
-            for (var price : product.getPrices()) {
+            for (var price : product.getProductPriceEntities()) {
                 ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getValue()).currency("VND").build();
 
-                var size = sizeRepository.findById(price.getSizeId()).orElseThrow(() -> new RuntimeException("Size not found"));
+                priceDetail.setSizeId(price.getSize().getId());
+                priceDetail.setQuantity(price.getSize().getQuantity().getValue());
+                priceDetail.setSize(price.getSize().getName().getValue());
+                priceDetail.setCurrency("VND");
+                priceDetail.setUnitName(price.getSize().getUnit().getName().getValue());
+                priceDetail.setUnitSymbol(price.getSize().getUnit().getSymbol().getValue());
 
-                priceDetail.setSize(size.getName().getValue());
-                priceDetail.setQuantity(size.getQuantity().getValue());
-
-                var unit = unitRepository.findById(size.getUnitOfMeasure()).orElseThrow(() -> new RuntimeException("Unit not found"));
-
-                priceDetail.setUnitName(unit.getName().getValue());
-                priceDetail.setUnitSymbol(unit.getSymbol().getValue());
-                
                 response.getPrices().add(priceDetail);
             }
-            
+
             responses.add(response);
         });
-        
+
         return CommandResult.success(responses);
     }
     

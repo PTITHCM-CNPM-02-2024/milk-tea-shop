@@ -1,14 +1,17 @@
 package com.mts.backend.domain.payment.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.domain.promotion.identifier.CouponId;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class PaymentId implements Identifiable {
+import java.io.Serializable;
+
+@Value
+public class PaymentId implements Serializable {
     
-    private final CouponId value;
+    Long value;
     
-    private PaymentId (CouponId value) {
+    private PaymentId (long value) {
         
         if (value <= 0) {
             throw new IllegalArgumentException("Payment id must be greater than 0");
@@ -20,7 +23,7 @@ public class PaymentId implements Identifiable {
         this.value = value;
     }
     
-    public static PaymentId of(CouponId value) {
+    public static PaymentId of(long value) {
         return new PaymentId(value);
     }
     
@@ -28,31 +31,25 @@ public class PaymentId implements Identifiable {
         return new PaymentId(Long.parseLong(value));
     }
     
+    public static PaymentId of(Long value) {
+        return new PaymentId(value);
+    }
+    
     public static PaymentId create(){
         return new PaymentId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public CouponId getValue() {
-        return value;
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class PaymentIdConverter implements AttributeConverter<PaymentId, Long> {
         
-        PaymentId paymentId = (PaymentId) o;
+        @Override
+        public Long convertToDatabaseColumn(PaymentId paymentId) {
+            return paymentId.getValue();
+        }
         
-        return value == paymentId.value;
+        @Override
+        public PaymentId convertToEntityAttribute(Long value) {
+            return PaymentId.of(value);
+        }
     }
     
-    @Override
-    public int hashCode() {
-        return Long.hashCode(value);
-    }
 }

@@ -28,15 +28,14 @@ import java.util.Optional;
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
 @Builder
-public class AreaEntity extends BaseEntity<AreaId> {
+public class AreaEntity extends BaseEntity<Integer> {
     @Id
     @Comment("Mã khu vực")
     @Column(name = "area_id", nullable = false, columnDefinition = "smallint UNSIGNED")
-    @Convert(converter = AreaId.AreaIdConverter.class)
     @NotNull
     @Getter
     @Setter
-    private AreaId id;
+    private Integer id;
 
     @Comment("Tên khu vực")
     @Column(name = "name", nullable = false, length = 3)
@@ -61,7 +60,8 @@ public class AreaEntity extends BaseEntity<AreaId> {
     @NotNull
     private Boolean active;
 
-    public AreaEntity(@NotNull AreaId id, @NotNull AreaName name, String description, MaxTable maxTable, @NotNull Boolean active) {
+    public AreaEntity(@NotNull Integer id, @NotNull AreaName name, String description, MaxTable maxTable,
+                      @NotNull Boolean active) {
         this.id = id;
         this.name = name;
         this.description = description;

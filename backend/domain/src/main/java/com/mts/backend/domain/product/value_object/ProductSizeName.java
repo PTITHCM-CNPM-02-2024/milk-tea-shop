@@ -1,43 +1,37 @@
 package com.mts.backend.domain.product.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class ProductSizeName extends AbstractValueObject {
-    private final String name;
+@Value
+@Builder
+public class ProductSizeName {
+   String value;
     
     private static final int MAX_LENGTH = 5;
-    private ProductSizeName(String name) {
-        this.name = name;
-    }
-    
-    public static ValueObjectValidationResult create(String name) {
+    private ProductSizeName(String value) {
+        Objects.requireNonNull(value, "Tên kích thước không được để trống");
+
         List<String> businessErrors = new ArrayList<>();
-        
-        if (name == null || name.trim().isEmpty()) {
+
+        if (value.isBlank()) {
             businessErrors.add("Tên không được để trống");
         }
-        
-        if (name != null && name.length() > MAX_LENGTH) {
+
+        if (value.length() > MAX_LENGTH) {
             businessErrors.add("Tên không được quá " + MAX_LENGTH + " ký tự");
         }
         
-        if (businessErrors.isEmpty()) {
-            return new ValueObjectValidationResult(new ProductSizeName(name), businessErrors);
+        if (!businessErrors.isEmpty()) {
+            throw new DomainBusinessLogicException(businessErrors);
         }
-        
-        return new ValueObjectValidationResult(null, businessErrors);
-    }
-    
-    public static ProductSizeName of(String name) {
-        ValueObjectValidationResult result = create(name);
-        if (result.getBusinessErrors().isEmpty()) {
-            return new ProductSizeName(name);
-        }
-        throw new IllegalArgumentException("Tên kích thước không hợp lệ: " + result.getBusinessErrors());
+        this.value = value;
     }
     
     private String normalize(String name) {
@@ -45,17 +39,19 @@ public class ProductSizeName extends AbstractValueObject {
     }
     
     public String getValue() {
-        return normalize(name);
+        return normalize(value);
     }
     
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(name);
-    }
-    
-    @Override
-    public String toString() {
-        return getValue();
+    public static final class ProductSizeNameConverter implements AttributeConverter<ProductSizeName, String> {
+        @Override
+        public String convertToDatabaseColumn(ProductSizeName attribute) {
+            return attribute == null ? null : attribute.getValue();
+        }
+
+        @Override
+        public ProductSizeName convertToEntityAttribute(String dbData) {
+            return dbData == null ? null : new ProductSizeName(dbData);
+        }
     }
     
 }

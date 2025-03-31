@@ -3,7 +3,6 @@ package com.mts.backend.application.promotion.query_handler;
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
 import com.mts.backend.application.promotion.response.CouponDetailResponse;
 import com.mts.backend.domain.promotion.jpa.JpaCouponRepository;
-import com.mts.backend.domain.promotion.repository.ICouponRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +33,7 @@ public class GetAllCouponQueryHandler implements IQueryHandler<DefaultCouponQuer
         
         coupons.forEach(coupon -> {
             responses.add(CouponDetailResponse.builder()
-                    .id(coupon.getId().getValue())
+                    .id(coupon.getId())
                     .coupon(coupon.getCoupon().getValue())
                     .description(coupon.getDescription().orElse(null))
                     .build());

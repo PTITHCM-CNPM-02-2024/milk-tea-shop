@@ -2,7 +2,6 @@ package com.mts.backend.domain.store.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import jakarta.persistence.AttributeConverter;
-import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 import java.io.Serializable;

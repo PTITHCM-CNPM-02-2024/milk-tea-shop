@@ -81,7 +81,9 @@ create table MembershipType
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint MembershipType_pk
-        unique (type)
+        unique (type),
+    constraint MembershipType_pk_2
+        unique (required_point)
 );
 
 create table PaymentMethod
@@ -134,7 +136,7 @@ create table Account
     role_id       tinyint unsigned                       not null comment 'Mã vai trò',
     username      varchar(50)                            not null comment 'Tên đăng nhập',
     password_hash varchar(255)                           not null comment 'Mật khẩu đã mã hóa',
-    is_active     tinyint(1)   default 1                 null comment 'Tài khoản hoạt động (1: Có, 0: Không)',
+    is_active     tinyint(1)   default 0                 null comment 'Tài khoản hoạt động (1: Có, 0: Không)',
     is_locked     tinyint(1)   default 0                 not null comment 'Tài khoản có bị khóa hay không (Có: 1, Không:0)',
     last_login    timestamp                              null comment 'Lần đăng nhập cuối',
     token_version int unsigned default '0'               not null comment 'Kiểm tra tính hợp lệ của token',
@@ -222,13 +224,14 @@ create table `Order`
         primary key,
     customer_id    int unsigned                                  null comment 'Mã khách hàng',
     employee_id    int unsigned                                  null comment 'Mã nhân viên',
-    order_time     timestamp default CURRENT_TIMESTAMP           null comment 'Thời gian đặt hàng',
+    order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
     total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
     final_amount   decimal(11, 3)                                null comment 'Thành tiền',
     status         enum ('PROCESSING', 'CANCELLED', 'COMPLETED') null comment 'Trạng thái đơn hàng',
     customize_note varchar(1000)                                 null comment 'Ghi chú tùy chỉnh',
-    created_at     datetime  default CURRENT_TIMESTAMP           null,
-    updated_at     datetime  default CURRENT_TIMESTAMP           null on update CURRENT_TIMESTAMP,
+    point          int unsigned default '1'                      null,
+    created_at     datetime     default CURRENT_TIMESTAMP        null,
+    updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
     constraint Order_ibfk_1
         foreign key (customer_id) references Customer (customer_id),
     constraint Order_ibfk_2

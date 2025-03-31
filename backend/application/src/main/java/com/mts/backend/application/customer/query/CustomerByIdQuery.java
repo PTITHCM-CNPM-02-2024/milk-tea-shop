@@ -1,5 +1,6 @@
 package com.mts.backend.application.customer.query;
 
+import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQuery;
 import lombok.AllArgsConstructor;
@@ -12,5 +13,5 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class CustomerByIdQuery implements IQuery<CommandResult> {
-    private Long id;
+    private CustomerId id;
 }

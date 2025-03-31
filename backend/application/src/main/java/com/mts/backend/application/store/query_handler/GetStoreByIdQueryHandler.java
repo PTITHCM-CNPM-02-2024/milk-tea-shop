@@ -2,11 +2,9 @@ package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.StoreByIdQuery;
 import com.mts.backend.application.store.response.StoreDetailResponse;
-import com.mts.backend.domain.store.Store;
 import com.mts.backend.domain.store.StoreEntity;
 import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
-import com.mts.backend.domain.store.repository.IStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -33,7 +31,7 @@ public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, C
         var store = mustExistStore(query.getId());
         
         var response = StoreDetailResponse.builder()
-                .id(store.getId().getValue())
+                .id(store.getId())
                 .name(store.getName().getValue())
                 .address(store.getAddress().getValue())
                 .phone(store.getPhone().getValue())
@@ -47,7 +45,7 @@ public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, C
     }
     
     private StoreEntity mustExistStore(StoreId id) {
-        return storeRepository.findById(id)
+        return storeRepository.findById(id.getValue())
                 .orElseThrow(() -> new DomainException("Cửa hàng" + id.getValue() + " không tồn tại"));
     }
 }

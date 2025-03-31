@@ -1,23 +1,15 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.CreateStoreCommand;
-import com.mts.backend.domain.common.value_object.Email;
-import com.mts.backend.domain.common.value_object.PhoneNumber;
-import com.mts.backend.domain.store.Store;
 import com.mts.backend.domain.store.StoreEntity;
 import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
-import com.mts.backend.domain.store.repository.IStoreRepository;
-import com.mts.backend.domain.store.value_object.Address;
-import com.mts.backend.domain.store.value_object.StoreName;
 import com.mts.backend.shared.command.CommandResult;
-import com.mts.backend.shared.command.ICommand;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -41,7 +33,7 @@ public class CreateStoreCommandHandler implements ICommandHandler<CreateStoreCom
         }
         
         var store = StoreEntity.builder()
-                .id(StoreId.create())
+                .id(StoreId.create().getValue())
                 .name(command.getName())
                 .address(command.getAddress())
                 .phone(command.getPhone())
@@ -55,6 +47,6 @@ public class CreateStoreCommandHandler implements ICommandHandler<CreateStoreCom
         var savedStore = storeRepository.save(store);
                 
         
-        return CommandResult.success(savedStore.getId().getValue());
+        return CommandResult.success(savedStore.getId());
     }
 }

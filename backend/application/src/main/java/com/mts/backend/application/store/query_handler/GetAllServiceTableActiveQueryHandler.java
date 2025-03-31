@@ -3,10 +3,8 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,9 +29,9 @@ public class GetAllServiceTableActiveQueryHandler implements IQueryHandler<Servi
 
         List<ServiceTableDetailResponse> responses = serviceTables.stream()
                 .map(e -> ServiceTableDetailResponse.builder()
-                        .id(e.getId().getValue())
+                        .id(e.getId())
                         .name(e.getTableNumber().getValue())
-                        .areaId(e.getAreaEntity().map(a -> a.getId().getValue()).orElse(null))
+                        .areaId(e.getAreaEntity().map(a -> a.getId()).orElse(null))
                         .isActive(e.getActive())
                         .build()).toList();
         

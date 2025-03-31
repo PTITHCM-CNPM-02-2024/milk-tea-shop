@@ -9,7 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,15 +23,14 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CouponEntity extends BaseEntity<CouponId> {
+public class CouponEntity extends BaseEntity<Long> {
     @Id
     @Comment("Mã coupon")
     @Column(name = "coupon_id", columnDefinition = "int UNSIGNED")
-    @Convert(converter = CouponId.CouponIdConverter.class)
-    @NotNull
     @Getter
     @Setter
-    private CouponId id;
+    @NotNull
+    private Long id;
 
     @Comment("Mã giảm giá")
     @Column(name = "coupon", nullable = false, length = 15)

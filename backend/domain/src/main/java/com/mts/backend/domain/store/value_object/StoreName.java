@@ -1,9 +1,6 @@
 package com.mts.backend.domain.store.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
 import jakarta.persistence.AttributeConverter;
 import lombok.Builder;
 import lombok.Value;

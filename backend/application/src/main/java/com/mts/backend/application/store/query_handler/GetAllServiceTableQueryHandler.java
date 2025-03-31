@@ -2,9 +2,7 @@ package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
-import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import jakarta.transaction.Transactional;
@@ -40,9 +38,9 @@ public class GetAllServiceTableQueryHandler implements IQueryHandler<DefaultServ
         
         serviceTables.forEach(se -> {
             var response = ServiceTableDetailResponse.builder()
-                    .id(se.getId().getValue())
+                    .id(se.getId())
                     .isActive(se.getActive())
-                    .areaId(se.getAreaEntity().map(a -> a.getId().getValue()).orElse(null))
+                    .areaId(se.getAreaEntity().map(a -> a.getId()).orElse(null))
                     .name(se.getTableNumber().getValue())
                     .build();
                     

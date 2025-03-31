@@ -3,7 +3,6 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.domain.store.jpa.JpaAreaRepository;
-import com.mts.backend.domain.store.repository.IAreaRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
 @Service
 public class GetAllAreaActiveQueryHandler implements IQueryHandler<AreaActiveQuery, CommandResult> {
     private final JpaAreaRepository areaRepository;
@@ -31,7 +30,7 @@ public class GetAllAreaActiveQueryHandler implements IQueryHandler<AreaActiveQue
         
         List<AreaDetailResponse> result = areas.stream()
                 .map(area -> AreaDetailResponse.builder()
-                        .id(area.getId().getValue())
+                        .id(area.getId())
                         .name(area.getName().getValue())
                         .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
                         .isActive(area.getActive())

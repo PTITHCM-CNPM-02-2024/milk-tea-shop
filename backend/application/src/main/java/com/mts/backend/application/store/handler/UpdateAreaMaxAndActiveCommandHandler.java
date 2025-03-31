@@ -5,7 +5,6 @@ import com.mts.backend.application.store.event.ChangeAreaMaxAndActiveEvent;
 import com.mts.backend.domain.store.AreaEntity;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaAreaRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -21,7 +20,7 @@ public class UpdateAreaMaxAndActiveCommandHandler implements ICommandHandler<Upd
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public UpdateAreaMaxAndActiveCommandHandler(JpaAreaRepository areaRepository, IServiceTableRepository serviceTableRepository,
+    public UpdateAreaMaxAndActiveCommandHandler(JpaAreaRepository areaRepository,
                                                 ApplicationEventPublisher eventPublisher) {
         this.areaRepository = areaRepository;
         this.eventPublisher = eventPublisher;
@@ -39,18 +38,18 @@ public class UpdateAreaMaxAndActiveCommandHandler implements ICommandHandler<Upd
         area.changeActive(command.isActive());
         
         var event = new ChangeAreaMaxAndActiveEvent(this,
-                ChangeAreaMaxAndActiveEvent.Data.builder().maxTable(maxTable).active(area.getActive()).id(area.getId()).build());
+                ChangeAreaMaxAndActiveEvent.Data.builder().maxTable(maxTable).active(area.getActive()).id(AreaId.of(area.getId())).build());
 
         eventPublisher.publishEvent(event);
 
 
         var savedArea = areaRepository.save(area);
 
-        return CommandResult.success(savedArea.getId().getValue());
+        return CommandResult.success(savedArea.getId());
     }
 
     private AreaEntity mustExistArea(AreaId areaId) {
-        return areaRepository.findById(areaId)
+        return areaRepository.findById(areaId.getValue())
                 .orElseThrow(() -> new NotFoundException("Khu vực không tồn tại"));
     }
 

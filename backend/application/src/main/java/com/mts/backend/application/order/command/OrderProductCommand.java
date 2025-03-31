@@ -1,5 +1,7 @@
 package com.mts.backend.application.order.command;
 
+import com.mts.backend.domain.product.identifier.ProductId;
+import com.mts.backend.domain.product.identifier.ProductSizeId;
 import lombok.*;
 
 @NoArgsConstructor
@@ -8,8 +10,8 @@ import lombok.*;
 @Data
 @EqualsAndHashCode
 public class OrderProductCommand {
-    private Integer productId;
-    private Integer sizeId;
+    private ProductId productId;
+    private ProductSizeId sizeId;
     @EqualsAndHashCode.Exclude
     private Integer quantity;
     private String option;

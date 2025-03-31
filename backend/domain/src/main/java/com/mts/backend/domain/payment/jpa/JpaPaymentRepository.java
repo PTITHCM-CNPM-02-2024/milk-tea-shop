@@ -1,48 +1,31 @@
 package com.mts.backend.domain.payment.jpa;
 
+import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
-import com.mts.backend.domain.persistence.entity.PaymentEntity;
-import com.mts.backend.domain.promotion.identifier.CouponId;
+import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.identifier.PaymentId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface JpaPaymentRepository extends JpaRepository<PaymentEntity, Long> {
   @Query("select p from PaymentEntity p where p.orderEntity.id = :id")
-  List<PaymentEntity> findByOrderEntity_Id(@Param("id") CouponId id);
+  List<PaymentEntity> findByOrderEntity_Id(@Param("id") Long id);
 
   @Query("""
           select p from PaymentEntity p
           where p.orderEntity.id is not null and p.orderEntity.id = :id and p.orderEntity.status = :status and p.status = :status1""")
-  List<PaymentEntity> findByOrderAndPaymentStatus(@Param("id") CouponId orderId, @Param("status") OrderStatus status, @Param("status1") PaymentStatus status1);
+  List<PaymentEntity> findByOrderAndPaymentStatus(@Param("id") OrderId orderId, @Param("status") OrderStatus status,
+                                                  @Param("status1") PaymentStatus status1);
 
-  // Insert payment using native query and entity parameter
-  @Modifying
-  @Transactional
-  @Query(value = "INSERT INTO milk_tea_shop_prod.Payment (payment_id, order_id, payment_method_id, amount_paid, " +
-          "change_amount, payment_time, status) " +
-          "VALUES (:#{#entity.id}, :#{#entity.orderEntity.id}, :#{#entity.paymentMethod.id}, :#{#entity.amountPaid}, " +
-          ":#{#entity.changeAmount}, :#{#entity.paymentTime}, :#{#entity.status?.name()})", nativeQuery = true)
-  void insertPayment(@Param("entity") PaymentEntity entity);
-
-  // Update payment using native query and entity parameter
-  @Modifying
-  @Transactional
-  @Query(value = "UPDATE milk_tea_shop_prod.Payment SET " +
-          "order_id = :#{#entity.orderEntity.id}, " +
-          "payment_method_id = :#{#entity.paymentMethod.id}, " +
-          "amount_paid = :#{#entity.amountPaid}, " +
-          "change_amount = :#{#entity.changeAmount}, " +
-          "payment_time = :#{#entity.paymentTime}, " +
-          "status = :#{#entity.status.name()}, " +
-          "updated_at = CURRENT_TIMESTAMP " +
-          "WHERE payment_id = :#{#entity.id}", nativeQuery = true)
-  void updatePayment(@Param("entity") PaymentEntity entity);
+  @Query("select p from PaymentEntity p where p.orderEntity.id = :id and p.id <> :id1")
+  List<PaymentEntity> findByOrderEntity_IdAndIdNot(@Param("id") @NonNull Long id, @Param("id1") @NonNull Long id1);
 
   // Delete payment using native query
   @Modifying

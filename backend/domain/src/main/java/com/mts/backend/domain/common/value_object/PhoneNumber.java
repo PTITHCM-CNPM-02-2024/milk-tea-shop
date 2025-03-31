@@ -2,6 +2,7 @@ package com.mts.backend.domain.common.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import lombok.Builder;
 import lombok.Value;
 
@@ -39,16 +40,15 @@ public class PhoneNumber {
     private static String normalize(String value) {
         return value.replaceAll("[^0-9]", "");
     }
-    
     public static final class PhoneNumberConverter implements AttributeConverter<PhoneNumber, String> {
         @Override
         public String convertToDatabaseColumn(PhoneNumber attribute) {
-            return Objects.requireNonNull(attribute).getValue();
+            return Objects.isNull(attribute) ? null : attribute.getValue();
         }
     
         @Override
         public PhoneNumber convertToEntityAttribute(String dbData) {
-            return builder().value(dbData).build();
+            return Objects.isNull(dbData) ? null : PhoneNumber.builder().value(dbData).build();
         }
     }
 

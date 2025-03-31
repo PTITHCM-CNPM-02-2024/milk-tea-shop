@@ -22,8 +22,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 )
 @EntityScan(basePackages = {
         "com.mts.backend.domain.*",
-        "com.mts.backend.domain.persistence.entity",
-        "com.mts.backend.domain.persistence.*",})
+        "com.mts.backend.domain.store.*",
+        "com.mts.backend.domain.customer.*",
+        "com.mts.backend.domain.product.*",
+        "com.mts.backend.domain.staff.*",
+        "com.mts.backend.domain.promotion.*",
+        "com.mts.backend.domain.account.*",
+        "com.mts.backend.domain.order.*",
+        "com.mts.backend.domain.payment.*",
+        "com.mts.backend.domain.billing.*"})
 @EnableJpaRepositories
 public class DomainModuleConfig {
 }

@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Value
 public class AreaId implements Serializable {
-    int value;
+    Integer value;
     
     private AreaId(int value) {
         if (value <= 0) {
@@ -26,6 +26,10 @@ public class AreaId implements Serializable {
     
     public static AreaId of (String areaId) {
         return new AreaId(Integer.parseInt(areaId));
+    }
+    
+    public static AreaId of (Integer areaId) {
+        return new AreaId(areaId);
     }
     
     public static AreaId create(){

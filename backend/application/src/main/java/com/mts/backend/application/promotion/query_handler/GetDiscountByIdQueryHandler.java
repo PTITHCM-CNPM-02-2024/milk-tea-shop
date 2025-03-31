@@ -24,14 +24,15 @@ public class GetDiscountByIdQueryHandler implements IQueryHandler<DiscountByIdQu
     public CommandResult handle(DiscountByIdQuery query) {
 
         var discount =
-                discountRepository.findById(query.getId()).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã giảm giá"));
+                discountRepository.findById(query.getId().getValue()).orElseThrow(() -> new IllegalArgumentException("Không " +
+                        "tìm thấy mã giảm giá"));
 
 
         var response = DiscountDetailResponse.builder()
-                .id(discount.getId().getValue())
+                .id(discount.getId())
                 .name(discount.getName().getValue())
                 .description(discount.getDescription())
-                .couponId(discount.getCouponEntity().getId().getValue())
+                .couponId(discount.getCouponEntity().getId())
                 .discountValue(discount.getPromotionDiscountValue().getValue())
                 .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
                 .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())

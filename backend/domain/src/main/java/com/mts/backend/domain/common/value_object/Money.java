@@ -44,7 +44,8 @@ public class Money  implements Comparable<Money> {
     }
     
     public Money subtract(Money money){
-        return new Money(value.subtract(money.value).doubleValue() < 0 ? BigDecimal.ZERO : value.subtract(money.value));
+        return new Money(value.subtract(money.value).compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO :
+                value.subtract(money.value));
     }
     
     public Money subtract(BigDecimal money){

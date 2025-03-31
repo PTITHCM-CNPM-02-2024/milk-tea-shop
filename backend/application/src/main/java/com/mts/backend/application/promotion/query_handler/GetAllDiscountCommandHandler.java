@@ -3,7 +3,6 @@ package com.mts.backend.application.promotion.query_handler;
 import com.mts.backend.application.promotion.query.DefaultDiscountQuery;
 import com.mts.backend.application.promotion.response.DiscountDetailResponse;
 import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
-import com.mts.backend.domain.promotion.repository.IDiscountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import jakarta.transaction.Transactional;
@@ -32,10 +31,10 @@ public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscou
 
         discounts.forEach(discount -> {
             responses.add(DiscountDetailResponse.builder()
-                    .id(discount.getId().getValue())
+                    .id(discount.getId())
                     .name(discount.getName().getValue())
                     .description(discount.getDescription())
-                    .couponId(discount.getCouponEntity().getId().getValue())
+                    .couponId(discount.getCouponEntity().getId())
                     .discountValue(discount.getPromotionDiscountValue().getValue())
                     .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
                     .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())

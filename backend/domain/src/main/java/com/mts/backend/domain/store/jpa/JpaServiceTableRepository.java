@@ -3,7 +3,7 @@ package com.mts.backend.domain.store.jpa;
 import com.mts.backend.domain.store.ServiceTableEntity;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
-import jakarta.validation.constraints.NotNull;
+import com.mts.backend.domain.store.value_object.TableNumber;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 @Repository
-public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEntity, ServiceTableId> {
+public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEntity, Integer> {
   @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
   @Query("select s from ServiceTableEntity s WHERE s.active = :active")
   List<ServiceTableEntity> findByActive(@Param("active") @NonNull Boolean active);
@@ -27,13 +27,13 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
 
 
   @Query("select count(s) from ServiceTableEntity s where s.areaEntity.id = :id")
-  long countByAreaEntity_Id(@Param("id") AreaId id);
+  long countByAreaEntity_Id(@Param("id") Integer id);
 
   @Query("select s from ServiceTableEntity s where s.tableNumber = :tableNumber")
-  Optional<ServiceTableEntity> findByTableNumber(@Param("tableNumber") @NonNull String tableNumber);
+  Optional<ServiceTableEntity> findByTableNumber(@Param("tableNumber") @NonNull TableNumber tableNumber);
 
   @Query("select (count(s) > 0) from ServiceTableEntity s where s.tableNumber = :tableNumber")
-  boolean existsByTableNumber(@Param("tableNumber") @NonNull String tableNumber);
+  boolean existsByTableNumber(@Param("tableNumber") @NonNull TableNumber tableNumber);
 
   @Modifying
   @Transactional
@@ -41,10 +41,15 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
   void deleteServiceTable(@Param("id") Integer id);
 
   @Query("select s from ServiceTableEntity s where s.areaEntity.id = :id")
-  Set<ServiceTableEntity> findByAreaEntity_Id(@Param("id") @NonNull AreaId id);
+  Set<ServiceTableEntity> findByAreaEntity_Id(@Param("id") @NonNull Integer id);
 
 
   
   @EntityGraph(attributePaths = {"areaEntity"})
-  Optional<ServiceTableEntity> findByIdWithArea(ServiceTableId serviceTableId);
+    @Query("select s from ServiceTableEntity s where s.id = :id")
+  Optional<ServiceTableEntity> findByIdWithArea(Integer serviceTableId);
+
+  @Query("select (count(s) > 0) from ServiceTableEntity s where s.id <> :id and s.tableNumber = :tableNumber")
+  boolean existsByIdNotAndTableNumber(@Param("id") @NonNull Integer id, @Param("tableNumber") @NonNull TableNumber tableNumber);
+
 }

@@ -9,7 +9,6 @@ import com.mts.backend.application.promotion.command.CreateCouponCommand;
 import com.mts.backend.application.promotion.command.UpdateCouponCommand;
 import com.mts.backend.application.promotion.query.CouponByIdQuery;
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
-import com.mts.backend.domain.promotion.Coupon;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.shared.response.ApiResponse;
