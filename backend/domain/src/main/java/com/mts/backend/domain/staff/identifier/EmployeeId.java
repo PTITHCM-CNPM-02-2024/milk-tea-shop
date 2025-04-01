@@ -1,10 +1,14 @@
 package com.mts.backend.domain.staff.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class EmployeeId implements Identifiable {
-    private final long value;
+import java.io.Serializable;
+
+@Value
+public class EmployeeId implements Serializable {
+    long value;
     
     private EmployeeId(long value) {
         if (value <= 0) {
@@ -25,31 +29,19 @@ public class EmployeeId implements Identifiable {
         return new EmployeeId(Long.parseLong(value));
     }
     
-    public long getValue() {
-        return value;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        EmployeeId employeeId = (EmployeeId) o;
-        
-        return value == employeeId.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(value);
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    
     public static EmployeeId create() {
         return new EmployeeId(IdentifiableProvider.generateTimeBasedUnsignedInt());
+    }
+    
+    public static final class EmployeeIdConverter implements AttributeConverter<EmployeeId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(EmployeeId employeeId) {
+            return employeeId.getValue();
+        }
+        
+        @Override
+        public EmployeeId convertToEntityAttribute(Long value) {
+            return EmployeeId.of(value);
+        }
     }
 }

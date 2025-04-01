@@ -1,11 +1,10 @@
 package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.CreateMembershipCommand;
-import com.mts.backend.domain.customer.MembershipType;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
+import com.mts.backend.domain.customer.MembershipTypeEntity;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
-import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -17,9 +16,9 @@ import java.util.Objects;
 
 @Service
 public class CreateMembershipCommandHandler implements ICommandHandler<CreateMembershipCommand, CommandResult> {
-    private final IMembershipTypeRepository membershipTypeRepository;
+    private final JpaMembershipTypeRepository membershipTypeRepository;
 
-    public CreateMembershipCommandHandler(IMembershipTypeRepository membershipTypeRepository) {
+    public CreateMembershipCommandHandler(JpaMembershipTypeRepository membershipTypeRepository) {
         this.membershipTypeRepository = membershipTypeRepository;
     }
 
@@ -27,34 +26,43 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
     public CommandResult handle(CreateMembershipCommand command) {
         Objects.requireNonNull(command, "Create membership command is required");
 
-        DiscountValue discountValue = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        MemberDiscountValue memberDiscountValue = MemberDiscountValue.builder()
+                .unit(command.getDiscountUnit())
+                .value(command.getDiscountValue()).build();
         
-        MemberTypeName name = MemberTypeName.of(command.getName());
+        verifyUniqueName(command.getName());
         
-        verifyUniqueName(name);
+        var validUntil = command.getValidUntil().isPresent() ? command.getValidUntil().get() :
+                LocalDateTime.of(LocalDateTime.now().getYear() + 1, 1,1,0,0);
         
-        var validUntil = command.getValidUntil() != null ? command.getValidUntil() : LocalDateTime.of(LocalDateTime.now().getYear() + 1, 1,1,0,0);
+        MembershipTypeEntity membershipType = MembershipTypeEntity.builder()
+                .id(MembershipTypeId.create().getValue())
+                .type(command.getName())
+                .description(command.getDescription())
+                .memberDiscountValue(memberDiscountValue)
+                .requiredPoint(command.getRequiredPoints())
+                .validUntil(validUntil)
+                .active(true)
+                .build();
         
-        MembershipType membershipType = new MembershipType(
-                MembershipTypeId.create(),
-                MemberTypeName.of(command.getName()),
-                discountValue,
-                command.getRequiredPoints(),
-                command.getDescription(),
-                validUntil,
-                true,
-                LocalDateTime.now()
-        );
+        verifyUniqueRewardPoint(command.getRequiredPoints());
         
         var savedMembershipType = membershipTypeRepository.save(membershipType);
         
-        return CommandResult.success(savedMembershipType.getId().getValue());
+        return CommandResult.success(savedMembershipType.getId());
     }
 
     private void verifyUniqueName(MemberTypeName name) {
         Objects.requireNonNull(name, "Member type name is required");
-        if (membershipTypeRepository.existsByName(name)){
+        if (membershipTypeRepository.existsByType(name)) {
             throw new DuplicateException("Tên loại thành viên đã tồn tại");
         }
     }
+    
+    private void verifyUniqueRewardPoint(int requiredPoints) {
+        if (membershipTypeRepository.existsByRequiredPoint(requiredPoints)) {
+            throw new DuplicateException("Điểm thưởng đã tồn tại");
+        }
+    }
+    
 }

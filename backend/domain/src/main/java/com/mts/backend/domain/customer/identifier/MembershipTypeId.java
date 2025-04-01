@@ -1,19 +1,22 @@
 package com.mts.backend.domain.customer.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class MembershipTypeId implements Identifiable {
-    private final int id;
+import java.io.Serializable;
+@Value
+public class MembershipTypeId implements Serializable {
+int value;
     
-    private MembershipTypeId(int id) {
-        if (id <= 0) {
+    private MembershipTypeId(int value) {
+        if (value <= 0) {
             throw new IllegalArgumentException("Id must be greater than 0");
         }
-        if (id > IdentifiableProvider.TINYINT_UNSIGNED_MAX){
+        if (value > IdentifiableProvider.TINYINT_UNSIGNED_MAX){
             throw new IllegalArgumentException("Id must be less than " + IdentifiableProvider.TINYINT_UNSIGNED_MAX);
         }
-        this.id = id;
+        this.value = value;
     }
     
     public static MembershipTypeId of(int id) {
@@ -28,28 +31,15 @@ public class MembershipTypeId implements Identifiable {
         return new MembershipTypeId(IdentifiableProvider.generateTimeBasedUnsignedTinyInt());
     }
     
-    public int getValue() {
-        return id;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class MembershipTypeIdConverter implements AttributeConverter<MembershipTypeId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(MembershipTypeId attribute) {
+            return attribute.getValue();
+        }
         
-        MembershipTypeId membershipTypeId = (MembershipTypeId) o;
-        
-        return id == membershipTypeId.id;
+        @Override
+        public MembershipTypeId convertToEntityAttribute(Integer dbData) {
+            return MembershipTypeId.of(dbData);
+        }
     }
-    
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(id);
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-    
 }

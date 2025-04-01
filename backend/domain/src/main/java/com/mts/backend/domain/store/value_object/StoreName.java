@@ -1,62 +1,49 @@
 package com.mts.backend.domain.store.value_object;
 
-import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-public class StoreName extends AbstractValueObject  {
-    private final String value;
+@Value
+@Builder
+public class StoreName{ 
+    String value;
     
     private static final int MAX_LENGTH = 100;
     private StoreName(String value) {
-        this.value = normalize(value);
-    }
-    
-    public static ValueObjectValidationResult create(String value){
+
         Objects.requireNonNull(value, "Store name is required");
-        
+
         List<String> errors = new ArrayList<>();
-        
+
         if (value.length() > MAX_LENGTH){
             errors.add("Tên cửa hàng không được vượt quá " + MAX_LENGTH + " ký tự");
         }
-        
+
         if (value.isBlank()){
             errors.add("Tên cửa hàng không được để trống");
         }
         
-        if (errors.isEmpty()){
-            return new ValueObjectValidationResult(new StoreName(value), errors);
+        if (!errors.isEmpty()){
+            throw new DomainBusinessLogicException(errors);
         }
-        
-        return new ValueObjectValidationResult(null, errors);
+        this.value = normalize(value);
     }
     
-    public static StoreName of(String value){
-        ValueObjectValidationResult result = create(value);
-        
-        if (result.getBusinessErrors().isEmpty()){
-            return new StoreName(value);
+    public final static class StoreNameConverter implements AttributeConverter<StoreName, String> {
+        @Override
+        public String convertToDatabaseColumn(StoreName attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
         }
-        throw new DomainException("Tên cửa hàng không hợp lệ" + result.getBusinessErrors());
-    }
     
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value);
-    }
-    
-    @Override
-    public String toString() {
-        return normalize(value);
-    }
-
-    public String getValue() {
-        return normalize(value);
+        @Override
+        public StoreName convertToEntityAttribute(String dbData) {
+            return Objects.isNull(dbData) ? null : StoreName.builder().value(dbData).build();
+        }
     }
     
     private static String normalize(String value){

@@ -1,53 +1,56 @@
 package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.CreateEmployeeCommand;
+import com.mts.backend.domain.account.AccountEntity;
 import com.mts.backend.domain.account.identifier.AccountId;
-import com.mts.backend.domain.account.repository.IAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.staff.Employee;
+import com.mts.backend.domain.staff.EmployeeEntity;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
-import com.mts.backend.domain.staff.repository.IEmployeeRepository;
-import com.mts.backend.domain.staff.value_object.Position;
+import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
 public class CreateEmployeeCommandHandler implements ICommandHandler<CreateEmployeeCommand, CommandResult> {
-    private final  IEmployeeRepository employeeRepository;
-    private final IAccountRepository accountRepository;
+    private final JpaEmployeeRepository employeeRepository;
+    private final JpaAccountRepository accountRepository;
     
-    public CreateEmployeeCommandHandler(IEmployeeRepository employeeRepository, IAccountRepository accountRepository) {
+    public CreateEmployeeCommandHandler(JpaEmployeeRepository employeeRepository, JpaAccountRepository accountRepository) {
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
     }
     
     @Override
+    @Transactional
     public CommandResult handle(CreateEmployeeCommand command) {
-        Employee emp = new Employee(EmployeeId.create(),
-                FirstName.of(command.getFirstName()),
-                LastName.of(command.getLastName()),
-                Email.of(command.getEmail()),
-                PhoneNumber.of(command.getPhone()),
-                Position.of(command.getPosition()),
-                Gender.valueOf(command.getGender()),
-                AccountId.of(command.getAccountId()),
-                LocalDateTime.now());
         
-        verifyUniqueEmail(emp.getEmail());
+        verifyUniqueEmail(command.getEmail());
         
-        verifyUniquePhoneNumber(emp.getPhoneNumber());
+        verifyUniquePhoneNumber(command.getPhone());
         
-        mustExitsAccountAndUniqueAccountId(emp.getAccountId());
+        var account = mustExitsAccountAndUniqueAccountId(command.getAccountId());
         
-        var employee = employeeRepository.save(emp);
+        var em = EmployeeEntity.
+                builder()
+                .id(EmployeeId.create().getValue())
+                .firstName(command.getFirstName())
+                .lastName(command.getLastName())
+                .phone(command.getPhone())
+                .email(command.getEmail())
+                .position(command.getPosition())
+                .gender(command.getGender())
+                .accountEntity(account)
+                .build();
         
-        return CommandResult.success(employee.getId().getValue());
+        var result = employeeRepository.save(em); 
+        return CommandResult.success(em.getId());
     }
     
     private void verifyUniqueEmail(Email email) {
@@ -59,18 +62,20 @@ public class CreateEmployeeCommandHandler implements ICommandHandler<CreateEmplo
     
     private void verifyUniquePhoneNumber(PhoneNumber phoneNumber) {
         Objects.requireNonNull(phoneNumber, "Phone number is required");
-        if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
+        if (employeeRepository.existsByPhone(phoneNumber)) {
             throw new DuplicateException("Số điện thoại đã tồn tại");
         }
     }
     
-    private void mustExitsAccountAndUniqueAccountId(AccountId accountId) {
+    private AccountEntity mustExitsAccountAndUniqueAccountId(AccountId accountId) {
         Objects.requireNonNull(accountId, "Account id is required");
-        if (!accountRepository.existsById(accountId)) {
+        if (!accountRepository.existsById(accountId.getValue())) {
             throw new NotFoundException("Tài khoản không tồn tại");
         }
-        if (employeeRepository.existsByAccountId(accountId)) {
+        if (employeeRepository.existsByAccountId(accountId.getValue())) {
             throw new DuplicateException("Tài khoản đã được sử dụng");
         }
+        
+        return accountRepository.getReferenceById(accountId.getValue());
     }
 }

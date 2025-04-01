@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
                 com.mts.backend.infrastructure.InfrastructureModuleConfig.class,
                 com.mts.backend.application.ApplicationModuleConfig.class,
                 com.mts.backend.api.ApiModuleConfig.class,
+                com.mts.backend.domain.DomainModuleConfig.class,
                 com.mts.backend.infrastructure.security.WebNoSecurity.class
         }
 )

@@ -1,13 +1,18 @@
 package com.mts.backend.domain.account.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import lombok.*;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
-public class RoleId implements Identifiable {
-    private final int id;
+@Value
+public class RoleId implements Serializable { 
+    Integer id;
     
     private RoleId(int id) {
         if (id <= 0) {
@@ -16,7 +21,7 @@ public class RoleId implements Identifiable {
         if (id > IdentifiableProvider.TINYINT_UNSIGNED_MAX) {
             throw new IllegalArgumentException("Id must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
         }
-        
+
         this.id = id;
     }
     
@@ -29,6 +34,10 @@ public class RoleId implements Identifiable {
         return new RoleId(Integer.parseInt(id));
     }
     
+    public static RoleId of(Integer id) {
+        return new RoleId(id);
+    }
+    
     public static RoleId create() {
         return new RoleId(IdentifiableProvider.generateTimeBasedUnsignedTinyInt());
     }
@@ -37,23 +46,15 @@ public class RoleId implements Identifiable {
         return id;
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class RoleIdConverter implements AttributeConverter<RoleId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(RoleId attribute) {
+            return attribute.getValue();
+        }
         
-        RoleId roleId = (RoleId) o;
-        
-        return id == roleId.id;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(id);
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(id);
+        @Override
+        public RoleId convertToEntityAttribute(Integer dbData) {
+            return new RoleId(dbData);
+        }
     }
 }

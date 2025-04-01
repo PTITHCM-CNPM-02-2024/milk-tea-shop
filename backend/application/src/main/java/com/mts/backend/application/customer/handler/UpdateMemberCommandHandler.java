@@ -1,11 +1,10 @@
 package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.UpdateMemberCommand;
-import com.mts.backend.domain.customer.MembershipType;
+import com.mts.backend.domain.common.value_object.MemberDiscountValue;
+import com.mts.backend.domain.customer.MembershipTypeEntity;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
-import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.DiscountUnit;
-import com.mts.backend.domain.customer.value_object.DiscountValue;
+import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -17,9 +16,9 @@ import java.util.Objects;
 
 @Service
 public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberCommand, CommandResult> {
-    private final IMembershipTypeRepository membershipTypeRepository;
+    private final JpaMembershipTypeRepository membershipTypeRepository;
     
-    public UpdateMemberCommandHandler(IMembershipTypeRepository membershipTypeRepository) {
+    public UpdateMemberCommandHandler(JpaMembershipTypeRepository membershipTypeRepository) {
         this.membershipTypeRepository = membershipTypeRepository;
     }
     
@@ -28,15 +27,17 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
     public CommandResult handle(UpdateMemberCommand command) {
         Objects.requireNonNull(command, "Update member command is required");
         
-        MembershipType membershipType = mustExistMembershipType(MembershipTypeId.of(command.getMemberId()));
+        MembershipTypeEntity membershipType = mustExistMembershipType(command.getMemberId());
         
-        if (membershipType.changeName(MemberTypeName.of(command.getName()))) {
-            verifyUniqueName(membershipType.getName());
+        if (membershipType.changeType(command.getName())) {
+            verifyUniqueName(command.getMemberId(), command.getName());
         }
 
-        DiscountValue discountValue = DiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()));
+        MemberDiscountValue memberDiscountValue = MemberDiscountValue.builder()
+                .unit(command.getDiscountUnit())
+                .value(command.getDiscountValue()).build();
         
-        membershipType.changeDiscountValue(discountValue);
+        membershipType.changeDiscountValue(memberDiscountValue);
         
         membershipType.changeRequiredPoint(command.getRequiredPoints());
         
@@ -44,23 +45,22 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
         
         membershipType.changeValidUntil(command.getValidUntil());
         
-        membershipType.changeActive(command.isActive());
+        membershipType.setActive(command.isActive());
         
         
-        var updatedMembershipType = membershipTypeRepository.save(membershipType);
         
-        return CommandResult.success(updatedMembershipType.getId().getValue());
+        return CommandResult.success(membershipType.getId());
         
     }
     
-    private MembershipType mustExistMembershipType(MembershipTypeId membershipTypeId) {
+    private MembershipTypeEntity mustExistMembershipType(MembershipTypeId membershipTypeId) {
         return membershipTypeRepository.findById(membershipTypeId)
                 .orElseThrow(() -> new NotFoundException("Loại thành viên không tồn tại"));
     }
     
-    private void verifyUniqueName(MemberTypeName name) {
+    private void verifyUniqueName(MembershipTypeId id, MemberTypeName name) {
         Objects.requireNonNull(name, "Member type name is required");
-        if (membershipTypeRepository.existsByName(name)){
+        if (membershipTypeRepository.existsByIdNotAndType(id.getValue(), name)) {
             throw new DuplicateException("Tên loại thành viên đã tồn tại");
         }
     }

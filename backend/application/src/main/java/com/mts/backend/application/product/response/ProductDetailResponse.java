@@ -21,9 +21,9 @@ public class ProductDetailResponse {
     
     private String description;
     
-    private String category;
+    private CategoryDetailResponse category;
     
-    private boolean isSignature;
+    private Boolean signature;
     
     private String image_url;
     
@@ -32,6 +32,8 @@ public class ProductDetailResponse {
     @AllArgsConstructor
     @Data
     public static class PriceDetail{
+        private Long id;
+        private Integer sizeId;
         private String size;
         private BigDecimal price;
         private String currency;

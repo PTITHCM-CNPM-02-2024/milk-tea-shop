@@ -1,20 +1,24 @@
 package com.mts.backend.domain.store.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import com.mts.backend.shared.exception.DomainException;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
+import java.io.Serializable;
 
-public class StoreId implements Identifiable {
-    private final int storeId;
+@Value
+public class StoreId implements Serializable {
+     int value;
     
-    private StoreId(int storeId) {
-        if (storeId <= 0) {
-            throw new IllegalArgumentException("Invalid storeId");
+    private StoreId(int value) {
+        if (value <= 0) {
+            throw new DomainException("Store id không hợp lệ");
         }
-        if (storeId > IdentifiableProvider.TINYINT_UNSIGNED_MAX) {
-            throw new IllegalArgumentException("Invalid storeId");
+        if (value > IdentifiableProvider.TINYINT_UNSIGNED_MAX) {
+            throw new DomainException("Store id không hợp lệ");
         }
-        this.storeId = storeId;
+        this.value = value;
     }
     
     public static StoreId of(int storeId) {
@@ -25,21 +29,17 @@ public class StoreId implements Identifiable {
         return new StoreId(Integer.parseInt(storeId));
     }
     
-    
-    public int getValue() {
-        return storeId;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final  class  StoreIdConverter implements AttributeConverter<StoreId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(StoreId attribute) {
+            return attribute.getValue();
+        }
         
-        StoreId storeId1 = (StoreId) o;
-        
-        return storeId == storeId1.storeId;
+        @Override
+        public StoreId convertToEntityAttribute(Integer dbData) {
+            return StoreId.of(dbData);
+        }
     }
-    
     
     public static StoreId create(){
         return new StoreId(IdentifiableProvider.generateTimeBasedUnsignedTinyInt());

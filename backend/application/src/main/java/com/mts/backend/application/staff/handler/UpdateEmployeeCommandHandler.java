@@ -1,80 +1,70 @@
 package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
-import com.mts.backend.domain.account.identifier.AccountId;
-import com.mts.backend.domain.account.repository.IAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.staff.Employee;
+import com.mts.backend.domain.staff.EmployeeEntity;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
-import com.mts.backend.domain.staff.repository.IEmployeeRepository;
-import com.mts.backend.domain.staff.value_object.Position;
+import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
 public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmployeeCommand, CommandResult> {
-    private final IEmployeeRepository employeeRepository;
-    private final IAccountRepository accountRepository;
+    private final JpaEmployeeRepository employeeRepository;
+    private final JpaAccountRepository accountRepository;
     
-    public UpdateEmployeeCommandHandler(IEmployeeRepository employeeRepository, IAccountRepository accountRepository) {
+    public UpdateEmployeeCommandHandler(JpaEmployeeRepository employeeRepository, JpaAccountRepository accountRepository) {
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
     }
     @Override
+    @Transactional
     public CommandResult handle(UpdateEmployeeCommand command) {
         Objects.requireNonNull(command, "Update employee command is required");
         
-        Employee employee = mustExistEmployee(EmployeeId.of(command.getId()));
+        EmployeeEntity employee = mustExistEmployee(command.getId());
         
-        if (employee.changeEmail(Email.of(command.getEmail()))) {
-            verifyUniqueEmail(employee.getEmail());
+        if (employee.changeEmail(command.getEmail())) {
+            verifyUniqueEmail(command.getId(), command.getEmail());
         }
-        if (employee.changePhoneNumber(PhoneNumber.of(command.getPhone()))) {
-            verifyUniquePhoneNumber(employee.getPhoneNumber());
+        if (employee.changePhoneNumber(command.getPhone())) {
+            verifyUniquePhoneNumber(command.getId(), command.getPhone());
         }
         
-        mustExitsAccount(employee.getAccountId());
+        employee.changePosition(command.getPosition());
+        employee.changeFirstName(command.getFirstName());
+        employee.changeLastName(command.getLastName());
+        employee.changeGender(command.getGender());
         
-        employee.changePosition(Position.of(command.getPosition()));
-        employee.changeFirstName(FirstName.of(command.getFirstName()));
-        employee.changeLastName(LastName.of(command.getLastName()));
-        employee.changeGender(Gender.valueOf(command.getGender()));
         
-        var updatedEmployee = employeeRepository.save(employee);
-        
-        return CommandResult.success(updatedEmployee.getId().getValue());
+        return CommandResult.success(employee.getId());
     }
     
-    private Employee mustExistEmployee(EmployeeId employeeId) {
+    private EmployeeEntity mustExistEmployee(EmployeeId employeeId) {
         Objects.requireNonNull(employeeId, "Employee id is required");
-        return employeeRepository.findById(employeeId)
+        return employeeRepository.findById(employeeId.getValue())
                 .orElseThrow(() -> new NotFoundException("Nhân viên không tồn tại"));
     }
     
-    private void verifyUniqueEmail(Email email) {
+    private void verifyUniqueEmail(EmployeeId id,  Email email) {
         Objects.requireNonNull(email, "Email is required");
-        if (employeeRepository.existsByEmail(email)) {
+        if (employeeRepository.existsByIdNotAndEmail(id.getValue(), email)) {
             throw new DuplicateException("Email đã tồn tại");
         }
     }
     
-    private void verifyUniquePhoneNumber(PhoneNumber phoneNumber) {
-        Objects.requireNonNull(phoneNumber, "Phone number is required");
-        if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
+    private void verifyUniquePhoneNumber(EmployeeId id,  PhoneNumber phone) {
+        Objects.requireNonNull(phone, "Phone number is required");
+        if (employeeRepository.existsByIdNotAndPhone(id.getValue(), phone)) {
             throw new DuplicateException("Số điện thoại đã tồn tại");
         }
     }
-    
-    private void mustExitsAccount(AccountId accountId) {
-        Objects.requireNonNull(accountId, "Account id is required");
-        if (!accountRepository.existsById(accountId)) {
-            throw new DuplicateException("Account không tồn tại");
-        }
-        
-    }
+
 }

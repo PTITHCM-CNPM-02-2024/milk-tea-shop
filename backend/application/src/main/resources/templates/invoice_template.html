@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Đơn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .invoice-header h1 {
+            color: #2a5885;
+            margin: 0;
+        }
+        .company-details, .client-details, .staff-info {
+            margin-bottom: 20px;
+        }
+        .invoice-details {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row {
+            font-weight: bold;
+        }
+        .invoice-footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .thank-you {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 18px;
+            color: #2a5885;
+        }
+        .staff-info {
+            margin-bottom: 20px;
+        }
+        .promotion {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-left: 3px solid #2a5885;
+            margin-bottom: 15px;
+        }
+        .payment-details {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .flex-item {
+            flex: 1;
+            padding-right: 15px;
+        }
+        .note-row {
+            background-color: #f9f9f9;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .note-row td {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .service-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #e9f5ff;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .service-type {
+            display: inline-block;
+            font-weight: bold;
+            padding: 5px 10px;
+            background-color: #2a5885;
+            color: white;
+            border-radius: 4px;
+        }
+        .table-name {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="invoice-container">
+    <div class="invoice-header">
+        <div>
+            <h1>HÓA ĐƠN</h1>
+            <div class="company-details">
+                <p><strong>{{companyName}}</strong></p>
+                <p>{{companyAddress}}</p>
+                <p>Email: {{companyEmail}}</p>
+                <p>Điện thoại: {{companyPhone}}</p>
+            </div>
+        </div>
+        <div class="invoice-details">
+            <p><strong>Số hóa đơn:</strong> {{invoiceNumber}}</p>
+            <p><strong>Ngày:</strong> {{invoiceDate}}</p>
+        </div>
+    </div>
+
+    <!-- Thông tin dịch vụ: bàn/mang đi -->
+    <div class="service-info">
+        <div>
+            <span class="table-name">{{tableName}}</span>
+        </div>
+        <div>
+            <span class="service-type">{{serviceType}}</span>
+        </div>
+    </div>
+
+    <!-- Thông tin nhân viên phục vụ -->
+    <div class="staff-info">
+        <p><strong>Nhân viên phục vụ:</strong> {{staffName}}</p>
+        <p><strong>Mã nhân viên:</strong> {{staffId}}</p>
+    </div>
+
+    <!-- Replace the existing promotion section -->
+    <div class="flex-container">
+        <!-- Thông tin khách hàng -->
+        <div class="flex-item client-details">
+            <p><strong>Khách hàng:</strong> {{clientName}}</p>
+            <p><strong>Địa chỉ:</strong> {{clientAddress}}</p>
+            <p><strong>Email:</strong> {{clientEmail}}</p>
+            <p><strong>Điện thoại:</strong> {{clientPhone}}</p>
+        </div>
+
+        <!-- Member promotion if applicable -->
+        {{#if hasMemberPromotion}}
+        <div class="flex-item promotion">
+            <p><strong>Khuyến mãi thành viên:</strong></p>
+            <p>{{memberPromotionDescription}}</p>
+        </div>
+        {{/if}}
+    </div>
+
+    <!-- Coupon promotion if applicable -->
+    {{#if hasCouponPromotion}}
+    <div class="promotion">
+        <p><strong>Mã giảm giá áp dụng:</strong> {{couponCode}}</p>
+    </div>
+    {{/if}}
+
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mô tả</th>
+            <th>Kích thước</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th class="text-right">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{invoiceItems}}
+        <tr class="total-row">
+            <td colspan="5" class="text-right">Tổng cộng:</td>
+            <td class="text-right">{{totalAmount}}</td>
+        </tr>
+        {{#if hasCouponPromotion}}
+        <tr>
+            <td colspan="5" class="text-right">Giảm giá:</td>
+            <td class="text-right">{{discountAmount}}</td>
+        </tr>
+        {{/if}}
+        <tr class="total-row">
+            <td colspan="5" class="text-right">Tổng thanh toán:</td>
+            <td class="text-right">{{grandTotal}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="payment-details">
+        <p><strong>Hình thức thanh toán:</strong> {{paymentMethod}}</p>
+        <p><strong>Số tiền khách đã trả:</strong> {{amountPaid}}</p>
+        <p><strong>Tiền thừa:</strong> {{changeAmount}}</p>
+    </div>
+
+    <div>
+        <p><strong>Ghi chú:</strong> {{notes}}</p>
+    </div>
+
+    <div class="thank-you">
+        <p>Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!</p>
+    </div>
+
+    <div class="invoice-footer">
+        <p>Hóa đơn này được tạo tự động và có giá trị pháp lý khi có đóng dấu.</p>
+        <p>Ngày: {{currentDate}} - Người tạo: {{currentUser}}</p>
+    </div>
+</div>
+</body>
+</html>

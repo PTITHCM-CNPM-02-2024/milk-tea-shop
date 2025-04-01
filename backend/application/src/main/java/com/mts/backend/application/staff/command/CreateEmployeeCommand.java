@@ -1,14 +1,16 @@
 package com.mts.backend.application.staff.command;
 
+import com.mts.backend.domain.staff.value_object.Position;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = false)
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
-@Builder
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateEmployeeCommand extends UserBaseCommand implements ICommand<CommandResult> {
-    private String position;
+    private Position position;
 }

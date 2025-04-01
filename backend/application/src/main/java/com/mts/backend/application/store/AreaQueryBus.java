@@ -1,6 +1,5 @@
 package com.mts.backend.application.store;
 
-import com.mts.backend.application.store.command.CreateAreaCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;

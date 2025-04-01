@@ -11,6 +11,6 @@ public class UpdateProductInformRequest {
     private String name;
     private String description;
     private Integer categoryId;
-    private boolean isAvailable;
-    private boolean isSignature;
+    private Boolean available;
+    private Boolean signature;
 }

@@ -1,8 +1,9 @@
 package com.mts.backend.application.store.event;
 
 import com.mts.backend.application.store.handler.UpdateAreaMaxAndActiveCommandHandler;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
+import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.shared.exception.DomainException;
+import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
@@ -10,15 +11,16 @@ import java.util.Objects;
 
 @Service
 public class ChangeAreaMaxAndActiveListener implements ApplicationListener<ChangeAreaMaxAndActiveEvent> {
-    private IServiceTableRepository serviceTableRepository;
+    private final JpaServiceTableRepository serviceTableRepository;
     
-    public ChangeAreaMaxAndActiveListener(IServiceTableRepository serviceTableRepository) {
+    public ChangeAreaMaxAndActiveListener(JpaServiceTableRepository serviceTableRepository) {
         this.serviceTableRepository = serviceTableRepository;
     }
     /**
      * @param event 
      */
     @Override
+    @Transactional
     public void onApplicationEvent(ChangeAreaMaxAndActiveEvent event) {
         var eventCommand = Objects.requireNonNull(event.getData(), "Event command is required");
         
@@ -26,7 +28,7 @@ public class ChangeAreaMaxAndActiveListener implements ApplicationListener<Chang
             return;
         }
         
-        var listTable = serviceTableRepository.findAllByAreaId(eventCommand.getId());
+        var listTable = serviceTableRepository.findByAreaEntity_Id(eventCommand.getId().getValue());
         
         if (listTable.isEmpty()){
             return;
@@ -38,8 +40,10 @@ public class ChangeAreaMaxAndActiveListener implements ApplicationListener<Chang
         
         listTable.forEach(table -> {
             table.changeIsActive(eventCommand.isActive());
-            serviceTableRepository.save(table);
         });
+        
+        serviceTableRepository.saveAll(listTable);
+        
         
     }
 

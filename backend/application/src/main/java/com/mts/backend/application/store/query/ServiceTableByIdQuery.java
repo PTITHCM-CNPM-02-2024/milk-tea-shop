@@ -1,5 +1,6 @@
 package com.mts.backend.application.store.query;
 
+import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQuery;
 import lombok.AllArgsConstructor;
@@ -12,5 +13,5 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class ServiceTableByIdQuery implements IQuery<CommandResult> {
-    private Integer id;
+    private ServiceTableId id;
 }

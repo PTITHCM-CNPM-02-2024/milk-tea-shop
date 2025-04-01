@@ -2,14 +2,12 @@ package com.mts.backend.application.staff.command;
 
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 public class CreateManagerCommand extends  UserBaseCommand implements ICommand<CommandResult> {
 }

@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a05924d0-1bb6-4f8e-b3e3-6527553a671e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/dto/CategoryEntityInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/dto/ProductEntityInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/dto/ProductPriceEntityInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/dto/ProductSizeEntityInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/dto/UnitOfMeasureEntityInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/account/controller/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/account/controller/AccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/account/controller/RoleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/account/controller/RoleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/customer/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/customer/controller/CustomerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/customer/controller/MembershipController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/customer/controller/MembershipController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/CategoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/ProductSizeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/ProductSizeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/UnitController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/product/controller/UnitController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/promotion/controller/DiscountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/promotion/controller/DiscountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/promotion/request/DiscountBaseRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/promotion/request/DiscountBaseRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/staff/controller/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/staff/controller/EmployeeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/staff/controller/ManagerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/api/src/main/java/com/mts/backend/api/staff/controller/ManagerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/CreateAccountCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/CreateAccountCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/CreateRoleCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/CreateRoleCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountPasswordCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountPasswordCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountRoleCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateAccountRoleCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateRoleCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/command/UpdateRoleCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/CreateAccountCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/CreateAccountCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/CreateRoleCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/CreateRoleCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountPasswordCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountPasswordCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountRoleCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateAccountRoleCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateRoleCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/handler/UpdateRoleCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/AccountByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/AccountByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/DefaultAccountQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/DefaultAccountQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/DefaultRoleQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/DefaultRoleQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/RoleByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query/RoleByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAccountByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAccountByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAllAccountQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAllAccountQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAllRoleQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetAllRoleQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetRoleByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/account/query_handler/GetRoleByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/CreateCustomerCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/CreateCustomerCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/CreateMembershipCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/CreateMembershipCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateCustomerCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateCustomerCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateMemberCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateMemberCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateMemberForCustomer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/command/UpdateMemberForCustomer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/CreateCustomerCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/CreateCustomerCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/CreateMembershipCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/CreateMembershipCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateCustomerCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateCustomerCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateMemberCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateMemberCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateMemberForCustomerCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/handler/UpdateMemberForCustomerCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/CustomerByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/CustomerByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/CustomerByPhoneQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/CustomerByPhoneQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/DefaultCustomerQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/DefaultCustomerQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/DefaultMemberQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/DefaultMemberQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/MemberTypeByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query/MemberTypeByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetAllCustomerQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetAllCustomerQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetAllMemberTypeQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetAllMemberTypeQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetCustomerByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetCustomerByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetCustomerByPhoneQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetCustomerByPhoneQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetMemberTypeByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/customer/query_handler/GetMemberTypeByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/CreateOrderCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/CreateOrderCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderDiscountCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderDiscountCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderProductCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderProductCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderTableCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/command/OrderTableCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/handler/CreateOrderCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/order/handler/CreateOrderCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/ProductCommandBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/ProductCommandBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/ProductQueryBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/ProductQueryBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/AddProductPriceCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/AddProductPriceCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateCategoryCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateCategoryCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateProductInformCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateProductCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateProductSizeCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateProductSizeCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateUnitCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/CreateUnitCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/DeletePriceBySizeIdCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/DeletePriceBySizeIdCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/ProductPriceCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/ProductPriceCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateCategoryCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateCategoryCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductInformCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductInformCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductPriceCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductPriceCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductSizeCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateProductSizeCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateUnitCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/command/UpdateUnitCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/AddProductPriceCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/AddProductPriceCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateCategoryCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateCategoryCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateProductInformCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateProductInformCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateProductSizeCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateProductSizeCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateUnitCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/CreateUnitCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/DeletePriceBySizeIdCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/DeletePriceBySizeIdCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateCategoryCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateCategoryCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductPriceCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductPriceCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductSizeCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateProductSizeCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateUnitCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/handler/UpdateUnitCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/AvailableOrderProductQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/ProductForSaleQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/DefaultCategoryQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/DefaultCategoryQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/DefaultProductQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/DefaultProductQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/SignatureProductQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query/SignatureProductForSaleQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllAvailableOrderProductQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllAvailableOrderProductQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllCategoryQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllCategoryQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllProductQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllProductQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllSignatureProductQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllSignatureProductQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllSizeQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllSizeQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllUnitQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/query_handler/GetAllUnitQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/response/ProductDetailResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/product/response/ProductDetailResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/promotion/handler/UpdateCouponCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/promotion/handler/UpdateCouponCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/promotion/query/DefaultDiscountQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/promotion/query/DefaultDiscountQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/CreateEmployeeCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/CreateEmployeeCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/CreateManagerCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/CreateManagerCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UpdateEmployeeCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UpdateEmployeeCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UpdateManagerCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UpdateManagerCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UserBaseCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/command/UserBaseCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/CreateEmployeeCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/CreateEmployeeCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/CreateManagerCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/CreateManagerCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/UpdateEmployeeCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/UpdateEmployeeCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/UpdateManagerCommandHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/handler/UpdateManagerCommandHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/DefaultEmployeeQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/DefaultEmployeeQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/DefaultManagerQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/DefaultManagerQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/EmployeeByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/EmployeeByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/ManagerByIdQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query/ManagerByIdQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetAllEmployeeQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetAllEmployeeQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetAllManagerQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetAllManagerQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetEmployeeByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetEmployeeByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetManagerByIdQueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/application/src/main/java/com/mts/backend/application/staff/query_handler/GetManagerByIdQueryHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/Account.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/Account.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/MembershipType.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/MembershipType.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/Order.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/ddl-data-source/milk_tea_shop_prod/Order.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/identifier/AccountId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/identifier/AccountId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/identifier/RoleId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/identifier/RoleId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/jpa/JpaAccountRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/jpa/JpaAccountRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/jpa/JpaRoleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/jpa/JpaRoleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/repository/AccountRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/repository/AccountRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/repository/RoleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/repository/RoleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/PasswordHash.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/PasswordHash.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/RoleName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/RoleName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/Username.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/value_object/Username.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/FirstName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/FirstName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/LastName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/LastName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/MemberDiscountValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/MemberDiscountValue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/Money.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/common/value_object/Money.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/CustomerId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/CustomerId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/MembershipTypeId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/MembershipTypeId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/RewardPointLogId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/identifier/RewardPointLogId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaCustomerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaCustomerRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaMembershipTypeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaMembershipTypeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaRewardPointLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/jpa/JpaRewardPointLogRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/CustomerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/CustomerRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/MembershipTypeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/MembershipTypeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/RewardPointLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/repository/RewardPointLogRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/value_object/MemberTypeName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/value_object/MemberTypeName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/value_object/RewardPoint.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/value_object/RewardPoint.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/entity/OrderTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/entity/OrderTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderDiscountId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderDiscountId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderProductId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderProductId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderTableId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/identifier/OrderTableId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderDiscountRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderDiscountRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderTableRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/jpa/JpaOrderTableRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/repository/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/repository/OrderRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/identifier/PaymentId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/identifier/PaymentId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/jpa/JpaPaymentMethodRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/jpa/JpaPaymentMethodRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/jpa/JpaPaymentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/jpa/JpaPaymentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/repository/PaymentMethodRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/repository/PaymentMethodRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/repository/PaymentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/repository/PaymentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/AccountEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/AccountEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/CategoryEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/CategoryEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/CustomerEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/CustomerEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/EmployeeEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/EmployeeEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/ManagerEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/ManagerEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/MembershipTypeEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/MembershipTypeEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/OrderDiscountEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/OrderDiscountEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/OrderEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/OrderEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/OrderProductEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/OrderProductEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/OrderTableEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/order/OrderTableEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/PaymentEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/PaymentEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/PaymentMethodEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/payment/PaymentMethodEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/ProductEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/ProductEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/ProductPriceEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/ProductPriceEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/ProductSizeEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/ProductSizeEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/RewardPointLogEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/customer/RewardPointLogEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/RoleEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/account/RoleEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/persistence/entity/UnitOfMeasureEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/UnitOfMeasureEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/CategoryId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/CategoryId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductPriceId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductPriceId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductSizeId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/ProductSizeId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/UnitOfMeasureId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/identifier/UnitOfMeasureId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaCategoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaCategoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductPriceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductPriceRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductSizeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaProductSizeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaUnitOfMeasureRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/jpa/JpaUnitOfMeasureRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/CategoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/CategoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ICategoryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ICategoryRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ProductSizeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/ProductSizeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/UnitRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/repository/UnitRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/CategoryName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/CategoryName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/ProductName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/ProductName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/ProductSizeName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/ProductSizeName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/QuantityOfProductSize.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/QuantityOfProductSize.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/UnitName.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/UnitName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/UnitSymbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/product/value_object/UnitSymbol.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/promotion/DiscountEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/promotion/DiscountEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/identifier/EmployeeId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/identifier/EmployeeId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/identifier/ManagerId.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/identifier/ManagerId.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/jpa/JpaEmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/jpa/JpaEmployeeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/jpa/JpaManagerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/jpa/JpaManagerRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/repository/EmployeeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/repository/ManagerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/repository/ManagerRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/value_object/Position.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/staff/value_object/Position.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/store/jpa/JpaServiceTableRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/domain/src/main/java/com/mts/backend/domain/store/jpa/JpaServiceTableRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/dev/B18.0.0__base_line.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/dev/B18.0.0__base_line.sql" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Vue Composition API Component" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2t7K49glxE4hrhWbEivwqOA3YD8" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.Debug Application.executor": "Run",
+    "Node.js.main.js.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/refactor",
+    "last_opened_file_path": "/home/PNguyen/Workspace/MyProject/milk-tea-shop/frontend/employee",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "/home/PNguyen/development/nvm/current/bin/node",
+    "nodejs_package_manager_path": "npm",
+    "npm.build.executor": "Run",
+    "npm.npm dev.executor": "Run",
+    "npm.preview.executor": "Run",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "/home/PNguyen/development/ides/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "vue.recent.templates": [
+      "Vue Composition API Component"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/components" />
+      <recent name="$PROJECT_DIR$/src/images" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.npm dev">
+    <configuration name="Debug Application" type="JavascriptDebugType" uri="http://localhost:5173">
+      <method v="2" />
+    </configuration>
+    <configuration name="main.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/src/main.js" working-dir="$PROJECT_DIR$/src">
+      <method v="2" />
+    </configuration>
+    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="build" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="npm dev" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="preview" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="preview" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.build" />
+        <item itemvalue="npm.preview" />
+        <item itemvalue="Node.js.main.js" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a05924d0-1bb6-4f8e-b3e3-6527553a671e" name="Changes" comment="" />
+      <created>1739697479756</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1739697479756</updated>
+      <workItem from="1739697481192" duration="232000" />
+      <workItem from="1740203765241" duration="740000" />
+      <workItem from="1740205377421" duration="1281000" />
+      <workItem from="1740206708741" duration="2026000" />
+      <workItem from="1740799507479" duration="752000" />
+      <workItem from="1740807934918" duration="9959000" />
+      <workItem from="1741501091296" duration="6000" />
+      <workItem from="1742863629291" duration="180000" />
+      <workItem from="1742871263140" duration="1197000" />
+      <workItem from="1742873836033" duration="1025000" />
+      <workItem from="1742879509928" duration="484000" />
+      <workItem from="1742881328651" duration="2944000" />
+      <workItem from="1742894443712" duration="6108000" />
+      <workItem from="1742901201315" duration="2645000" />
+      <workItem from="1743232352482" duration="45000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

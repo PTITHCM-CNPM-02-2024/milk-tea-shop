@@ -12,11 +12,14 @@ import com.mts.backend.application.account.command.UpdateAccountRoleCommand;
 import com.mts.backend.application.account.query.AccountByIdQuery;
 import com.mts.backend.application.account.query.DefaultAccountQuery;
 import com.mts.backend.application.account.response.AccountDetailResponse;
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 @RestController
 @RequestMapping("/api/v1/accounts")
 public class AccountController implements IController {
@@ -28,12 +31,12 @@ public class AccountController implements IController {
         this.accountQueryBus = accountQueryBus;
     }
     
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<ApiResponse<Long>> createAccount(@RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
-            .username(request.getUsername())
-            .password(request.getPassword())
-            .roleId(request.getRoleId())
+            .username(Username.builder().value(request.getUsername()).build())
+            .password(PasswordHash.builder().value(request.getPassword()).build())
+            .roleId(RoleId.of(request.getRoleId()))
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -45,8 +48,8 @@ public class AccountController implements IController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Long>> updateAccount(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
         UpdateAccountCommand command = UpdateAccountCommand.builder()
-            .id(id)
-            .username(request.getUsername())
+            .id(AccountId.of(id))
+            .username(Username.builder().value(request.getUsername()).build())
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -58,9 +61,9 @@ public class AccountController implements IController {
     @PutMapping("/{id}/change-password")
     public ResponseEntity<ApiResponse<Long>> changePassword(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
-            .id(id)
-            .newPassword(request.getNewPassword())
-            .confirmPassword(request.getConfirmPassword())
+            .id(AccountId.of(id))
+            .newPassword(PasswordHash.builder().value(request.getNewPassword()).build())
+            .confirmPassword(PasswordHash.builder().value(request.getConfirmPassword()).build())
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -72,8 +75,8 @@ public class AccountController implements IController {
     @PutMapping("/{id}/change-role")
     public ResponseEntity<ApiResponse<Long>> changeRole(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
-            .id(id)
-            .roleId(request.getRoleId())
+            .id(AccountId.of(id))
+            .roleId(RoleId.of(request.getRoleId()))
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -85,7 +88,7 @@ public class AccountController implements IController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AccountDetailResponse>> getAccount(@PathVariable("id") Long id) {
         AccountByIdQuery query = AccountByIdQuery.builder()
-            .id(id)
+            .id(AccountId.of(id))
             .build();
         
         var result = accountQueryBus.dispatch(query);
@@ -95,13 +98,17 @@ public class AccountController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AccountDetailResponse>>> getAccounts() {
+    public ResponseEntity<ApiResponse<?>> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                                 @RequestParam(value = "size", defaultValue = "10") int size) {
         DefaultAccountQuery query = DefaultAccountQuery.builder()
+            .page(page)
+            .size(size)
             .build();
         
         var result = accountQueryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List<AccountDetailResponse>)result.getData())) : handleError(result);
+        return result.isSuccess() ?
+                ResponseEntity.ok(ApiResponse.success((result.getData()))) : handleError(result);
         
     }
     

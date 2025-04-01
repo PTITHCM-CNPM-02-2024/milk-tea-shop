@@ -1,12 +1,13 @@
 package com.mts.backend.domain.product.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import lombok.Value;
 
-import java.util.Objects;
+import java.io.Serializable;
 
-public class ProductSizeId implements Identifiable {
-    private final int value;
+@Value
+public class ProductSizeId implements Serializable {
+    Integer value;
 
     private ProductSizeId(int value) {
         if (value <= 0) {
@@ -29,35 +30,19 @@ public class ProductSizeId implements Identifiable {
         }
         return new ProductSizeId(Integer.parseInt(value));
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ProductSizeId productSizeId = (ProductSizeId) o;
-
-        return Objects.equals(value, productSizeId.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    /**
-     * TODO: Đây là phương thức cần kiểm ra lại
-     */
     public static ProductSizeId create() {
         return new ProductSizeId(IdentifiableProvider.generateTimeBasedUnsignedSmallInt());
+    }
+    
+    public static final class ProductSizeIdConverter implements jakarta.persistence.AttributeConverter<ProductSizeId, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(ProductSizeId attribute) {
+            return attribute.getValue();
+        }
+
+        @Override
+        public ProductSizeId convertToEntityAttribute(Integer dbData) {
+            return new ProductSizeId(dbData);
+        }
     }
 }

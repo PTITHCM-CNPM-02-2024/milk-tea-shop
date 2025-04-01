@@ -1,50 +1,51 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.UpdateStoreCommand;
-import com.mts.backend.domain.common.value_object.Email;
-import com.mts.backend.domain.common.value_object.PhoneNumber;
-import com.mts.backend.domain.store.Store;
+import com.mts.backend.domain.store.StoreEntity;
 import com.mts.backend.domain.store.identifier.StoreId;
-import com.mts.backend.domain.store.repository.IStoreRepository;
-import com.mts.backend.domain.store.value_object.Address;
-import com.mts.backend.domain.store.value_object.StoreName;
+import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 @Service
 public class UpdateStoreCommandHandler implements ICommandHandler<UpdateStoreCommand, CommandResult> {
     
-    private final IStoreRepository storeRepository;
+    private final JpaStoreRepository storeRepository;
     
-    public UpdateStoreCommandHandler(IStoreRepository storeRepository) {
+    public UpdateStoreCommandHandler(JpaStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
     @Override
+    @Transactional
     public CommandResult handle(UpdateStoreCommand command) {
         Objects.requireNonNull(command, "Update store command is required");
         
-        var store = mustExistStore(StoreId.of(command.getId()));
+        var store = mustExistStore(command.getId());
         
-        store.changeStoreName(StoreName.of(command.getName()));
-        store.changeAddress(Address.of(command.getAddress()));
-        store.changePhoneNumber(PhoneNumber.of(command.getPhone()));
-        store.changeEmail(Email.of(command.getEmail()));
+        store.changeAddress(command.getAddress());
+        store.changeEmail(command.getEmail());
+        store.changeStoreName(command.getName());
+        store.changePhoneNumber(command.getPhone());
         store.changeTaxCode(command.getTaxCode());
-        store.changeOpenTime(command.getOpenTime());
-        store.changeCloseTime(command.getCloseTime());
+        store.changeOpeningTime(command.getOpenTime());
+        store.changeClosingTime(command.getCloseTime());
+        store.changeOpeningDate(command.getOpeningDate());
+        
+        
         
         var savedStore = storeRepository.save(store);
         
-        return CommandResult.success(savedStore.getId().getValue());
+        return CommandResult.success(savedStore.getId());
     }
-    
-    private Store mustExistStore(StoreId id){
+    @Transactional
+    protected StoreEntity mustExistStore(StoreId id){
         Objects.requireNonNull(id, "Store id is required");
         
-        return storeRepository.findById(id)
+        return storeRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Cửa hàng không tồn tại"));
     }
 }
