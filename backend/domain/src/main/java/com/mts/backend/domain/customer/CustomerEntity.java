@@ -185,9 +185,19 @@ public class CustomerEntity extends BaseEntity<Long> {
         this.currentPoints = this.currentPoints.add(RewardPoint.builder().value(1).build());
         return true;
     }
+    
+    public boolean increaseRewardPoint(RewardPoint rewardPoint) {
+        this.currentPoints = this.currentPoints.add(rewardPoint);
+        return true;
+    }
 
     public boolean decreaseRewardPoint() {
         this.currentPoints = this.currentPoints.subtract(RewardPoint.builder().value(1).build());
+        return true;
+    }
+    
+    public boolean decreaseRewardPoint(RewardPoint rewardPoint) {
+        this.currentPoints = this.currentPoints.subtract(rewardPoint);
         return true;
     }
 

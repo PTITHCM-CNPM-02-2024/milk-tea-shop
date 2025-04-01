@@ -23,10 +23,11 @@ public class JwtUserDetailService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return accountRepository.findByUsername(Username.builder()
-                        .value(username)
-                        .build())
-                .map(UserPrincipal::new)
+        var account = accountRepository.findByUsername(Username.builder().value(username).build())
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản với tên đăng nhập: " + username));
+        
+        account.login();
+        
+        return new UserPrincipal(account);
     }
 }

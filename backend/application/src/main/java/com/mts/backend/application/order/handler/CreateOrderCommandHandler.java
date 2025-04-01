@@ -9,6 +9,7 @@ import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
+import com.mts.backend.domain.customer.value_object.RewardPoint;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
@@ -45,6 +46,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
     private final JpaCustomerRepository customerRepository;
     private final JpaServiceTableRepository serviceTableRepository;
     private final JpaProductPriceRepository productPriceRepository;
+    private final static Integer POINT = 1;
     public CreateOrderCommandHandler(
             JpaOrderRepository orderRepository,
             JpaEmployeeRepository employeeRepository,
@@ -83,6 +85,8 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         addDiscountsToOrder(order, command.getOrderDiscounts());
         addTablesToOrder(order, command.getOrderTables());
         addMemberDiscountValue(order, command.getCustomerId().orElse(null));
+        
+        order.setPoint(Long.valueOf(POINT));
         
         var saveOrder = orderRepository.save(order);
 
@@ -187,6 +191,11 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
                 .orElseThrow(() -> new DomainException("Khách hàng không tồn tại"));
         
         order.setCustomerEntity(customer);
+        
+        customer.increaseRewardPoint(RewardPoint.builder()
+                .value(POINT)
+                .build());
+        
     }
     
     private void addTablesToOrder(OrderEntity order, List<OrderTableCommand> tables){
