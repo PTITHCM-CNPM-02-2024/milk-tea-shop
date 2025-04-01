@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Coffeehouse</title>
+    <link rel="stylesheet" href="EmployeeDetail.css">
+    <link rel="stylesheet" href="./src/assets/base.css">
+    <link rel="stylesheet" href="./src/assets/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<div class="employee">
+    <div class="employee__menu_bar">
+        <i class="logo_store fa-solid fa-mug-hot" title="Logo"></i>
+
+        <button class="employee_home" title="Home">
+            <i class="fa-solid fa-house"></i>
+        </button>
+
+        <button class="employee_profile" title="Profile">
+            <i class="fa-solid fa-user"></i>
+        </button>
+    </div>
+
+    <div class="employee__list_product">
+        <div class="list_product__header">
+            <div class="welcome_content">
+                <div class="welcome_content__1">Welcome to Coffeehouse</div>
+                <div class="welcome_content__2">Choose the category</div>
+            </div>
+
+            <div class="search-container">
+                <i class="icon_search_container fa-solid fa-magnifying-glass"></i>
+                <input class="search-input" type="text" placeholder="Search something">
+            </div>
+        </div>
+
+        <div class="list_product__body">
+            <div class="category_product">
+                <button class="category_product__topping">
+                    <img class="topping_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/topping.png" alt="Ảnh topping">
+                    <div class="topping_title">Topping</div>
+                </button>
+
+                <!--<button class="category_product__brown_sugar">
+                    <img class="brown_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/tran_chau_duong_den.png" alt="Ảnh chân trâu đường đen">
+                    <div class="brown_title">Trân châu đường đen</div>
+                </button>
+
+                <button class="category_product__milk_tea">
+                    <img class="milk_tea_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/tra_sua.jpg" alt="Ảnh trà sữa">
+                    <div class="milk_tea_title">Trà sữa</div>
+                </button>
+
+                <button class="category_product__special">
+                    <img class="special_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/tra_sau_special.png" alt="Ảnh trà sữa đặc biệt">
+                    <div class="special_title">Trà sữa đặc biệt</div>
+                </button>
+
+                <button class="category_product__machiato">
+                    <img class="machiato_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/machiato.jpg" alt="Ảnh machiato">
+                    <div class="machiato_title">Machiato/Kem chese</div>
+                </button>
+
+                <button class="category_product__hoahong">
+                    <img class="hoahong_img" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/rose.png" alt="Ảnh hồng trà">
+                    <div class="hoahong_title">Hồng trà</div>
+                </button>-->
+            </div>
+
+            <div class="menu_product">
+                <div class="menu_product__header">
+                    <div class="menu_product_title_1">
+                        Menu
+                    </div>
+
+                    <div class="menu_product_title_2">
+                        13 results
+                    </div>
+                </div>
+
+                <div class="topping_list" style="display: none">
+                    <div class="jelly_type">
+                        <div class="jelly_type_content_image">
+                            <img class="jelly_type_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/jelly_type.png" alt="Ảnh các loại thạch">
+
+                            <div class="jelly_type_content">
+                                <div class="jelly_type_name">
+                                    Các loại thạch
+                                </div>
+
+                                <div class="jelly_type_description" title="Đa dạng từ thạch rau câu, thạch trái cây, đến thạch cà phê, mang lại cảm giác sảng khoái.">
+                                    Đa dạng từ thạch rau câu, thạch trái cây, đến thạch cà phê, mang lại cảm giác sảng khoái.
+                                </div>
+
+                                <div class="jelly_type_price">
+                                    5,000 VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="jelly_type_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="aloe_vera">
+                        <div class="aloe_vera_content_image">
+                            <img class="aloe_vera_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/aloe_vera.png" alt="Ảnh sản phẩm">
+
+                            <div class="aloe_vera_content">
+                                <div class="aloe_vera_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="aloe_vera_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="aloe_vera_price">
+                                    10,000 VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="aloe_vera_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="flan">
+                        <div class="flan_content_image">
+                            <img class="flan_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/flan.png" alt="Ảnh bánh Flan">
+
+                            <div class="flan_content">
+                                <div class="flan_name">
+                                    Bánh Flan
+                                </div>
+
+                                <div class="flan_description">
+                                    Mềm mịn, béo ngậy, tăng thêm phần đặc sắc cho ly trà sữa.
+                                </div>
+
+                                <div class="flan_price">
+                                    10,000 VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="flan_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="black_diamond">
+                        <div class="black_diamond_content_image">
+                            <img class="black_diamond_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/diamond_black.png" alt="Ảnh kim cương đen">
+
+                            <div class="black_diamond_content">
+                                <div class="black_diamond_name">
+                                    Kim cương đen
+                                </div>
+
+                                <div class="black_diamond_description">
+                                    Trân châu đen cao cấp, dẻo thơm, ngấm vị ngọt đậm đà.
+                                </div>
+
+                                <div class="black_diamond_price">
+                                    10,000 VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="black_diamond_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="cheese">
+                        <div class="cheese_content_image">
+                            <img class="cheese_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/cheese.png" alt="Ảnh phô mai">
+
+                            <div class="cheese_content">
+                                <div class="cheese_name">
+                                    Phô mai khổng lồ
+                                </div>
+
+                                <div class="cheese_description">
+                                    Viên phô mai béo ngậy, tan chảy trong miệng, là lựa chọn tuyệt vời cho những tín đồ phô mai.
+                                </div>
+
+                                <div class="cheese_price">
+                                    10,000 VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="cheese_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>
+
+                <!--<div class="brown_list topping_list" style="display: flex">
+                    <div class="milk_tcdd product_detail">
+                        <div class="milk_tcdd_content_image product_content_image">
+                            <img class="milk_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/milk_tcdd.png" alt="Ảnh sữa tươi trân châu đường đen">
+
+                            <div class="milk_tcdd_content product_content">
+                                <div class="milk_tcdd_name product_name">
+                                    Sữa tươi trân châu đường đen
+                                </div>
+
+                                <div class="milk_tcdd_description product_description" title="Một sự kết hợp hoàn hảo giữa vị ngọt thanh của đường đen và sự béo ngậy của sữa tươi nguyên chất. Điểm nhấn chính là những viên trân châu dai mềm, ngấm đều hương đường, tạo nên hương vị khó quên.0p  ">
+                                    Một sự kết hợp hoàn hảo giữa vị ngọt thanh của đường đen và sự béo ngậy của sữa tươi nguyên chất. Điểm nhấn chính là những viên trân châu dai mềm, ngấm đều hương đường, tạo nên hương vị khó quên.
+                                </div>
+                                <div class="milk_tcdd_price product_price">
+                                    <div class="milk_tcdd_value product_value">
+                                        40,000 VND
+                                    </div>
+
+                                    <div class="milk_tcdd_size product_size">
+                                        <buttton class="milk_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="milk_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view milk_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="caramel_tcdd product_detail">
+                        <div class="caramel_tcdd_content_image product_content_image">
+                            <img class="caramel_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/caramel_tcdd.png" alt="Ảnh caramel trân châu đường đen">
+
+                            <div class="caramel_tcdd_content product_content">
+                                <div class="caramel_tcdd_name product_name">
+                                    Caramel trân châu đường đen
+                                </div>
+
+                                <div class="caramel_tcdd_description product_description" title="Đậm đà với lớp caramel mịn màng, hòa quyện cùng vị ngọt dịu của đường đen và trân châu dai mềm. Thức uống này mang lại cảm giác ngọt ngào, béo nhẹ, rất thích hợp cho những tín đồ hảo ngọt.">
+                                    Đậm đà với lớp caramel mịn màng, hòa quyện cùng vị ngọt dịu của đường đen và trân châu dai mềm. Thức uống này mang lại cảm giác ngọt ngào, béo nhẹ, rất thích hợp cho những tín đồ hảo ngọt.
+                                </div>
+                                <div class="caramel_tcdd_price product_price">
+                                    <div class="caramel_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="caramel_tcdd_size product_size">
+                                        <buttton class="caramel_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="caramel_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view caramel_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="socola_tcdd product_detail">
+                        <div class="socola_tcdd_content_image product_content_image">
+                            <img class="socola_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/socola_tcdd.png" alt="Ảnh socola trân châu đường đen">
+
+                            <div class="socola_tcdd_content product_content">
+                                <div class="socola_tcdd_name product_name">
+                                    Socola trân châu đường đen
+                                </div>
+
+                                <div class="socola_tcdd_description product_description" title="Hương vị thơm nồng, đậm đà của socola hòa quyện cùng đường đen ngọt thanh. Trân châu dẻo dai làm tăng thêm sự thú vị cho mỗi ngụm thưởng thức. Đây là lựa chọn lý tưởng cho những ai yêu thích sự đậm đà và ngọt ngào.">
+                                    Hương vị thơm nồng, đậm đà của socola hòa quyện cùng đường đen ngọt thanh. Trân châu dẻo dai làm tăng thêm sự thú vị cho mỗi ngụm thưởng thức. Đây là lựa chọn lý tưởng cho những ai yêu thích sự đậm đà và ngọt ngào.                                </div>
+                                <div class="socola_tcdd_price product_price">
+                                    <div class="socola_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="socola_tcdd_size product_size">
+                                        <buttton class="socola_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="socola_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view socola_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="cacao_tcdd product_detail">
+                        <div class="cacao_tcdd_content_image product_content_image">
+                            <img class="cacao_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/cacao_tcdd.png" alt="Ảnh cacao trân châu đường đen">
+
+                            <div class="cacao_tcdd_content product_content">
+                                <div class="cacao_tcdd_name product_name">
+                                    Cacao trân châu đường đen
+                                </div>
+
+                                <div class="cacao_tcdd_description product_description" title="Một sự kết hợp tuyệt vời giữa vị đắng nhẹ của cacao nguyên chất và ngọt thanh của đường đen. Thức uống này vừa thơm vừa béo, mang lại cảm giác hài hòa và thư giãn.">
+                                    Một sự kết hợp tuyệt vời giữa vị đắng nhẹ của cacao nguyên chất và ngọt thanh của đường đen. Thức uống này vừa thơm vừa béo, mang lại cảm giác hài hòa và thư giãn.
+                                </div>
+
+                                <div class="cacao_tcdd_price product_price">
+                                    <div class="cacao_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="cacao_tcdd_size product_size">
+                                        <buttton class="cacao_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="cacao_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view cacao_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="matcha_tcdd product_detail">
+                        <div class="matcha_tcdd_content_image product_content_image">
+                            <img class="matcha_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/matcha_tcdd.png" alt="Ảnh matcha trân châu đường đen">
+
+                            <div class="matcha_tcdd_content product_content">
+                                <div class="matcha_tcdd_name product_name">
+                                    Matcha trân châu đường đen
+                                </div>
+
+                                <div class="matcha_tcdd_description product_description" title="Matcha thanh mát, thơm lừng hòa quyện cùng lớp đường đen ngọt ngào và trân châu dai mềm. Sự hòa quyện này đem đến một trải nghiệm trà xanh hiện đại mà không kém phần truyền thống.">
+                                    Matcha thanh mát, thơm lừng hòa quyện cùng lớp đường đen ngọt ngào và trân châu dai mềm. Sự hòa quyện này đem đến một trải nghiệm trà xanh hiện đại mà không kém phần truyền thống.
+                                </div>
+
+                                <div class="matcha_tcdd_price product_price">
+                                    <div class="matcha_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="matcha_tcdd_size product_size">
+                                        <buttton class="matcha_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="matcha_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view matcha_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="taro_tcdd product_detail">
+                        <div class="taro_tcdd_content_image product_content_image">
+                            <img class="taro_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/khoaimon_tcdd.png" alt="Ảnh khoai môn trân châu đường đen">
+
+                            <div class="taro_tcdd_content product_content">
+                                <div class="taro_tcdd_name product_name">
+                                    Khoai môn trân châu đường đen
+                                </div>
+
+                                <div class="taro_tcdd_description product_description" title="Hương khoai môn tự nhiên, bùi bùi kết hợp cùng vị ngọt thanh của đường đen và trân châu dẻo dai. Một thức uống vừa thơm, vừa đậm vị quê nhà.">
+                                    Hương khoai môn tự nhiên, bùi bùi kết hợp cùng vị ngọt thanh của đường đen và trân châu dẻo dai. Một thức uống vừa thơm, vừa đậm vị quê nhà.
+                                </div>
+
+                                <div class="taro_tcdd_price product_price">
+                                    <div class="taro_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="taro_tcdd_size product_size">
+                                        <buttton class="taro_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="taro_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view taro_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="hoadaubiec_tcdd product_detail">
+                        <div class="hoadaubiec_tcdd_content_image product_content_image">
+                            <img class="hoadaubiec_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/hoadaubiec_tcdd.png" alt="Ảnh hoa đậu biếc trân châu đường đen">
+
+                            <div class="hoadaubiec_tcdd_content product_content">
+                                <div class="hoadaubiec_tcdd_name product_name">
+                                    Hoa đậu biếc trân châu đường đen
+                                </div>
+
+                                <div class="hoadaubiec_tcdd_description product_description" title="Với sắc xanh bắt mắt từ hoa đậu biếc, kết hợp cùng vị ngọt nhẹ của đường đen và trân châu dẻo dai, đây không chỉ là thức uống ngon mà còn rất tốt cho sức khỏe.">
+                                    Với sắc xanh bắt mắt từ hoa đậu biếc, kết hợp cùng vị ngọt nhẹ của đường đen và trân châu dẻo dai, đây không chỉ là thức uống ngon mà còn rất tốt cho sức khỏe.
+                                </div>
+
+                                <div class="hoadaubiec_tcdd_price product_price">
+                                    <div class="hoadaubiec_tcdd_value product_value">
+                                        45,000 VND
+                                    </div>
+
+                                    <div class="hoadaubiec_tcdd_size product_size">
+                                        <buttton class="hoadaubiec_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="hoadaubiec_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view hoadaubiec_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="oolong_tcdd product_detail">
+                        <div class="oolong_tcdd_content_image product_content_image">
+                            <img class="oolong_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/oolong_tcdd.png" alt="Ảnh oolong trân châu đường đen">
+
+                            <div class="oolong_tcdd_content product_content">
+                                <div class="oolong_tcdd_name product_name">
+                                    Oolong trân châu đường đen
+                                </div>
+
+                                <div class="oolong_tcdd_description product_description" title="Thưởng thức hương vị thanh tao, nhẹ nhàng của trà Oolong kết hợp cùng lớp đường đen ngọt dịu và trân châu mềm mại. Một sự lựa chọn lý tưởng để thư giãn và tận hưởng sự tinh tế.">
+                                    Thưởng thức hương vị thanh tao, nhẹ nhàng của trà Oolong kết hợp cùng lớp đường đen ngọt dịu và trân châu mềm mại. Một sự lựa chọn lý tưởng để thư giãn và tận hưởng sự tinh tế.
+                                </div>
+                                <div class="oolong_tcdd_price product_price">
+                                    <div class="oolong_tcdd_value product_value">
+                                        35,000 VND
+                                    </div>
+
+                                    <div class="oolong_tcdd_size product_size">
+                                        <buttton class="oolong_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="oolong_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view oolong_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="milk_tea_tcdd product_detail">
+                        <div class="milk_tea_tcdd_content_image product_content_image">
+                            <img class="milk_tea_tcdd_image product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/milk_tea_tcdd.png" alt="Ảnh trà sữa trân châu đường đen">
+
+                            <div class="milk_tea_tcdd_content product_content">
+                                <div class="milk_tea_tcdd_name product_name">
+                                    Trà sữa trân châu đường đen
+                                </div>
+
+                                <div class="milk_tea_tcdd_description product_description" title="Kinh điển nhưng không bao giờ lỗi thời, trà sữa thơm ngon béo nhẹ hòa quyện cùng đường đen ngọt dịu và trân châu dai mềm. Thức uống này luôn là must-try cho bất kỳ ai yêu thích trà sữa.">
+                                    Kinh điển nhưng không bao giờ lỗi thời, trà sữa thơm ngon béo nhẹ hòa quyện cùng đường đen ngọt dịu và trân châu dai mềm. Thức uống này luôn là "must-try" cho bất kỳ ai yêu thích trà sữa.
+                                </div>
+                                <div class="milk_tea_tcdd_price product_price">
+                                    <div class="milk_tea_tcdd_value product_value">
+                                        38,000 VND
+                                    </div>
+
+                                    <div class="milk_tea_tcdd_size product_size">
+                                        <buttton class="milk_tea_tcdd_btn_size product_btn_size">
+                                            M
+                                        </buttton>
+
+                                        <buttton class="milk_tea_tcdd_btn_size product_btn_size">
+                                            L
+                                        </buttton>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view milk_tea_tcdd_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>
+
+                <div class="milk_tea_list" style="display: none">
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>
+
+                <div class="special_list" style="display: none">
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>
+
+                <div class="machiato_list" style="display: none">
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hongtra_list" style="display: none">
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+
+                    <div class="product_detail">
+                        <div class="product_content_image">
+                            <img class="product_image" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/Tra-sua-tran-chau-duong-den.webp" alt="Ảnh sản phẩm">
+
+                            <div class="product_content">
+                                <div class="product_name">
+                                    Trà sữa trân châu đường đen ít đá
+                                </div>
+
+                                <div class="product_description" title="Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.">
+                                    Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ. Đây là một đoạn văn bản rất dài mà chúng ta muốn tự động cắt nếu nó vượt quá chiều rộng của thẻ.
+                                </div>
+
+                                <div class="product_price">
+                                    50,000
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="product_view">
+                            View detail
+                        </button>
+                    </div>
+                </div>-->
+            </div>
+        </div>
+
+        <div class="list_product__footer">
+            <!-- Thêm footer ở đây -->
+        </div>
+    </div>
+
+    <div class="employee__service_table">
+        <div class="table_header">
+            <img class="user_avatar" src="https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/avatar.png" alt="Avatar user">
+
+            <div class="user_info">
+                <div class="user_role">
+                    Nhân viên
+                </div>
+
+                <div class="user_name">
+                    Nguyễn Đức Chính
+                </div>
+            </div>
+        </div>
+
+        <div class="table_body">
+            <div class="table_area">
+                <div class="table_title">Table service</div>
+
+                <div class="choose_area">
+                    <div class="area">Sân vườn</div>
+
+                    <button class="area_btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="list_area" style="display: none">
+                <button class="list_area_content">Sân vườn</button>
+            </div>
+
+            <div class="table_diagram">
+                <button class="table_info">
+                    <i class="table_icon fa-regular fa-square"></i>
+                    <div class="table_number">A111</div>
+                </button>
+            </div>
+
+            <div class="table_description">
+                <div class="table_empty">
+                    <i class="table_empty_icon fa-regular fa-square"></i>
+                    <div class="table_explain">Bàn đang trống</div>
+                </div>
+
+                <div class="table_occupied">
+                    <i class="table_occupied_icon fa-regular fa-square-check"></i>
+                    <div class="table_explain">Bàn đang có người ngồi</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table_footer">
+            <button class="new_order">
+                NEW ORDER
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="EmployeeOperation.js"></script>
+</body>
+</html>
+
+
