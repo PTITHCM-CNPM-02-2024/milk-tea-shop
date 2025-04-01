@@ -1,22 +1,30 @@
 package com.mts.backend.application.payment.response;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Value;
+import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Value
 @Data
 public class PaymentInitResponse {
-
+    @NotNull
     String message;
+    @NotNull
     Long paymentId;
+    @NotNull
     PaymentInitStatus status;
+    @Nullable
     String redirectUrl;
+    @Nullable
     BigDecimal amount;
+    @Nullable
     Map<String, String> additionalData;
     public PaymentInitResponse(Long payment, PaymentInitStatus status, String message, BigDecimal amount,
                                String redirectUrl,
@@ -66,24 +74,12 @@ public class PaymentInitResponse {
         return status == PaymentInitStatus.FAILED;
     }
 
-    public Long getPaymentId() {
-        return paymentId;
-    }
-
-    public PaymentInitStatus getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getRedirectUrl() {
-        return redirectUrl;
+    public Optional<String> getRedirectUrl() {
+        return Optional.ofNullable(redirectUrl);
     }
 
     public Map<String, String> getAdditionalData() {
-        return additionalData;
+        return additionalData != null ? Collections.unmodifiableMap(additionalData) : Collections.emptyMap();
     }
 
     public enum PaymentInitStatus {

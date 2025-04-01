@@ -11,12 +11,14 @@ import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
-import com.mts.backend.domain.store.ServiceTable;
+import com.mts.backend.domain.store.identifier.AreaId;
+import com.mts.backend.domain.store.identifier.ServiceTableId;
+import com.mts.backend.domain.store.value_object.TableNumber;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/service-tables")
@@ -32,24 +34,24 @@ public class ServiceTableController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createServiceTable(@RequestBody CreateServiceTableRequest request) {
         var command = CreateServiceTableCommand.builder()
-                .name(request.getName())
-                .areaId(request.getAreaId())
+                .name(TableNumber.builder().value(request.getName()).build())
+                .areaId(AreaId.of(request.getAreaId()))
                 .description(request.getDescription())
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> updateServiceTable(@PathVariable("id") Integer id,
                                                              @RequestBody UpdateServiceTableRequest request) {
         var command = UpdateServiceTableCommand.builder()
-                .id(id)
-                .name(request.getName())
+                .id(ServiceTableId.of(request.getId()))
+                .name(TableNumber.builder().value(request.getName()).build())
                 .isActive(request.getIsActive())
-                .areaId(request.getAreaId())
+                .areaId(Objects.isNull(request.getAreaId()) ? null : AreaId.of(request.getAreaId()))
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -60,7 +62,7 @@ public class ServiceTableController implements IController {
     
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getServiceTableById(@PathVariable("id") Integer id) {
-        var query = ServiceTableByIdQuery.builder().id(id).build();
+        var query = ServiceTableByIdQuery.builder().id(ServiceTableId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
@@ -69,8 +71,9 @@ public class ServiceTableController implements IController {
     }
     
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<?>> getAllServiceTableActive() {
-        var query = ServiceTableActiveQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllServiceTableActive(@RequestParam(value = "active", defaultValue = 
+            "true") Boolean active, @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var query = ServiceTableActiveQuery.builder().active(active).size(size).build();
         
         var result = queryBus.dispatch(query);
         
@@ -79,8 +82,9 @@ public class ServiceTableController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllServiceTable() {
-        var query = DefaultServiceTableQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllServiceTable(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                             @RequestParam(value = "size", defaultValue = "40") Integer size) {
+        var query = DefaultServiceTableQuery.builder().page(page).size(size).build();
         
         var result = queryBus.dispatch(query);
         

@@ -26,6 +26,6 @@ public class DiscountBaseRequest {
     private Integer maxUsagePerCustomer;
     private Long maxUsage;
     private Long couponId;
-    private Boolean isActive;
+    private Boolean active;
     
 }

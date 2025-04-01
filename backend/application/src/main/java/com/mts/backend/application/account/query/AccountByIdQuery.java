@@ -1,5 +1,6 @@
 package com.mts.backend.application.account.query;
 
+import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQuery;
 import lombok.AllArgsConstructor;
@@ -13,5 +14,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AccountByIdQuery implements IQuery<CommandResult> {
     
-    private Long id;
+    private AccountId id;
 }

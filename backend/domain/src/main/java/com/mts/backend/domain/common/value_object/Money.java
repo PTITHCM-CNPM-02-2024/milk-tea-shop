@@ -1,7 +1,10 @@
 package com.mts.backend.domain.common.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import com.mts.backend.shared.exception.DomainException;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,102 +12,95 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Money extends AbstractValueObject implements Comparable<Money> {
-    private final BigDecimal amount;
+@Value
+@Builder
+public class Money  implements Comparable<Money> {
+    BigDecimal value;
     private static final int DEFAULT_SCALE = 3;
     
-    private Money(BigDecimal amount) {
-        this.amount = amount.setScale(DEFAULT_SCALE, RoundingMode.HALF_UP);
-    }
-    
-    public static ValueObjectValidationResult create(BigDecimal amount) {
-        Objects.requireNonNull(amount, "BigDecimal is required");
+    private Money(BigDecimal value) {
+        Objects.requireNonNull(value, "BigDecimal is required");
         List<String> businessErrors = new ArrayList<>(List.of());
-        
-        if ( amount.doubleValue() < 1000) {
-            businessErrors.add("Đơn vị tiền là VNĐ, số tiền phải lớn hơn 1000");
-        }
 
-        if (businessErrors.isEmpty()) {
-            return new ValueObjectValidationResult(new Money(amount), businessErrors);
+
+        // Allow zero amounts, only validate positive values
+        if (value.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
+            businessErrors.add("Đơn vị tiền là VNĐ, số tiền phải bằng 0 hoặc lớn hơn 1000");
         }
-        return new ValueObjectValidationResult(null, businessErrors);
+        
+        if (!businessErrors.isEmpty()) {
+            throw new DomainBusinessLogicException(businessErrors);
+        }
+        this.value = value.setScale(DEFAULT_SCALE, RoundingMode.HALF_UP);
     }
     
-    public static ValueObjectValidationResult create(double amount) {
-        return create(BigDecimal.valueOf(amount));
-    }
-    
-    public static Money of(BigDecimal amount) {
-        ValueObjectValidationResult result = create(amount);
-        if (result.getBusinessErrors().isEmpty()) {
-            return new Money(amount);
-        }
-        throw new IllegalArgumentException("Giá tiền không chính xác: " + result.getBusinessErrors());
-    }
     
     public Money add(Money money){
-        return new Money(amount.add(money.amount));
+        return new Money(value.add(money.value));
+    }
+    
+    public Money add(BigDecimal money){
+        return new Money(value.add(money));
     }
     
     public Money subtract(Money money){
-        return new Money(amount.subtract(money.amount));
+        return new Money(value.subtract(money.value).compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO :
+                value.subtract(money.value));
+    }
+    
+    public Money subtract(BigDecimal money){
+        return new Money(value.subtract(money).doubleValue() < 0 ? BigDecimal.ZERO : value.subtract(money));
     }
     
     
+    public Money multiply(Money value){
+        return new Money(this.value.multiply(value.value));
+    }
+    
     public Money multiply(BigDecimal value){
-        
-        if (value.doubleValue() < 0) {
-            throw new IllegalArgumentException("Số lượng không hợp lệ");
+        return new Money(this.value.multiply(value));
+    }
+    
+    public Money divide(Money value){
+        if (value.value.equals(Money.ZERO.getValue())) {
+            throw new DomainException("Không thể chia cho 0");
         }
-        BigDecimal newValue = amount.multiply(value);
+        BigDecimal newValue = this.value.divide(value.getValue(), DEFAULT_SCALE, RoundingMode.HALF_UP);
+        
         return new Money(newValue);
     }
     
     public Money divide(BigDecimal value){
-        if (value.doubleValue() <= 0) {
-            throw new IllegalArgumentException("Số lượng không hợp lệ");
+        if (value.equals(BigDecimal.ZERO)) {
+            throw new DomainException("Không thể chia cho 0");
         }
-        BigDecimal newValue = amount.divide(value, DEFAULT_SCALE, RoundingMode.HALF_UP);
+        BigDecimal newValue = this.value.divide(value, DEFAULT_SCALE, RoundingMode.HALF_UP);
+        
         return new Money(newValue);
     }
     
+    
+    
     public static final Money ZERO = new Money(BigDecimal.ZERO);
-    
-    public Money discount(double percentageOff){
-        if(percentageOff < 0 || percentageOff > 100){
-            throw new IllegalArgumentException("Phần trăm giảm giá không hợp lệ");
+
+    public Money discount(double percentageOff) {
+        if (percentageOff < 0 || percentageOff > 100) {
+            throw new DomainException("Phần trăm giảm giá phải nằm trong khoảng từ 0 đến 100");
         }
-        
-        BigDecimal discountMultiplier = BigDecimal.ONE.subtract(BigDecimal.valueOf(percentageOff).divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP));
-        
-        BigDecimal discountedAmount = amount.multiply(discountMultiplier);
-        
-        return new Money(discountedAmount);
-    }
-    
-    public BigDecimal getAmount() {
-        return amount;
-    }
-    
-    public double getValue() {
-        return amount.doubleValue();
-    }
-    
-    
-    @Override
-    public String toString() {
-        return amount.toString();
-    }
 
+        // Convert percentage to decimal for calculation (e.g., 20% -> 0.2)
+        BigDecimal discountRate = BigDecimal.valueOf(percentageOff)
+                .divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
 
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(amount);
+        // Calculate discount amount = original amount * discount rate
+        BigDecimal discountAmount = value.multiply(discountRate);
+
+        // Subtract discount from original amount
+        BigDecimal finalAmount = value.subtract(discountAmount);
+
+        return new Money(finalAmount);
     }
+    
 
     /**
      * @param o the object to be compared. 
@@ -112,6 +108,18 @@ public class Money extends AbstractValueObject implements Comparable<Money> {
      */
     @Override
     public int compareTo(Money o) {
-        return amount.compareTo(o.amount);
+        return value.compareTo(o.value);
+    }
+    
+    public static final class MoneyConverter implements AttributeConverter<Money, BigDecimal>{
+        @Override
+        public BigDecimal convertToDatabaseColumn(Money attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
+        }
+
+        @Override
+        public Money convertToEntityAttribute(BigDecimal dbData) {
+            return Objects.isNull(dbData) ? null : Money.builder().value(dbData).build();
+        }
     }
 }

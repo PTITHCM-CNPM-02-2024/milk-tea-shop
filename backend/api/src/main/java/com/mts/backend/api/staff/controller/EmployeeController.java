@@ -10,14 +10,16 @@ import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.common.value_object.*;
+import com.mts.backend.domain.staff.identifier.EmployeeId;
+import com.mts.backend.domain.staff.value_object.Position;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("api/v1/employees")
+@RequestMapping("/api/v1/employees")
 public class EmployeeController implements IController {
     private final EmployeeCommandBus commandBus;
     private final EmployeeQueryBus queryBus;
@@ -29,15 +31,15 @@ public class EmployeeController implements IController {
     
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createEmployee(@RequestBody CreateEmployeeRequest request) {
-        var command = CreateEmployeeCommand.builder().build();
-        
-        command.setEmail(request.getEmail());
-        command.setFirstName(request.getFirstName());
-        command.setLastName(request.getLastName());
-        command.setGender(request.getGender());
-        command.setPhone(request.getPhone());
-        command.setPosition(request.getPosition());
-        command.setAccountId(request.getAccountId());
+        var command = CreateEmployeeCommand.builder()
+                .accountId(AccountId.of(request.getAccountId()))
+                .email(Email.builder().value(request.getEmail()).build())
+                .firstName(FirstName.builder().value(request.getFirstName()).build())
+                .lastName(LastName.builder().value(request.getLastName()).build())
+                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .gender(Gender.valueOf(request.getGender()))
+                .position(Position.builder().value(request.getPosition()).build())
+                .build();
         
         var result = commandBus.dispatch(command);
         
@@ -46,15 +48,15 @@ public class EmployeeController implements IController {
     
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Long>> updateEmployee(@PathVariable("id") Long id, @RequestBody UpdateEmployeeRequest request) {
-        var command = UpdateEmployeeCommand.builder().build();
-        
-        command.setId(id);
-        command.setEmail(request.getEmail());
-        command.setFirstName(request.getFirstName());
-        command.setLastName(request.getLastName());
-        command.setGender(request.getGender());
-        command.setPhone(request.getPhone());
-        command.setPosition(request.getPosition());
+        var command = UpdateEmployeeCommand.builder()
+                .id(EmployeeId.of(id))
+                .email(Email.builder().value(request.getEmail()).build())
+                .firstName(FirstName.builder().value(request.getFirstName()).build())
+                .lastName(LastName.builder().value(request.getLastName()).build())
+                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .gender(Gender.valueOf(request.getGender()))
+                .position(Position.builder().value(request.getPosition()).build())
+                .build();
         
         var result = commandBus.dispatch(command);
         
@@ -63,9 +65,7 @@ public class EmployeeController implements IController {
     
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getEmployee(@PathVariable("id") Long id) {
-        var query = EmployeeByIdQuery.builder().build();
-        
-        query.setId(id);
+        var query = EmployeeByIdQuery.builder().id(EmployeeId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
@@ -73,11 +73,16 @@ public class EmployeeController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getEmployees() {
-        var request = DefaultEmployeeQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getEmployees(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        var request = DefaultEmployeeQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(request);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((List< EmployeeDetailResponse >) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
 }

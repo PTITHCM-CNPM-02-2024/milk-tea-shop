@@ -1,24 +1,26 @@
 package com.mts.backend.domain.promotion.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class CouponId implements Identifiable {
-    private final long value;
+import java.io.Serializable;
+@Value
+public class CouponId implements Serializable {
+    Long value;
     
     private  CouponId(long value){
+        if (value <= 0){
+            throw new IllegalArgumentException("CouponId must be greater than 0");
+        }
+
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX){
+            throw new IllegalArgumentException("CouponId must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
+        }
         this.value = value;
     }
     
     public static CouponId of(long value){
-        if (value <= 0){
-            throw new IllegalArgumentException("CouponId must be greater than 0");
-        }
-        
-        if (value > IdentifiableProvider.INT_UNSIGNED_MAX){
-            throw new IllegalArgumentException("CouponId must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
-        }
-        
         return new CouponId(value);
     }
     
@@ -26,7 +28,7 @@ public class CouponId implements Identifiable {
         return of(Long.parseLong(value));
     }
     
-    public long getValue() {
+    public Long getValue() {
         return value;
     }
     
@@ -35,22 +37,19 @@ public class CouponId implements Identifiable {
         return String.valueOf(value);
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        CouponId couponId = (CouponId) o;
-        
-        return value == couponId.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(value);
-    }
-    
     public static CouponId create(){
         return new CouponId(IdentifiableProvider.generateTimeBasedUnsignedInt());
+    }
+    
+    public static final class CouponIdConverter implements AttributeConverter<CouponId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(CouponId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public CouponId convertToEntityAttribute(Long dbData) {
+            return CouponId.of(dbData);
+        }
     }
 }

@@ -1,55 +1,47 @@
 package com.mts.backend.domain.store.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MaxTable extends AbstractValueObject {
-    private final int value;
+@Value
+@Builder
+public class MaxTable{
+    int value;
     private final static int MAX_TABLE = 100;
     
     private MaxTable(int value) {
+        
+        List<String> errors = new ArrayList<>();
+        
+        if (value > MAX_TABLE) {
+            errors.add("Số bàn tối đa không được vượt quá " + MAX_TABLE);
+        }
+        
+        if (value < 0){
+            errors.add("Số bàn tối đa phải lớn hơn hoặc bằng 0");
+        }
+        
         this.value = value;
     }
     
-    public static ValueObjectValidationResult create(int value){
-        List<String> errors = new ArrayList<>();
+    @Converter(autoApply = true)
+    public final static class MaxTableConverter implements AttributeConverter<MaxTable, Integer> {
         
-        if (value < 0 || value > MAX_TABLE){
-            errors.add("Số bàn tối đa phải lớn hơn 0 và nhỏ hơn " + MAX_TABLE);
+        @Override
+        public Integer convertToDatabaseColumn(MaxTable attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
         }
         
-        if (errors.isEmpty()){
-            return new ValueObjectValidationResult(new MaxTable(value), errors);
+        @Override
+        public MaxTable convertToEntityAttribute(Integer dbData) {
+            return Objects.isNull(dbData) ? null : MaxTable.builder().value(dbData).build();
         }
-        
-        return new ValueObjectValidationResult(null, errors);
     }
     
-    public int getValue(){
-        return value;
-    }
-    
-    public static MaxTable of(int value){
-        ValueObjectValidationResult result = create(value);
-        
-        if (result.getBusinessErrors().isEmpty()){
-            return new MaxTable(value);
-        }
-        throw new IllegalArgumentException("Số bàn tối đa không hợp lệ" + result.getBusinessErrors());
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value);
-    }
 }

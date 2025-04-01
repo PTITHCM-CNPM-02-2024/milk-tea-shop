@@ -6,7 +6,6 @@ import com.mts.backend.application.store.query.ServiceTableByIdQuery;
 import com.mts.backend.application.store.query_handler.GetAllServiceTableActiveQueryHandler;
 import com.mts.backend.application.store.query_handler.GetAllServiceTableQueryHandler;
 import com.mts.backend.application.store.query_handler.GetServiceTableIdQueryHandler;
-import com.mts.backend.shared.command.AbstractCommandBus;
 import com.mts.backend.shared.query.AbstractQueryBus;
 import org.springframework.stereotype.Component;
 

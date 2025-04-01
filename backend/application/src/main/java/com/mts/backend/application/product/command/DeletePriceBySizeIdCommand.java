@@ -1,5 +1,7 @@
 package com.mts.backend.application.product.command;
 
+import com.mts.backend.domain.product.identifier.ProductId;
+import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class DeletePriceBySizeIdCommand implements ICommand<CommandResult> {
-    private Integer productId;
-    private Integer sizeId;
+    private ProductId productId;
+    private ProductSizeId sizeId;
 }

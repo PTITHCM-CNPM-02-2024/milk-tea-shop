@@ -1,76 +1,74 @@
 package com.mts.backend.domain.customer.value_object;
 
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import com.mts.backend.shared.exception.DomainBusinessLogicException;
+import com.mts.backend.shared.exception.DomainException;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class RewardPoint extends AbstractValueObject {
+@Value
+@Builder
+public class RewardPoint implements Comparable<RewardPoint>  {
     
-    private final int point;
+   int value;
     
-    private RewardPoint(int point){
-        this.point = point;
-    }
-    
-    public static ValueObjectValidationResult create(int point){
+    private RewardPoint(int value){
         List<String> errors = new ArrayList<>();
-        
-        if(point < 0){
+
+        if(value < 0){
             errors.add("Điểm thưởng không được nhỏ hơn 0");
         }
-        
-        if(errors.isEmpty()){
-            return new ValueObjectValidationResult(new RewardPoint(point), errors);
+
+        if(!errors.isEmpty()){
+            throw new DomainBusinessLogicException(errors);
         }
-        
-        return new ValueObjectValidationResult(null, errors);
+
+        this.value = value;
     }
     
-    public static RewardPoint of(int point){
-        ValueObjectValidationResult result = create(point);
-        
-        if(result.getBusinessErrors().isEmpty()){
-            return new RewardPoint(point);
-        }
-        
-        throw new IllegalArgumentException("Điểm thưởng không hợp lệ: " + result.getBusinessErrors());
-    }
     
-    public int getValue(){
-        return point;
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(point);
-    }
-    
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(point);
+    public RewardPoint subtract(RewardPoint rewardPoint){
+        var result = this.value - rewardPoint.value;
+        return result < 0 ? new RewardPoint(0) : new RewardPoint(result);
     }
     
     public RewardPoint add(RewardPoint rewardPoint){
-        return RewardPoint.of(this.point + rewardPoint.point);
+        return new RewardPoint(this.value + rewardPoint.value);
     }
     
-    public RewardPoint subtract(RewardPoint rewardPoint){
-        var result = this.point - rewardPoint.point;
-        return result < 0 ? RewardPoint.of(0) : RewardPoint.of(result);
+    public RewardPoint multiply(int multiplier){
+        return new RewardPoint(this.value * multiplier);
     }
     
-    public boolean isGreaterThan(RewardPoint rewardPoint){
-        return this.point > rewardPoint.point;
+    public RewardPoint divide(int divisor){
+        if(divisor == 0){
+            throw new DomainException("Không thể chia cho 0");
+        }
+        return new RewardPoint(this.value / divisor);
+    }
+
+
+    /**
+     * @param o the object to be compared. 
+     * @return
+     */
+    @Override
+    public int compareTo(RewardPoint o) {
+        return Integer.compare(this.value, o.value);
     }
     
-    public boolean isLessThan(RewardPoint rewardPoint){
-        return this.point < rewardPoint.point;
+    public static final class RewardPointConverter implements jakarta.persistence.AttributeConverter<RewardPoint, Integer> {
+        @Override
+        public Integer convertToDatabaseColumn(RewardPoint attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
+        }
+        
+        @Override
+        public RewardPoint convertToEntityAttribute(Integer dbData) {
+            return Objects.isNull(dbData) ? null : new RewardPoint(dbData);
+        }
     }
-    
-    
 }

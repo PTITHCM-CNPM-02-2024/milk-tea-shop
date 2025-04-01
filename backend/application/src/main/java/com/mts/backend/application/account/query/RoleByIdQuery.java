@@ -1,5 +1,6 @@
 package com.mts.backend.application.account.query;
 
+import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQuery;
 import lombok.AllArgsConstructor;
@@ -13,5 +14,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RoleByIdQuery implements IQuery<CommandResult> {
     
-    private Integer id;
+    private RoleId id;
 }

@@ -1,0 +1,2192 @@
+openapi: "3.1.0"
+info:
+  title: "backend API"
+  description: "backend API"
+  version: "1.0.0"
+servers:
+  - url: "https://localhost:8181"
+paths:
+  /api/v1/employees/{id}:
+    put:
+      summary: "PUT api/v1/employees/{id}"
+      operationId: "updateEmployee"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmployeeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+    get:
+      summary: "GET api/v1/employees/{id}"
+      operationId: "getEmployee"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/employees:
+    post:
+      summary: "POST api/v1/employees"
+      operationId: "createEmployee"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmployeeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+    get:
+      summary: "GET api/v1/employees"
+      operationId: "getEmployees"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/managers/{id}:
+    put:
+      summary: "PUT api/v1/managers/{id}"
+      operationId: "updateManager"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateManagerRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+    get:
+      summary: "GET api/v1/managers/{id}"
+      operationId: "getManager"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/managers:
+    post:
+      summary: "POST api/v1/managers"
+      operationId: "createManager"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateManagerRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+    get:
+      summary: "GET api/v1/managers"
+      operationId: "getManagers"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/accounts/{id}:
+    put:
+      summary: "PUT api/v1/accounts/{id}"
+      operationId: "updateAccount"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+    get:
+      summary: "GET api/v1/accounts/{id}"
+      operationId: "getAccount"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AccountDetailResponse"
+  /api/v1/accounts/{id}/change-password:
+    put:
+      summary: "PUT api/v1/accounts/{id}/change-password"
+      operationId: "changePassword"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+  /api/v1/accounts/{id}/change-role:
+    put:
+      summary: "PUT api/v1/accounts/{id}/change-role"
+      operationId: "changeRole"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+  /api/v1/accounts/register:
+    post:
+      summary: "POST api/v1/accounts/register"
+      operationId: "createAccount"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAccountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int64"
+  /api/v1/accounts:
+    get:
+      summary: "GET api/v1/accounts"
+      operationId: "getAccounts"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/roles/{id}:
+    put:
+      summary: "PUT api/v1/roles/{id}"
+      operationId: "updateRole"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRoleRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/roles/{id}"
+      operationId: "getRoleById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RoleDetailResponse"
+  /api/v1/roles:
+    post:
+      summary: "POST api/v1/roles"
+      operationId: "createRole"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoleRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/roles"
+      operationId: "getAllRoles"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/units/{id}:
+    put:
+      summary: "PUT api/v1/units/{id}"
+      operationId: "updateUnit"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUnitRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+  /api/v1/units:
+    post:
+      summary: "POST api/v1/units"
+      operationId: "createUnit"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUnitRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/units"
+      operationId: "getAllUnit"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/categories/{id}:
+    put:
+      summary: "PUT api/v1/categories/{id}"
+      operationId: "updateCategory"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/categories:
+    post:
+      summary: "POST api/v1/categories"
+      operationId: "createCategory"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/categories"
+      operationId: "getAllCategory"
+      parameters:
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "50"
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/product-sizes/{id}:
+    put:
+      summary: "PUT api/v1/product-sizes/{id}"
+      operationId: "updateProductSize"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductSizeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+  /api/v1/product-sizes:
+    post:
+      summary: "POST api/v1/product-sizes"
+      operationId: "createProductSize"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductSizeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/product-sizes"
+      operationId: "getAllProductSize"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products/{id}:
+    put:
+      summary: "PUT api/v1/products/{id}"
+      operationId: "updateProductInform"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductInformRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+  /api/v1/products/{id}/prices:
+    put:
+      summary: "PUT api/v1/products/{id}/prices"
+      operationId: "updateProductPrice"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddProductPriceRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    post:
+      summary: "POST api/v1/products/{id}/prices"
+      operationId: "createProductPrice"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddProductPriceRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products:
+    post:
+      summary: "POST api/v1/products"
+      operationId: "createProduct"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/products"
+      operationId: "getProductDetail"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "100"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products/{id}/prices/{sizeId}:
+    delete:
+      summary: "DELETE api/v1/products/{id}/prices/{sizeId}"
+      operationId: "deleteProductPrice"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+        - name: "sizeId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products/not-available:
+    get:
+      summary: "GET api/v1/products/not-available"
+      operationId: "getUnavailableOrderProductDetail"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "100"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products/available:
+    get:
+      summary: "GET api/v1/products/available"
+      operationId: "getAvailableOrderProductDetail"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "100"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/products/search:
+    get:
+      summary: "GET api/v1/products/search"
+      operationId: "getSignatureProductDetail"
+      parameters:
+        - name: "isAvailableOrder"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: "true"
+        - name: "isSignature"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: "true"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/memberships/{id}:
+    put:
+      summary: "PUT api/v1/memberships/{id}"
+      operationId: "updateMembership"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMembershipTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/memberships/{id}"
+      operationId: "getMembership"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/memberships:
+    post:
+      summary: "POST api/v1/memberships"
+      operationId: "createMembership"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMembershipTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "integer"
+                format: "int32"
+    get:
+      summary: "GET api/v1/memberships"
+      operationId: "getMemberships"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/customers/{id}:
+    put:
+      summary: "PUT api/v1/customers/{id}"
+      operationId: "updateCustomer"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomerRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/customers/{id}"
+      operationId: "getCustomer"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/customers/{id}/membership:
+    put:
+      summary: "PUT api/v1/customers/{id}/membership"
+      operationId: "updateMembership"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "membershipId"
+          in: "query"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/customers:
+    post:
+      summary: "POST api/v1/customers"
+      operationId: "createCustomer"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/customers"
+      operationId: "getCustomers"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/customers/search/phone:
+    get:
+      summary: "GET api/v1/customers/search/phone"
+      operationId: "getCustomerByPhone"
+      parameters:
+        - name: "phone"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/payments/initiate:
+    post:
+      summary: "POST api/v1/payments/initiate"
+      operationId: "initiatePayment"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/payments/{paymentId}/{methodId}/complete:
+    post:
+      summary: "POST api/v1/payments/{paymentId}/{methodId}/complete"
+      operationId: "completePayment"
+      parameters:
+        - name: "paymentId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "methodId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentTransactionRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/store/{id}:
+    put:
+      summary: "PUT api/v1/store/{id}"
+      operationId: "updateStore"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStoreRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/store/{id}"
+      operationId: "getStoreById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/store:
+    post:
+      summary: "POST api/v1/store"
+      operationId: "createStore"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoreRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/service-tables/{id}:
+    put:
+      summary: "PUT api/v1/service-tables/{id}"
+      operationId: "updateServiceTable"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateServiceTableRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/service-tables/{id}"
+      operationId: "getServiceTableById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/service-tables:
+    post:
+      summary: "POST api/v1/service-tables"
+      operationId: "createServiceTable"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateServiceTableRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/service-tables"
+      operationId: "getAllServiceTable"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "40"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/service-tables/active:
+    get:
+      summary: "GET api/v1/service-tables/active"
+      operationId: "getAllServiceTableActive"
+      parameters:
+        - name: "active"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: "true"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/areas/{id}:
+    put:
+      summary: "PUT api/v1/areas/{id}"
+      operationId: "updateArea"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAreaRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/areas/{id}"
+      operationId: "getAreaById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/areas/{id}/max-and-active:
+    put:
+      summary: "PUT api/v1/areas/{id}/max-and-active"
+      operationId: "updateAreaMaxAndActive"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMaxAndActiveRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/areas:
+    post:
+      summary: "POST api/v1/areas"
+      operationId: "createArea"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAreaRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/areas"
+      operationId: "getAllArea"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "40"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/areas/active:
+    get:
+      summary: "GET api/v1/areas/active"
+      operationId: "getAllActiveArea"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "40"
+        - name: "active"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: "true"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/discounts/{id}:
+    put:
+      summary: "PUT api/v1/discounts/{id}"
+      operationId: "updateDiscount"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDiscountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/discounts/{id}"
+      operationId: "getDiscountById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/discounts:
+    post:
+      summary: "POST api/v1/discounts"
+      operationId: "createDiscount"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDiscountRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/discounts"
+      operationId: "getAllDiscount"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/discounts/coupon/{code}:
+    get:
+      summary: "GET api/v1/discounts/coupon/{code}"
+      operationId: "getDiscountByCouponCode"
+      parameters:
+        - name: "code"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/coupons/{id}:
+    put:
+      summary: "PUT api/v1/coupons/{id}"
+      operationId: "updateCoupon"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCouponRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/coupons/{id}"
+      operationId: "getCouponById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/coupons:
+    post:
+      summary: "POST api/v1/coupons"
+      operationId: "createCoupon"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCouponRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      summary: "GET api/v1/coupons"
+      operationId: "getAllCoupon"
+      parameters:
+        - name: "page"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "0"
+        - name: "size"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: "10"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/orders/{orderId}/cancel:
+    put:
+      summary: "PUT api/v1/orders/{orderId}/cancel"
+      operationId: "cancelOrder"
+      parameters:
+        - name: "orderId"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/orders:
+    post:
+      summary: "POST api/v1/orders"
+      operationId: "createOrder"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderBaseRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/auth/login:
+    post:
+      summary: "POST api/v1/auth/login"
+      operationId: "login"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/v1/auth/logout:
+    post:
+      summary: "POST api/v1/auth/logout"
+      operationId: "logout"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+components:
+  schemas:
+    UpdateEmployeeRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        position:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    CreateEmployeeRequest:
+      type: "object"
+      properties:
+        position:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    UpdateManagerRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    CreateManagerRequest:
+      type: "object"
+      properties:
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    UpdateAccountRequest:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
+        newPassword:
+          type: "string"
+        confirmPassword:
+          type: "string"
+    CreateAccountRequest:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
+    RoleDetailResponse:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+    AccountDetailResponse:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        username:
+          type: "string"
+        description:
+          type: "string"
+        role:
+          $ref: "#/components/schemas/RoleDetailResponse"
+    UpdateRoleRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+    CreateRoleRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+    UpdateUnitRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        symbol:
+          type: "string"
+        description:
+          type: "string"
+    CreateUnitRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        symbol:
+          type: "string"
+        description:
+          type: "string"
+    CreateCategoryRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        parentId:
+          type: "integer"
+          format: "int32"
+    UpdateProductSizeRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        unitId:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        quantity:
+          type: "integer"
+          format: "int32"
+    CreateProductSizeRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        unitId:
+          type: "integer"
+          format: "int32"
+        description:
+          type: "string"
+        quantity:
+          type: "integer"
+          format: "int32"
+    UpdateProductInformRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        categoryId:
+          type: "integer"
+          format: "int32"
+        available:
+          type: "boolean"
+        signature:
+          type: "boolean"
+    BigDecimal:
+      type: "object"
+      properties: { }
+    ProductPriceRequest:
+      type: "object"
+      properties:
+        sizeId:
+          type: "integer"
+          format: "int32"
+        price:
+          $ref: "#/components/schemas/BigDecimal"
+    AddProductPriceRequest:
+      type: "object"
+      properties:
+        productPrices:
+          $ref: "#/components/schemas/ProductPriceRequest"
+    CreateProductRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        categoryId:
+          type: "integer"
+          format: "int32"
+        available:
+          type: "boolean"
+        signature:
+          type: "boolean"
+        imagePath:
+          type: "string"
+        prices:
+          type: "integer"
+          format: "int32"
+    UpdateMembershipTypeRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        validUntil:
+          type: "string"
+        requiredPoint:
+          type: "integer"
+          format: "int32"
+        discountUnit:
+          type: "string"
+        discountValue:
+          type: "number"
+          format: "double"
+    CreateMembershipTypeRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+        requiredPoint:
+          type: "integer"
+          format: "int32"
+        discountUnit:
+          type: "string"
+        discountValue:
+          type: "number"
+          format: "double"
+        validUntil:
+          type: "string"
+    UpdateCustomerRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        memberId:
+          type: "integer"
+          format: "int32"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    CreateCustomerRequest:
+      type: "object"
+      properties:
+        memberId:
+          type: "integer"
+          format: "int32"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+        gender:
+          type: "string"
+        phone:
+          type: "string"
+        accountId:
+          type: "integer"
+          format: "int64"
+    CreatePaymentRequest:
+      type: "object"
+      properties:
+        orderId:
+          type: "integer"
+          format: "int64"
+        paymentMethodId:
+          type: "integer"
+          format: "int32"
+    PaymentTransactionRequest:
+      type: "object"
+      properties:
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+    UpdateStoreRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        phone:
+          type: "string"
+        address:
+          type: "string"
+        taxCode:
+          type: "string"
+        openTime:
+          type: "string"
+        closeTime:
+          type: "string"
+        openingDate:
+          type: "string"
+    CreateStoreRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        phone:
+          type: "string"
+        address:
+          type: "string"
+        taxCode:
+          type: "string"
+        openTime:
+          type: "string"
+        closeTime:
+          type: "string"
+        openingDate:
+          type: "string"
+    UpdateServiceTableRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        areaId:
+          type: "integer"
+          format: "int32"
+        isActive:
+          type: "boolean"
+    CreateServiceTableRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        areaId:
+          type: "integer"
+          format: "int32"
+        isActive:
+          type: "boolean"
+    UpdateAreaRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        isActive:
+          type: "boolean"
+        maxTable:
+          type: "integer"
+          format: "int32"
+    UpdateMaxAndActiveRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        isActive:
+          type: "boolean"
+        maxTable:
+          type: "integer"
+          format: "int32"
+    CreateAreaRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        isActive:
+          type: "boolean"
+        maxTable:
+          type: "integer"
+          format: "int32"
+    UpdateDiscountRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        discountUnit:
+          type: "string"
+        discountValue:
+          $ref: "#/components/schemas/BigDecimal"
+        maxDiscountAmount:
+          $ref: "#/components/schemas/BigDecimal"
+        minimumOrderValue:
+          $ref: "#/components/schemas/BigDecimal"
+        minimumRequiredProduct:
+          type: "integer"
+          format: "int32"
+        validFrom:
+          type: "string"
+          format: "date-time"
+        validUntil:
+          type: "string"
+          format: "date-time"
+        maxUsagePerCustomer:
+          type: "integer"
+          format: "int32"
+        maxUsage:
+          type: "integer"
+          format: "int64"
+        couponId:
+          type: "integer"
+          format: "int64"
+        active:
+          type: "boolean"
+    CreateDiscountRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        discountUnit:
+          type: "string"
+        discountValue:
+          $ref: "#/components/schemas/BigDecimal"
+        maxDiscountAmount:
+          $ref: "#/components/schemas/BigDecimal"
+        minimumOrderValue:
+          $ref: "#/components/schemas/BigDecimal"
+        minimumRequiredProduct:
+          type: "integer"
+          format: "int32"
+        validFrom:
+          type: "string"
+          format: "date-time"
+        validUntil:
+          type: "string"
+          format: "date-time"
+        maxUsagePerCustomer:
+          type: "integer"
+          format: "int32"
+        maxUsage:
+          type: "integer"
+          format: "int64"
+        couponId:
+          type: "integer"
+          format: "int64"
+        active:
+          type: "boolean"
+    UpdateCouponRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        coupon:
+          type: "string"
+        description:
+          type: "string"
+    CreateCouponRequest:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        coupon:
+          type: "string"
+        description:
+          type: "string"
+    OrderProductBaseRequest:
+      type: "object"
+      properties:
+        productId:
+          type: "integer"
+          format: "int32"
+        sizeId:
+          type: "integer"
+          format: "int32"
+        quantity:
+          type: "integer"
+          format: "int32"
+        option:
+          type: "string"
+    OrderTableBaseRequest:
+      type: "object"
+      properties:
+        serviceTableId:
+          type: "integer"
+          format: "int32"
+    OrderDiscountBaseRequest:
+      type: "object"
+      properties:
+        discountId:
+          type: "integer"
+          format: "int64"
+    OrderBaseRequest:
+      type: "object"
+      properties:
+        employeeId:
+          type: "integer"
+          format: "int64"
+        customerId:
+          type: "integer"
+          format: "int64"
+        note:
+          type: "string"
+        products:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderProductBaseRequest"
+        tables:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderTableBaseRequest"
+        discounts:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderDiscountBaseRequest"
+    AuthenticationRequest:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"

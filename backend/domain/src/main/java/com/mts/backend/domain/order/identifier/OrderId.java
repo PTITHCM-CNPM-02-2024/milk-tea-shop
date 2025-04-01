@@ -1,11 +1,15 @@
 package com.mts.backend.domain.order.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class OrderId implements Identifiable {
+import java.io.Serializable;
+
+@Value
+public class OrderId implements Serializable {
     
-    private final long value;
+    Long value;
     
     private OrderId (long value) {
         
@@ -23,6 +27,10 @@ public class OrderId implements Identifiable {
         return new OrderId(value);
     }
     
+    public static OrderId of(Long value) {
+        return new OrderId(value);
+    }
+    
     public static OrderId of(String value) {
         return new OrderId(Long.parseLong(value));
     }
@@ -31,27 +39,15 @@ public class OrderId implements Identifiable {
         return new OrderId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
-        return value;
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class OrderIdConverter implements AttributeConverter<OrderId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(OrderId attribute) {
+            return attribute.getValue();
+        }
         
-        OrderId orderId = (OrderId) o;
-        
-        return value == orderId.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(value);
+        @Override
+        public OrderId convertToEntityAttribute(Long dbData) {
+            return OrderId.of(dbData);
+        }
     }
 }

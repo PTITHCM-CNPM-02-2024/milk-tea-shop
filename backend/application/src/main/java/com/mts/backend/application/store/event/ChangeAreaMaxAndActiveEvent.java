@@ -1,11 +1,9 @@
 package com.mts.backend.application.store.event;
 
-import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 
@@ -20,7 +18,7 @@ public class ChangeAreaMaxAndActiveEvent extends ApplicationEvent {
     public static final class Data{
         private AreaId id;
         private MaxTable maxTable;
-        private boolean isActive;
+        private boolean active;
         
         public Optional<MaxTable> getMaxTable(){
             return Optional.ofNullable(maxTable);

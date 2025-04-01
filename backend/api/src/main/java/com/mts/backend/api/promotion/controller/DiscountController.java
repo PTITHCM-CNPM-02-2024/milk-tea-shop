@@ -10,11 +10,15 @@ import com.mts.backend.application.promotion.command.UpdateDiscountCommand;
 import com.mts.backend.application.promotion.query.DefaultDiscountQuery;
 import com.mts.backend.application.promotion.query.DiscountByCouponQuery;
 import com.mts.backend.application.promotion.query.DiscountByIdQuery;
+import com.mts.backend.domain.common.value_object.DiscountUnit;
+import com.mts.backend.domain.common.value_object.Money;
+import com.mts.backend.domain.promotion.identifier.CouponId;
+import com.mts.backend.domain.promotion.identifier.DiscountId;
+import com.mts.backend.domain.promotion.value_object.CouponCode;
+import com.mts.backend.domain.promotion.value_object.DiscountName;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/discounts")
@@ -30,13 +34,17 @@ public class DiscountController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createDiscount(@RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
-                .name(request.getName())
+                .name(DiscountName.builder().value(request.getName()).build())
                 .description(request.getDescription())
-                .couponId(request.getCouponId())
-                .discountUnit(request.getDiscountUnit())
+                .couponId(CouponId.of(request.getCouponId()))
+                .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
-                .maxDiscountAmount(request.getMaxDiscountAmount())
-                .minimumOrderValue(request.getMinimumOrderValue())
+                .maxDiscountAmount(Money.builder()
+                        .value(request.getMaxDiscountAmount())
+                             .build())
+                .minimumOrderValue(Money.builder()
+                        .value(request.getMinimumOrderValue())
+                        .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
                 .validFrom(request.getValidFrom())
                 .validUntil(request.getValidUntil())
@@ -54,20 +62,24 @@ public class DiscountController implements IController {
     public ResponseEntity<ApiResponse<?>> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
         
         var command = UpdateDiscountCommand.builder()
-                .id(id)
-                .name(request.getName())
+                .id(DiscountId.of(id))
+                .name(DiscountName.builder().value(request.getName()).build())
                 .description(request.getDescription())
-                .couponId(request.getCouponId())
-                .discountUnit(request.getDiscountUnit())
+                .couponId(CouponId.of(request.getCouponId()))
+                .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
-                .maxDiscountAmount(request.getMaxDiscountAmount())
-                .minimumOrderValue(request.getMinimumOrderValue())
+                .maxDiscountAmount(Money.builder()
+                        .value(request.getMaxDiscountAmount())
+                        .build())
+                .minimumOrderValue(Money.builder()
+                        .value(request.getMinimumOrderValue())
+                        .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
                 .validFrom(request.getValidFrom())
-                .validUntil((request.getValidUntil()))
+                .validUntil(request.getValidUntil())
                 .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
                 .maxUsage(request.getMaxUsage())
-                .isActive(request.getIsActive())
+                .active(request.getActive())
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -76,8 +88,12 @@ public class DiscountController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllDiscount() {
-        var command = DefaultDiscountQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllDiscount(@RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
+        var command = DefaultDiscountQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(command);
         
@@ -87,7 +103,7 @@ public class DiscountController implements IController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getDiscountById(@PathVariable("id") Long id) {
         var command = DiscountByIdQuery.builder()
-                .id(id)
+                .id(DiscountId.of(id))
                 .build();
         
         var result = queryBus.dispatch(command);
@@ -95,10 +111,10 @@ public class DiscountController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
     
-    @GetMapping("/coupon/{id}")
-    public ResponseEntity<ApiResponse<?>> getDiscountByCouponCode(@PathVariable("id") Long id) {
+    @GetMapping("/coupon/{code}")
+    public ResponseEntity<ApiResponse<?>> getDiscountByCouponCode(@PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
-                .couponId(id)
+                .couponId(CouponCode.builder().value(code).build())
                 .build();
         
         var result = queryBus.dispatch(command);

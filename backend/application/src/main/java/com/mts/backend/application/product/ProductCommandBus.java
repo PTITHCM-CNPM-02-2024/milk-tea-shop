@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class ProductCommandBus extends AbstractCommandBus{
     
     public ProductCommandBus(CreateProductInformCommandHandler createProductCommandHandler, UpdateProductCommandHandler updateProductCommandHandler, AddProductPriceCommandHandler addProductPriceCommandHandler, UpdateProductPriceCommandHandler updateProductPriceCommandHandler, DeletePriceBySizeIdCommandHandler deletePriceBySizeIdCommandHandler) {
-        register(CreateProductInformCommand.class, createProductCommandHandler);
+        register(CreateProductCommand.class, createProductCommandHandler);
         register(UpdateProductInformCommand.class, updateProductCommandHandler);
         register(AddProductPriceCommand.class, addProductPriceCommandHandler);
         register(UpdateProductPriceCommand.class, updateProductPriceCommandHandler);

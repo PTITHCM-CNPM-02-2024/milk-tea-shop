@@ -9,10 +9,16 @@ import com.mts.backend.application.store.command.CreateStoreCommand;
 import com.mts.backend.application.store.command.UpdateStoreCommand;
 import com.mts.backend.application.store.query.StoreByIdQuery;
 import com.mts.backend.application.store.response.StoreDetailResponse;
+import com.mts.backend.domain.common.value_object.Email;
+import com.mts.backend.domain.common.value_object.PhoneNumber;
+import com.mts.backend.domain.store.identifier.StoreId;
+import com.mts.backend.domain.store.value_object.Address;
+import com.mts.backend.domain.store.value_object.StoreName;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -30,11 +36,11 @@ public class StoreController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
-                .name(request.getName())
-                .address(request.getAddress())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .openingDate(LocalDateTime.parse(request.getOpeningDate()))
+                .name(StoreName.builder().value(request.getName()).build())
+                .address(Address.builder().value(request.getAddress()).build())
+                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .email(Email.builder().value(request.getEmail()).build())
+                .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
                 .openTime(LocalDateTime.parse(request.getOpenTime()).toLocalTime())
                 .closeTime(LocalDateTime.parse(request.getCloseTime()).toLocalTime())
@@ -49,12 +55,12 @@ public class StoreController implements IController {
     public ResponseEntity<ApiResponse<?>> updateStore(@PathVariable("id") Integer id,
                                                       @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
-                .id(id)
-                .name(request.getName())
-                .address(request.getAddress())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .openingDate(LocalDateTime.parse(request.getOpeningDate()))
+                .id(StoreId.of(id))
+                .name(StoreName.builder().value(request.getName()).build())
+                .address(Address.builder().value(request.getAddress()).build())
+                .phone(PhoneNumber.builder().value(request.getAddress()).build())
+                .email(Email.builder().value(request.getName()).build())
+                .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
                 .openTime(LocalDateTime.parse(request.getOpenTime()).toLocalTime())
                 .closeTime(LocalDateTime.parse(request.getCloseTime()).toLocalTime())
@@ -68,7 +74,7 @@ public class StoreController implements IController {
     
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getStoreById(@PathVariable("id") Integer id) {
-        var query = StoreByIdQuery.builder().id(id).build();
+        var query = StoreByIdQuery.builder().id(StoreId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         

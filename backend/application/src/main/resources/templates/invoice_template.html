@@ -156,6 +156,7 @@
         <p><strong>Mã nhân viên:</strong> {{staffId}}</p>
     </div>
 
+    <!-- Replace the existing promotion section -->
     <div class="flex-container">
         <!-- Thông tin khách hàng -->
         <div class="flex-item client-details">
@@ -165,15 +166,21 @@
             <p><strong>Điện thoại:</strong> {{clientPhone}}</p>
         </div>
 
-        <!-- Phần khuyến mãi nếu có -->
-        {{#if hasPromotion}}
+        <!-- Member promotion if applicable -->
+        {{#if hasMemberPromotion}}
         <div class="flex-item promotion">
-            <p><strong>Khuyến mãi dành cho thành viên:</strong></p>
-            <p>{{promotionDescription}}</p>
-            <p><strong>Mã giảm giá áp dụng:</strong> {{promotionCode}}</p>
+            <p><strong>Khuyến mãi thành viên:</strong></p>
+            <p>{{memberPromotionDescription}}</p>
         </div>
         {{/if}}
     </div>
+
+    <!-- Coupon promotion if applicable -->
+    {{#if hasCouponPromotion}}
+    <div class="promotion">
+        <p><strong>Mã giảm giá áp dụng:</strong> {{couponCode}}</p>
+    </div>
+    {{/if}}
 
     <table>
         <thead>
@@ -192,7 +199,7 @@
             <td colspan="5" class="text-right">Tổng cộng:</td>
             <td class="text-right">{{totalAmount}}</td>
         </tr>
-        {{#if hasPromotion}}
+        {{#if hasCouponPromotion}}
         <tr>
             <td colspan="5" class="text-right">Giảm giá:</td>
             <td class="text-right">{{discountAmount}}</td>

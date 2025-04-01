@@ -2,15 +2,16 @@ package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.UpdateManagerCommand;
 import com.mts.backend.domain.account.identifier.AccountId;
-import com.mts.backend.domain.account.repository.IAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.staff.Manager;
+import com.mts.backend.domain.staff.ManagerEntity;
 import com.mts.backend.domain.staff.identifier.ManagerId;
-import com.mts.backend.domain.staff.repository.IManagerRepository;
+import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -18,10 +19,10 @@ import java.util.Objects;
 @Service
 public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManagerCommand, CommandResult> {
 
-    private final IManagerRepository managerRepository;
-    private final IAccountRepository accountRepository;
+    private final JpaManagerRepository managerRepository;
+    private final JpaAccountRepository accountRepository;
 
-    public UpdateManagerCommandHandler(IManagerRepository managerRepository, IAccountRepository accountRepository) {
+    public UpdateManagerCommandHandler(JpaManagerRepository managerRepository, JpaAccountRepository accountRepository) {
         this.managerRepository = managerRepository;
         this.accountRepository = accountRepository;
     }
@@ -31,56 +32,55 @@ public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManage
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(UpdateManagerCommand command) {
         Objects.requireNonNull(command, "Update manager command is required");
         
-        Manager manager = mustExistManager(ManagerId.of(command.getId()));
+        ManagerEntity manager = mustExistManager(command.getId());
         
-        if (manager.changeEmail(Email.of(command.getEmail()))) {
-            verifyUniqueEmail(manager);
+        if (manager.changeEmail(command.getEmail())) {
+            verifyUniqueEmail(command.getId(), command.getEmail());
         }
         
-        if (manager.changePhoneNumber(PhoneNumber.of(command.getPhone()))) {
-            verifyUniquePhoneNumber(manager);
+        if (manager.changePhoneNumber(command.getPhone())) {
+            verifyUniquePhoneNumber(command.getId(), command.getPhone());
         }
         
-        mustExitsAccount(manager.getAccountId());
+        manager.changeFirstName(command.getFirstName());
         
-        manager.changeFirstName(FirstName.of(command.getFirstName()));
+        manager.changeLastName(command.getLastName());
         
-        manager.changeLastName(LastName.of(command.getLastName()));
-        
-        manager.changeGender(Gender.valueOf(command.getGender()));
+        manager.changeGender(command.getGender());
         
         var updatedManager = managerRepository.save(manager);
         
-        return CommandResult.success(updatedManager.getId().getValue());
+        return CommandResult.success(updatedManager.getId());
     }
 
-    private Manager mustExistManager(ManagerId id) {
+    private ManagerEntity mustExistManager(ManagerId id) {
         Objects.requireNonNull(id, "Manager id is required");
 
-        return managerRepository.findById(id)
+        return managerRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy quản lý"));
     }
     
-    private void verifyUniqueEmail(Manager manager) {
-        Objects.requireNonNull(manager, "Manager is required");
-        if (managerRepository.existsByEmail(manager.getEmail())) {
+    private void verifyUniqueEmail(ManagerId id, Email email) {
+        Objects.requireNonNull(email, "Manager is required");
+        if (managerRepository.existsByIdNotAndEmail(id.getValue(), email)) {
             throw new DuplicateException("Email đã tồn tại");
         }
     }
     
-    private void verifyUniquePhoneNumber(Manager manager) {
-        Objects.requireNonNull(manager, "Manager is required");
-        if (managerRepository.existsByPhone(manager.getPhoneNumber())) {
+    private void verifyUniquePhoneNumber( ManagerId id,  PhoneNumber phone) {
+        Objects.requireNonNull(phone, "Manager is required");
+        if (managerRepository.existsByIdNotAndPhone(id.getValue(), phone)) {
             throw new DuplicateException("Số điện thoại đã tồn tại");
         }
     }
 
     private void mustExitsAccount(AccountId accountId) {
         Objects.requireNonNull(accountId, "Account id is required");
-        if (!accountRepository.existsById(accountId)) {
+        if (!accountRepository.existsById(accountId.getValue())) {
             throw new DuplicateException("Account không tồn tại");
         }
 

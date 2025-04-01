@@ -1,5 +1,6 @@
 package com.mts.backend.application.order.command;
 
+import com.mts.backend.domain.promotion.identifier.DiscountId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class OrderDiscountCommand {
-    private Long discountId;
+    private DiscountId discountId;
 }

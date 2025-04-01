@@ -40,10 +40,10 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+      ddl-auto: none
     show-sql: true
     properties:
         hibernate:
@@ -51,19 +51,28 @@ spring:
             use_sql_comments: true
             default_schema: milk_tea_shop_test
             dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
   
   flyway:
     enabled: false
 
 server:
   port: 8181
-  
+    
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
 
+jwt-config:
+    secret: hdvfkfvewfowefihpqhfphwgbwiegihgwinwgnwigiwgiweigoewog
+    expiration: 86400000
+    header: Authorization
+    prefix: Bearer
+    token-type: JWT
+    issuer: mts-backend
+    
 # Database configuration
 
 # Logging configuration
@@ -72,7 +81,8 @@ logging:
     root: INFO
     org.springframework: INFO
     com.myapp: DEBUG
-
+    org.hibernate: DEBUG
+    
 # Testing Environment
 ---
 spring:

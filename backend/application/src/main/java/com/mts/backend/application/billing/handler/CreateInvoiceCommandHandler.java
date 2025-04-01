@@ -6,19 +6,9 @@ import com.mts.backend.application.order.response.OrderProductDetailResponse;
 import com.mts.backend.application.order.response.OrderTableDetailResponse;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.repository.ICustomerRepository;
-import com.mts.backend.domain.customer.repository.IMembershipTypeRepository;
-import com.mts.backend.domain.order.Order;
-import com.mts.backend.domain.order.entity.OrderDiscount;
-import com.mts.backend.domain.payment.Payment;
-import com.mts.backend.domain.payment.repository.IPaymentMethodRepository;
-import com.mts.backend.domain.product.repository.IProductRepository;
-import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.promotion.repository.ICouponRepository;
-import com.mts.backend.domain.promotion.repository.IDiscountRepository;
-import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
-import com.mts.backend.domain.staff.repository.IEmployeeRepository;
-import com.mts.backend.domain.store.repository.IServiceTableRepository;
+import com.mts.backend.domain.order.OrderDiscountEntity;
+import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.payment.PaymentEntity;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import org.springframework.core.io.ClassPathResource;
@@ -37,15 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoiceCommand, CommandResult> {
-    private final IProductRepository productRepository;
-    private final IServiceTableRepository serviceTableRepository;
-    private final IDiscountRepository discountRepository;
-    private final IEmployeeRepository employeeRepository;
-    private final ICustomerRepository customerRepository;
-    private final ISizeRepository sizeRepository;
-    private final ICouponRepository couponRepository;
-    private final IPaymentMethodRepository paymentMethodRepository;
-    private final IMembershipTypeRepository membershipTypeRepository;
+
 
     private static final String TEMPLATE_PATH = "templates/invoice_template.html";
     private static final String COMPANY_NAME = "Công ty TNHH MTS";
@@ -53,25 +35,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
     private static final String COMPANY_PHONE = "0901234567";
     private static final String COMPANY_EMAIL = "mts@gmail.com";
 
-    public CreateInvoiceCommandHandler(
-            IProductRepository productRepository,
-            IServiceTableRepository serviceTableRepository,
-            IDiscountRepository discountRepository,
-            IEmployeeRepository employeeRepository,
-            ICustomerRepository customerRepository,
-            ISizeRepository sizeRepository,
-            ICouponRepository couponRepository,
-            IPaymentMethodRepository paymentMethodRepository,
-            IMembershipTypeRepository membershipTypeRepository) {
-        this.productRepository = productRepository;
-        this.serviceTableRepository = serviceTableRepository;
-        this.discountRepository = discountRepository;
-        this.employeeRepository = employeeRepository;
-        this.customerRepository = customerRepository;
-        this.sizeRepository = sizeRepository;
-        this.couponRepository = couponRepository;
-        this.paymentMethodRepository = paymentMethodRepository;
-        this.membershipTypeRepository = membershipTypeRepository;
+    public CreateInvoiceCommandHandler(){
     }
 
     @Override
@@ -110,7 +74,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillOrderInfo(String template, Order order) {
+    private String fillOrderInfo(String template, OrderEntity order) {
         DateTimeFormatter formatter = DateTimeFormatter
                 .ofPattern("yyyy-MM-dd HH:mm:ss")
                 .withZone(ZoneId.systemDefault());
@@ -122,7 +86,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillTableInfo(String template, Order order) {
+    private String fillTableInfo(String template, OrderEntity order) {
         var tableList = getTables(order);
 
         if (tableList.isEmpty()) {
@@ -140,11 +104,11 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillDiscountInfo(String template, Order order) {
+    private String fillDiscountInfo(String template, OrderEntity order) {
         var discounts = getDiscounts(order);
 
         if (discounts.isEmpty()) {
-            template = template.replaceAll("\\{\\{#if hasPromotion\\}\\}([\\s\\S]*?)\\{\\{/if\\}\\}", "");
+            template = template.replaceAll("\\{\\{#if hasCouponPromotion\\}\\}([\\s\\S]*?)\\{\\{/if\\}\\}", "");
             return template;
         }
 
@@ -161,13 +125,13 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .collect(Collectors.joining(", "));
         
 
-        template = template.replace("{{#if hasPromotion}}", "");
+        template = template.replace("{{#if hasCouponPromotion}}", "");
         template = template.replace("{{/if}}", "");
-        template = template.replace("{{promotionCode}}", couponCodes);
+        template = template.replace("{{couponCode}}", couponCodes);
         return template;
     }
 
-    private String fillProductItems(String template, Order order) {
+    private String fillProductItems(String template, OrderEntity order) {
         DecimalFormat currency = new DecimalFormat("#,###");
         var products = getProducts(order);
 
@@ -196,23 +160,23 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
         // Total amount
         template = template.replace("{{totalAmount}}",
-                currency.format(order.getTotalAmount().orElse(Money.ZERO).getAmount()));
+                currency.format(order.getTotalAmount().orElse(Money.ZERO).getValue()));
         
         // Final amount
         template = template.replace("{{grandTotal}}",
-                currency.format(order.getFinalAmount().orElse(Money.ZERO).getAmount()));
+                currency.format(order.getFinalAmount().orElse(Money.ZERO).getValue()));
         
         // Total discount
         Money totalDiscount = order.getOrderDiscounts().stream()
-                .map(OrderDiscount::getDiscountAmount)
+                .map(OrderDiscountEntity::getDiscountAmount)
                 .reduce(Money.ZERO, Money::add);
 
-        template = template.replace("{{discountAmount}}", currency.format(totalDiscount.getAmount()));
+        template = template.replace("{{discountAmount}}", currency.format(totalDiscount.getValue()));
 
         return template;
     }
 
-    private String fillPaymentInfo(String template, Order order, Payment payment) {
+    private String fillPaymentInfo(String template, OrderEntity order, PaymentEntity payment) {
         DecimalFormat currency = new DecimalFormat("#,###");
         var paymentDetail = getPayment(payment);
 
@@ -223,12 +187,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private List<OrderTableDetailResponse> getTables(Order order) {
+    private List<OrderTableDetailResponse> getTables(OrderEntity order) {
         return order.getOrderTables().stream()
                 .map(orderTable -> {
-                    var table = serviceTableRepository.findById(orderTable.getTableId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy bàn với id: " + orderTable.getTableId().getValue()));
+                    var table = orderTable.getTable();
                     return OrderTableDetailResponse.builder()
                             .tableNumber(table.getTableNumber().getValue())
                             .build();
@@ -236,115 +198,92 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .collect(Collectors.toList());
     }
 
-    private List<OrderProductDetailResponse> getProducts(Order order) {
+    private List<OrderProductDetailResponse> getProducts(OrderEntity order) {
         return order.getOrderProducts().stream()
                 .map(orderProduct -> {
-                    var product = productRepository.findByPriceId(orderProduct.getProductPriceId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy sản phẩm với id: " +
-                                            orderProduct.getProductPriceId().getValue()));
+                    var productPrice = orderProduct.getProductPriceEntity();
 
-                    var productPrice = product.getPrice(orderProduct.getProductPriceId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy giá sản phẩm với id: " +
-                                            orderProduct.getProductPriceId().getValue()));
+                    var product = productPrice.getProductEntity();
 
-                    var size = sizeRepository.findById(productPrice.getSizeId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy size với id: " + productPrice.getSizeId()));
-
+                    var size = productPrice.getSize();
                     return OrderProductDetailResponse.builder()
                             .productName(product.getName().getValue())
                             .size(size.getName().getValue())
-                            .price(productPrice.getPrice().getAmount())
+                            .price(productPrice.getPrice().getValue())
                             .quantity(orderProduct.getQuantity())
                             .productOption(orderProduct.getOption())
-                            .totalPrice(productPrice.getPrice().getAmount()
+                            .totalPrice(productPrice.getPrice().getValue()
                                     .multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private List<OrderDiscountDetailResponse> getDiscounts(Order order) {
+    private List<OrderDiscountDetailResponse> getDiscounts(OrderEntity order) {
         return order.getOrderDiscounts().stream()
                 .map(orderDiscount -> {
-                    var discount = discountRepository.findById(orderDiscount.getDiscountId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy khuyến mãi với id: " +
-                                            orderDiscount.getDiscountId().getValue()));
+                    var discount = orderDiscount.getDiscount();
 
-                    var coupon = couponRepository.findById(discount.getCouponId())
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Không tìm thấy mã giảm giá với id: " +
-                                            discount.getCouponId().getValue()));
+                    var coupon = discount.getCouponEntity();
 
                     return OrderDiscountDetailResponse.builder()
                             .name(discount.getName().getValue())
                             .couponCode(coupon.getCoupon().getValue())
-                            .discountValue(orderDiscount.getDiscountValue()
-                                    .map(PromotionDiscountValue::getDescription)
-                                    .orElse(""))
-                            .discountAmount(orderDiscount.getDiscountAmount().getAmount())
+                            .discountValue(discount.getPromotionDiscountValue().getDescription())
+                            .discountAmount(orderDiscount.getDiscountAmount().getValue())
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private PaymentDetailResponse getPayment(Payment payment){
-        var paymentMethod = paymentMethodRepository.findById(payment.getPaymentMethodId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy phương thức thanh toán với id: " +
-                                payment.getPaymentMethodId().getValue()));
+    private PaymentDetailResponse getPayment(PaymentEntity payment){
+        var paymentMethod = payment.getPaymentMethod();
 
         return PaymentDetailResponse.builder()
-                .paymentMethod(paymentMethod.getName().getValue())
+                .paymentMethod(paymentMethod.getPaymentName().getValue())
                 .amountPaid(payment.getAmountPaid()
-                        .map(Money::getAmount)
+                        .map(Money::getValue)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy số tiền đã thanh toán")))
                 .change(payment.getChangeAmount()
-                        .map(Money::getAmount)
+                        .map(Money::getValue)
                         .orElse(BigDecimal.ZERO))
                 .build();
     }
 
-    private String fillCustomerInfo(String template, Order order) {
-        if (order.getCustomerId().isEmpty()) {
+    private String fillCustomerInfo(String template, OrderEntity order) {
+        if (order.getCustomerEntity().isEmpty()) {
             template = template.replace("{{clientName}}", "Khách vãng lai");
             template = template.replace("{{clientAddress}}", "");
             template = template.replace("{{clientEmail}}", "");
             template = template.replace("{{clientPhone}}", "");
-            template = template.replace("{{promotionDescription}}", "");
+            template = template.replace("{{memberPromotionDescription}}", "");
+
+            template = template.replaceAll("\\{\\{#if hasMemberPromotion\\}\\}([\\s\\S]*?)\\{\\{/if\\}\\}", "");
             return template;
         }
 
-        var customer = customerRepository.findById(order.getCustomerId().get())
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy khách hàng với id: " +
-                                order.getCustomerId().get().getValue()));
-        var membershipType = membershipTypeRepository.findById(customer.getMembershipTypeId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy loại thành viên với id: " +
-                                customer.getMembershipTypeId().getValue()));
+        var customer = order.getCustomerEntity().get();
 
-        template = template.replace("{{clientName}}", customer.getFullName());
+        var membershipType = customer.getMembershipTypeEntity();
+
+        template = template.replace("{{clientName}}", customer.getFullName().orElse(""));
         template = template.replace("{{clientAddress}}", "");
         template = template.replace("{{clientEmail}}", customer.getEmail().map(Object::toString).orElse(""));
-        template = template.replace("{{clientPhone}}", customer.getPhoneNumber().getValue());
-        template = template.replace("{{promotionDescription}}",
-                membershipType.getName().getValue() + " - " + membershipType.getDiscountValue());
+        template = template.replace("{{clientPhone}}", customer.getPhone().getValue());
+        template = template.replace("{{memberPromotionDescription}}",
+                membershipType.getType().getValue() + " - " + membershipType.getMemberDiscountValue().getDescription());
+    // Hiển thị phần hasMemberPromotion nếu có thông tin thành viên
+    template = template.replace("{{#if hasMemberPromotion}}", "");
+    template = template.replace("{{/if}}", "");
 
         return template;
     }
 
-    private String fillEmployeeInfo(String template, Order order) {
-        var employee = employeeRepository.findById(order.getEmployeeId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy nhân viên với id: " +
-                                order.getEmployeeId().getValue()));
+    private String fillEmployeeInfo(String template, OrderEntity order) {
+        var employee = order.getEmployeeEntity();
 
         template = template.replace("{{staffName}}", employee.getFirstName().getValue() + " " + employee.getLastName().getValue());
-        template = template.replace("{{staffId}}", employee.getId().toString());
+        template = template.replace("{{staffId}}", String.valueOf(employee.getId()));
 
         return template;
     }

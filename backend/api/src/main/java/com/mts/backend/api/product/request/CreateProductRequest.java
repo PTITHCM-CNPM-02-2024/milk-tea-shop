@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * DTO for {@link com.mts.backend.domain.product.Product}
  */
 @Data
 @NoArgsConstructor
@@ -18,8 +17,8 @@ public class CreateProductRequest {
     String name;
     String description;
     Integer categoryId;
-    boolean available;
-    boolean signature;
+    Boolean available;
+    Boolean signature;
     String imagePath;
     
     Map<Integer, BigDecimal> prices = new HashMap<>();

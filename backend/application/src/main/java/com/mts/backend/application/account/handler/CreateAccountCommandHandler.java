@@ -1,31 +1,32 @@
 package com.mts.backend.application.account.handler;
 
 import com.mts.backend.application.account.command.CreateAccountCommand;
-import com.mts.backend.domain.account.Account;
+import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.RoleEntity;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
-import com.mts.backend.domain.account.repository.IAccountRepository;
-import com.mts.backend.domain.account.repository.IRoleRepository;
+import com.mts.backend.domain.account.jpa.JpaAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
 public class CreateAccountCommandHandler implements ICommandHandler<CreateAccountCommand, CommandResult> {
     
-    private final IAccountRepository accountRepository;
-    private final IRoleRepository roleRepository;
+    private final JpaAccountRepository accountRepository;
+    private final JpaRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     
-    public CreateAccountCommandHandler(IAccountRepository accountRepository, IRoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public CreateAccountCommandHandler(JpaAccountRepository accountRepository, JpaRoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -35,29 +36,28 @@ public class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(CreateAccountCommand command) {
         Objects.requireNonNull(command, "CreateAccountCommand must not be null");
         
-        PasswordHash passwordHash = encodePassword(PasswordHash.of(command.getPassword()));
+        PasswordHash passwordHash = encodePassword(command.getPassword());
         
-        Account account = new Account(
-                AccountId.create(),
-                Username.of(command.getUsername()),
-                passwordHash,
-                RoleId.of(command.getRoleId()),
-                null,
-                0L,
-                true,
-                false,
-                LocalDateTime.now());
+        verifyUniqueUsername(command.getUsername());
         
-        verifyUniqueUsername(account.getUsername());
+        AccountEntity account = AccountEntity.builder()
+                .id(AccountId.create().getValue())
+                .username(command.getUsername())
+                .passwordHash(passwordHash)
+                .roleEntity(verifyRole(command.getRoleId()))
+                .active(false)
+                .tokenVersion(0L)
+                .locked(false)
+                .build();
         
-        mustExistRoleId(RoleId.of(command.getRoleId()));
         
         var savedAccount = accountRepository.save(account);
         
-        return CommandResult.success(savedAccount.getId().getValue());
+        return CommandResult.success(savedAccount.getId());
     }
     
     private void verifyUniqueUsername(Username username) {
@@ -68,15 +68,17 @@ public class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
         }
     }
     
-    private void mustExistRoleId(RoleId roleId) {
-        Objects.requireNonNull(roleId, "Role id is required");
-
-        if (!roleRepository.existsById(roleId))
-            throw new NotFoundException("Role id not found");
-    
+    private RoleEntity verifyRole(RoleId id){
+        Objects.requireNonNull(id, "Role id is required");
+        
+        if (!roleRepository.existsById(id.getValue())){
+            throw new NotFoundException("Không tìm thấy quyền truy cập");
+        }
+        
+        return roleRepository.getReferenceById(id.getValue());
     }
     
     private PasswordHash encodePassword(PasswordHash password) {
-        return PasswordHash.of(passwordEncoder.encode(password.getValue()));
+        return PasswordHash.builder().value(passwordEncoder.encode(password.getValue())).build();
     }
 }
