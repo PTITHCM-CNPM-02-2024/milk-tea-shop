@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+@layer components {
+  .card {
+    display: flex;
+    background-color: theme('colors.twitter-blue'); /* ✅ Đúng */
+  }
+}

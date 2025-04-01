@@ -1,10 +1,14 @@
 package com.mts.backend.domain.staff.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class ManagerId implements Identifiable {
-    private final long value;
+import java.io.Serializable;
+
+@Value
+public class ManagerId implements Serializable {
+    long value;
     
     private ManagerId(long value) {
         if (value <= 0) {
@@ -25,32 +29,20 @@ public class ManagerId implements Identifiable {
         return new ManagerId(Long.parseLong(value));
     }
     
-    public long getValue() {
-        return value;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        ManagerId managerId = (ManagerId) o;
-        
-        return value == managerId.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(value);
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    
     public static ManagerId create() {
         return new ManagerId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
+    
+    public static final class ManagerIdConverter implements AttributeConverter<ManagerId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(ManagerId managerId) {
+            return managerId.getValue();
+        }
+        
+        @Override
+        public ManagerId convertToEntityAttribute(Long value) {
+            return ManagerId.of(value);
+        }
+    }
 }

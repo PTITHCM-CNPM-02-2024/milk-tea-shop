@@ -1,30 +1,31 @@
 package com.mts.backend.application.product.handler;
 
 import com.mts.backend.application.product.command.CreateProductSizeCommand;
-import com.mts.backend.domain.product.ProductSize;
+import com.mts.backend.domain.product.ProductSizeEntity;
+import com.mts.backend.domain.product.UnitOfMeasureEntity;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
-import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.product.repository.IUnitRepository;
+import com.mts.backend.domain.product.jpa.JpaProductSizeRepository;
+import com.mts.backend.domain.product.jpa.JpaUnitOfMeasureRepository;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
-import com.mts.backend.domain.product.value_object.QuantityOfProductSize;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
 public class CreateProductSizeCommandHandler implements ICommandHandler<CreateProductSizeCommand, CommandResult> {
 
-    private final ISizeRepository sizeRepository;
+    private final JpaProductSizeRepository sizeRepository;
     
-    private final IUnitRepository unitOfMeasureRepository;
+    private final JpaUnitOfMeasureRepository unitOfMeasureRepository;
 
-    public CreateProductSizeCommandHandler(ISizeRepository sizeRepository, IUnitRepository unitOfMeasureRepository) {
+    public CreateProductSizeCommandHandler(JpaProductSizeRepository sizeRepository,
+                                           JpaUnitOfMeasureRepository unitOfMeasureRepository) {
         this.sizeRepository = sizeRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
     }
@@ -34,26 +35,25 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(CreateProductSizeCommand command) {
         Objects.requireNonNull(command.getName(), "Product size name is required");
         
-        ProductSize productSize = new ProductSize(
-                ProductSizeId.create(),
-                ProductSizeName.of(command.getName()),
-                UnitOfMeasureId.of(command.getUnitId()),
-                QuantityOfProductSize.of(command.getQuantity()),
-                command.getDescription().orElse(""),
-                command.getCreatedAt().orElse(LocalDateTime.now()),
-                command.getUpdatedAt().orElse(LocalDateTime.now())
-        );
 
-        mustExistUnitOfMeasure(productSize.getUnitOfMeasure());
+        var un  = verifyUnitOfMeasure(command.getUnitId());
         
-        verifyTupleUnique(productSize.getName(), productSize.getUnitOfMeasure());
+        verifyTupleUnique(command.getName(), command.getUnitId());
         
-        ProductSize createdProductSize = sizeRepository.save(productSize);
-
-        return CommandResult.success(createdProductSize.getId().getValue());
+        var productSize = ProductSizeEntity.builder()
+                .id(ProductSizeId.create().getValue())
+                .name(command.getName())
+                .unit(un)
+                .quantity(command.getQuantity())
+                .description(command.getDescription().orElse(null))
+                .build();
+        
+        var createdProductSize = sizeRepository.save(productSize);
+        return CommandResult.success(createdProductSize.getId());
 
     }
     
@@ -61,13 +61,18 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
         Objects.requireNonNull(name, "ProductSizeName is required");
         Objects.requireNonNull(unit, "UnitOfMeasureId is required");
         
-        sizeRepository.findByNameAndUnit(name, unit).ifPresent(size -> {
-            throw new DuplicateException("Size, Unit " + name.getValue() + ", " + unit.getValue() + " đã tồn tại");
-        });
+        if (sizeRepository.existsByNameAndUnit_Id(name, unit.getValue())) {
+            throw new DuplicateException("Kích thước " + name.getValue() + " đã tồn tại trong đơn vị " + unit.getValue());
+        }
     }
     
-    private void mustExistUnitOfMeasure(UnitOfMeasureId unitOfMeasureId) {
+    private UnitOfMeasureEntity verifyUnitOfMeasure(UnitOfMeasureId unitOfMeasureId) {
         Objects.requireNonNull(unitOfMeasureId, "UnitOfMeasureId is required");
-        unitOfMeasureRepository.findById(unitOfMeasureId).orElseThrow(() -> new NotFoundException("Đơn vị tính không tồn tại"));
+        
+        if (!unitOfMeasureRepository.existsById(unitOfMeasureId.getValue())){
+            throw new NotFoundException("Đơn vị " + unitOfMeasureId.getValue() + " không tồn tại");
+        }
+        
+        return unitOfMeasureRepository.getReferenceById(unitOfMeasureId.getValue());
     }
 }

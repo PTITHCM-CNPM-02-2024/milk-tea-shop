@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class OrderTableCommand {
     
-    private Integer serviceTableId;
+    private ServiceTableId serviceTableId;
 }

@@ -11,7 +11,6 @@ import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.shared.response.ApiResponse;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +47,7 @@ public class PaymentController implements IController {
             .paymentId(PaymentId.of(paymentId))
             .paymentMethodId(PaymentMethodId.of(methodId))
             .transactionId(System.currentTimeMillis())
-            .amount(Money.of(request.getAmount()))
+            .amount(Money.builder().value(request.getAmount()).build())
             .build();
     
     var result = paymentCommandBus.dispatch(command);

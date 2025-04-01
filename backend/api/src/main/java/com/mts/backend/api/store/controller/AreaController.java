@@ -12,13 +12,12 @@ import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
-import com.mts.backend.application.store.query_handler.GetAllAreaActiveQueryHandler;
-import com.mts.backend.application.store.response.AreaDetailResponse;
+import com.mts.backend.domain.store.identifier.AreaId;
+import com.mts.backend.domain.store.value_object.AreaName;
+import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/areas")
@@ -35,8 +34,9 @@ public class AreaController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
-                .name(request.getName())
-                .maxTable(request.getMaxTable())
+                .name(AreaName.builder().value(request.getName()).build())
+                .isActive(request.getIsActive())
+                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
                 .build();
 
         var result = commandBus.dispatch(command);
@@ -49,8 +49,8 @@ public class AreaController implements IController {
                                                      @RequestBody UpdateAreaRequest request) {
         
         var command = UpdateAreaCommand.builder()
-                .areaId(id)
-                .name(request.getName())
+                .areaId(AreaId.of(id))
+                .name(AreaName.builder().value(request.getName()).build())
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -63,8 +63,8 @@ public class AreaController implements IController {
                                                                  @RequestBody UpdateMaxAndActiveRequest request) {
         
         var command = UpdateAreaMaxAndActiveCommand.builder()
-                .areaId(id)
-                .maxTable(request.getMaxTable())
+                .areaId(AreaId.of(id))
+                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
                 .isActive(request.getIsActive())
                 .build();
         
@@ -74,8 +74,9 @@ public class AreaController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllArea() {
-        var query = DefaultAreaQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                     @RequestParam(value = "size", defaultValue = "40") Integer size) {
+        var query = DefaultAreaQuery.builder().page(page).size(size).build();
         
         var result = queryBus.dispatch(query);
         
@@ -84,8 +85,10 @@ public class AreaController implements IController {
     }
     
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<?>> getAllActiveArea() {
-        var query = AreaActiveQuery.builder().build();
+    public ResponseEntity<ApiResponse<?>> getAllActiveArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                           @RequestParam(value = "size", defaultValue = "40") Integer size,
+                                                           @RequestParam(value = "active", defaultValue = "true") Boolean active) {
+        var query = AreaActiveQuery.builder().page(page).size(size).active(active).build();
         
         var result = queryBus.dispatch(query);
         
@@ -95,7 +98,7 @@ public class AreaController implements IController {
     
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getAreaById(@PathVariable("id") Integer id) {
-        var query = AreaByIdQuery.builder().id(id).build();
+        var query = AreaByIdQuery.builder().id(AreaId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         

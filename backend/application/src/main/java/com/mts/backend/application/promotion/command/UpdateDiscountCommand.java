@@ -1,5 +1,6 @@
 package com.mts.backend.application.promotion.command;
 
+import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class UpdateDiscountCommand extends DiscountCommand implements ICommand<CommandResult> {
-    private Long id;
-    private Boolean isActive;
+    private DiscountId id;
+    private Boolean active;
 }

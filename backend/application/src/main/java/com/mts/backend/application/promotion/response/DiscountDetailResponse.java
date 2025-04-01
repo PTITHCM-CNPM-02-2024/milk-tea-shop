@@ -17,6 +17,7 @@ public class DiscountDetailResponse {
     private String name;
     private String description;
     private Long couponId;
+    private String couponCode;
     private String discountUnit;
     private BigDecimal discountValue;
     private BigDecimal maxDiscountAmount;

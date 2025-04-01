@@ -1,5 +1,7 @@
 package com.mts.backend.application.account.command;
 
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class UpdateAccountCommand implements ICommand<CommandResult> {
-    private Long id;
-    private String username;
+    private AccountId id;
+    private Username username;
 }

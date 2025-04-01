@@ -3,13 +3,14 @@ package com.mts.backend.application.payment.provider;
 import com.mts.backend.application.payment.command.PaymentTransactionCommand;
 import com.mts.backend.application.payment.response.PaymentInitResponse;
 import com.mts.backend.application.payment.response.PaymentResult;
-import com.mts.backend.domain.order.Order;
+import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
-import com.mts.backend.domain.payment.Payment;
+import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
-import com.mts.backend.domain.payment.repository.IPaymentMethodRepository;
-import com.mts.backend.domain.payment.repository.IPaymentRepository;
+import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
+import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
@@ -22,12 +23,11 @@ import java.util.Objects;
 @Service
 public class CashProvider implements IPaymentProvider{
     private final static PaymentMethodId PAYMENT_METHOD_ID = PaymentMethodId.of(5);
-    private final IPaymentRepository paymentRepository;
-    private final IPaymentMethodRepository paymentMethodRepository;
+    private final JpaPaymentRepository paymentRepository;
+    private final JpaPaymentMethodRepository paymentMethodRepository;
 
-    public CashProvider(IPaymentRepository paymentRepository, IPaymentMethodRepository paymentMethodRepository) {
-        if (paymentMethodRepository.findById(PAYMENT_METHOD_ID).isEmpty())
-        {
+    public CashProvider(JpaPaymentRepository paymentRepository, JpaPaymentMethodRepository paymentMethodRepository) {
+        if (!paymentMethodRepository.existsById(PAYMENT_METHOD_ID.getValue())) {
             throw new DomainException("Phương thức thanh toán không tồn tại");
         }
         this.paymentMethodRepository = paymentMethodRepository;
@@ -40,25 +40,26 @@ public class CashProvider implements IPaymentProvider{
      * @return
      */
     @Override
-    public PaymentInitResponse initPayment(Payment payment, Order order) {
+    @Transactional
+    public PaymentInitResponse initPayment(PaymentEntity payment, OrderEntity order) {
         
         validWhenInit(payment, order);
         
         payment.changeStatus(PaymentStatus.PROCESSING);
         
-        var paymentSaved = paymentRepository.save(payment);
+        var savedPayment = paymentRepository.save(payment);
         
-        var message = "Vui lòng thanh toán %sVNĐ".formatted(order.getFinalAmount().get().getAmount());
+        var message = "Vui lòng thanh toán %sVNĐ".formatted(order.getFinalAmount().get().getValue());
         
         return PaymentInitResponse.processing(
-                paymentSaved.getId().getValue(),
+                savedPayment.getId(),
                 message,
-                order.getFinalAmount().get().getAmount());
+                order.getFinalAmount().get().getValue());
                 
         
     }
     
-    private void validWhenInit(Payment payment, Order order) {
+    private void validWhenInit(PaymentEntity payment, OrderEntity order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Final amount is required");
         List<String> errors = new ArrayList<>();
@@ -91,7 +92,7 @@ public class CashProvider implements IPaymentProvider{
         
     }
 
-    private void validWhenDispatch(Payment payment, Order order) {
+    private void validWhenDispatch(PaymentEntity payment, OrderEntity order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Order is required");
         List<String> errors = new ArrayList<>();
@@ -135,7 +136,7 @@ public class CashProvider implements IPaymentProvider{
      */
     @Override
     @Transactional
-    public PaymentResult dispatch(Payment payment, Order order, PaymentTransactionCommand transactionCommand) {
+    public PaymentResult dispatch(PaymentEntity payment, OrderEntity order, PaymentTransactionCommand transactionCommand) {
         
         validWhenDispatch(payment, order);
         
@@ -154,17 +155,14 @@ public class CashProvider implements IPaymentProvider{
 
         payment.changeStatus(PaymentStatus.PAID);
         
-        List<Payment> getOtherPayments = paymentRepository.findByOrderId(order.getId());
+        List<PaymentEntity> getOtherPayments = paymentRepository.findByOrderEntity_IdAndIdNot(order.getId(), payment.getId());
         
         for (var pa : getOtherPayments){
             pa.changeStatus(PaymentStatus.CANCELLED);
-            paymentRepository.save(pa);
         }
-
-
-        var result = paymentRepository.save(payment);
         
-        return new PaymentResult(result.getId(), transactionCommand.getTransactionId());
+        
+        return new PaymentResult(PaymentId.of(payment.getId()), transactionCommand.getTransactionId());
     }
     
     

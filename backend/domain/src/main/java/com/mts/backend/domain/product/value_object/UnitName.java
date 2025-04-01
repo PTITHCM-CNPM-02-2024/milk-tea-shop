@@ -1,67 +1,47 @@
 package com.mts.backend.domain.product.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class UnitName extends AbstractValueObject {
+@Value
+@Builder
+public class UnitName {
     
-    private final String name;
+    String value;
     
     private static final int MAX_LENGTH = 10;
     
-    private UnitName(String name) {
-        this.name = name;
-    }
-    
-    public static ValueObjectValidationResult create(String name) {
+    private UnitName(String value) {
 
         List<String> businessErrors = new ArrayList<>();
-        if (name == null || name.trim().isEmpty()) {
+        if (value == null || value.trim().isEmpty()) {
             businessErrors.add("Tên đơn vị đo không được để trống");
         }
-        
-        if (name != null && name.length() > MAX_LENGTH) {
+
+        if (value != null && value.length() > MAX_LENGTH) {
             businessErrors.add("Tên đơn vị đo không được quá " + MAX_LENGTH + " ký tự");
         }
         
-        if(!businessErrors.isEmpty()) {
-            return new ValueObjectValidationResult(null, businessErrors);
+        if (!businessErrors.isEmpty()){
+            throw new DomainBusinessLogicException(businessErrors);
         }
-        
-        return new ValueObjectValidationResult(new UnitName(name), businessErrors);
-        
+        this.value = value;
     }
     
-    public static UnitName of(String name) {
-        ValueObjectValidationResult validationResult = create(name);
-        if (!validationResult.getBusinessErrors().isEmpty()) {
-            throw new DomainBusinessLogicException(validationResult.getBusinessErrors());
+    public static final class UnitNameConverter implements AttributeConverter<UnitName, String> {
+        @Override
+        public String convertToDatabaseColumn(UnitName attribute) {
+            return attribute == null ? null : attribute.getValue();
         }
-        return new UnitName(name);
-    }
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(name);
-    }
-    
-    private String normalize(String name) {
-        return name.trim();
-    }
-    
-    public String getValue() {
-        return normalize(name);
-    }
-    
-    @Override
-    public String toString() {
-        return normalize(name);
+
+        @Override
+        public UnitName convertToEntityAttribute(String dbData) {
+            return dbData == null ? null : new UnitName(dbData);
+        }
     }
     
 }

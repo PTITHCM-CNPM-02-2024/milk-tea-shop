@@ -1,11 +1,22 @@
 package com.mts.backend.domain.payment.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Value;
 
-public class PaymentMethodId implements Identifiable {
+import java.io.Serializable;
 
-    private final int value;
+@EqualsAndHashCode
+@Getter
+public class PaymentMethodId implements Serializable {
+
+    Integer value;
+    
+    public PaymentMethodId() {
+    }
 
     private PaymentMethodId(int value) {
 
@@ -18,43 +29,35 @@ public class PaymentMethodId implements Identifiable {
         }
         this.value = value;
     }
-    
+
     public static PaymentMethodId of(int value) {
         return new PaymentMethodId(value);
     }
     
+    public static PaymentMethodId of(Integer value) {
+        return new PaymentMethodId(value);
+    }
+
     public static PaymentMethodId of(String value) {
         return new PaymentMethodId(Integer.parseInt(value));
     }
-    
-    public static PaymentMethodId create(){
+
+    public static PaymentMethodId create() {
         return new PaymentMethodId(IdentifiableProvider.generateTimeBasedUnsignedTinyInt());
     }
-    
-    public int getValue() {
-        return value;
+    @Converter(autoApply = true)
+    public static final class PaymentMethodIdConverter implements AttributeConverter<PaymentMethodId, Integer> {
+
+        @Override
+        public Integer convertToDatabaseColumn(PaymentMethodId paymentMethodId) {
+            return paymentMethodId.getValue();
+        }
+
+        @Override
+        public PaymentMethodId convertToEntityAttribute(Integer value) {
+            return PaymentMethodId.of(value);
+        }
     }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        PaymentMethodId paymentMethodId = (PaymentMethodId) o;
-        
-        return value == paymentMethodId.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(value);
-    }
-    
 }
     
     

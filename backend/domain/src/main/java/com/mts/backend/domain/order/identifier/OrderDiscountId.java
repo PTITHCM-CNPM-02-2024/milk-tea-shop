@@ -1,20 +1,23 @@
 package com.mts.backend.domain.order.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class OrderDiscountId implements Identifiable {
-    private final long id;
+import java.io.Serializable;
+@Value
+public class OrderDiscountId implements Serializable {
+   Long value;
     
-    private OrderDiscountId(long id) {
+    private OrderDiscountId(long value) {
         
-        if (id <= 0) {
+        if (value <= 0) {
             throw new IllegalArgumentException("OrderDiscountId id must be greater than 0");
         }
         
-        if (id > IdentifiableProvider.INT_UNSIGNED_MAX)
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX)
             throw new IllegalArgumentException("OrderDiscountId id must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
-        this.id = id;
+        this.value = value;
     }
     
     public static OrderDiscountId of(long id) {
@@ -25,28 +28,23 @@ public class OrderDiscountId implements Identifiable {
         return new OrderDiscountId(Long.parseLong(id));
     }
     
+    public static OrderDiscountId of(Long id) {
+        return new OrderDiscountId(id);
+    }
+    
     public static OrderDiscountId create(){
         return new OrderDiscountId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
-        return id;
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderDiscountId orderDiscountId)) return false;
-        return id == orderDiscountId.id;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(id);
+    public final static class OrderDiscountIdConverter implements AttributeConverter<OrderDiscountId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(OrderDiscountId attribute) {
+            return attribute.getValue();
+        }
+        
+        @Override
+        public OrderDiscountId convertToEntityAttribute(Long dbData) {
+            return OrderDiscountId.of(dbData);
+        }
     }
 }

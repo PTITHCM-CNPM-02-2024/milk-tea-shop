@@ -1,9 +1,9 @@
 package com.mts.backend.application.order.handler;
 
 import com.mts.backend.application.order.command.CheckOutOrderCommand;
-import com.mts.backend.domain.order.Order;
+import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
-import com.mts.backend.domain.order.repository.IOrderRepository;
+import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -15,9 +15,9 @@ import java.util.Objects;
 @Service
 public class CheckOutOrderCommandHandler implements ICommandHandler<CheckOutOrderCommand, CommandResult>
 {
-    private final IOrderRepository orderRepository;
+    private final JpaOrderRepository orderRepository;
     
-    public CheckOutOrderCommandHandler(IOrderRepository orderRepository) {
+    public CheckOutOrderCommandHandler(JpaOrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
 
@@ -33,18 +33,17 @@ public class CheckOutOrderCommandHandler implements ICommandHandler<CheckOutOrde
         
         var order = mustExistOrder(command.getOrderId());
         
-        order.checkOutAllTable();
+        order.checkOut();
         
         var orderSaved = orderRepository.save(order);
         
-        return CommandResult.success(orderSaved.getId().getValue());
+        return CommandResult.success(orderSaved.getId());
         
         
     }
     
-    @Transactional
-    protected Order mustExistOrder(OrderId orderId) {
-        return orderRepository.findById(orderId)
+    private OrderEntity mustExistOrder(OrderId orderId) {
+        return orderRepository.findById(orderId.getValue())
                 .orElseThrow(() -> new NotFoundException("Order not found"));
     }
 }

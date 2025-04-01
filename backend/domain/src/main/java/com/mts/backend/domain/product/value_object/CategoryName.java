@@ -1,48 +1,35 @@
 package com.mts.backend.domain.product.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class CategoryName extends AbstractValueObject {
+@Value
+@Builder
+public class CategoryName {
     
     private static final int MAX_LENGTH = 100;
     
-    private final String value;
+    String value;
 
-    private CategoryName(String value) {
-        this.value = normalize(value);
-    }
-    
-    public static ValueObjectValidationResult create(String value) {
+    public CategoryName(String value) {
         List<String> businessErrors = new ArrayList<>();
-        
+
         if (value == null || value.trim().isEmpty()) {
             businessErrors.add("Tên không được để trống");
         }
-        
+
         if (value != null && value.length() > MAX_LENGTH) {
             businessErrors.add("Tên không được quá " + MAX_LENGTH + " ký tự");
         }
         
-        if (businessErrors.isEmpty()) {
-            return new ValueObjectValidationResult(new CategoryName(value), businessErrors);
+        if (!businessErrors.isEmpty()){
+            throw new DomainBusinessLogicException(businessErrors);
         }
-        
-        return new ValueObjectValidationResult(null, businessErrors);
-        
-    }
-    
-    public static CategoryName of(String value) {
-        ValueObjectValidationResult result = create(value);
-        if (result.getBusinessErrors().isEmpty()) {
-            String normalizedValue = normalize(value);
-            return new CategoryName(normalizedValue);
-        }
-        throw new DomainBusinessLogicException(result.getBusinessErrors());
+        this.value = normalize(value);
     }
     
     private static String normalize(String value) {
@@ -52,15 +39,16 @@ public class CategoryName extends AbstractValueObject {
     public String getValue() {
         return normalize(value);
     }
-    
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value);
+
+    public static final class CategoryNameConverter implements AttributeConverter<CategoryName, String>{
+        @Override
+        public String convertToDatabaseColumn(CategoryName attribute) {
+            return attribute == null ? null : attribute.getValue();
+        }
+
+        @Override
+        public CategoryName convertToEntityAttribute(String dbData) {
+            return dbData == null ? null : new CategoryName(dbData);
+        }
     }
-    
-    @Override
-    public String toString() {
-        return getValue();
-    }
-    
 }

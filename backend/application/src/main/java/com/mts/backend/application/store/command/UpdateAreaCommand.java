@@ -1,5 +1,7 @@
 package com.mts.backend.application.store.command;
 
+import com.mts.backend.domain.store.identifier.AreaId;
+import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.AllArgsConstructor;
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class UpdateAreaCommand implements ICommand<CommandResult> {
-    private Integer areaId;
-    private String name;
+    private AreaId areaId;
+    private AreaName name;
     private String description;
 }

@@ -1,44 +1,35 @@
 package com.mts.backend.domain.account.value_object;
 
 import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.value_object.AbstractValueObject;
-import com.mts.backend.shared.value_object.ValueObjectValidationResult;
+import jakarta.persistence.AttributeConverter;
+import lombok.Builder;
+import lombok.Value;
 
-import java.util.List;
+import java.util.Objects;
 
-public class PasswordHash extends AbstractValueObject {
-    
-    private final String value;
-    
+@Value
+@Builder
+public class PasswordHash {
+
+    String value;
+
     private PasswordHash(String value) {
+        if (value.isBlank()) {
+            throw new DomainException("Mật khẩu không được để trống");
+        }
         this.value = value;
     }
     
-    public static ValueObjectValidationResult create(String value) {
-        if (value.isBlank()) {
-            return new ValueObjectValidationResult(null, List.of("Mật khẩu không được để trống"));
-        }
-        return new ValueObjectValidationResult(new PasswordHash(value), List.of());
-    }
     
-    public static PasswordHash of(String value) {
-        
-        ValueObjectValidationResult result = create(value);
-        if (result.getBusinessErrors().isEmpty()) {
-            return new PasswordHash(value);
+    public static final class PasswordHashConverter implements AttributeConverter<PasswordHash, String> {
+        @Override
+        public String convertToDatabaseColumn(PasswordHash attribute) {
+            return Objects.isNull(attribute) ? null : attribute.getValue();
         }
-        throw new DomainException("Mật khẩu không hợp lệ: " + result.getBusinessErrors());
-    }
-    
-    public String getValue() {
-        return value;
-    }
 
-    /**
-     * @return 
-     */
-    @Override
-    protected Iterable<Object> getEqualityComponents() {
-        return List.of(value);
+        @Override
+        public PasswordHash convertToEntityAttribute(String dbData) {
+            return Objects.isNull(dbData) ? null : PasswordHash.builder().value(dbData).build();
+        }
     }
 }

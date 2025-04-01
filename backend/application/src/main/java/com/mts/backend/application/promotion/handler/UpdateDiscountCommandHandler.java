@@ -1,76 +1,90 @@
 package com.mts.backend.application.promotion.handler;
 
 import com.mts.backend.application.promotion.command.UpdateDiscountCommand;
-import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.common.value_object.DiscountUnit;
-import com.mts.backend.domain.promotion.Discount;
+import com.mts.backend.domain.promotion.DiscountEntity;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
-import com.mts.backend.domain.promotion.repository.ICouponRepository;
-import com.mts.backend.domain.promotion.repository.IDiscountRepository;
+import com.mts.backend.domain.promotion.jpa.JpaCouponRepository;
+import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
 import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
-import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
 public class UpdateDiscountCommandHandler implements ICommandHandler<UpdateDiscountCommand, CommandResult> {
-    private final IDiscountRepository discountRepository;
-    private final ICouponRepository couponRepository;
-    public UpdateDiscountCommandHandler(IDiscountRepository discountRepository, ICouponRepository couponRepository) {
+    private final JpaDiscountRepository discountRepository;
+    private final JpaCouponRepository couponRepository;
+    public UpdateDiscountCommandHandler(JpaDiscountRepository discountRepository, JpaCouponRepository couponRepository) {
         this.discountRepository = discountRepository;
         this.couponRepository = couponRepository;
     }
     @Override
+    @Transactional
     public CommandResult handle(UpdateDiscountCommand command) {
         Objects.requireNonNull(command, "Update discount command is required");
         
-        Discount discount = mustExistDiscount(DiscountId.of(command.getId()));
-        CouponId checkCouponId = CouponId.of(command.getCouponId());
-        var newVal = PromotionDiscountValue.of(command.getDiscountValue(), DiscountUnit.valueOf(command.getDiscountUnit()), Money.of(command.getMaxDiscountAmount()));
+        var discount = mustExistDiscount(command.getId());
+        CouponId checkCouponId = command.getCouponId();
+        var newVal = PromotionDiscountValue.builder()
+                .unit(command.getDiscountUnit())
+                .value(command.getDiscountValue())
+                .maxDiscountAmount(command.getMaxDiscountAmount())
+                .build();
         
-        if (discount.changeCouponId(checkCouponId)){
-            verifyUniqueCoupon(checkCouponId);
+        if (discount.getCouponEntity().getId().equals(checkCouponId.getValue())) {
+            verifyUniqueCoupon(command.getId(), checkCouponId);
+            discount.setCouponEntity(couponRepository.getReferenceById(checkCouponId.getValue()));
         }
         
-        discount.changeName(DiscountName.of(command.getName()));
-        discount.changeDescription(command.getDescription());
-        discount.changeDiscountValue(newVal);
-        discount.changeMinRequiredOrderValue(Money.of(command.getMinimumOrderValue()));
-        discount.changeMinRequiredProduct(command.getMinimumRequiredProduct());
-        discount.changeValidFrom(command.getValidFrom());
+        if (discount.changeDiscountName(command.getName())) {
+            verifyUniqueName(command.getId(), command.getName());
+        }
+        discount.changeDescription(command.getDescription().orElse(null));
+        discount.changePromotionDiscountValue(newVal);
+        discount.changeMinRequiredOrderValue(command.getMinimumOrderValue());
+        discount.changeMinRequiredProduct(command.getMinimumRequiredProduct().orElse(null));
+        discount.changeValidFrom(command.getValidFrom().orElse(null));
         discount.changeValidUntil(command.getValidUntil());
-        discount.changeMaxUsage(command.getMaxUsage());
-        discount.changeMaxUsagePerCustomer(command.getMaxUsagePerCustomer());
-        discount.changeActive(command.getIsActive());
+        discount.changeMaxUse(command.getMaxUsage().orElse(null));
+        discount.changeMaxUsesPerCustomer(command.getMaxUsagePerCustomer().orElse(null));
+        discount.setActive(command.getActive());
         
         
-        var updatedDiscount = discountRepository.save(discount);
         
-        return CommandResult.success(updatedDiscount.getId().getValue());
+        return CommandResult.success(discount.getId());
         
     }
-    
-    private Discount mustExistDiscount(DiscountId id){
+    protected DiscountEntity mustExistDiscount(DiscountId id){
         Objects.requireNonNull(id, "Discount id is required");
         
-        return discountRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy chương trình giảm giá"));
+        return discountRepository.findById(id.getValue()).orElseThrow(() -> new NotFoundException("Không tìm thấy chương " +
+                "trình giảm giá"));
     }
     
-    private void verifyUniqueCoupon(CouponId id){
+    protected void verifyUniqueCoupon(DiscountId id, CouponId couponId) {
         Objects.requireNonNull(id, "Coupon id is required");
         
-        if (!couponRepository.existById(id)){
+        if (!couponRepository.existsById(id.getValue())){
             throw new NotFoundException("Không tìm thấy mã giảm giá");
         }
         
-        if (discountRepository.existByCouponId(id)){
-            throw new DuplicateException("Mã giảm giá đã được sử dụng");
+        if (discountRepository.existsByIdNotAndCouponEntity_Id(id.getValue(), couponId.getValue())) {
+            throw new NotFoundException("Mã giảm giá đã tồn tại");
         }
     }
+    
+    private void verifyUniqueName(DiscountId id, DiscountName name) {
+        Objects.requireNonNull(id, "Discount id is required");
+        
+        if (discountRepository.existsByIdNotAndName(id.getValue(), name)) {
+            throw new NotFoundException("Tên mã giảm giá đã tồn tại");
+        }
+    }
+    
 }

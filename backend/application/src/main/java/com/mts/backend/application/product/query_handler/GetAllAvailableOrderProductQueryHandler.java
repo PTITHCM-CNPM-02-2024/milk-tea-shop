@@ -1,12 +1,10 @@
 package com.mts.backend.application.product.query_handler;
 
-import com.mts.backend.application.product.query.AvailableOrderProductQuery;
+import com.mts.backend.application.product.query.ProductForSaleQuery;
+import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
-import com.mts.backend.domain.product.Product;
-import com.mts.backend.domain.product.repository.ICategoryRepository;
-import com.mts.backend.domain.product.repository.IProductRepository;
-import com.mts.backend.domain.product.repository.ISizeRepository;
-import com.mts.backend.domain.product.repository.IUnitRepository;
+import com.mts.backend.domain.product.ProductEntity;
+import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import org.springframework.stereotype.Service;
@@ -16,50 +14,52 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<AvailableOrderProductQuery, CommandResult> {
-    private IProductRepository productRepository;
-    private ISizeRepository sizeRepository;
-    private ICategoryRepository categoryRepository;
-    private IUnitRepository unitRepository;
+public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<ProductForSaleQuery, CommandResult> {
+    private final JpaProductRepository productRepository;
     
-    public GetAllAvailableOrderProductQueryHandler(IProductRepository productRepository, ISizeRepository sizeRepository, ICategoryRepository categoryRepository, IUnitRepository unitRepository) {
+    public GetAllAvailableOrderProductQueryHandler(JpaProductRepository productRepository){
         this.productRepository = productRepository;
-        this.sizeRepository = sizeRepository;
-        this.categoryRepository = categoryRepository;
-        this.unitRepository = unitRepository;
     }
+    
     /**
      * @param query 
      * @return
      */
     @Override
-    public CommandResult handle(AvailableOrderProductQuery query) {
+    public CommandResult handle(ProductForSaleQuery query) {
         Objects.requireNonNull(query, "OrderedProductQuery is required");
+        List<ProductEntity> products = null;
         
-        var products = getProducts(query.isOrdered());
+        if (query.getIsOrdered()){
+            products = productRepository.findAllWithDetails().stream()
+                    .filter(ProductEntity::isOrdered)
+                    .toList();
+        } else {
+            products = productRepository.findAllWithDetails().stream()
+                    .filter(product -> !product.isOrdered())
+                    .toList();
+        }
+   
 
         List<ProductDetailResponse> responses = new ArrayList<>();
         
         products.forEach(product -> {
-            ProductDetailResponse response = ProductDetailResponse.builder().id(product.getId().getValue()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).isSignature(product.isSignature()).build();
+            ProductDetailResponse response =
+                    ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
 
-            if (product.getCategoryId().isPresent()) {
-                var categoryId = product.getCategoryId().get();
-                response.setCategory(categoryRepository.findById(categoryId).map(category -> category.getName().getValue()).orElse(""));
-            }
+            product.getCategoryEntity().ifPresent(category -> {
+                response.setCategory(CategoryDetailResponse.builder().id(category.getId()).name(category.getName().getValue()).build());
+            });
 
-            for (var price : product.getPrices()) {
-                ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getAmount()).currency("VND").build();
+            for (var price : product.getProductPriceEntities()) {
+                ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getValue()).currency("VND").build();
 
-                var size = sizeRepository.findById(price.getSizeId()).orElseThrow(() -> new RuntimeException("Size not found"));
-
-                priceDetail.setSize(size.getName().getValue());
-                priceDetail.setQuantity(size.getQuantity().getValue());
-
-                var unit = unitRepository.findById(size.getUnitOfMeasure()).orElseThrow(() -> new RuntimeException("Unit not found"));
-
-                priceDetail.setUnitName(unit.getName().getValue());
-                priceDetail.setUnitSymbol(unit.getSymbol().getValue());
+                priceDetail.setSizeId(price.getSize().getId());
+                priceDetail.setQuantity(price.getSize().getQuantity().getValue());
+                priceDetail.setSize(price.getSize().getName().getValue());
+                priceDetail.setCurrency("VND");
+                priceDetail.setUnitName(price.getSize().getUnit().getName().getValue());
+                priceDetail.setUnitSymbol(price.getSize().getUnit().getSymbol().getValue());
 
                 response.getPrices().add(priceDetail);
             }
@@ -68,12 +68,5 @@ public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<Av
         });
         
         return CommandResult.success(responses);
-    }
-    
-    private List<Product> getProducts(boolean isOrdered) {
-        if (isOrdered) {
-            return productRepository.findAllForSale();
-        }
-        return productRepository.findAll().stream().filter(p -> !p.isOrdered()).toList();
     }
 }

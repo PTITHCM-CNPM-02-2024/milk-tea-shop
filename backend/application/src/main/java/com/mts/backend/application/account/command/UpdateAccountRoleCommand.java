@@ -1,5 +1,7 @@
 package com.mts.backend.application.account.command;
 
+import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class UpdateAccountRoleCommand implements ICommand<CommandResult> {
-    private Long id;
-    private Integer roleId;
+    private AccountId id;
+    private RoleId roleId;
 }

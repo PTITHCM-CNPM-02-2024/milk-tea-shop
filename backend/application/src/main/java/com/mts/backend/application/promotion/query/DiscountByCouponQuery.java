@@ -1,5 +1,6 @@
 package com.mts.backend.application.promotion.query;
 
+import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQuery;
 import lombok.AllArgsConstructor;
@@ -12,5 +13,5 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class DiscountByCouponQuery implements IQuery<CommandResult> {
-    private Long couponId;
+    private CouponCode couponId;
 }

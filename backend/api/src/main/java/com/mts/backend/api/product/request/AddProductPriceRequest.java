@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 
 /**
- * DTO for {@link com.mts.backend.domain.product.entity.ProductPrice}
  */
 @Data
 @NoArgsConstructor

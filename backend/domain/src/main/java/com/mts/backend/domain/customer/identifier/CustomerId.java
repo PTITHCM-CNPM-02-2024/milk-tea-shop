@@ -1,22 +1,29 @@
 package com.mts.backend.domain.customer.identifier;
 
 import com.mts.backend.domain.common.provider.IdentifiableProvider;
-import com.mts.backend.shared.domain.Identifiable;
+import jakarta.persistence.AttributeConverter;
+import lombok.Value;
 
-public class CustomerId implements Identifiable {
-    private final  long id;
+import java.io.Serializable;
+@Value
+public class CustomerId implements Serializable {
+   Long value;
     
-    private CustomerId(long id) {
-        if (id <= 0) {
+    private CustomerId(long value) {
+        if (value <= 0) {
             throw new IllegalArgumentException("Id must be greater than 0");
         }
-        if (id > IdentifiableProvider.INT_UNSIGNED_MAX) {
+        if (value > IdentifiableProvider.INT_UNSIGNED_MAX) {
             throw new IllegalArgumentException("Id must be less than " + IdentifiableProvider.INT_UNSIGNED_MAX);
         }
-        this.id = id;
+        this.value = value;
     }
     
     public static CustomerId of(long id) {
+        return new CustomerId(id);
+    }
+    
+    public static CustomerId of(Long id) {
         return new CustomerId(id);
     }
     
@@ -28,27 +35,15 @@ public class CustomerId implements Identifiable {
         return new CustomerId(IdentifiableProvider.generateTimeBasedUnsignedInt());
     }
     
-    public long getValue() {
-        return id;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public static final class CustomerIdConverter implements AttributeConverter<CustomerId, Long> {
+        @Override
+        public Long convertToDatabaseColumn(CustomerId attribute) {
+            return attribute.getValue();
+        }
         
-        CustomerId customerId = (CustomerId) o;
-        
-        return id == customerId.id;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(id);
-    }
-    
-    @Override
-    public String toString() {
-        return String.valueOf(id);
+        @Override
+        public CustomerId convertToEntityAttribute(Long dbData) {
+            return CustomerId.of(dbData);
+        }
     }
 }
