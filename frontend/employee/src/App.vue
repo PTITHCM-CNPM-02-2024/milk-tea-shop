@@ -25,6 +25,7 @@
                 :subtotal="calculateSubtotal()"
                 :discount="calculateDiscount()"
                 :total="calculateTotal()"
+                :customer="selectedCustomer"
                 @remove-item="removeCartItem"
                 @edit-item="editCartItem"
                 @clear-cart="clearCart"
@@ -92,6 +93,16 @@
           @cancel="showPaymentModal = false"
       />
     </v-dialog>
+
+
+  <!-- Dialog hiển thị hóa đơn -->
+  <v-dialog v-model="billDialog" max-width="600px">
+  <BillDialog 
+    :bill-html="billHtml" 
+    @close="closeBillDialog"
+  />
+</v-dialog>
+
   </v-app>
 </template>
 
@@ -107,9 +118,10 @@ import TableSelection from './components/TableSelection.vue';
 import PaymentModal from './components/PaymentModal.vue';
 import ProductService from './services/product.service';
 import OrderService from './services/order.service';
+import BillDialog from './components/BillDialog.vue';
 
 // Nhân viên hiện tại (trong thực tế sẽ lấy từ đăng nhập)
-const employeeId = ref(1);
+const employeeId = ref(4139561627);
 const employeeName = ref('Phạm Văn A');
 
 // Dữ liệu sản phẩm & danh mục
@@ -135,6 +147,9 @@ const selectedProduct = ref(null);
 const customizationEditMode = ref(false);
 const customizationEditIndex = ref(-1);
 const customizationInitialOptions = ref({});
+
+const billDialog = ref(false);
+const billHtml = ref('');
 
 // Computed
 const filteredProducts = computed(() => {
@@ -217,6 +232,7 @@ function openCustomerModal() {
 }
 
 function selectCustomer(customer) {
+  console.log('Selected customer:', customer);
   selectedCustomer.value = customer;
   showCustomerModal.value = false;
 }
@@ -280,32 +296,47 @@ function calculateTotal() {
 
 async function completeOrder(paymentData) {
   try {
+    // Chuẩn bị mảng sản phẩm chính (không bao gồm topping)
+    const mainProducts = cart.value.map(item => ({
+      productId: item.product.id,
+      sizeId: item.size.id,
+      quantity: item.quantity,
+      option: item.options.join(', ') + (item.note ? `, Ghi chú: ${item.note}` : '')
+    }));
+
+    // Chuẩn bị mảng topping (tất cả topping từ tất cả sản phẩm)
+    const toppingProducts = [];
+    cart.value.forEach(item => {
+      if (item.toppings && item.toppings.length > 0) {
+        item.toppings.forEach(topping => {
+          toppingProducts.push({
+            productId: topping.id,
+            sizeId: topping.sizeId,
+            quantity: item.quantity,
+            option: `Topping`
+          });
+        });
+      }
+    });
+
+    // Kết hợp sản phẩm chính và topping
+    const allProducts = [...mainProducts, ...toppingProducts];
+
     // Chuẩn bị dữ liệu đơn hàng
     const orderData = {
       employeeId: employeeId.value,
       customerId: selectedCustomer.value ? selectedCustomer.value.id : null,
-      note: paymentData.note || '',
-
-      // Danh sách sản phẩm
-      products: cart.value.map(item => ({
-        productId: item.product.id,
-        sizeId: item.size.id,
-        quantity: item.quantity,
-        option: item.options.join(', ')
-      })),
-
-      // Danh sách bàn
+      note: 'Đơn hàng từ app',
+      products: allProducts,
       tables: selectedTables.value.map(table => ({
         serviceTableId: table.id
       })),
-
-      // Mã giảm giá
       discounts: selectedCoupon.value ? [{ discountId: selectedCoupon.value.id }] : []
     };
 
     // Tạo đơn hàng
     const orderResponse = await OrderService.createOrder(orderData);
-    const orderId = orderResponse.data;
+    const orderId = orderResponse.data.orderId;
 
     // Khởi tạo thanh toán
     const initiateResponse = await OrderService.initiatePayment({
@@ -313,14 +344,17 @@ async function completeOrder(paymentData) {
       paymentMethodId: paymentData.methodId
     });
 
-    const paymentId = initiateResponse.data;
+    const paymentId = initiateResponse.data.paymentId;
 
     // Hoàn tất thanh toán
-    await OrderService.completePayment(
-        paymentId,
-        paymentData.methodId,
-        { amount: paymentData.amount }
+    const billing = await OrderService.completePayment(
+      paymentId,
+      paymentData.methodId,
+      { amount: paymentData.amount }
     );
+
+    billHtml.value = billing.data;
+    billDialog.value = true;
 
     // Reset giỏ hàng và các trạng thái
     cart.value = [];
@@ -335,6 +369,15 @@ async function completeOrder(paymentData) {
     alert('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại sau.');
   }
 }
+
+// Trong phần script của App.vue
+
+function closeBillDialog() {
+  console.log('Closing bill dialog');
+  billDialog.value = false;
+}
+
+
 
 onMounted(() => {
   loadProducts();

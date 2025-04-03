@@ -92,11 +92,11 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
                     "Không tồn tại một membership type nào"));
         }
         
-        if (!membershipTypeRepository.existsById(id)){
+        if (!membershipTypeRepository.existsById(id.getValue())){
             throw new NotFoundException("Membership type không tồn tại");
         }
         
-        return membershipTypeRepository.getReferenceById(id) ;
+        return membershipTypeRepository.getReferenceById(id.getValue());
     }
     
     private void verifyUniquePhoneNumber(PhoneNumber phoneNumber){

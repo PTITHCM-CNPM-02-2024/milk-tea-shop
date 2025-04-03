@@ -7,6 +7,7 @@ import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.response.ApiResponse;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Profile("prod")
 public class AuthController {
     private final AccountCommandBus accountCommandBus;
 

@@ -44,6 +44,7 @@ public class OrderController implements IController {
                     .sizeId(ProductSizeId.of(orderProduct.getSizeId()))
                     .productId(ProductId.of(orderProduct.getProductId()))
                     .quantity(orderProduct.getQuantity())
+                    .option(orderProduct.getOption().orElse(null))
                     .build());
         }
 
@@ -59,23 +60,23 @@ public class OrderController implements IController {
                     .serviceTableId(ServiceTableId.of(orderTable.getServiceTableId()))
                     .build());
         }
-        
+
 
         var result = commandBus.dispatch(command);
 
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
 
-    
+
     @PutMapping("{orderId}/cancel")
     public ResponseEntity<ApiResponse<?>> cancelOrder(@PathVariable("orderId") Long orderId) {
         var command = CancelledOrderCommand.builder()
                 .id(OrderId.of(orderId))
                 .build();
-        
+
         var result = commandBus.dispatch(command);
-        
+
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
-                
+
     }
 }

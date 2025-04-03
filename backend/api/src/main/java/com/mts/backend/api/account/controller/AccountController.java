@@ -5,10 +5,7 @@ import com.mts.backend.api.account.request.UpdateAccountRequest;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.application.account.AccountCommandBus;
 import com.mts.backend.application.account.AccountQueryBus;
-import com.mts.backend.application.account.command.CreateAccountCommand;
-import com.mts.backend.application.account.command.UpdateAccountCommand;
-import com.mts.backend.application.account.command.UpdateAccountPasswordCommand;
-import com.mts.backend.application.account.command.UpdateAccountRoleCommand;
+import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.query.AccountByIdQuery;
 import com.mts.backend.application.account.query.DefaultAccountQuery;
 import com.mts.backend.application.account.response.AccountDetailResponse;
@@ -110,6 +107,18 @@ public class AccountController implements IController {
         return result.isSuccess() ?
                 ResponseEntity.ok(ApiResponse.success((result.getData()))) : handleError(result);
         
+    }
+    
+    @PutMapping("/{id}/lock")
+    public ResponseEntity<ApiResponse<?>> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "locked",
+            required = true) Boolean locked) {
+        var command = UpdateLockAccountCommand.builder().id(AccountId.of(id))
+                .isLocked(locked)
+                .build();
+        
+        var result = accountCommandBus.dispatch(command);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(),"Cập nhật trạng thái tài khoản thành công")) : handleError(result);
     }
     
     

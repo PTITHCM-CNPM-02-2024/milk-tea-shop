@@ -11,6 +11,9 @@ import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
@@ -32,13 +35,15 @@ public class EmployeeController implements IController {
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createEmployee(@RequestBody CreateEmployeeRequest request) {
         var command = CreateEmployeeCommand.builder()
-                .accountId(AccountId.of(request.getAccountId()))
                 .email(Email.builder().value(request.getEmail()).build())
                 .firstName(FirstName.builder().value(request.getFirstName()).build())
                 .lastName(LastName.builder().value(request.getLastName()).build())
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
                 .gender(Gender.valueOf(request.getGender()))
                 .position(Position.builder().value(request.getPosition()).build())
+                .username(Username.builder().value(request.getUsername()).build())
+                .password(PasswordHash.builder().value(request.getPassword()).build())
+                .roleId(RoleId.of(request.getRoleId()))
                 .build();
         
         var result = commandBus.dispatch(command);

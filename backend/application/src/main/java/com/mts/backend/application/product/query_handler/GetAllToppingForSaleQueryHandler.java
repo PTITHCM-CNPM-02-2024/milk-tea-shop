@@ -1,6 +1,6 @@
 package com.mts.backend.application.product.query_handler;
 
-import com.mts.backend.application.product.query.ProductForSaleQuery;
+import com.mts.backend.application.product.query.ToppingForSaleQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.domain.product.ProductEntity;
@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<ProductForSaleQuery, CommandResult> {
+public class GetAllToppingForSaleQueryHandler implements IQueryHandler<ToppingForSaleQuery, CommandResult> {
     private final JpaProductRepository productRepository;
     
-    public GetAllAvailableOrderProductQueryHandler(JpaProductRepository productRepository){
+    public GetAllToppingForSaleQueryHandler(JpaProductRepository productRepository) {
         this.productRepository = productRepository;
     }
     
@@ -26,23 +26,23 @@ public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<Pr
      * @return
      */
     @Override
-    public CommandResult handle(ProductForSaleQuery query) {
-        Objects.requireNonNull(query, "OrderedProductQuery is required");
+    public CommandResult handle(ToppingForSaleQuery query) {
+        Objects.requireNonNull(query, "ToppingForSaleQuery is required");
+        
         List<ProductEntity> products = null;
         
-        if (query.getIsOrdered()){
-            products = productRepository.findAllWithDetails().stream()
+        if (query.isOrdered()){
+            products = productRepository.findAllByCategoryEntity_Id(1).stream()
                     .filter(ProductEntity::isOrdered)
                     .toList();
         } else {
-            products = productRepository.findAllWithDetails().stream()
+            products = productRepository.findAllByCategoryEntity_Id(1).stream()
                     .filter(product -> !product.isOrdered())
                     .toList();
         }
-   
 
         List<ProductDetailResponse> responses = new ArrayList<>();
-        
+
         products.forEach(product -> {
             ProductDetailResponse response =
                     ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
@@ -53,7 +53,7 @@ public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<Pr
 
             for (var price : product.getProductPriceEntities()) {
                 ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder().price(price.getPrice().getValue()).currency("VND").build();
-
+                priceDetail.setId(price.getId());
                 priceDetail.setSizeId(price.getSize().getId());
                 priceDetail.setQuantity(price.getSize().getQuantity().getValue());
                 priceDetail.setSize(price.getSize().getName().getValue());
@@ -66,7 +66,8 @@ public class GetAllAvailableOrderProductQueryHandler implements IQueryHandler<Pr
 
             responses.add(response);
         });
-        
+
         return CommandResult.success(responses);
+        
     }
 }

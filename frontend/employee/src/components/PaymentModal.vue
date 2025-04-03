@@ -172,10 +172,10 @@ function formatPrice(price) {
 function completePayment() {
   const paymentData = {
     methodId: selectedMethod.value,
-    amount: props.total,
+    amount: selectedMethod.value === 1 ? cashAmount.value : props.total,
     note: note.value
   };
-  
+
   emit('complete-order', paymentData);
 }
 </script>

@@ -36,7 +36,9 @@ public class UpdateAccountRoleCommandHandler implements ICommandHandler<UpdateAc
         
         account.incrementTokenVersion();
         
-        var updatedAccount = accountRepository.save(account);
+        var updatedAccount = accountRepository.saveAndFlush(account);
+        
+        accountRepository.grantPermissionsByRole(updatedAccount.getId());
         
         return CommandResult.success(updatedAccount.getId());
         

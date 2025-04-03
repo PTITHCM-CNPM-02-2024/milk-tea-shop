@@ -6,11 +6,13 @@ import com.mts.backend.application.order.command.OrderProductCommand;
 import com.mts.backend.application.order.command.OrderTableCommand;
 import com.mts.backend.application.order.response.OrderBasicResponse;
 import com.mts.backend.domain.common.value_object.Money;
+import com.mts.backend.domain.customer.CustomerEntity;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.RewardPoint;
 import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.OrderProductEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
@@ -91,7 +93,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         var saveOrder = orderRepository.save(order);
 
         OrderBasicResponse response = 
-                OrderBasicResponse.builder().customerId(saveOrder.getCustomerEntity().map(e ->e.getId()).orElse(null))
+                OrderBasicResponse.builder().customerId(saveOrder.getCustomerEntity().map(CustomerEntity::getId).orElse(null))
                         .employeeId(saveOrder.getEmployeeEntity().getId())
                         .finalAmount(saveOrder.getFinalAmount().map(Money::getValue).orElse(null))
                         .note(saveOrder.getCustomizeNote().orElse(null))
@@ -136,13 +138,6 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         }
         
         return employee;
-    }
-    
-    private Set<ProductEntity> mustExistProductAndIsOrdered(List<ProductId> productIds) {
-        Objects.requireNonNull(productIds, "Product id is required");
-        
-        Set<ProductEntity> products = new HashSet<>();
-        return products;
     }
 
     private void addProductsToOrder(OrderEntity order, List<OrderProductCommand> orderProductCommands) {
@@ -213,53 +208,59 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
     }
     
     private void checkDiscountToApply(OrderEntity order, DiscountEntity discount){
-        
-        var today = LocalDateTime.now();
-        
-        List<String> errors = new ArrayList<>();
-        
-        if (!discount.getActive()){
-            errors.add("Chương trình giảm giá không còn hiệu lực");
-        }
-        
-        if (discount.getValidFrom().isPresent()){
-            if (today.isBefore(discount.getValidFrom().get())){
-                errors.add("Chương trình giảm giá" + discount.getName().getValue() + "chưa có hiệu lực. Chỉ bắt đầu " +
-                        "từ " + discount.getValidFrom().get());
+
+        if (!discount.isApplicable()) {
+            String baseError = "Khuyến mãi không thể áp dụng: ";
+
+            if (!discount.getActive()) {
+                throw new DomainException(baseError + "Chương trình giảm giá không còn hiệu lực");
+            }
+
+            if (!discount.isInValidTimeRange()) {
+                LocalDateTime now = LocalDateTime.now();
+                if (discount.getValidFrom().isPresent() && now.isBefore(discount.getValidFrom().get())) {
+                    throw new DomainException(baseError + "Chương trình giảm giá chưa có hiệu lực. Chỉ bắt đầu từ " +
+                            discount.getValidFrom().get());
+                } else {
+                    throw new DomainException(baseError + "Chương trình giảm giá đã hết hạn. Chỉ áp dụng đến " +
+                            discount.getValidUntil());
+                }
+            }
+
+            if (!discount.hasRemainingUses()) {
+                throw new DomainException(baseError + "Chương trình giảm giá đã hết lượt sử dụng");
             }
         }
-        
-        if (today.isAfter(discount.getValidUntil())){
-            errors.add("Chương trình giảm giá" + discount.getName().getValue() + "đã hết hạn. Chỉ áp dụng đến " +
-                    discount.getValidUntil());
+
+        // Kiểm tra điều kiện liên quan đến đơn hàng
+
+        // 1. Kiểm tra số lượng sản phẩm tối thiểu
+        int totalQuantity = order.getOrderProducts().stream()
+                .mapToInt(OrderProductEntity::getQuantity)
+                .sum();
+
+        if (discount.getMinRequiredProduct().isPresent() && totalQuantity < discount.getMinRequiredProduct().get()) {
+            throw new DomainException("Khuyến mãi chỉ áp dụng cho đơn hàng có số lượng sản phẩm từ " +
+                    discount.getMinRequiredProduct().get());
         }
-        
-        if (discount.getMinRequiredProduct().isPresent() && order.getOrderProducts().stream().reduce(0, (subtotal, item) -> subtotal + item.getQuantity(), Integer::sum) < discount.getMinRequiredProduct().get()){
-            errors.add("Chương trình giảm giá" + discount.getName().getValue() + "chỉ áp dụng cho đơn hàng có số lượng " +
-                    "sản phẩm từ " + discount.getMinRequiredProduct().get());
+
+        // 2. Kiểm tra giá trị đơn hàng tối thiểu
+        if (order.getTotalAmount().isPresent() &&
+                discount.getMinRequiredOrderValue().compareTo(order.getTotalAmount().get()) > 0) {
+            throw new DomainException("Khuyến mãi chỉ áp dụng cho đơn hàng có giá trị từ " +
+                    discount.getMinRequiredOrderValue().getValue());
         }
-        
-        if (order.getTotalAmount().isPresent() && discount.getMinRequiredOrderValue().compareTo(order.getTotalAmount().get()) > 0){
-            errors.add("Chương trình giảm giá" + discount.getName().getValue() + "chỉ áp dụng cho đơn hàng có giá trị " +
-                    "từ " + discount.getMinRequiredOrderValue());
-        }
-        
-        if (order.getCustomerEntity().isPresent() && discount.getMaxUsesPerCustomer().isPresent()){
+
+        // 3. Kiểm tra số lần sử dụng của khách hàng
+        if (order.getCustomerEntity().isPresent() && discount.getMaxUsesPerCustomer().isPresent()) {
+            var customerId = order.getCustomerEntity().get().getId();
             var currentDiscountUseByCustomer = orderRepository.countByCustomerEntity_IdAndOrderDiscounts_Discount_IdAndStatus(
-                    order.getCustomerEntity().get().getId(), discount.getId(), OrderStatus.COMPLETED);
-            
-            if (currentDiscountUseByCustomer >= discount.getMaxUsesPerCustomer().get()){
-                errors.add("Chương trình giảm giá" + discount.getName().getValue() + "đã hết lượt sử dụng" +
-                        " cho khách hàng");
+                    customerId, discount.getId(), OrderStatus.COMPLETED);
+
+            if (currentDiscountUseByCustomer >= discount.getMaxUsesPerCustomer().get()) {
+                throw new DomainException("Khuyến mãi đã hết lượt sử dụng cho khách hàng");
             }
-            
         }
-        
-        if (errors.isEmpty()){
-            return;
-        }
-        
-        throw new DomainException("Chương trình giảm giá không thể áp dụng: " + errors);
     }
 
 }

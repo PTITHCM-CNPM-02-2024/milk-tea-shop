@@ -17,7 +17,7 @@ public class GetMemberTypeByIdQueryHandler implements IQueryHandler<MemberTypeBy
     
     @Override
     public CommandResult handle(MemberTypeByIdQuery query) {
-        var membershipType = membershipTypeRepository.findById(query.getId())
+        var membershipType = membershipTypeRepository.findById(query.getId().getValue())
                 .orElseThrow(() -> new RuntimeException("Membership type not found"));
 
         MemberTypeDetailResponse response = MemberTypeDetailResponse.builder()
