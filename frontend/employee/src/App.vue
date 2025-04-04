@@ -22,9 +22,9 @@
           <div class="right-panel">
             <Cart
                 :cart="cart"
-                :subtotal="calculateSubtotal()"
-                :discount="calculateDiscount()"
-                :total="calculateTotal()"
+                :subtotal="subtotal"
+                :discount="discount"
+                :total="total"
                 :customer="selectedCustomer"
                 @remove-item="removeCartItem"
                 @edit-item="editCartItem"
@@ -32,6 +32,7 @@
                 @find-customer="openCustomerModal"
                 @select-table="openTableModal"
                 @checkout="openPaymentModal"
+                @update-quantity="updateCartQuantity"
             />
           </div>
         </div>
@@ -45,10 +46,9 @@
         persistent
     >
       <OrderCustomization
-          :product="selectedProduct"
-          :editMode="customizationEditMode"
-          :editIndex="customizationEditIndex"
-          :initialOptions="customizationInitialOptions"
+          :product="editingProduct"
+          :editMode="editingItemIndex !== -1"
+          :initialOptions="editingProduct?.options || {}"
           @add-to-cart="addToCart"
           @cancel="showCustomizationModal = false"
       />
@@ -85,9 +85,9 @@
           :cart="cart"
           :customer="selectedCustomer"
           :tables="selectedTables"
-          :subtotal="calculateSubtotal()"
-          :discount="calculateDiscount()"
-          :total="calculateTotal()"
+          :subtotal="subtotal"
+          :discount="discount"
+          :total="total"
           :employeeId="employeeId"
           @complete-order="completeOrder"
           @cancel="showPaymentModal = false"
@@ -107,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import {ref, computed, onMounted, watch} from 'vue';
 import Header from './components/Header.vue';
 import CategoryList from './components/CategoryList.vue';
 import ProductGrid from './components/ProductGrid.vue';
@@ -119,6 +119,7 @@ import PaymentModal from './components/PaymentModal.vue';
 import ProductService from './services/product.service';
 import OrderService from './services/order.service';
 import BillDialog from './components/BillDialog.vue';
+import useMembership from './services/useMembership.js'
 
 // Nhân viên hiện tại (trong thực tế sẽ lấy từ đăng nhập)
 const employeeId = ref(4139561627);
@@ -142,14 +143,107 @@ const showCustomerModal = ref(false);
 const showTableModal = ref(false);
 const showPaymentModal = ref(false);
 
-// Trạng thái tùy chỉnh sản phẩm
-const selectedProduct = ref(null);
-const customizationEditMode = ref(false);
-const customizationEditIndex = ref(-1);
-const customizationInitialOptions = ref({});
+// Editing state
+const editingProduct = ref(null);
+const editingItemIndex = ref(-1);
 
 const billDialog = ref(false);
 const billHtml = ref('');
+
+const calculatedSubtotal = ref(0);
+const calculatedDiscount = ref(0);
+const calculatedTotal = ref(0);
+const isCalculating = ref(false);
+
+// Gọi API tính toán đơn hàng mỗi khi có thay đổi
+async function calculateOrderFromServer() {
+  if (cart.value.length === 0) {
+    calculatedSubtotal.value = 0;
+    calculatedDiscount.value = 0;
+    calculatedTotal.value = 0;
+    return;
+  }
+
+  isCalculating.value = true;
+
+  try {
+    // Chuẩn bị dữ liệu đơn hàng
+    const orderData = {
+      employeeId: employeeId.value,
+      customerId: selectedCustomer.value ? selectedCustomer.value.id : null,
+      note: 'Đơn hàng từ app',
+      products: prepareProductsForServer(),
+      tables: selectedTables.value.map(table => ({
+        serviceTableId: table.id
+      })),
+      discounts: selectedCoupon.value ? [{ discountId: selectedCoupon.value.id }] : []
+    };
+
+    // Gọi API tính toán
+    const response = await OrderService.calculateOrder(orderData);
+    console.log('Kết quả tính toán từ server:', response.data);
+
+    // Cập nhật giá trị từ server
+    if (response.data && response.data.data) {
+      const result = response.data.data;
+      calculatedSubtotal.value = result.subtotal || 0;
+      calculatedDiscount.value = result.discount || 0;
+      calculatedTotal.value = result.total || 0;
+    }
+  } catch (error) {
+    console.error('Lỗi khi tính toán đơn hàng:', error);
+    // Sử dụng giá trị dự phòng tính toán trên client
+    fallbackCalculation();
+  } finally {
+    isCalculating.value = false;
+  }
+}
+
+// Tính toán dự phòng trên client (sử dụng khi server lỗi)
+function fallbackCalculation() {
+  calculatedSubtotal.value = subtotal.value;
+  calculatedDiscount.value = discount.value;
+  calculatedTotal.value = total.value;
+}
+
+// Thêm watch để theo dõi thay đổi trong giỏ hàng và gọi API
+watch(
+  [cart, selectedCustomer, selectedTables, selectedCoupon],
+  () => {
+    calculateOrderFromServer();
+  },
+  { deep: true }
+);
+
+// Chuẩn bị dữ liệu sản phẩm để gửi lên server
+function prepareProductsForServer() {
+  const mainProducts = cart.value.map(item => ({
+    productId: item.product.id,
+    sizeId: item.size.id,
+    quantity: item.quantity,
+    option: item.options.join(', ')
+  }));
+
+  // Chuẩn bị mảng topping
+  const toppingProducts = [];
+  cart.value.forEach(item => {
+    if (item.toppings && item.toppings.length > 0) {
+      item.toppings.forEach(topping => {
+        toppingProducts.push({
+          productId: topping.id,
+          sizeId: topping.sizeId || null,
+          quantity: item.quantity,
+          option: `Topping cho ${item.product.name}`
+        });
+      });
+    }
+  });
+
+  return [...mainProducts, ...toppingProducts];
+}
+
+const { getMembershipDetails } = useMembership();
+
 
 // Computed
 const filteredProducts = computed(() => {
@@ -158,6 +252,120 @@ const filteredProducts = computed(() => {
   }
   return products.value.filter(product => product.category === selectedCategory.value);
 });
+
+// Cập nhật số lượng trong giỏ hàng
+function updateCartQuantity(index, newQuantity) {
+  if (index >= 0 && index < cart.value.length && newQuantity > 0) {
+    // Cập nhật số lượng
+    cart.value[index].quantity = newQuantity;
+
+    // Tính lại tổng tiền cho item
+    recalculateItemTotal(index);
+  }
+}
+
+// Tính lại tổng tiền cho một item
+function recalculateItemTotal(index) {
+  const item = cart.value[index];
+
+  // Giá cơ bản
+  const basePrice = Number(item.price) || 0;
+
+  // Tổng giá topping
+  const toppingTotal = (item.toppings || []).reduce((total, topping) => {
+    return total + (Number(topping.price) || 0);
+  }, 0);
+
+  // Tổng giá item = (giá cơ bản + tổng topping) * số lượng
+  item.total = (basePrice + toppingTotal) * item.quantity;
+}
+
+// Tính tổng tạm thời
+const subtotal = computed(() => {
+  return cart.value.reduce((sum, item) => {
+    // Sử dụng item.total nếu có, ngược lại tính lại
+    if (item.total !== undefined && !isNaN(Number(item.total))) {
+      return sum + Number(item.total);
+    }
+
+    // Tính lại nếu không có item.total
+    const basePrice = Number(item.price) || 0;
+    const toppingTotal = (item.toppings || []).reduce((toppingSum, topping) => {
+      return toppingSum + (Number(topping.price) || 0);
+    }, 0);
+
+    return sum + ((basePrice + toppingTotal) * item.quantity);
+  }, 0);
+});
+
+// Tính giảm giá (từ coupon và membership)
+const discount = computed(() => {
+  let totalDiscount = 0;
+  
+  // 1. Giảm giá từ coupon nếu có
+  if (selectedCoupon.value) {
+    const couponDiscount = selectedCoupon.value.value || 0;
+    
+    if (selectedCoupon.value.type === 'PERCENTAGE') {
+      // Giảm giá theo phần trăm
+      totalDiscount += (subtotal.value * couponDiscount) / 100;
+    } else {
+      // Giảm giá theo số tiền cố định
+      totalDiscount += Math.min(couponDiscount, subtotal.value);
+    }
+  }
+  
+  // 2. Giảm giá theo membership nếu khách hàng có membershipId
+  if (selectedCustomer.value && selectedCustomer.value.membershipId) {
+    // Lấy thông tin chi tiết về membership từ ID
+    const membershipDetails = getMembershipDetails(selectedCustomer.value.membershipId);
+    
+    if (membershipDetails && membershipDetails.discountValue) {
+      console.log('Membership discount details:', membershipDetails);
+      
+      if (membershipDetails.discountUnit === 'PERCENT') {
+        // Giảm giá theo phần trăm
+        const memberDiscount = (subtotal.value * membershipDetails.discountValue) / 100;
+        totalDiscount += memberDiscount;
+        console.log(`Giảm giá thành viên ${membershipDetails.discountValue}%:`, memberDiscount);
+      } else {
+        // Giảm giá theo số tiền cố định
+        const memberDiscount = Math.min(membershipDetails.discountValue, subtotal.value - totalDiscount);
+        totalDiscount += memberDiscount;
+        console.log(`Giảm giá thành viên cố định:`, memberDiscount);
+      }
+    }
+  }
+  
+  return totalDiscount;
+});
+
+// Tính tổng cộng
+const total = computed(() => {
+  return subtotal.value - discount.value;
+});
+
+// Các hàm xử lý sản phẩm
+function getBasePrice(product) {
+  if (product.prices && product.prices.length > 0) {
+    return product.prices[0].price;
+  }
+  return 0;
+}
+
+// Product modal functions
+function openProductDetails(product) {
+  editingProduct.value = product;
+  editingItemIndex.value = -1; // Chế độ thêm mới
+  showCustomizationModal.value = true;
+}
+
+function closeProductModal() {
+  showProductModal.value = false;
+  editingProduct.value = null;
+  editingItemIndex.value = -1;
+}
+
 
 // Methods
 async function loadProducts() {
@@ -183,39 +391,43 @@ async function loadProducts() {
 }
 
 function openCustomizationModal(product) {
-  selectedProduct.value = product;
-  customizationEditMode.value = false;
-  customizationEditIndex.value = -1;
-  customizationInitialOptions.value = {};
+  editingProduct.value = product;
+  editingItemIndex.value = -1; // Mode thêm mới
   showCustomizationModal.value = true;
 }
 
+// Hàm thêm vào giỏ hàng
 function addToCart(item) {
-  if (customizationEditMode.value && customizationEditIndex.value >= 0) {
-    // Edit mode
-    cart.value[customizationEditIndex.value] = item;
+  if (editingItemIndex.value >= 0 && editingItemIndex.value < cart.value.length) {
+    // Sửa item đã có
+    cart.value[editingItemIndex.value] = item;
+    recalculateItemTotal(editingItemIndex.value);
   } else {
-    // Add new item
+    // Thêm item mới
     cart.value.push(item);
+    recalculateItemTotal(cart.value.length - 1);
   }
+
+  // Đóng modal sau khi thêm/sửa
   showCustomizationModal.value = false;
+  editingProduct.value = null;
+  editingItemIndex.value = -1;
+}
+
+
+function removeCartItem(index) {
+  if (index >= 0 && index < cart.value.length) {
+    cart.value.splice(index, 1);
+  }
 }
 
 function editCartItem(index) {
-  const item = cart.value[index];
-  selectedProduct.value = item.product;
-  customizationEditMode.value = true;
-  customizationEditIndex.value = index;
-  customizationInitialOptions.value = {
-    size: item.size,
-    quantity: item.quantity,
-    options: item.options
-  };
-  showCustomizationModal.value = true;
-}
-
-function removeCartItem(index) {
-  cart.value.splice(index, 1);
+  if (index >= 0 && index < cart.value.length) {
+    const item = cart.value[index];
+    editingItemIndex.value = index;
+    editingProduct.value = item.product;
+    showCustomizationModal.value = true;
+  }
 }
 
 function clearCart() {
@@ -232,7 +444,6 @@ function openCustomerModal() {
 }
 
 function selectCustomer(customer) {
-  console.log('Selected customer:', customer);
   selectedCustomer.value = customer;
   showCustomerModal.value = false;
 }
@@ -296,38 +507,11 @@ function calculateTotal() {
 
 async function completeOrder(paymentData) {
   try {
-    // Chuẩn bị mảng sản phẩm chính (không bao gồm topping)
-    const mainProducts = cart.value.map(item => ({
-      productId: item.product.id,
-      sizeId: item.size.id,
-      quantity: item.quantity,
-      option: item.options.join(', ') + (item.note ? `, Ghi chú: ${item.note}` : '')
-    }));
-
-    // Chuẩn bị mảng topping (tất cả topping từ tất cả sản phẩm)
-    const toppingProducts = [];
-    cart.value.forEach(item => {
-      if (item.toppings && item.toppings.length > 0) {
-        item.toppings.forEach(topping => {
-          toppingProducts.push({
-            productId: topping.id,
-            sizeId: topping.sizeId,
-            quantity: item.quantity,
-            option: `Topping`
-          });
-        });
-      }
-    });
-
-    // Kết hợp sản phẩm chính và topping
-    const allProducts = [...mainProducts, ...toppingProducts];
-
-    // Chuẩn bị dữ liệu đơn hàng
     const orderData = {
       employeeId: employeeId.value,
       customerId: selectedCustomer.value ? selectedCustomer.value.id : null,
       note: 'Đơn hàng từ app',
-      products: allProducts,
+      products: prepareProductsForServer(),
       tables: selectedTables.value.map(table => ({
         serviceTableId: table.id
       })),

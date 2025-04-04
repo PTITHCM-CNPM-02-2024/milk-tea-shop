@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,9 @@ public class OrderDetailResponse {
     private String employeePhone;
     private String orderStatus;
     private Instant orderTime;
+    private BigDecimal totalAmount;
+    private BigDecimal finalAmount;
+    private BigDecimal discountAmount;
     @Builder.Default
     private List<OrderProductDetailResponse> orderProducts = new ArrayList<>();
     @Builder.Default

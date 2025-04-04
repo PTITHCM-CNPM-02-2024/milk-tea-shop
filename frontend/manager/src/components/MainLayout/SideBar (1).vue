@@ -52,9 +52,29 @@ const menuItems = [
     ],
   },
 
-  { name: 'Areas & Tables', path: '/areas', icon: TableCellsIcon },
-  { name: 'Store Management', path: '/store', icon: BuildingStorefrontIcon },
-  { name: 'Discounts & Promotions', path: '/discounts', icon: TagIcon },
+  {
+    name: 'Areas & Tables',
+    path: '/areas',
+    icon: TableCellsIcon,
+    subItems:[
+      {name:'Areas', path: '/areas/list'},
+      {name:'Tables', path: '/areas/tables'},
+  ]
+  },
+  {
+    name: 'Store Management',
+    path: '/store',
+    icon: BuildingStorefrontIcon,
+  },
+  {
+    name: 'Discounts & Promotions',
+    path: '/discounts',
+    icon: TagIcon,
+    subItems:[
+      {name:'Discounts', path: '/discount/list'},
+      {name:'Promotions', path: '/discount/promotion'}
+    ]
+  },
 ]
 // dao nguoc gia tri collapsed
 const toggleSidebar = () => {

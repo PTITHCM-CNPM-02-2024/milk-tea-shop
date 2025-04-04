@@ -32,6 +32,11 @@ public interface JpaProductPriceRepository extends JpaRepository<ProductPriceEnt
     Optional<ProductPriceEntity> findByProductEntity_IdAndSize_Id(@Param("id") @NonNull Integer id,
                                                                   @Param("id1") @NonNull Integer id1);
 
+    @EntityGraph(attributePaths = {"productEntity.productPrices", "size"})
+    @Query("select p from ProductPriceEntity p where p.productEntity.id = :id and p.size.id = :id1")
+    Optional<ProductPriceEntity> findByProductEntity_IdAndSize_IdFetchPrices(@Param("id") @NonNull Integer id,
+                                                                  @Param("id1") @NonNull Integer id1);    
+
 
     @Modifying
     @Transactional

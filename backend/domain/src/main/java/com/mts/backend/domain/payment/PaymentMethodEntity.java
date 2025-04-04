@@ -8,6 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.springframework.lang.Nullable;
 
+import java.util.Optional;
+
 @Getter
 @Setter
 @Entity
@@ -38,6 +40,10 @@ public class PaymentMethodEntity extends BaseEntity<Integer> {
     @Column(name = "payment_description")
     @Nullable
     private String paymentDescription;
+    
+    public Optional<String> getPaymentDescription() {
+        return Optional.ofNullable(paymentDescription);
+    }
 
     public boolean changeName(PaymentMethodName name) {
         if (paymentName.equals(name)) {

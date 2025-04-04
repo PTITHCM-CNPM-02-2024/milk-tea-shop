@@ -47,11 +47,21 @@ public class OrderController implements IController {
                     .option(orderProduct.getOption().orElse(null))
                     .build());
         }
+        
+        if (request.getTables() != null && !request.getTables().isEmpty()) {
+            for (var orderTable : request.getTables()) {
+                command.getOrderTables().add(OrderTableCommand.builder()
+                        .serviceTableId(ServiceTableId.of(orderTable.getServiceTableId()))
+                        .build());
+            }
+        }
 
-        for (var orderDiscount : request.getDiscounts()) {
-            command.getOrderDiscounts().add(OrderDiscountCommand.builder()
-                    .discountId(DiscountId.of(orderDiscount.getDiscountId()))
-                    .build());
+       if (request.getDiscounts() != null && !request.getDiscounts().isEmpty()) {
+            for (var orderDiscount : request.getDiscounts()) {
+                command.getOrderDiscounts().add(OrderDiscountCommand.builder()
+                        .discountId(DiscountId.of(orderDiscount.getDiscountId()))
+                        .build());
+            }
         }
 
 
@@ -78,5 +88,46 @@ public class OrderController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
 
+    }
+    
+    @PostMapping("/utilities/calculate")
+    public ResponseEntity<ApiResponse<?>> calculateOrder(@RequestBody OrderBaseRequest request) {
+
+        var command = CalculateOrderCommand.builder()
+                .employeeId(EmployeeId.of(request.getEmployeeId()))
+                .orderProducts(new ArrayList<>())
+                .orderDiscounts(new ArrayList<>())
+                .orderTables(new ArrayList<>())
+                .customerId(Objects.isNull(request.getCustomerId()) ? null : CustomerId.of(request.getCustomerId()))
+                .note(request.getNote())
+                .build();
+
+        for (var orderProduct : request.getProducts()) {
+            command.getOrderProducts().add(OrderProductCommand.builder()
+                    .sizeId(ProductSizeId.of(orderProduct.getSizeId()))
+                    .productId(ProductId.of(orderProduct.getProductId()))
+                    .quantity(orderProduct.getQuantity())
+                    .option(orderProduct.getOption().orElse(null))
+                    .build());
+        }
+        
+        if (request.getTables() != null && !request.getTables().isEmpty()) {
+            for (var orderTable : request.getTables()) {
+                command.getOrderTables().add(OrderTableCommand.builder()
+                        .serviceTableId(ServiceTableId.of(orderTable.getServiceTableId()))
+                        .build());
+            }
+        }
+        if (request.getDiscounts() != null && !request.getDiscounts().isEmpty()) {
+            for (var orderDiscount : request.getDiscounts()) {
+                command.getOrderDiscounts().add(OrderDiscountCommand.builder()
+                        .discountId(DiscountId.of(orderDiscount.getDiscountId()))
+                        .build());
+            }
+        }
+
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
 }

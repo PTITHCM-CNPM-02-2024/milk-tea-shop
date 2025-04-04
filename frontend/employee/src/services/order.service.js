@@ -29,5 +29,11 @@ export default {
   // Lấy khuyến mãi theo mã giảm giá
   getDiscountByCoupon(couponCode) {
     return apiClient.get(`/discounts/coupon/${couponCode}`);
+  },
+
+    // Tính toán đơn hàng
+    calculateOrder(orderData) {
+    console.log(orderData);
+      return apiClient.post('/orders/utilities/calculate', orderData);
   }
 };

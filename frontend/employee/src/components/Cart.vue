@@ -142,7 +142,7 @@
       </div>
       <div class="d-flex justify-space-between mb-2">
         <span class="text-body-2">Giảm giá:</span>
-        <span class="text-body-2">{{ formatPrice(getSafePrice(discount)) }}</span>
+        <span class="text-body-2">{{ formatPrice(getSafePrice(props.discount)) }}</span>
       </div>
       <v-divider class="my-2"></v-divider>
       <div class="d-flex justify-space-between mb-3">

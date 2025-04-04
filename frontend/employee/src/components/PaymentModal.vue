@@ -24,33 +24,45 @@
             <span>{{ formatPrice(total) }}</span>
           </div>
         </div>
-        
-        <div class="divider">
-          <span>Phương thức thanh toán</span>
-        </div>
-        
-        <div class="payment-methods">
-          <div
-            v-for="method in paymentMethods"
-            :key="method.id"
-            :class="['payment-method', selectedMethod === method.id ? 'selected' : '']"
-            @click="selectPaymentMethod(method.id)"
-          >
-            <div class="method-icon">
-              <i :class="['fas', method.icon]"></i>
+
+        <!-- Phương thức thanh toán -->
+        <div class="payment-methods my-4">
+          <h4 class="mb-3">Chọn phương thức thanh toán</h4>
+
+          <div class="payment-method-grid">
+            <div
+                v-for="method in paymentMethods"
+                :key="method.id"
+                :class="['payment-method-card', {
+          'active': selectedMethod === method.id,
+          'disabled': method.id !== 1
+        }]"
+                @click="method.id === 1 && selectPaymentMethod(method.id)"
+            >
+              <div class="payment-method-icon">
+                <v-icon>{{getMethodIcon(method.name)}}</v-icon>
+              </div>
+              <div class="payment-method-content">
+                <div class="payment-method-name">{{ formatMethodName(method.name) }}</div>
+              </div>
+              <div class="payment-method-check" v-if="selectedMethod === method.id">
+                <v-icon color="primary">mdi-check-circle</v-icon>
+              </div>
+              <div class="payment-method-unavailable" v-if="method.id !== 1">
+                <span>Chưa hỗ trợ</span>
+              </div>
             </div>
-            <div class="method-name">{{ method.name }}</div>
           </div>
         </div>
-        
+
         <div v-if="selectedMethod === 1" class="cash-payment mt-4">
           <div class="form-group">
             <label>Tiền khách đưa</label>
             <div class="input-group">
-              <input 
-                type="number" 
-                class="form-control" 
-                v-model="cashAmount" 
+              <input
+                type="number"
+                class="form-control"
+                v-model="cashAmount"
                 min="0"
                 step="1000"
               >
@@ -82,15 +94,16 @@
           <textarea class="form-control" v-model="note" rows="2" placeholder="Nhập ghi chú đơn hàng nếu có"></textarea>
         </div>
       </div>
-      
+
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" @click="$emit('cancel')">Hủy</button>
+        <button class="cancel-btn" @click="$emit('cancel')">Hủy</button>
         <button
-          class="btn btn-success"
-          :disabled="!isPaymentValid"
-          @click="completePayment"
+            class="pay-btn"
+            :disabled="!isPaymentValid || isProcessing"
+            @click="completePayment"
         >
-          <i class="fas fa-check me-2"></i> Hoàn tất thanh toán
+          <span v-if="isProcessing">Đang xử lý...</span>
+          <span v-else>Thanh toán</span>
         </button>
       </div>
     </div>
@@ -98,7 +111,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import {ref, computed, onMounted} from 'vue';
+import PaymentService from "@/services/payment.service.js";
 
 const props = defineProps({
   cart: {
@@ -133,15 +147,42 @@ const props = defineProps({
 
 const emit = defineEmits(['complete-order', 'cancel']);
 
-const paymentMethods = [
-  { id: 1, name: 'Tiền mặt', icon: 'fa-money-bill-wave' },
-  { id: 2, name: 'Thẻ ngân hàng', icon: 'fa-credit-card' },
-  { id: 3, name: 'Ví điện tử', icon: 'fa-wallet' }
-];
-
+// Trạng thái
+const isProcessing = ref(false);
 const selectedMethod = ref(1);
 const cashAmount = ref(0);
 const note = ref('');
+const paymentMethods = ref([
+  { id: 1, name: 'Tiền mặt', icon: 'fa-money-bill-wave' },
+  { id: 2, name: 'Thẻ ngân hàng', icon: 'fa-credit-card' },
+  { id: 3, name: 'Ví điện tử', icon: 'fa-wallet' }
+]);
+
+// Tải phương thức thanh toán từ API
+async function loadPaymentMethods() {
+  try {
+    const response = await PaymentService.getAllPaymentMethods();
+    if (response.data) {
+      const apiMethods = response.data;
+
+      // Cập nhật thông tin phương thức thanh toán từ API
+      paymentMethods.value = apiMethods.map(method => ({
+        id: method.id,
+        name: method.name,
+        description: method.description,
+        // Giữ lại icon mặc định cho các phương thức
+        icon: method.id === 1 ? 'fa-money-bill-wave' :
+            method.id === 2 ? 'fa-credit-card' : 'fa-wallet'
+      }));
+
+      console.log('Đã tải phương thức thanh toán:', paymentMethods.value);
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải phương thức thanh toán:', error);
+    // Giữ nguyên dữ liệu mặc định nếu API lỗi
+  }
+}
+
 
 const quickAmounts = computed(() => {
   const roundedTotal = Math.ceil(props.total / 10000) * 10000;
@@ -170,14 +211,56 @@ function formatPrice(price) {
 }
 
 function completePayment() {
-  const paymentData = {
-    methodId: selectedMethod.value,
-    amount: selectedMethod.value === 1 ? cashAmount.value : props.total,
-    note: note.value
+  if (!isPaymentValid.value) return;
+
+  isProcessing.value = true;
+
+  try{
+    const paymentData = {
+      methodId: selectedMethod.value,
+      amount: selectedMethod.value === 1 ? cashAmount.value : props.total,
+      note: note.value
+    };
+
+    emit('complete-order', paymentData);
+  }catch (error) {
+    console.error('Lỗi khi xử lý thanh toán:', error);
+    alert('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại sau.');
+  } finally {
+    isProcessing.value = false;
+  }
+}
+
+function formatMethodName(name) {
+  const nameMap = {
+    'CASH': 'Tiền mặt',
+    'VISA': 'Thẻ Visa',
+    'BANKCARD': 'Thẻ ngân hàng',
+    'CREDIT_CARD': 'Thẻ tín dụng',
+    'E-WALLET': 'Ví điện tử'
   };
 
-  emit('complete-order', paymentData);
+  return nameMap[name] || name;
 }
+
+// Lấy icon cho phương thức thanh toán
+function getMethodIcon(name) {
+  const iconMap = {
+    'CASH': 'mdi-cash',
+    'VISA': 'mdi-credit-card',
+    'BANKCARD': 'mdi-credit-card',
+    'CREDIT_CARD': 'mdi-credit-card-outline',
+    'E-WALLET': 'mdi-wallet-outline'
+  };
+
+  return iconMap[name] || 'mdi-credit-card';
+}
+
+// Khởi tạo
+onMounted(() => {
+  loadPaymentMethods();
+  cashAmount.value = props.total;
+});
 </script>
 
 <style scoped>
@@ -287,7 +370,6 @@ function completePayment() {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
 }
-
 .payment-method {
   background-color: white;
   border: 1px solid var(--light-gray);
@@ -358,11 +440,199 @@ function completePayment() {
   font-size: 0.9rem;
 }
 
-.modal-footer {
-  padding: 1rem;
-  border-top: 1px solid var(--light-gray);
+.payment-methods {
+  background-color: white;
+  border: 1px solid var(--light-gray);
+  border-radius: 0.5rem;
+  padding: 1rem 0.5rem;
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: start;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-methods h4 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  display: block;
+  width: 100%;
+}
+
+.payment-method-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payment-method-card {
+  flex: 0 0 calc(40% - 6px);
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  height: 70px;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .payment-method-card {
+    flex: 0 0 calc(33.33% - 8px);
+  }
+}
+
+.payment-method-card:hover:not(.disabled) {
+  border-color: #2196F3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-method-card.active {
+  border-color: #2196F3;
+  background-color: #E3F2FD;
+}
+
+.payment-method-card.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border: 1px dashed #ccc;
+}
+
+.payment-method-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #F5F5F5;
+  margin-right: 12px;
+}
+
+.payment-method-card.active .payment-method-icon {
+  background-color: #BBDEFB;
+}
+
+.payment-method-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.payment-method-name {
+  font-weight: 600;
+  color: #263238;
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.payment-method-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.payment-method-unavailable {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #F44336;
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 0 8px 0 8px;
+  font-weight: 500;
+}
+
+.payment-method-card.disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.03),
+      rgba(0, 0, 0, 0.03) 10px,
+      rgba(0, 0, 0, 0.06) 10px,
+      rgba(0, 0, 0, 0.06) 20px
+  );
+  pointer-events: none;
+}
+
+.payment-method-card.disabled .payment-method-name,
+.payment-method-card.disabled .payment-method-description {
+  color: #9e9e9e;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+}
+
+.cancel-btn, .pay-btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-btn {
+  background-color: #f5f5f5;
+  color: #424242;
+  border: 1px solid #e0e0e0;
+}
+
+.cancel-btn:hover {
+  background-color: #eeeeee;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-btn:active {
+  background-color: #e0e0e0;
+  transform: translateY(1px);
+}
+
+.pay-btn {
+  background-color: #2196F3;
+  color: white;
+  margin-left: 12px;
+}
+
+.pay-btn:hover:not(:disabled) {
+  background-color: #1976D2;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.pay-btn:active:not(:disabled) {
+  background-color: #0D47A1;
+  transform: translateY(1px);
+}
+
+.pay-btn:disabled {
+  background-color: #90CAF9;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>
