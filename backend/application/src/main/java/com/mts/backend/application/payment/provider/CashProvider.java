@@ -22,7 +22,7 @@ import java.util.Objects;
 
 @Service
 public class CashProvider implements IPaymentProvider{
-    private final static PaymentMethodId PAYMENT_METHOD_ID = PaymentMethodId.of(5);
+    private final static PaymentMethodId PAYMENT_METHOD_ID = PaymentMethodId.of(1);
     private final JpaPaymentRepository paymentRepository;
     private final JpaPaymentMethodRepository paymentMethodRepository;
 

@@ -16,4 +16,6 @@ import lombok.NoArgsConstructor;
 public class UpdateAccountRoleCommand implements ICommand<CommandResult> {
     private AccountId id;
     private RoleId roleId;
+    private boolean isActive;
+    private boolean isLocked;
 }

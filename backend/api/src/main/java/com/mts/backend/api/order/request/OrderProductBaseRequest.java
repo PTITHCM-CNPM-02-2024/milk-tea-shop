@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Optional;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
@@ -14,4 +16,8 @@ public class OrderProductBaseRequest {
     private Integer sizeId;
     private Integer quantity;
     private String option;
+    
+    public Optional<String> getOption() {
+        return Optional.ofNullable(option);
+    }
 }

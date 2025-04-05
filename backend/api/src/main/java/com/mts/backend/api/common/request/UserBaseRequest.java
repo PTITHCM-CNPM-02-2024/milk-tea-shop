@@ -9,5 +9,8 @@ public abstract class UserBaseRequest {
     protected String email;
     protected String gender;
     protected String phone;
+    protected String username;
+    protected String password;
+    protected Integer roleId;
     protected Long accountId;
 }

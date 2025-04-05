@@ -9,6 +9,7 @@ import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
+@Profile("prod")
 public class AuthenticationCommandHandler implements ICommandHandler<AuthenticationCommand, CommandResult> {
     private final AuthenticationManager authenticationManager;
     private final JpaAccountRepository accountRepository;
@@ -49,10 +51,6 @@ public class AuthenticationCommandHandler implements ICommandHandler<Authenticat
         
         var userPrincipal = (UserPrincipal) authentication.getPrincipal();
         
-        var account = accountRepository.findByUsername(command.getUsername())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với tên đăng nhập: " + command.getUsername().getValue()));
-        
-        account.login();
         
         String token = jwtService.generateToken(userPrincipal);
         

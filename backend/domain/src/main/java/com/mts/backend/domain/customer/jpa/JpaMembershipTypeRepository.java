@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTypeEntity, MembershipTypeId> {
+public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTypeEntity, Integer> {
   @Query("select (count(m) > 0) from MembershipTypeEntity m where m.requiredPoint = :requiredPoint")
   boolean existsByRequiredPoint(@Param("requiredPoint") @NonNull Integer requiredPoint);
 

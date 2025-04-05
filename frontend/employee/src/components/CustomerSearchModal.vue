@@ -98,15 +98,38 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item v-if="customer.membership && customer.membership.discountValue">
-              <template v-slot:prepend>
-                <v-icon size="small" color="green">mdi-sale</v-icon>
-              </template>
-              <v-list-item-title class="text-body-2">
-                {{ formatMembershipDiscount(customer.membership) }}
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
+            <v-card v-if="customer.membershipId" variant="outlined" class="mb-4">
+            <v-card-item>
+              <v-card-title class="pa-0 d-flex align-center gap-2">
+                <v-icon :color="getMembershipColor(customer.membershipId)">mdi-card-account-details</v-icon>
+                <span>Thành viên {{ getMembershipName(customer.membershipId) }}</span>
+              </v-card-title>
+
+              <v-card-text class="pa-0 pt-2">
+                <div class="d-flex flex-column gap-1">
+                  <div class="d-flex align-center gap-2">
+                    <v-icon size="small" color="primary">mdi-star</v-icon>
+                    <span>Điểm tích lũy: {{ customer.rewardPoint || 0 }} điểm</span>
+                  </div>
+
+                  <div class="d-flex align-center gap-2">
+                    <v-icon size="small" color="green">mdi-percent</v-icon>
+                    <span>Ưu đãi: {{ formatMembershipDiscount(getMembershipDetails(customer.membershipId)) }}</span>
+                  </div>
+
+                  <div v-if="getNextMembership(customer.membershipId, customer.rewardPoint)" class="d-flex align-center gap-2 mt-2">
+                    <v-icon size="small" color="amber-darken-2">mdi-arrow-up-circle</v-icon>
+                    <span>
+                Cần thêm {{ getPointsToNextLevel(customer.membershipId, customer.rewardPoint) }} điểm
+                để lên hạng {{ getNextMembership(customer.membershipId, customer.rewardPoint).name }}
+              </span>
+                  </div>
+                </div>
+              </v-card-text>
+            </v-card-item>
+      </v-card>
+
+      </v-list>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -123,7 +146,6 @@
         </v-card-actions>
       </v-card>
 
-      <!-- Form tạo khách hàng mới -->
       <v-expand-transition>
         <div v-if="showNewCustomerForm">
           <v-divider class="my-4"></v-divider>
@@ -145,18 +167,16 @@
               <div class="d-flex gap-3 mb-3">
                 <v-text-field
                     v-model="newCustomer.firstName"
-                    label="Họ"
+                    label="Họ (không bắt buộc)"
                     variant="outlined"
                     density="comfortable"
-                    :rules="[v => !!v || 'Vui lòng nhập họ']"
                 ></v-text-field>
 
                 <v-text-field
                     v-model="newCustomer.lastName"
-                    label="Tên"
+                    label="Tên (không bắt buộc)"
                     variant="outlined"
                     density="comfortable"
-                    :rules="[v => !!v || 'Vui lòng nhập tên']"
                 ></v-text-field>
               </div>
 
@@ -168,8 +188,8 @@
                   prepend-inner-icon="mdi-email"
                   class="mb-3"
                   :rules="[
-                  v => !v || /.+@.+\..+/.test(v) || 'Email không hợp lệ'
-                ]"
+            v => !v || /.+@.+\..+/.test(v) || 'Email không hợp lệ'
+          ]"
               ></v-text-field>
 
               <v-select
@@ -211,6 +231,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import CustomerService from '../services/customer.service';
+import useMembership from "@/services/useMembership.js";
 
 const emit = defineEmits(['select-customer', 'cancel']);
 
@@ -269,8 +290,27 @@ async function createNewCustomer() {
   savingCustomer.value = true;
 
   try {
-    const response = await CustomerService.createCustomer(newCustomer.value);
-    customer.value = response.data;
+    // Chuẩn bị dữ liệu trước khi gửi
+    const customerData = {
+      ...newCustomer.value,
+      // Chuyển chuỗi rỗng thành null
+      firstName: newCustomer.value.firstName.trim() || null,
+      lastName: newCustomer.value.lastName.trim() || null,
+      email: newCustomer.value.email.trim() || null
+    };
+
+    console.log('Sending customer data:', customerData);
+
+    const response = await CustomerService.createCustomer(customerData);
+
+    // Xử lý kết quả từ API - trả về id của khách hàng mới
+    const customerId = response.data;
+    console.log('Customer created with ID:', customerId);
+
+    // Tải thông tin đầy đủ của khách hàng
+    const customerResponse = await CustomerService.getCustomerById(customerId);
+    customer.value = customerResponse.data;
+
     showNewCustomerForm.value = false;
 
     // Hiển thị thông báo thành công
@@ -282,33 +322,21 @@ async function createNewCustomer() {
   }
 }
 
+
 function selectCustomer() {
   emit('select-customer', customer.value);
 }
 
-function getMembershipColor(membership) {
-  if (!membership) return 'grey';
 
-  const colorMap = {
-    'Bronze': 'grey',
-    'Silver': 'blue-grey',
-    'Gold': 'amber-darken-2',
-    'Platinum': 'red-darken-1',
-    'Diamond': 'indigo'
-  };
+const {
+  getMembershipName,
+  getMembershipDetails,
+  getMembershipColor,
+  formatMembershipDiscount,
+  getNextMembership,
+  getPointsToNextLevel
+} = useMembership();
 
-  return colorMap[membership.name] || 'grey';
-}
-
-function formatMembershipDiscount(membership) {
-  if (!membership || !membership.discountValue) return 'Không có ưu đãi';
-
-  if (membership.discountUnit === 'PERCENT') {
-    return `Giảm ${membership.discountValue}% cho mỗi đơn hàng`;
-  } else {
-    return `Giảm ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(membership.discountValue)} cho mỗi đơn hàng`;
-  }
-}
 </script>
 
 <style scoped>
@@ -321,7 +349,6 @@ function formatMembershipDiscount(membership) {
 }
 
 .new-customer-form {
-  border-color: var(--v-primary-lighten3);
-  background-color: var(--v-surface-variant);
+  border-color: var(--v-border-color);
 }
 </style>

@@ -1,6 +1,7 @@
 package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
+import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
 import com.mts.backend.domain.store.AreaEntity;
 import com.mts.backend.domain.store.ServiceTableEntity;
@@ -34,8 +35,13 @@ public class GetServiceTableIdQueryHandler implements IQueryHandler<ServiceTable
                 .id(re.getId())
                 .name(re.getTableNumber().getValue())
                 .isActive(re.getActive())
-                        .areaId(re.getAreaEntity().map(AreaEntity::getId).orElse(null))
-                        .build();
+                        .area(re.getAreaEntity().map(area -> AreaDetailResponse.builder()
+                                .id(area.getId())
+                                .name(area.getName().getValue())
+                                .maxTable(area.getMaxTable().map(maxTable -> maxTable.getValue()).orElse(null))
+                                .isActive(area.getActive())
+                                .description(area.getDescription().orElse(null))
+                                .build()).orElse(null)).build();
         
         return CommandResult.success(response);
     }

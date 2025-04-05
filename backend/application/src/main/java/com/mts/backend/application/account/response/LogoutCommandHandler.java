@@ -31,8 +31,6 @@ public class LogoutCommandHandler implements ICommandHandler<LogoutCommand, Comm
         
         account.logout();
         
-        account.incrementTokenVersion();
-        
         return CommandResult.success(null);
     }
 }

@@ -11,6 +11,8 @@ import com.mts.backend.application.staff.query.DefaultManagerQuery;
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
 import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.ManagerId;
 import com.mts.backend.shared.response.ApiResponse;
@@ -34,9 +36,10 @@ public class ManagerController implements IController {
                 .email(Email.builder().value(request.getEmail()).build())
                 .firstName(FirstName.builder().value(request.getFirstName()).build())
                 .lastName(LastName.builder().value(request.getLastName()).build())
-                .accountId(AccountId.of(request.getAccountId()))
                 .gender(Gender.valueOf(request.getGender()))
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .username(Username.builder().value(request.getUsername()).build())
+                .password(PasswordHash.builder().value(request.getPassword()).build())
                 .build();
 
         var result = commandBus.dispatch(command);

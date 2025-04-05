@@ -5,6 +5,8 @@ import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.customer.CustomerEntity;
 import com.mts.backend.domain.customer.identifier.CustomerId;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,6 +34,10 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
 
   @Query("select (count(c) > 0) from CustomerEntity c where c.email = :email")
   boolean existsByEmail(@Param("email") @NonNull Email email);
+
+    @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue"})
+    @Query("select c from CustomerEntity c where c.id = :id")
+  Optional<CustomerEntity> findByIdFetchMembershipType(@NotNull @Param("id") Long id);
 
 
 }

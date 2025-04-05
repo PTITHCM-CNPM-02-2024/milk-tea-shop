@@ -18,6 +18,9 @@ public interface JpaPaymentMethodRepository extends JpaRepository<PaymentMethodE
 
     @Query("select p from PaymentMethodEntity p where p.paymentName = :paymentName")
     Optional<PaymentMethodEntity> findByPaymentName(@Param("paymentName") @NonNull PaymentMethodName paymentName);
-    
+
+    @Query("select (count(p) > 0) from PaymentMethodEntity p where p.id <> :id and p.paymentName = :paymentName")
+    boolean existsByIdNotAndPaymentName(@Param("id") @NonNull Integer id, @Param("paymentName") @NonNull PaymentMethodName paymentName);
+
 
 }

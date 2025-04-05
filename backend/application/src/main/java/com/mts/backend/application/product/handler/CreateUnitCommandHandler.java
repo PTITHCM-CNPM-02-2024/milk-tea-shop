@@ -53,14 +53,16 @@ public class CreateUnitCommandHandler implements ICommandHandler<CreateUnitComma
     }
     
     private void verifyUniqueName(UnitName name) {
-        unitRepository.findByName(name).ifPresent(unit -> {
+        Objects.requireNonNull(name, "Unit name is required");
+        if(unitRepository.existsByName(name)) {
             throw new DuplicateException("Đơn vị " + name.getValue() + " đã tồn tại");
-        });
+        }
     }
     
     private void verifyUniqueSymbol(UnitSymbol symbol) {
-            unitRepository.findBySymbol(symbol).ifPresent(unit -> {
-            throw new DuplicateException("Ký hiệu " + symbol + " đã tồn tại");
-        });
+        Objects.requireNonNull(symbol, "Unit symbol is required");
+       if(unitRepository.existsBySymbol(symbol)) {
+            throw new DuplicateException("Kí hiệu " + symbol.getValue() + " đã tồn tại");
+        }
     }
 }

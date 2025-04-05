@@ -4,6 +4,8 @@ import com.mts.backend.application.staff.command.CreateManagerCommand;
 import com.mts.backend.domain.account.AccountEntity;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaRoleRepository;
+import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.ManagerEntity;
 import com.mts.backend.domain.staff.identifier.ManagerId;
@@ -13,6 +15,7 @@ import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -21,10 +24,14 @@ import java.util.Objects;
 public class CreateManagerCommandHandler implements ICommandHandler<CreateManagerCommand, CommandResult> {
     private final JpaManagerRepository managerRepository;
     private final JpaAccountRepository accountRepository;
+    private final JpaRoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     
-    public CreateManagerCommandHandler(JpaManagerRepository managerRepository, JpaAccountRepository accountRepository) {
+    public CreateManagerCommandHandler(JpaManagerRepository managerRepository, JpaAccountRepository accountRepository, JpaRoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.managerRepository = managerRepository;
         this.accountRepository = accountRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     
     @Override
@@ -34,7 +41,7 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
         verifyUniqueEmail(command.getEmail());
         verifyUniquePhone(command.getPhone());
         
-        var account = mustExistAccountAndUnique(command.getAccountId());
+        var account = createAccount(command);
 
         ManagerEntity manager = ManagerEntity.builder()
                 .id(ManagerId.create().getValue())
@@ -66,16 +73,37 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
         }
     }
     
-    private AccountEntity mustExistAccountAndUnique(AccountId accountId){
-        Objects.requireNonNull(accountId, "Account id is required");
-        if (!accountRepository.existsById(accountId.getValue())){
-            throw new NotFoundException("Tài khoản không tồn tại");
-        }
-        if (managerRepository.existsByAccountId(accountId.getValue())){
-            throw new DuplicateException("Tài khoản đã được sử dụng");
+    private AccountEntity createAccount(CreateManagerCommand command){
+        Objects.requireNonNull(command, "Account id is required");
+        
+        if (accountRepository.existsByUsername(command.getUsername())){
+            throw new DuplicateException("Tên đăng nhập đã tồn tại");
         }
         
+        if (!roleRepository.existsById(command.getRoleId().getValue())){
+            throw new NotFoundException("Không tìm thấy quyền với id: " + command.getRoleId().getValue());
+        }
         
-        return accountRepository.getReferenceById(accountId.getValue());
+        var password = PasswordHash.builder()
+                .value(passwordEncoder.encode(command.getPassword().getValue()))
+                .build();
+        
+        var account = AccountEntity.builder()
+                .id(AccountId.create().getValue())
+                .username(command.getUsername())
+                .passwordHash(password)
+                .locked(false)
+                .active(false)
+                .lastLogin(null)
+                .tokenVersion(0L)
+                .roleEntity(roleRepository.getReferenceById(command.getRoleId().getValue()))
+                .build();
+        
+        
+        accountRepository.saveAndFlush(account);
+        
+        accountRepository.grantPermissionsByRole(account.getId());
+        
+        return account;
     }
 }

@@ -4,7 +4,7 @@ info:
   description: "backend API"
   version: "1.0.0"
 servers:
-  - url: "https://localhost:8181"
+  - url: "http://localhost:8181"
 paths:
   /api/v1/employees/{id}:
     put:
@@ -268,6 +268,29 @@ paths:
               schema:
                 type: "integer"
                 format: "int64"
+  /api/v1/accounts/{id}/lock:
+    put:
+      summary: "PUT api/v1/accounts/{id}/lock"
+      operationId: "lockAccount"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+        - name: "locked"
+          in: "query"
+          required: true
+          schema:
+            type: "boolean"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
   /api/v1/accounts/register:
     post:
       summary: "POST api/v1/accounts/register"
@@ -1610,6 +1633,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"
@@ -1628,6 +1658,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"
@@ -1647,6 +1684,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"
@@ -1663,6 +1707,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"
@@ -1889,6 +1940,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"
@@ -1908,6 +1966,13 @@ components:
           type: "string"
         phone:
           type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+        roleId:
+          type: "integer"
+          format: "int32"
         accountId:
           type: "integer"
           format: "int64"

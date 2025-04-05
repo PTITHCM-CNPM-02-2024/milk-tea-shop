@@ -3,6 +3,7 @@ package com.mts.backend.domain.product.jpa;
 import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.value_object.ProductName;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,10 +40,11 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, Integ
     @EntityGraph(attributePaths = {"categoryEntity", "productPrices.size.unit"})
     List<ProductEntity> findAllByIdIn(@Param("ids") List<ProductId> ids);
 
-    @Query("select p from ProductEntity p")
+    @Query("""
+            select p from ProductEntity p where p.categoryEntity.id <> 1 or p.categoryEntity is null""")
     @EntityGraph(attributePaths = {"categoryEntity", "productPrices.size.unit"})
-    List<ProductEntity> findAllWithDetails();
-
+    List<ProductEntity> findAllExceptCategory_Topping();
+    
     @Query("select p from ProductEntity p")
     @EntityGraph(attributePaths = {"categoryEntity", "productPrices.size.unit"})
     List<ProductEntity> findAllWithDetails(Pageable pageable);
@@ -58,4 +60,8 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, Integ
 
     @Query("select (count(p) > 0) from ProductEntity p where p.id <> :id and p.name = :name")
     boolean existsByIdNotAndName(@Param("id") @NonNull Integer id, @Param("name") @NonNull ProductName name);
+    
+    @Query("select p from ProductEntity p where p.categoryEntity.id = ?1")
+    @EntityGraph(attributePaths = {"categoryEntity", "productPrices.size.unit"})
+    List<ProductEntity> findAllByCategoryEntity_Id(@NotNull Integer categoryEntityId);
 }

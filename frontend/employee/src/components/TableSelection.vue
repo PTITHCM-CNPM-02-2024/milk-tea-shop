@@ -37,7 +37,7 @@
               @click="toggleTableSelection(table)"
             >
               <div class="table-icon">
-                <i class="fas fa-chair"></i>
+                <v-icon>{{ table.isActive ? 'mdi-table-chair' : 'mdi-table-off' }}</v-icon>
               </div>
               <div class="table-name">{{ table.name }}</div>
               <div v-if="!table.isActive" class="table-status">Không hoạt động</div>
@@ -45,7 +45,7 @@
           </div>
           
           <div v-if="filteredTables.length === 0" class="no-tables text-center py-4">
-            <i class="fas fa-chair fa-3x text-muted mb-3"></i>
+            <v-icon size="x-large" color="grey" class="mb-3">mdi-table-chair</v-icon>
             <p>Không có bàn trong khu vực này</p>
           </div>
           
@@ -59,7 +59,7 @@
               >
                 {{ table.name }}
                 <button class="remove-table-btn" @click.stop="removeTable(table.id)">
-                  <i class="fas fa-times"></i>
+                  <v-icon small>mdi-close</v-icon>
                 </button>
               </span>
             </div>
@@ -68,9 +68,9 @@
       </div>
       
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" @click="$emit('cancel')">Hủy</button>
+        <button class="cancel-btn" @click="$emit('cancel')">Hủy</button>
         <button
-          class="btn btn-primary"
+          class="confirm-btn"
           :disabled="selectedTables.length === 0"
           @click="confirmSelection"
         >
@@ -87,55 +87,119 @@ import TableService from '../services/table.service';
 
 const emit = defineEmits(['select-tables', 'cancel']);
 
+const props = defineProps({
+  initialTables: {
+    type: Array,
+    default: () => []
+  }
+});
+
 const areas = ref([]);
 const tables = ref([]);
 const selectedArea = ref(null);
-const selectedTables = ref([]);
+const selectedTables = ref((props.initialTables && props.initialTables.length > 0) 
+  ? props.initialTables.map(table => table.id) 
+  : []);
 const loading = ref(true);
 
+// Add a special NO_AREA_ID constant
+const NO_AREA_ID = 'no-area';
+
+// Lọc bàn theo khu vực đã chọn
 const filteredTables = computed(() => {
   if (!selectedArea.value) return [];
-  return tables.value.filter(table => table.areaId === selectedArea.value);
+  
+  // If "No Area" is selected, show tables without areas
+  if (selectedArea.value === NO_AREA_ID) {
+    return tables.value.filter(table => !table.area);
+  }
+  
+  // Otherwise filter by selected area
+  return tables.value.filter(table => table.area && table.area.id === selectedArea.value);
 });
 
+// Lấy thông tin chi tiết của các bàn được chọn
 const selectedTableObjects = computed(() => {
   return selectedTables.value.map(id => {
     return tables.value.find(table => table.id === id);
-  }).filter(table => table); // Remove undefined values
+  }).filter(table => table); // Loại bỏ các giá trị undefined
 });
 
+// Tải danh sách khu vực
 async function loadAreas() {
   try {
+    console.log('Đang tải danh sách khu vực...');
     const response = await TableService.getActiveAreas();
-    areas.value = response.data;
+    
+    // Đảm bảo response.data là mảng
+    if (Array.isArray(response.data)) {
+      areas.value = response.data;
+    } else if (response.data && Array.isArray(response.data)) {
+      areas.value = response.data;
+    } else {
+      console.error('Cấu trúc dữ liệu khu vực không đúng:', response.data);
+      areas.value = [];
+    }
+    
+    // Add a special "No Area" option
+    areas.value.push({
+      id: NO_AREA_ID,
+      name: 'Không có khu vực',
+      isActive: true
+    });
+    
+    console.log('Đã tải khu vực:', areas.value);
+    
+    // Chọn khu vực đầu tiên nếu có
     if (areas.value.length > 0) {
       selectedArea.value = areas.value[0].id;
     }
   } catch (error) {
-    console.error('Error loading areas:', error);
+    console.error('Lỗi khi tải danh sách khu vực:', error);
     alert('Không thể tải danh sách khu vực');
   }
 }
 
+// Tải danh sách bàn
 async function loadTables() {
   loading.value = true;
   try {
-    const response = await TableService.getActiveServiceTables();
-    tables.value = response.data;
+    console.log('Đang tải danh sách bàn...');
+    const response = await TableService.getActiveServiceTables(100);
+    
+    // Đảm bảo response.data là mảng
+    if (Array.isArray(response.data)) {
+      tables.value = response.data;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      // Nếu API trả về dạng {data: [...]}
+      tables.value = response.data
+      ;
+    } else {
+      console.error('Cấu trúc dữ liệu bàn không đúng:', response.data);
+      tables.value = [];
+    }
+    
+    console.log('Đã tải bàn:', tables.value);
   } catch (error) {
-    console.error('Error loading tables:', error);
+    console.error('Lỗi khi tải danh sách bàn:', error);
     alert('Không thể tải danh sách bàn');
   } finally {
     loading.value = false;
   }
 }
 
+// Kiểm tra xem bàn có được chọn hay không
 function isTableSelected(tableId) {
   return selectedTables.value.includes(tableId);
 }
 
+// Thêm/xóa bàn khỏi danh sách đã chọn
 function toggleTableSelection(table) {
-  if (!table.isActive) return;
+  // Chỉ cho phép chọn bàn đang hoạt động
+  if (!table.isActive) {
+    alert('Bàn này hiện không hoạt động');
+    return;
+  }
   
   const index = selectedTables.value.indexOf(table.id);
   if (index === -1) {
@@ -145,6 +209,7 @@ function toggleTableSelection(table) {
   }
 }
 
+// Xóa bàn khỏi danh sách đã chọn
 function removeTable(tableId) {
   const index = selectedTables.value.indexOf(tableId);
   if (index !== -1) {
@@ -152,10 +217,12 @@ function removeTable(tableId) {
   }
 }
 
+// Xác nhận lựa chọn bàn
 function confirmSelection() {
   emit('select-tables', selectedTableObjects.value);
 }
 
+// Tải dữ liệu khi component được tạo
 onMounted(() => {
   Promise.all([loadAreas(), loadTables()]);
 });
@@ -197,7 +264,7 @@ onMounted(() => {
 
 .modal-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--light-gray);
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -232,27 +299,28 @@ onMounted(() => {
 .area-tab {
   padding: 0.5rem 1rem;
   background-color: #f8f9fa;
-  border: 1px solid var(--light-gray);
+  border: 1px solid #e0e0e0;
   border-radius: 0.25rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .area-tab.active {
-  background-color: var(--primary-color);
+  background-color: #2196F3;
   color: white;
-  border-color: var(--primary-color);
+  border-color: #2196F3;
 }
 
 .table-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .table-item {
   background-color: white;
-  border: 1px solid var(--light-gray);
+  border: 1px solid #e0e0e0;
   border-radius: 0.5rem;
   padding: 1rem 0.5rem;
   display: flex;
@@ -262,36 +330,50 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
+.table-item:hover:not(.inactive) {
+  border-color: #2196F3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .table-item.selected {
-  background-color: rgba(142, 68, 173, 0.1);
-  border-color: var(--primary-color);
+  background-color: #E3F2FD;
+  border-color: #2196F3;
 }
 
 .table-item.inactive {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: #f5f5f5;
+  border: 1px dashed #ccc;
 }
 
 .table-icon {
   font-size: 1.5rem;
-  color: #6c757d;
+  color: #2196F3;
   margin-bottom: 0.5rem;
 }
 
 .table-name {
   font-size: 0.9rem;
   text-align: center;
+  font-weight: 500;
 }
 
 .table-status {
   font-size: 0.7rem;
-  color: var(--danger-color);
+  color: #F44336;
   margin-top: 0.25rem;
 }
 
 .selected-tables {
-  border-top: 1px solid var(--light-gray);
+  border-top: 1px solid #e0e0e0;
   padding-top: 0.75rem;
+  margin-top: 1rem;
+}
+
+.selected-tables h6 {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .selected-table-list {
@@ -302,7 +384,7 @@ onMounted(() => {
 }
 
 .selected-table-badge {
-  background-color: var(--primary-color);
+  background-color: #2196F3;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
@@ -324,9 +406,43 @@ onMounted(() => {
 
 .modal-footer {
   padding: 1rem;
-  border-top: 1px solid var(--light-gray);
+  border-top: 1px solid #e0e0e0;
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.confirm-btn {
+  background-color: #2196F3;
+  border: none;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #1976D2;
+}
+
+.confirm-btn:disabled {
+  background-color: #90CAF9;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>
