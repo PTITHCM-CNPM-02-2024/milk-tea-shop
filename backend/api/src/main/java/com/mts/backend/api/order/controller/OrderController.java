@@ -107,16 +107,7 @@ public class OrderController implements IController {
                     .sizeId(ProductSizeId.of(orderProduct.getSizeId()))
                     .productId(ProductId.of(orderProduct.getProductId()))
                     .quantity(orderProduct.getQuantity())
-                    .option(orderProduct.getOption().orElse(null))
                     .build());
-        }
-        
-        if (request.getTables() != null && !request.getTables().isEmpty()) {
-            for (var orderTable : request.getTables()) {
-                command.getOrderTables().add(OrderTableCommand.builder()
-                        .serviceTableId(ServiceTableId.of(orderTable.getServiceTableId()))
-                        .build());
-            }
         }
         if (request.getDiscounts() != null && !request.getDiscounts().isEmpty()) {
             for (var orderDiscount : request.getDiscounts()) {

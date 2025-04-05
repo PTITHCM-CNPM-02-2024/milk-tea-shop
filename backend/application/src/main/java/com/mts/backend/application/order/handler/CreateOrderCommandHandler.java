@@ -84,9 +84,9 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         OrderEntity order = createInitialOrder(command);
         
         addProductsToOrder(order, command.getOrderProducts());
+        addMemberDiscountValue(order, command.getCustomerId().orElse(null));
         addDiscountsToOrder(order, command.getOrderDiscounts());
         addTablesToOrder(order, command.getOrderTables());
-        addMemberDiscountValue(order, command.getCustomerId().orElse(null));
         
         order.setPoint(Long.valueOf(POINT));
         

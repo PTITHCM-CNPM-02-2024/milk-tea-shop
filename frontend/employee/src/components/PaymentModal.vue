@@ -15,6 +15,53 @@
             <span>Tạm tính:</span>
             <span>{{ formatPrice(subtotal) }}</span>
           </div>
+          <!-- Phần coupon - thêm mới -->
+          <div class="coupon-section">
+            <div v-if="!appliedCoupon" class="coupon-form">
+              <div class="coupon-input-group">
+                <input
+                    type="text"
+                    v-model="couponCode"
+                    placeholder="Nhập mã giảm giá"
+                    class="coupon-input"
+                    :disabled="isApplyingCoupon"
+                />
+                <button
+                    @click="applyCoupon"
+                    class="apply-coupon-btn"
+                    :disabled="!couponCode || isApplyingCoupon"
+                >
+                  <span v-if="isApplyingCoupon">
+                    <v-icon small>mdi-loading mdi-spin</v-icon>
+                  </span>
+                  <span v-else>Áp dụng</span>
+                </button>
+              </div>
+              <div v-if="couponError" class="coupon-error">
+                {{ couponError }}
+              </div>
+            </div>
+
+            <div v-else class="applied-coupon">
+              <div class="coupon-info">
+                <div class="coupon-header">
+                  <span class="coupon-name">{{ appliedCoupon.name }}</span>
+                  <button @click="removeCoupon" class="remove-coupon-btn">
+                    <v-icon small>mdi-close</v-icon>
+                  </button>
+                </div>
+                <div class="coupon-detail">
+                  <span class="coupon-code">Mã: {{ appliedCoupon.couponCode }}</span>
+                  <span class="coupon-value">
+                    {{ formatDiscount(appliedCoupon.discountUnit, appliedCoupon.discountValue) }}
+                  </span>
+                </div>
+                <div v-if="appliedCoupon.description" class="coupon-description">
+                  {{ appliedCoupon.description }}
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="summary-row">
             <span>Giảm giá:</span>
             <span>{{ formatPrice(discount) }}</span>
@@ -113,6 +160,7 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue';
 import PaymentService from "@/services/payment.service.js";
+import OrderService from "@/services/order.service.js";
 
 const props = defineProps({
   cart: {
@@ -145,7 +193,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['complete-order', 'cancel']);
+const emit = defineEmits(['complete-order', 'cancel', 'apply-coupon', 'remove-coupon']);
 
 // Trạng thái
 const isProcessing = ref(false);
@@ -157,6 +205,12 @@ const paymentMethods = ref([
   { id: 2, name: 'Thẻ ngân hàng', icon: 'fa-credit-card' },
   { id: 3, name: 'Ví điện tử', icon: 'fa-wallet' }
 ]);
+
+// Xử lý coupon
+const couponCode = ref('');
+const couponError = ref('');
+const isApplyingCoupon = ref(false);
+const appliedCoupon = ref(null);
 
 // Tải phương thức thanh toán từ API
 async function loadPaymentMethods() {
@@ -215,21 +269,28 @@ function completePayment() {
 
   isProcessing.value = true;
 
-  try{
+  try {
+    // Chuẩn bị dữ liệu thanh toán
     const paymentData = {
       methodId: selectedMethod.value,
-      amount: selectedMethod.value === 1 ? cashAmount.value : props.total,
+      amount: props.total, // Luôn dùng giá trị total từ props
+      cashReceived: selectedMethod.value === 1 ? cashAmount.value : undefined,
+      cashReturned: selectedMethod.value === 1 ? cashAmount.value - props.total : undefined,
       note: note.value
     };
 
+    // Gửi dữ liệu lên component cha để xử lý
     emit('complete-order', paymentData);
-  }catch (error) {
+
+    // Không cần setTimeout ở đây vì component cha sẽ đóng modal nếu thành công
+  } catch (error) {
     console.error('Lỗi khi xử lý thanh toán:', error);
     alert('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại sau.');
   } finally {
     isProcessing.value = false;
   }
 }
+
 
 function formatMethodName(name) {
   const nameMap = {
@@ -254,6 +315,69 @@ function getMethodIcon(name) {
   };
 
   return iconMap[name] || 'mdi-credit-card';
+}
+
+function formatDiscount(unit, value) {
+  if (unit === 'PERCENTAGE') {
+    return `${value}%`;
+  } else {
+    return formatPrice(value);
+  }
+}
+
+// Áp dụng mã giảm giá
+async function applyCoupon() {
+  if (!couponCode.value) return;
+
+  couponError.value = '';
+  isApplyingCoupon.value = true;
+
+  try {
+    const response = await OrderService.getDiscountByCoupon(couponCode.value);
+
+    if (response.data) {
+      const couponData = response.data;
+
+      // Kiểm tra tính hợp lệ
+      if (!couponData.isActive) {
+        couponError.value = 'Mã giảm giá không còn hiệu lực';
+        return;
+      }
+
+      // Áp dụng coupon
+      appliedCoupon.value = couponData;
+      
+      // Emit event để App.vue cập nhật và tính toán lại giá
+      emit('apply-coupon', couponData);
+
+      // Sau khi emit, giá trị subtotal, discount và total sẽ được cập nhật từ App.vue
+      // và tự động cập nhật trong giao diện qua props binding
+
+      // Reset input
+      couponCode.value = '';
+    } else {
+      couponError.value = 'Không tìm thấy mã giảm giá';
+    }
+  } catch (error) {
+    console.error('Lỗi khi áp dụng mã giảm giá:', error);
+    if (error.response && error.response.data && error.response.data.message) {
+      couponError.value = error.response.data.message;
+    } else {
+      couponError.value = 'Có lỗi xảy ra, vui lòng thử lại';
+    }
+  } finally {
+    isApplyingCoupon.value = false;
+  }
+}
+
+// Xóa mã giảm giá
+function removeCoupon() {
+  appliedCoupon.value = null;
+  
+  // Emit event để App.vue cập nhật và tính toán lại giá
+  emit('remove-coupon');
+  
+  // Sau khi emit, giá trị subtotal, discount và total sẽ được cập nhật từ App.vue
 }
 
 // Khởi tạo
@@ -634,5 +758,108 @@ onMounted(() => {
   background-color: #90CAF9;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+/* CSS cho phần coupon */
+.coupon-section {
+  margin: 12px 0;
+}
+
+.coupon-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coupon-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.apply-coupon-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.apply-coupon-btn:hover:not(:disabled) {
+  background-color: #43A047;
+}
+
+.apply-coupon-btn:disabled {
+  background-color: #A5D6A7;
+  cursor: not-allowed;
+}
+
+.coupon-error {
+  color: #F44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.applied-coupon {
+  border: 1px solid #2196F3;
+  border-radius: 4px;
+  background-color: #E3F2FD;
+  padding: 12px;
+}
+
+.coupon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.coupon-name {
+  font-weight: 600;
+  color: #0D47A1;
+  font-size: 14px;
+}
+
+.remove-coupon-btn {
+  background: none;
+  border: none;
+  color: #F44336;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.remove-coupon-btn:hover {
+  color: #D32F2F;
+}
+
+.coupon-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #455A64;
+  margin-bottom: 4px;
+}
+
+.coupon-description {
+  font-size: 12px;
+  color: #546E7A;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 </style>

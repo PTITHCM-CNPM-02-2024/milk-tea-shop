@@ -6,9 +6,9 @@ export default {
     return apiClient.get('/service-tables');
   },
   
-  // Lấy bàn đang hoạt động
-  getActiveServiceTables() {
-    return apiClient.get('/service-tables/active');
+  // Lấy danh sách bàn đang hoạt động
+  getActiveServiceTables(size = 100) {
+    return apiClient.get(`/service-tables/active?active=true&size=${size}`);
   },
   
   // Lấy thông tin bàn theo ID
@@ -21,9 +21,9 @@ export default {
     return apiClient.get('/areas');
   },
   
-  // Lấy khu vực đang hoạt động
+  // Lấy danh sách khu vực
   getActiveAreas() {
-    return apiClient.get('/areas/active');
+    return apiClient.get('/areas?active=true');
   },
   
   // Lấy thông tin khu vực theo ID

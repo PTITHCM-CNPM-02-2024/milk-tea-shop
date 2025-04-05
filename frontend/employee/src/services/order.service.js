@@ -1,4 +1,5 @@
 import apiClient from './api';
+import axios from 'axios';
 
 export default {
   // Tạo đơn hàng mới
@@ -35,5 +36,10 @@ export default {
     calculateOrder(orderData) {
     console.log(orderData);
       return apiClient.post('/orders/utilities/calculate', orderData);
+  },
+
+  // Phương thức lấy danh sách đơn hàng đang sử dụng bàn
+  getActiveTableOrders() {
+    return axios.get('/api/orders/active-tables');
   }
 };

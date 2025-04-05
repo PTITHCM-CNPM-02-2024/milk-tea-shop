@@ -36,6 +36,7 @@ public class GetDiscountByCouponQueryHandler implements IQueryHandler<DiscountBy
                 .name(discount.getName().getValue())
                 .description(discount.getDescription())
                 .couponId(discount.getCouponEntity().getId())
+                .couponCode(discount.getCouponEntity().getCoupon().getValue())
                 .discountValue(discount.getPromotionDiscountValue().getValue())
                 .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
                 .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())

@@ -62,8 +62,8 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
                 .build();
 
         addProductsToOrder(order, command.getOrderProducts());
-        addDiscountsToOrder(order, command.getOrderDiscounts());
         addCustomerToOrder(order, command);
+        addDiscountsToOrder(order, command.getOrderDiscounts());
         
         var response = OrderDetailResponse.builder()
                 .orderId(order.getId())
