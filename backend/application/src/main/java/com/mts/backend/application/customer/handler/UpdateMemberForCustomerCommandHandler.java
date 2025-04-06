@@ -45,11 +45,11 @@ public class UpdateMemberForCustomerCommandHandler implements ICommandHandler<Up
     private MembershipTypeEntity mustExistMembershipType(MembershipTypeId membershipTypeId) {
         Objects.requireNonNull(membershipTypeId, "Membership type id is required");
         
-        if (!membershipTypeRepository.existsById(membershipTypeId)) {
+        if (!membershipTypeRepository.existsById(membershipTypeId.getValue())) {
             throw new NotFoundException("Loại thành viên không tồn tại");
         }
         
-        return membershipTypeRepository.getReferenceById(membershipTypeId);
+        return membershipTypeRepository.getReferenceById(membershipTypeId.getValue());
     }
     
 }

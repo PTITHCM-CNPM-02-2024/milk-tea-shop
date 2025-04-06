@@ -54,7 +54,7 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
     }
     
     private MembershipTypeEntity mustExistMembershipType(MembershipTypeId membershipTypeId) {
-        return membershipTypeRepository.findById(membershipTypeId)
+        return membershipTypeRepository.findById(membershipTypeId.getValue())
                 .orElseThrow(() -> new NotFoundException("Loại thành viên không tồn tại"));
     }
     

@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class ServiceTableDetailResponse {
     private Integer id;
     private String name;
-    private Integer areaId;
+    private AreaDetailResponse area;
     private Boolean isActive;
 }

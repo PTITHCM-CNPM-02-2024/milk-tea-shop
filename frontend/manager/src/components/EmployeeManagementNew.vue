@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
+  <div class="p-6 ml-56 *:max-w-7xl mx-auto">
     <h1 class="text-2xl font-bold mb-6 flex items-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -265,7 +265,7 @@
 </template>
 
 <script>
-import EmployeeFormNew from './EmployeeFormNew.vue'
+import EmployeeFormNew from './employees/EmployeeFormNew.vue'
 
 export default {
   components: { EmployeeFormNew },

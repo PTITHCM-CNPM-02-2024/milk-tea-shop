@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class AreaDetailResponse implements IQuery<CommandResult> {
     private Integer id;
     private String name;
-    private boolean isActive;
+    private Boolean isActive;
     private Integer maxTable;
     private String description;
 }
