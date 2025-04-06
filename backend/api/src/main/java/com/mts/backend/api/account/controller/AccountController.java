@@ -8,6 +8,7 @@ import com.mts.backend.application.account.AccountQueryBus;
 import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.query.AccountByIdQuery;
 import com.mts.backend.application.account.query.DefaultAccountQuery;
+import com.mts.backend.application.account.query.UserInfoQueryByIdQuery;
 import com.mts.backend.application.account.response.AccountDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
@@ -87,6 +88,18 @@ public class AccountController implements IController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> getAccount(@PathVariable("id") Long id) {
         AccountByIdQuery query = AccountByIdQuery.builder()
+            .id(AccountId.of(id))
+            .build();
+        
+        var result = accountQueryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        
+    }
+    
+    @GetMapping("{id}/user-info")
+    public ResponseEntity<ApiResponse<?>> getAccountInfo(@PathVariable("id") Long id) {
+        UserInfoQueryByIdQuery query = UserInfoQueryByIdQuery.builder()
             .id(AccountId.of(id))
             .build();
         

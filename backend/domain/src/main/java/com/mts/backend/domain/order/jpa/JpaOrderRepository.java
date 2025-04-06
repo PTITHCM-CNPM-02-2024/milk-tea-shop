@@ -2,10 +2,7 @@ package com.mts.backend.domain.order.jpa;
 
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.order.OrderEntity;
-import com.mts.backend.domain.order.identifier.OrderDiscountId;
-import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.promotion.identifier.DiscountId;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -41,8 +38,11 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     @Query("select o from OrderEntity o where o.customerEntity.id is not null and o.customerEntity.id = :id")
     List<OrderEntity> findByCustomerEntity_IdNotNullAndCustomerEntity_Id(@Param("id") @NonNull Long id);
 
-    @Query("select o from OrderEntity o where o.employeeEntity.id = :id")
-    List<OrderEntity> findByEmployeeEntity_Id(@Param("id") @NonNull CustomerId id);
+    @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderTables.table"})
+    @Query("select o from OrderEntity o join o.orderTables ot where o.employeeEntity.id = :id " +
+            "and o.status = 'COMPLETED' and size(o.orderTables) > 0 " +
+            "and ot.checkOut is null")
+    List<OrderEntity> findByEmployeeEntity_IdFetchOrdTbs(@Param("id") @NonNull Long id);
     
     @EntityGraph(value = "OrderEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
     Optional<OrderEntity> findDetailById(Long id);

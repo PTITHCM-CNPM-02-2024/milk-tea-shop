@@ -381,6 +381,10 @@ public class OrderEntity extends BaseEntity<Long> {
     }
 
     public void checkOut() {
+        
+        if (this.status != OrderStatus.COMPLETED) {
+            throw new DomainException("Đơn hàng chưa hoàn thành, không thể lưu thời gian rời bàn");
+        }
         for (OrderTableEntity orderTable : orderTables) {
             orderTable.setCheckOut(LocalDateTime.now());
         }

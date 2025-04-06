@@ -36,8 +36,6 @@ public class UpdateAccountCommandHandler implements ICommandHandler<UpdateAccoun
         
         account.incrementTokenVersion();
         
-        accountRepository.save(account);
-        
         return CommandResult.success(account.getId());
     }
     

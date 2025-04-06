@@ -36,7 +36,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         AccountEntity account = mustExistAccount(command.getId());
         
         PasswordHash newPasswordHash = encodePassword(command.getNewPassword());
-        PasswordHash confirmPasswordHash = encodePassword(command.getConfirmPassword());
+        encodePassword(command.getConfirmPassword());
         if (!passwordEncoder.matches(command.getConfirmPassword().getValue(), newPasswordHash.getValue())) {
             throw new DomainException("Mật khẩu mới và xác nhận mật khẩu không khớp");
         }
@@ -47,9 +47,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         
         account.incrementTokenVersion();
         
-        var savedAccount = accountRepository.save(account);
-        
-        return CommandResult.success(savedAccount.getId());
+        return CommandResult.success(account.getId());
     }
     
     private AccountEntity mustExistAccount(AccountId accountId) {

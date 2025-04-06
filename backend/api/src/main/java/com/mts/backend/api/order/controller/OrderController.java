@@ -121,4 +121,16 @@ public class OrderController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
+    
+    @PutMapping("{orderId}/checkout")
+    public ResponseEntity<ApiResponse<?>> checkoutOrder(@PathVariable("orderId") Long orderId) {
+        var command = CheckOutOrderCommand.builder()
+                .orderId(OrderId.of(orderId))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+
+    }
 }

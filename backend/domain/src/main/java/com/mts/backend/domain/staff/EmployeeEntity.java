@@ -137,6 +137,10 @@ public class EmployeeEntity extends BaseEntity<Long> {
         this.position = position;
         return true;
     }
+    
+    public String getFullName() {
+        return this.firstName.getValue() + " " + this.lastName.getValue();
+    }
 
     @Override
     public final boolean equals(Object o) {

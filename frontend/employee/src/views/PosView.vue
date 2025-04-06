@@ -5,6 +5,7 @@
         <CategoryList
             :categories="categories"
             :selectedCategory="selectedCategory"
+            :products="products"
             @select-category="selectedCategory = $event"
         />
 
@@ -160,10 +161,25 @@ const isCalculating = ref(false);
 
 // Computed properties
 const filteredProducts = computed(() => {
-  if (selectedCategory.value === 'all') {
+  if (!selectedCategory.value || selectedCategory.value === 'all' || 
+      (typeof selectedCategory.value === 'object' && selectedCategory.value.id === 'all')) {
     return products.value;
   }
-  return products.value.filter(product => product.category === selectedCategory.value);
+  
+  // Lấy ID của danh mục đã chọn
+  const categoryId = typeof selectedCategory.value === 'object' 
+    ? selectedCategory.value.id 
+    : selectedCategory.value;
+  
+  // Lọc sản phẩm theo categoryId
+  return products.value.filter(product => {
+    // Nếu product.category là object
+    if (typeof product.category === 'object') {
+      return product.category && product.category.id === categoryId;
+    }
+    // Nếu product.category là string hoặc ID trực tiếp
+    return product.category === categoryId;
+  });
 });
 
 // Alias cho calculatedSubtotal, calculatedDiscount, calculatedTotal

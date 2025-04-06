@@ -7,6 +7,7 @@ import com.mts.backend.application.staff.EmployeeCommandBus;
 import com.mts.backend.application.staff.EmployeeQueryBus;
 import com.mts.backend.application.staff.command.CreateEmployeeCommand;
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
+import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
@@ -79,14 +80,23 @@ public class EmployeeController implements IController {
     
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getEmployees(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var request = DefaultEmployeeQuery.builder()
                 .page(page)
                 .size(size)
                 .build();
         
         var result = queryBus.dispatch(request);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("{id}/orders/order-tables")
+    public ResponseEntity<ApiResponse<?>> getOrderTablesByEmployeeId(@PathVariable("id") Long id) {
+        var query = CheckoutTableByEmpIdQuery.builder().employeeId(EmployeeId.of(id)).build();
+        
+        var result = queryBus.dispatch(query);
         
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }

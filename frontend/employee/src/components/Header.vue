@@ -82,7 +82,7 @@
 
       <v-divider vertical class="mx-2 d-none d-sm-flex"></v-divider>
 
-      <!-- Menu người dùng -->
+      <!-- User Menu -->
       <v-menu location="bottom end" transition="slide-y-transition">
         <template v-slot:activator="{ props }">
           <div class="d-flex align-center" v-bind="props" style="cursor: pointer">
@@ -97,8 +97,7 @@
         </template>
         
         <v-list>
-          <v-list-item prepend-icon="mdi-account-outline" title="Hồ sơ"></v-list-item>
-          <v-list-item prepend-icon="mdi-clock-time-four-outline" title="Ca làm việc"></v-list-item>
+          <v-list-item prepend-icon="mdi-account-outline" title="Hồ sơ" to="/profile"></v-list-item>
           <v-divider></v-divider>
           <v-list-item prepend-icon="mdi-logout" title="Đăng xuất" color="error"></v-list-item>
         </v-list>
@@ -119,6 +118,10 @@ const props = defineProps({
   employeeName: {
     type: String,
     default: 'Nhân viên'
+  },
+  accountId: {
+    type: Number,
+    default: 2
   }
 });
 

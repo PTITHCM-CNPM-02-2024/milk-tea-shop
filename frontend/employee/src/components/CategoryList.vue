@@ -1,20 +1,27 @@
 <template>
-  <div class="category-container pa-3">
-    <v-chip-group
-        v-model="selectedCategoryIndex"
-        mandatory
-        @update:modelValue="handleCategoryChange"
-    >
-      <v-chip
+  <div class="category-container">
+    <div class="category-wrapper">
+      <div class="category-cards-container px-4 py-3">
+        <div
           v-for="category in uniqueCategories"
           :key="category.id || category"
-          :value="category.id || category"
-          filter
-          variant="elevated"
-      >
-        {{ getCategoryDisplayName(category) }}
-      </v-chip>
-    </v-chip-group>
+          @click="handleCategoryChange(category.id || category)"
+          :class="[
+            'category-card', 
+            (category.id || category) == selectedCategoryIndex ? 'category-card-active' : ''
+          ]"
+          :title="getCategoryDisplayName(category)"
+        >
+          <div class="category-image-wrapper">
+            <img v-if="getCategoryImage(category)" :src="getCategoryImage(category)" class="category-image" />
+            <v-icon v-else :icon="getCategoryIcon(category)" size="x-large"></v-icon>
+          </div>
+          <div class="category-name">
+            {{ getCategoryDisplayName(category) }}
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -27,8 +34,12 @@ const props = defineProps({
     required: true
   },
   selectedCategory: {
-    type: [String, Number, Object], // Thêm Object vào danh sách kiểu dữ liệu
+    type: [String, Number, Object],
     required: true
+  },
+  products: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -77,12 +88,59 @@ function getCategoryDisplayName(category) {
   return category;
 }
 
+function getCategoryImage(category) {
+  // Nếu không có sản phẩm, trả về null
+  if (!props.products || props.products.length === 0) return null;
+  
+  const categoryName = getCategoryDisplayName(category).toLowerCase();
+  
+  // Tất cả là danh mục đặc biệt - lấy hình ảnh sản phẩm đầu tiên
+  if (categoryName === 'tất cả') {
+    const firstProduct = props.products[0];
+    return firstProduct && firstProduct.image_url ? firstProduct.image_url : null;
+  }
+  
+  // Tìm sản phẩm đầu tiên thuộc danh mục này
+  const categoryId = typeof category === 'object' ? category.id : category;
+  
+  const productsInCategory = props.products.filter(product => {
+    if (typeof product.category === 'object') {
+      return product.category && product.category.id === categoryId;
+    }
+    return product.category === categoryId;
+  });
+  
+  if (productsInCategory.length > 0) {
+    const product = productsInCategory[0];
+    return product.image_url || null;
+  }
+  
+  return null;
+}
+
+function getCategoryIcon(category) {
+  // Trả về icon phù hợp dựa vào tên category (dùng làm backup khi không có ảnh)
+  const name = getCategoryDisplayName(category).toLowerCase();
+  
+  if (name === 'tất cả') return 'mdi-view-grid';
+  if (name.includes('trà') || name.includes('tea')) return 'mdi-tea';
+  if (name.includes('cà phê') || name.includes('coffee')) return 'mdi-coffee';
+  if (name.includes('sữa') || name.includes('milk')) return 'mdi-cup';
+  if (name.includes('đá xay') || name.includes('smoothie')) return 'mdi-blender';
+  if (name.includes('trân châu') || name.includes('bubble')) return 'mdi-circle-small';
+  if (name.includes('topping')) return 'mdi-food-variant';
+  
+  // Icon mặc định
+  return 'mdi-glass-cocktail';
+}
+
 function handleCategoryChange(categoryId) {
   // Tìm category object từ categoryId
   const selectedCategory = uniqueCategories.value.find(c =>
-      (typeof c === 'object' ? c.id == categoryId : c == categoryId)
+      (typeof c === 'object' ? c.id === categoryId : c === categoryId)
   );
 
+  selectedCategoryIndex.value = categoryId;
   emit('select-category', selectedCategory || categoryId);
 }
 
@@ -99,8 +157,142 @@ onMounted(() => {
 
 <style scoped>
 .category-container {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  background: linear-gradient(to right, #f5f7fa, #ffffff);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  height: 150px; /* Chiều cao cố định cho container */
+}
+
+.category-wrapper {
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.category-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.category-wrapper::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 20px;
+}
+
+.category-cards-container {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 8px;
+  height: 100%;
+  align-items: center;
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 120px;
+  min-width: 100px;
+  flex: 0 0 auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #eaeaea;
+  padding: 12px 8px; /* Giảm padding ngang để có thêm không gian cho chữ */
+  user-select: none;
+  position: relative;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--v-theme-primary);
+}
+
+.category-card-active {
+  background: linear-gradient(135deg, var(--v-theme-primary), #2196F3);
+  color: white !important; /* Đảm bảo màu chữ sáng */
+  border: none;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);
+}
+
+.category-card-active .v-icon {
+  color: white !important;
+}
+
+.category-image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 8px;
+  background-color: rgba(var(--v-theme-primary), 0.1);
+  overflow: hidden;
+  flex-shrink: 0; /* Ngăn hình ảnh co lại */
+}
+
+.category-card-active .category-image-wrapper {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 6px;
+  width: 100%; /* Đảm bảo text được phép sử dụng toàn bộ chiều rộng */
+  /* Giảm xuống còn 1 dòng để tránh bị tràn */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Chỉ hiển thị 1 dòng */
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  max-height: 1.2em;
+  white-space: normal; /* Cho phép xuống dòng nếu cần */
+  color: #333; /* Màu chữ tối hơn cho dễ đọc */
+}
+
+.category-card-active .category-name {
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Thêm text shadow để dễ đọc hơn khi nền là màu */
+  color: salmon;
+}
+
+/* Thêm tooltip hiển thị tên đầy đủ khi hover */
+.category-card:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  display: none; /* Tạm thời ẩn tooltip này */
 }
 </style>
