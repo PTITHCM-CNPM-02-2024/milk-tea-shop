@@ -34,7 +34,7 @@ public class StoreController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createStore(@RequestBody CreateStoreRequest request) {
+    public ResponseEntity<?> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
                 .name(StoreName.builder().value(request.getName()).build())
                 .address(Address.builder().value(request.getAddress()).build())
@@ -48,11 +48,11 @@ public class StoreController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateStore(@PathVariable("id") Integer id,
+    public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,
                                                       @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
                 .id(StoreId.of(id))
@@ -68,17 +68,17 @@ public class StoreController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer)result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getStoreById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getStoreById(@PathVariable("id") Integer id) {
         var query = StoreByIdQuery.builder().id(StoreId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((StoreDetailResponse) result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
 }

@@ -28,7 +28,7 @@ public class UnitController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
+    public ResponseEntity<?> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
         CreateUnitCommand command =
                 CreateUnitCommand.builder().name(UnitName.builder().value(createUnitRequest.getName()).build())
                         .description(createUnitRequest.getDescription())
@@ -37,11 +37,11 @@ public class UnitController implements IController {
         
         var result = unitCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateUnit(@PathVariable("id") Integer id, @RequestBody UpdateUnitRequest updateUnitRequest){
+    public ResponseEntity<?> updateUnit(@PathVariable("id") Integer id, @RequestBody UpdateUnitRequest updateUnitRequest){
         UpdateUnitCommand command =
                 UpdateUnitCommand.builder().id(UnitOfMeasureId.of(id))
                         .name(UnitName.builder().value(updateUnitRequest.getName()).build())
@@ -51,15 +51,15 @@ public class UnitController implements IController {
         
         var result = unitCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData(), "Thông tin đơn vị đã được cập nhật")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllUnit(){
+    public ResponseEntity<?> getAllUnit(){
         DefaultUnitQuery query = DefaultUnitQuery.builder().build();
         
         var result = unitQueryBus.dispatch(query);
             
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

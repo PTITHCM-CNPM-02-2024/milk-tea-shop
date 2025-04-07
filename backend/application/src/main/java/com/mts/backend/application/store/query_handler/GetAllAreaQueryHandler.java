@@ -28,7 +28,13 @@ public class GetAllAreaQueryHandler implements IQueryHandler<DefaultAreaQuery, C
     public CommandResult handle(DefaultAreaQuery query) {
         Objects.requireNonNull(query,"DefaultAreaQuery is required");
         
-        var areas = areaRepository.findAll(Pageable.ofSize(query.getSize()));
+        var areas = areaRepository.findAll().stream().filter(area -> {
+            if (query.getActive().isPresent()){
+                return area.getActive() == query.getActive().get();
+            }
+            
+            return true;
+        }).toList();
         
         List<AreaDetailResponse> responses = new ArrayList<>();
         

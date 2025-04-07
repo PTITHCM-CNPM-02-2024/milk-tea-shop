@@ -16,39 +16,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDuplicateException(DuplicateException e) {
-        return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
+    public ResponseEntity<?> handleDuplicateException(DuplicateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
     
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleNotFoundException(NotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.fail(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+    public ResponseEntity<?> handleNotFoundException(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
     
     @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDomainException(DomainException e) {
+    public ResponseEntity<?> handleDomainException(DomainException e) {
         return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
     }
     
     @ExceptionHandler(DomainBusinessLogicException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDomainBusinessLogicException(DomainBusinessLogicException e) {
-        return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
+    public ResponseEntity<?> handleDomainBusinessLogicException(DomainBusinessLogicException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
+    public ResponseEntity<?> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
     
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<ApiResponse<Object>> handleNullPointerException(NullPointerException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
+    public ResponseEntity<?> handleNullPointerException(NullPointerException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
     
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage(),
-                HttpStatus.BAD_REQUEST.value()));
+    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
 }

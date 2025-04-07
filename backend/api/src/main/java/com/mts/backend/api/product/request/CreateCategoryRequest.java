@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class CreateCategoryRequest {
     String name;
     String description;
-    Integer parentId;
 }

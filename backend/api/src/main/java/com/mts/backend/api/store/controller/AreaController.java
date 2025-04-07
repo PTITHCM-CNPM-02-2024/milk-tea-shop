@@ -32,7 +32,7 @@ public class AreaController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createArea(@RequestBody CreateAreaRequest request) {
+    public ResponseEntity<?> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
                 .name(AreaName.builder().value(request.getName()).build())
                 .isActive(request.getIsActive())
@@ -41,11 +41,11 @@ public class AreaController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateArea(@PathVariable("id") Integer id,
+    public ResponseEntity<?> updateArea(@PathVariable("id") Integer id,
                                                      @RequestBody UpdateAreaRequest request) {
         
         var command = UpdateAreaCommand.builder()
@@ -55,11 +55,11 @@ public class AreaController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}/max-and-active")
-    public ResponseEntity<ApiResponse<?>> updateAreaMaxAndActive(@PathVariable("id") Integer id,
+    public ResponseEntity<?> updateAreaMaxAndActive(@PathVariable("id") Integer id,
                                                                  @RequestBody UpdateMaxAndActiveRequest request) {
         
         var command = UpdateAreaMaxAndActiveCommand.builder()
@@ -70,40 +70,25 @@ public class AreaController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                     @RequestParam(value = "size", defaultValue = "40") Integer size) {
-        var query = DefaultAreaQuery.builder().page(page).size(size).build();
+    public ResponseEntity<?> getAllArea(@RequestParam(value = "active", required = false) Boolean active) {
+        var query = DefaultAreaQuery.builder().active(active).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :
-                handleError(result);
-    }
-    
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<?>> getAllActiveArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                           @RequestParam(value = "size", defaultValue = "40") Integer size,
-                                                           @RequestParam(value = "active", defaultValue = "true") Boolean active) {
-        var query = AreaActiveQuery.builder().page(page).size(size).active(active).build();
-        
-        var result = queryBus.dispatch(query);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getAreaById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getAreaById(@PathVariable("id") Integer id) {
         var query = AreaByIdQuery.builder().id(AreaId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-
-
 }

@@ -1,13 +1,11 @@
-
-
 -- 15. Payment
 
 DELIMITER //
 
 -- Kiểm tra trước khi thêm thanh toán
 CREATE TRIGGER before_payment_insert
-    BEFORE INSERT ON Payment
-    FOR EACH ROW
+BEFORE INSERT ON Payment
+FOR EACH ROW
 BEGIN
     -- Kiểm tra số tiền thanh toán
     IF NEW.amount_paid < 0 THEN
@@ -23,8 +21,8 @@ END //
 
 -- Kiểm tra trước khi cập nhật thanh toán
 CREATE TRIGGER before_payment_update
-    BEFORE UPDATE ON Payment
-    FOR EACH ROW
+BEFORE UPDATE ON Payment
+FOR EACH ROW
 BEGIN
     -- Kiểm tra số tiền thanh toán
     IF NEW.amount_paid < 0 THEN

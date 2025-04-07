@@ -4,7 +4,7 @@ const apiClient = axios.create({
   baseURL: 'http://localhost:8181/api/v1',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
 });
 
 // Thêm xử lý interceptor nếu cần thiết
@@ -27,20 +27,40 @@ apiClient.interceptors.response.use(
           data: response.data.data,
           message: response.data.message,
           metadata: response.data.metadata,
-          status: response.data.status
+          status: response.status
         };
       }
 
-      // Trường hợp khác, trả về response như bình thường
+      // Trường hợp ResponseEntity trả về trực tiếp (không có cấu trúc ApiResponse)
       return response;
     },
     (error) => {
       // Xử lý lỗi từ server
-      if (error.response && error.response.data) {
-        if (error.response.data.message) {
-          error.message = error.response.data.message;
+      let errorMessage = 'Có lỗi xảy ra';
+      
+      if (error.response) {
+        // Khi có phản hồi từ server nhưng là lỗi
+        if (error.response.data) {
+          if (typeof error.response.data === 'string') {
+            // Nếu phản hồi lỗi là chuỗi
+            errorMessage = error.response.data;
+          } else if (error.response.data.message) {
+            // Nếu phản hồi lỗi có trường message
+            errorMessage = error.response.data.message;
+          } else if (error.response.data.error) {
+            // Nếu phản hồi lỗi có trường error
+            errorMessage = error.response.data.error;
+          }
         }
+      } else if (error.request) {
+        // Khi không nhận được phản hồi
+        errorMessage = 'Không nhận được phản hồi từ server';
+      } else {
+        // Lỗi khi thiết lập request
+        errorMessage = error.message;
       }
+      
+      error.message = errorMessage;
       return Promise.reject(error);
     }
 );

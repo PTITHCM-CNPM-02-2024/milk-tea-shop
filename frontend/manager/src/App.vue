@@ -4,20 +4,18 @@
 // import Posdasboard from './components/MainLayout/SideBar.vue'
 //
 import SideBar from './components/MainLayout/SideBar.vue'
+import Login from '@/components/MainLayout/Login.vue'
 </script>
 
 <template>
   <div class="flex">
-    <!-- component dang nhap  -->
-    <!-- <Login /> -->
-    <!-- menu dieu huong -->
+<!--     <Login />-->
     <SideBar />
     <div class="flex-1 p-4">
       <router-view />
     </div>
-    <!-- <ProductList /> -->
-    <!-- danh sach nhan vien -->
-    <!-- <EmployeeList /> -->
-    <!-- <EmployeeManagementNew /> -->
+<!--     <ProductList />-->
+<!--     <EmployeeList />-->
+<!--     <EmployeeManagementNew />-->
   </div>
 </template>

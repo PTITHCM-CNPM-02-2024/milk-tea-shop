@@ -5,8 +5,8 @@ CREATE TRIGGER before_product_insert
 BEFORE INSERT ON Product
 FOR EACH ROW
 BEGIN
-    -- Kiểm tra tên sản phẩm
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    -- Kiểm tra tên sản phẩm có trống không
+    IF LENGTH(TRIM(NEW.name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Tên sản phẩm không được để trống';
     END IF;
@@ -28,10 +28,10 @@ BEFORE UPDATE ON Product
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên sản phẩm
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Tên sản phẩm không được để trống';
     END IF;
 END //
 
-DELIMITER ; 
+DELIMITER ;

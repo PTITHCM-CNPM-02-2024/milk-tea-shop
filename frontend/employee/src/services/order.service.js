@@ -49,7 +49,12 @@ export default {
   },
   
   // Lấy danh sách đơn hàng đang sử dụng bàn
-  getActiveTableOrders(employeeId) {
-    return apiClient.get(`/employees/${employeeId}/orders/order-tables`);
+  getActiveTableOrders(employeeId, page = 0, size = 10) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`, {
+      params: {
+        page,
+        size
+      }
+    });
   }
 };

@@ -15,13 +15,9 @@ create table Category
     category_id        smallint unsigned auto_increment comment 'Mã danh mục' primary key,
     name               varchar(100)                       not null comment 'Tên danh mục',
     description        varchar(1000)                      null comment 'Mô tả danh mục',
-    parent_category_id smallint unsigned                  null comment 'Mã danh mục sản phẩm cha',
     created_at         datetime default CURRENT_TIMESTAMP null,
     updated_at         datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key Category_pk (name),
-    foreign key Category_ibfk_1 (parent_category_id) references Category (category_id)
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT
+    unique key Category_pk (name)
 );
 
 create table Coupon
@@ -172,7 +168,7 @@ create table Employee
     unique key account_id (account_id),
     foreign key Employee_ibfk_1 (account_id) references Account (account_id)
         ON UPDATE CASCADE
-        ON DELETE SET NULL
+        ON DELETE RESTRICT
 );
 
 create table Manager
@@ -189,14 +185,14 @@ create table Manager
     unique key account_id (account_id),
     foreign key Manager_ibfk_1 (account_id) references Account (account_id)
         ON UPDATE CASCADE
-        ON DELETE SET NULL
+        ON DELETE RESTRICT
 );
 
 create table `Order`
 (
     order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,
     customer_id    int unsigned                                  null comment 'Mã khách hàng',
-    employee_id    int unsigned                                  null comment 'Mã nhân viên',
+    employee_id    int unsigned                                  not null comment 'Mã nhân viên',
     order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
     total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
     final_amount   decimal(11, 3)                                null comment 'Thành tiền',
@@ -208,10 +204,10 @@ create table `Order`
     index employee_id (employee_id),
     foreign key Order_ibfk_1 (customer_id) references Customer (customer_id)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT,
+        ON DELETE SET NULL,
     foreign key Order_ibfk_2 (employee_id) references Employee (employee_id)
         ON UPDATE CASCADE
-        ON DELETE SET NULL
+        ON DELETE CASCADE
 );
 
 create table OrderDiscount
@@ -228,7 +224,7 @@ create table OrderDiscount
         ON DELETE CASCADE,
     foreign key OrderDiscount_ibfk_2 (discount_id) references Discount (discount_id)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON DELETE CASCADE
 );
 
 create table Payment
@@ -283,7 +279,7 @@ create table OrderTable
         ON DELETE CASCADE,
     foreign key OrderTable_ibfk_2 (table_id) references ServiceTable (table_id)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON DELETE CASCADE
 );
 
 create table Store
@@ -331,8 +327,8 @@ create table ProductSize
 create table ProductPrice
 (
     product_price_id int unsigned auto_increment comment 'Mã giá sản phẩm' primary key,
-    product_id       mediumint unsigned                 null comment 'Mã sản phẩm',
-    size_id          smallint unsigned                  null comment 'Mã kích thước',
+    product_id       mediumint unsigned                 not null comment 'Mã sản phẩm',
+    size_id          smallint unsigned                  not null comment 'Mã kích thước',
     price            decimal(11, 3)                     not null comment 'Giá',
     created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',

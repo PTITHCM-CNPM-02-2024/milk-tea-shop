@@ -32,7 +32,7 @@ public class DiscountController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createDiscount(@RequestBody CreateDiscountRequest request) {
+    public ResponseEntity<?> createDiscount(@RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
                 .name(DiscountName.builder().value(request.getName()).build())
                 .description(request.getDescription())
@@ -54,12 +54,12 @@ public class DiscountController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
+    public ResponseEntity<?> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
         
         var command = UpdateDiscountCommand.builder()
                 .id(DiscountId.of(id))
@@ -84,12 +84,12 @@ public class DiscountController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllDiscount(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllDiscount(@RequestParam(defaultValue = "0") Integer page,
+                                                         @RequestParam(defaultValue = "10") Integer size) {
         var command = DefaultDiscountQuery.builder()
                 .page(page)
                 .size(size)
@@ -97,31 +97,28 @@ public class DiscountController implements IController {
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getDiscountById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getDiscountById(@PathVariable("id") Long id) {
         var command = DiscountByIdQuery.builder()
                 .id(DiscountId.of(id))
                 .build();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/coupon/{code}")
-    public ResponseEntity<ApiResponse<?>> getDiscountByCouponCode(@PathVariable("code") String code) {
+    public ResponseEntity<?> getDiscountByCouponCode(@PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
                 .couponId(CouponCode.builder().value(code).build())
                 .build();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-    
-    
-    
 }

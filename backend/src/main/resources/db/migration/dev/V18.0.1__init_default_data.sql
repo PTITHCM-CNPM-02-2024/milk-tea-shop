@@ -13,9 +13,9 @@ VALUES ((SELECT unit_id FROM UnitOfMeasure WHERE symbol = 'mL'), 'S', 450, 'Size
        ((SELECT unit_id FROM UnitOfMeasure WHERE symbol = 'cái'), 'NA', 1, 'Đơn vị (cái/phần)');
 
 -- Dữ liệu cho bảng Category
-INSERT INTO Category (category_id, name, description, parent_category_id)
-VALUES (1,'TOPPING', 'Các loại topping bổ sung cho đồ uống', NULL),
-       (2,'TOPPING BÁN LẺ', 'Các loại topping được bán riêng lẻ', 1);
+INSERT INTO Category (category_id, name, description)
+VALUES (1,'TOPPING', 'Các loại topping bổ sung cho đồ uống'),   
+       (2,'TOPPING BÁN LẺ', 'Các loại topping được bán riêng lẻ');
 
 -- Dữ liệu cho bảng MembershipType
 INSERT INTO MembershipType (type, discount_value, discount_unit, required_point, description, is_active, valid_until)
@@ -124,9 +124,9 @@ CREATE TRIGGER protect_default_membership_update
     FOR EACH ROW
 BEGIN
     IF OLD.type IN ('NEWMEM', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM') THEN
-        IF NEW.type != OLD.type OR NEW.required_point != OLD.required_point THEN
+        IF NEW.type != OLD.type THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Không thể thay đổi tên hoặc điểm yêu cầu của loại thành viên mặc định';
+                SET MESSAGE_TEXT = 'Không thể thay đổi tên loại thành viên mặc định';
         END IF;
     END IF;
 END //

@@ -27,7 +27,7 @@ public class GetAllServiceTableActiveQueryHandler implements IQueryHandler<Servi
     public CommandResult handle(ServiceTableActiveQuery query) {
         Objects.requireNonNull(query, "Service table active query is required");
         
-        var serviceTables = serviceTableRepository.findByActive(query.getActive());
+        var serviceTables = serviceTableRepository.findAllByActiveFetchArea(query.getActive());
 
         List<ServiceTableDetailResponse> responses = serviceTables.stream()
                 .map(e -> ServiceTableDetailResponse.builder()

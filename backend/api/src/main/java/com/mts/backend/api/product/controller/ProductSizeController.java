@@ -29,7 +29,7 @@ public class ProductSizeController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createProductSize(@RequestBody CreateProductSizeRequest request) {
+    public ResponseEntity<?> createProductSize(@RequestBody CreateProductSizeRequest request) {
 
         CreateProductSizeCommand command = CreateProductSizeCommand.builder()
                 .name(ProductSizeName.builder().value(request.getName()).build())
@@ -41,11 +41,11 @@ public class ProductSizeController implements IController {
 
         var result = productSizeCommandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateProductSize(@PathVariable("id") Integer id, @RequestBody UpdateProductSizeRequest request) {
+    public ResponseEntity<?> updateProductSize(@PathVariable("id") Integer id, @RequestBody UpdateProductSizeRequest request) {
         UpdateProductSizeCommand command = UpdateProductSizeCommand.builder().
                 id(ProductSizeId.of(id))
                 .name(ProductSizeName.builder().value(request.getName()).build())
@@ -56,16 +56,15 @@ public class ProductSizeController implements IController {
 
         var result = productSizeCommandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData(), "Thông tin sản phẩm đã được cập nhật")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllProductSize() {
+    public ResponseEntity<?> getAllProductSize() {
         DefaultSizeQuery query = DefaultSizeQuery.builder().build();
 
         var result = sizeQueryBus.dispatch(query);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
-
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

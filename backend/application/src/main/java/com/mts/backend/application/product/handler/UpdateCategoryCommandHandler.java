@@ -40,10 +40,6 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
             verifyUniqueName(category.getName());
         }
         
-        var parentCategory = verifyParentCategory(command.getParentId().orElse(null));
-        
-        category.setParentCategoryEntity(parentCategory);
-        
         var updatedCategory = categoryRepository.save(category);
         
         return CommandResult.success(updatedCategory.getId());
@@ -64,17 +60,6 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
         });
     }
     
-    private CategoryEntity verifyParentCategory(CategoryId parentId){
-        if (Objects.isNull(parentId)) {
-            return null;
-        }
-        
-        if (!categoryRepository.existsById(parentId.getValue())) {
-            throw new NotFoundException("Danh mục cha " + parentId + " không tồn tại");
-        }
-        
-        return categoryRepository.getReferenceById(parentId.getValue());
-    }
     
     
 }

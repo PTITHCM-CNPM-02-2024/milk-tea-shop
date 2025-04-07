@@ -27,19 +27,15 @@ public class GetAllCategoryQueryHandler implements IQueryHandler<DefaultCategory
     public CommandResult handle(DefaultCategoryQuery query) {
         Objects.requireNonNull(query);
         
-        var categories = categoryRepository.findAllWithJoinFetch(PageRequest.ofSize(query.getSize()).withPage(query.getPage()));
+        var categories = categoryRepository.findAllWithJoinFetch();
         
-        List<CategoryDetailResponse> responses = new ArrayList<>();
-        
-        categories.forEach(category -> {
-            CategoryDetailResponse response = CategoryDetailResponse.builder().id(category.getId()).name(category.getName().getValue()).build();
-            
-            category.getParentCategoryEntity().ifPresent(parent -> {
-                response.setParent(CategoryDetailResponse.builder().id(parent.getId()).name(parent.getName().getValue()).build());
-            });
-            
-            responses.add(response);
-        });
+        List<CategoryDetailResponse> responses = categories.stream().map(category -> {
+            return CategoryDetailResponse.builder()
+                    .id(category.getId())
+                    .name(category.getName().getValue())
+                    .description(category.getDescription().orElse(null))
+                    .build();
+        }).toList();
         
         return CommandResult.success(responses);
     }

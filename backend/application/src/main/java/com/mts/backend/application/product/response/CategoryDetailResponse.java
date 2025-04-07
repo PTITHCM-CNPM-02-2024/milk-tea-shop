@@ -13,5 +13,4 @@ public class CategoryDetailResponse {
     private Integer id;
     private String name;
     private String description;
-    private CategoryDetailResponse parent;
 }

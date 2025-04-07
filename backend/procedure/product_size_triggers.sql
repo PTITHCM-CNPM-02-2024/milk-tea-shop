@@ -6,7 +6,7 @@ BEFORE INSERT ON ProductSize
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên kích thước
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Tên kích thước không được để trống';
     END IF;
@@ -24,7 +24,7 @@ BEFORE UPDATE ON ProductSize
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên kích thước
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Tên kích thước không được để trống';
     END IF;
@@ -36,4 +36,4 @@ BEGIN
     END IF;
 END //
 
-DELIMITER ; 
+DELIMITER ;

@@ -24,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<?>> login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) {
         var command = new AuthenticationCommand(
                 Username.builder().value(request.getUsername()).build(),
                 PasswordHash.builder().value(request.getPassword()).build()
@@ -32,18 +32,18 @@ public class AuthController {
         
         var result = accountCommandBus.dispatch(command);
         
-        return ResponseEntity.ok(ApiResponse.success(result.getData()));
+        return ResponseEntity.ok(result.getData());
     }
 
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<?>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<?> logout(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         var command = LogoutCommand.builder()
                 .userPrincipal(userPrincipal)
                 .build();
         
         var result = accountCommandBus.dispatch(command);
         
-        return ResponseEntity.ok(ApiResponse.success(result.getData()));
+        return ResponseEntity.ok(result.getData());
     }
 }

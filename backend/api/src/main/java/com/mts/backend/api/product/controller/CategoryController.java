@@ -29,49 +29,38 @@ public class CategoryController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) {
+    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) {
         CreateCategoryCommand createCategoryCommand = CreateCategoryCommand.builder()
                 .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
                 .description(createCategoryRequest.getDescription())
-                .parentId(Objects.isNull(createCategoryRequest.getParentId()) ? null :
-                        CategoryId.of(createCategoryRequest.getParentId()))
                 .build();
 
         var result = categoryCommandBus.dispatch(createCategoryCommand);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("id") Integer id,
-                                                         @RequestBody CreateCategoryRequest createCategoryRequest) {
+    public ResponseEntity<?> updateCategory(@PathVariable("id") Integer id,
+                                            @RequestBody CreateCategoryRequest createCategoryRequest) {
         UpdateCategoryCommand createCategoryCommand = UpdateCategoryCommand.builder()
                 .id(CategoryId.of(id))
                 .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
                 .description(createCategoryRequest.getDescription())
-                .parentId(Objects.isNull(createCategoryRequest.getParentId()) ? null :
-                        CategoryId.of(createCategoryRequest.getParentId()))
-                .build();
+                .build();   
         var result = categoryCommandBus.dispatch(createCategoryCommand);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(), "Thông tin danh mục đã " +
-                "được cập nhật")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllCategory(@RequestParam(value = "size",
-                                                                 defaultValue = "50") int size,
-                                                         @RequestParam(value = "page", defaultValue = "0") int page) {
+    public ResponseEntity<?> getAllCategory() {
 
         DefaultCategoryQuery defaultCategoryQuery = DefaultCategoryQuery.builder()
-                .page(page)
-                .size(size)
                 .build();
 
         var result = categoryQueryBus.dispatch(defaultCategoryQuery);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-
-
 }

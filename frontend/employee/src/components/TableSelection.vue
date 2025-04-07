@@ -131,20 +131,15 @@ async function loadAreas() {
     console.log('Đang tải danh sách khu vực...');
     const response = await TableService.getActiveAreas();
     
-    // Đảm bảo response.data là mảng
-    if (Array.isArray(response.data)) {
+    // Kiểm tra và xử lý dữ liệu Spring Boot Page
+    if (response && response.data) {
       areas.value = response.data;
-    } else if (response.data && Array.isArray(response.data)) {
-      areas.value = response.data;
-    } else {
-      console.error('Cấu trúc dữ liệu khu vực không đúng:', response.data);
-      areas.value = [];
     }
-    
+
     // Add a special "No Area" option
     areas.value.push({
       id: NO_AREA_ID,
-      name: 'Không có khu vực',
+      name: 'Khác',
       isActive: true
     });
     
@@ -165,19 +160,9 @@ async function loadTables() {
   loading.value = true;
   try {
     console.log('Đang tải danh sách bàn...');
-    const response = await TableService.getActiveServiceTables(100);
+    const response = await TableService.getActiveServiceTables();
     
-    // Đảm bảo response.data là mảng
-    if (Array.isArray(response.data)) {
-      tables.value = response.data;
-    } else if (response.data && Array.isArray(response.data.data)) {
-      // Nếu API trả về dạng {data: [...]}
-      tables.value = response.data
-      ;
-    } else {
-      console.error('Cấu trúc dữ liệu bàn không đúng:', response.data);
-      tables.value = [];
-    }
+    tables.value = response.data;
     
     console.log('Đã tải bàn:', tables.value);
   } catch (error) {

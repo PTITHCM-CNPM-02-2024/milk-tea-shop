@@ -201,7 +201,7 @@
       <v-card-text>
         <div v-if="loading" class="d-flex justify-center py-5">
           <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        </div>
+    </div>
         <v-table v-else density="compact">
           <thead>
             <tr>
@@ -354,7 +354,13 @@ async function loadReportData() {
     
     // Trong thực tế, sẽ gọi API ở đây
     // const response = await ReportService.getReportSummary(params);
-    // summaryData = response.data;
+    // if (response && response.data) {
+    //   // Nếu API trả về thành công
+    //   summaryData = {...response.data};
+    //   showSnackbar(response.message || 'Đã tải dữ liệu báo cáo', 'success');
+    // } else {
+    //   throw new Error('Không có dữ liệu trả về');
+    // }
     
     // Mô phỏng dữ liệu
     simulateReportData();
@@ -362,7 +368,7 @@ async function loadReportData() {
     showSnackbar('Đã tải dữ liệu báo cáo', 'success');
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu báo cáo:', error);
-    showSnackbar('Không thể tải dữ liệu báo cáo', 'error');
+    showSnackbar(error.message || 'Không thể tải dữ liệu báo cáo', 'error');
   } finally {
     loading.value = false;
   }
@@ -440,13 +446,18 @@ async function exportToExcel() {
     //   to: dateRange.to
     // });
     
-    // Download file
-    // const url = window.URL.createObjectURL(new Blob([response.data]));
-    // const link = document.createElement('a');
-    // link.href = url;
-    // link.setAttribute('download', `report-${Date.now()}.xlsx`);
-    // document.body.appendChild(link);
-    // link.click();
+    // // Download file
+    // if (response && response.data) {
+    //   const url = window.URL.createObjectURL(new Blob([response.data]));
+    //   const link = document.createElement('a');
+    //   link.href = url;
+    //   link.setAttribute('download', `report-${Date.now()}.xlsx`);
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   showSnackbar(response.message || 'Báo cáo đã được xuất thành công', 'success');
+    // } else {
+    //   throw new Error('Không thể xuất báo cáo');
+    // }
     
     // Mô phỏng thành công
     setTimeout(() => {
@@ -455,7 +466,7 @@ async function exportToExcel() {
     }, 1500);
   } catch (error) {
     console.error('Lỗi khi xuất báo cáo:', error);
-    showSnackbar('Không thể xuất báo cáo', 'error');
+    showSnackbar(error.message || 'Không thể xuất báo cáo', 'error');
     exporting.value = false;
   }
 }

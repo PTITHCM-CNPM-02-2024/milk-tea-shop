@@ -33,13 +33,10 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
         
         verifyUniqueName(command.getName());
         
-        var par = verifyParentCategoryIfSpecified(command.getParentId().orElse(null));
-        
         var category = CategoryEntity.builder()
                 .id(CategoryId.create().getValue())
                 .name(command.getName())
                 .description(command.getDescription().orElse(null))
-                .parentCategoryEntity(par)
                 .build();
 
         var createdCategory = categoryRepository.save(category);
@@ -56,18 +53,5 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
         });
     }
     
-    private CategoryEntity verifyParentCategoryIfSpecified(CategoryId parentId) {
-        
-        if (parentId == null) {
-            return null;
-        }
-        
-        if (!categoryRepository.existsById(parentId.getValue())) {
-            throw new NotFoundException("Danh mục cha " + parentId.getValue() + " không tồn tại");
-        }
-        
-        return categoryRepository.getReferenceById(parentId.getValue());
-    }
-
 
 }

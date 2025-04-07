@@ -29,21 +29,18 @@ public class GetAllSizeQueryHandler implements IQueryHandler<DefaultSizeQuery, C
 
         var sizes = sizeRepository.findAllWithJoinFetch();
 
-        List<SizeDetailResponse> sizeDetailResponses = new ArrayList<>();
-
-        sizes.forEach(size -> {
-            sizeDetailResponses.add(SizeDetailResponse.builder()
-                    .id(size.getId())
-                    .name(size.getName().getValue())
-                    .unit(UnitDetailResponse.builder()
-                            .id(size.getUnit().getId())
-                            .symbol(size.getUnit().getSymbol().getValue())
-                            .name(size.getUnit().getName().getValue())
-                            .build())
-                    .quantity(size.getQuantity().getValue())
-                    .build());
-        });
-
+        List<SizeDetailResponse> sizeDetailResponses = sizes.stream().map(
+                size -> SizeDetailResponse.builder()
+                        .id(size.getId())
+                        .name(size.getName().getValue())
+                        .unit(UnitDetailResponse.builder()
+                                .id(size.getUnit().getId())
+                                .symbol(size.getUnit().getSymbol().getValue())
+                                .name(size.getUnit().getName().getValue())
+                                .build())
+                        .quantity(size.getQuantity().getValue())
+                        .build()).toList();
+        
         return CommandResult.success(sizeDetailResponses);
     }
 }

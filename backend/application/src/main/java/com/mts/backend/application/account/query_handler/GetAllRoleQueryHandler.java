@@ -25,7 +25,7 @@ public class GetAllRoleQueryHandler implements IQueryHandler<DefaultRoleQuery, C
     public CommandResult handle(DefaultRoleQuery query) {
         Objects.requireNonNull(query, "GetAllRoleQuery must not be null");
         
-        var roles = roleRepository.findAll(PageRequest.of(query.getPage(), query.getSize())).getContent();
+        var roles = roleRepository.findAll();
         
         List<RoleDetailResponse> roleDetailResponses = roles.stream()
                 .map(role -> RoleDetailResponse.builder()

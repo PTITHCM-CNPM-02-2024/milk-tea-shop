@@ -1,22 +1,19 @@
-
-
 -- 16. PaymentMethod
 DELIMITER //
 
 -- Kiểm tra trước khi thêm phương thức thanh toán
 CREATE TRIGGER before_payment_method_insert
-    BEFORE INSERT ON PaymentMethod
-    FOR EACH ROW
+BEFORE INSERT ON PaymentMethod
+FOR EACH ROW
 BEGIN
-    DECLARE payment_method_exists BOOLEAN;
-
     -- Kiểm tra tên phương thức thanh toán
-    IF NEW.payment_name IS NULL OR LENGTH(TRIM(NEW.payment_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.payment_name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tên phương thức thanh toán không được để trống';
     END IF;
 
     -- Kiểm tra tên phương thức thanh toán đã tồn tại chưa
+    DECLARE payment_method_exists BOOLEAN;
     SELECT EXISTS(SELECT 1 FROM PaymentMethod WHERE payment_name = NEW.payment_name)
     INTO payment_method_exists;
 
@@ -28,19 +25,18 @@ END //
 
 -- Kiểm tra trước khi cập nhật phương thức thanh toán
 CREATE TRIGGER before_payment_method_update
-    BEFORE UPDATE ON PaymentMethod
-    FOR EACH ROW
+BEFORE UPDATE ON PaymentMethod
+FOR EACH ROW
 BEGIN
-    DECLARE payment_method_exists BOOLEAN;
-
     -- Kiểm tra tên phương thức thanh toán
-    IF NEW.payment_name IS NULL OR LENGTH(TRIM(NEW.payment_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.payment_name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tên phương thức thanh toán không được để trống';
     END IF;
 
     -- Kiểm tra tên phương thức thanh toán đã tồn tại chưa (trừ chính nó)
     IF NEW.payment_name != OLD.payment_name THEN
+        DECLARE payment_method_exists BOOLEAN;
         SELECT EXISTS(
             SELECT 1 FROM PaymentMethod
             WHERE payment_name = NEW.payment_name
@@ -56,8 +52,8 @@ END //
 
 -- Kiểm tra trước khi xóa phương thức thanh toán
 CREATE TRIGGER before_payment_method_delete
-    BEFORE DELETE ON PaymentMethod
-    FOR EACH ROW
+BEFORE DELETE ON PaymentMethod
+FOR EACH ROW
 BEGIN
     -- Kiểm tra phương thức thanh toán có liên kết với thanh toán không
     DECLARE payment_count INT;

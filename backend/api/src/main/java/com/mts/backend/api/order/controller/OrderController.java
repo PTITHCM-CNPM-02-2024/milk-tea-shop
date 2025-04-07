@@ -28,7 +28,7 @@ public class OrderController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createOrder(@RequestBody OrderBaseRequest request) {
+    public ResponseEntity<?> createOrder(@RequestBody OrderBaseRequest request) {
 
         var command = CreateOrderCommand.builder()
                 .employeeId(EmployeeId.of(request.getEmployeeId()))
@@ -74,24 +74,24 @@ public class OrderController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
 
     @PutMapping("{orderId}/cancel")
-    public ResponseEntity<ApiResponse<?>> cancelOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<?> cancelOrder(@PathVariable("orderId") Long orderId) {
         var command = CancelledOrderCommand.builder()
                 .id(OrderId.of(orderId))
                 .build();
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
 
     }
     
     @PostMapping("/utilities/calculate")
-    public ResponseEntity<ApiResponse<?>> calculateOrder(@RequestBody OrderBaseRequest request) {
+    public ResponseEntity<?> calculateOrder(@RequestBody OrderBaseRequest request) {
 
         var command = CalculateOrderCommand.builder()
                 .employeeId(EmployeeId.of(request.getEmployeeId()))
@@ -119,18 +119,18 @@ public class OrderController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("{orderId}/checkout")
-    public ResponseEntity<ApiResponse<?>> checkoutOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<?> checkoutOrder(@PathVariable("orderId") Long orderId) {
         var command = CheckOutOrderCommand.builder()
                 .orderId(OrderId.of(orderId))
                 .build();
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
 
     }
 }

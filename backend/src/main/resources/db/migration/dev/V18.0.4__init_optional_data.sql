@@ -20,17 +20,14 @@ call sp_create_staff_account_with_permissions(
     
 
 
-INSERT INTO Category (category_id, name, description, parent_category_id)
+INSERT INTO Category (category_id, name, description)
 VALUES (3,UPPER('Trân châu đường đen'), 'Các loại đồ uống kết hợp với trân châu đường đen, mang vị ngọt caramel đặc 
-trưng.',
-        NULL),
-       (4,UPPER('Trà sữa'), 'Danh mục tổng hợp các loại trà sữa truyền thống và phổ biến.', NULL),
-       (5,UPPER('Trà sữa đặc biệt'), 'Các loại trà sữa cao cấp hoặc có công thức đặc biệt, mang hương vị độc đáo.', 
-        4),
-       (6,UPPER('Macchiato/Kem cheese'), 'Các loại trà kết hợp với lớp kem macchiato hoặc kem cheese béo mịn.', NULL),
-       (7,UPPER('Hoa hồng'), 'Đồ uống có thành phần từ hoa hồng, mang hương thơm tự nhiên và thanh mát.', NULL),
-       (8,UPPER('Trà giải khát'), 'Các loại trà thảo mộc và trà trái cây giúp giải nhiệt và tăng cường sức khỏe.', 
-        NULL);
+trưng.') ,
+       (4,UPPER('Trà sữa'), 'Danh mục tổng hợp các loại trà sữa truyền thống và phổ biến.'),
+       (5,UPPER('Trà sữa đặc biệt'), 'Các loại trà sữa cao cấp hoặc có công thức đặc biệt, mang hương vị độc đáo.'),
+       (6,UPPER('Macchiato/Kem cheese'), 'Các loại trà kết hợp với lớp kem macchiato hoặc kem cheese béo mịn.'),
+       (7,UPPER('Hoa hồng'), 'Đồ uống có thành phần từ hoa hồng, mang hương thơm tự nhiên và thanh mát.'),
+       (8,UPPER('Trà giải khát'), 'Các loại trà thảo mộc và trà trái cây giúp giải nhiệt và tăng cường sức khỏe.');
 
 insert into Product (product_id, category_id, name, description, is_available, is_signature, image_path, created_at, updated_at)
 values  (1001, 3, 'Sữa tươi trân châu đường đen', 'Một sự kết hợp hoàn hảo giữa vị ngọt thanh của đường đen và sự béo ngậy của sữa tươi nguyên chất. Điểm nhấn chính là những viên trân châu dai mềm, ngấm đều hương đường, tạo nên hương vị khó quên.', 1, 1, 'https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/milk_tcdd.png', '2025-04-02 07:51:34', '2025-04-06 06:59:55'),

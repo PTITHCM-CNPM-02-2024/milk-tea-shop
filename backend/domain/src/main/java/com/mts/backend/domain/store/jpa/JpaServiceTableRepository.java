@@ -1,13 +1,13 @@
 package com.mts.backend.domain.store.jpa;
 
 import com.mts.backend.domain.store.ServiceTableEntity;
-import com.mts.backend.domain.store.identifier.AreaId;
-import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.value_object.TableNumber;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +18,19 @@ import java.util.Set;
 public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEntity, Integer> {
   @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
   @Query("select s from ServiceTableEntity s WHERE s.active = :active")
-  List<ServiceTableEntity> findByActive(@Param("active") @NonNull Boolean active);
+  List<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active);
 
+  @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
+  @Query("select s from ServiceTableEntity s WHERE s.active = :active")
+  Page<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active, Pageable pageable);
   
   @EntityGraph(attributePaths = {"areaEntity"})
+  @Query("select s from ServiceTableEntity s WHERE (s.active = :active or :active is null)")
+  Page<ServiceTableEntity> findAllFetchArea(@Param("active") @Nullable Boolean active, Pageable pageable);
+
+  @EntityGraph(attributePaths = {"areaEntity"})
   @Query("select s from ServiceTableEntity s")
-  List<ServiceTableEntity> findAllWithArea(Pageable pageable);
+  List<ServiceTableEntity> findAllFetchArea();
 
 
   @Query("select count(s) from ServiceTableEntity s where s.areaEntity.id = :id")

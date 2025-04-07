@@ -26,7 +26,7 @@ public class PaymentController implements IController {
     }
     
     @PostMapping("/initiate")
-    public ResponseEntity<ApiResponse<?>> initiatePayment(@RequestBody CreatePaymentRequest request) {
+    public ResponseEntity<?> initiatePayment(@RequestBody CreatePaymentRequest request) {
         
         var command = CreatePaymentCommand.builder()
                 .orderId(OrderId.of(request.getOrderId()))
@@ -35,13 +35,13 @@ public class PaymentController implements IController {
         
         var result = paymentCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PostMapping("/{paymentId}/{methodId}/complete")
     public ResponseEntity<?> completePayment(@PathVariable("paymentId") Long paymentId,
-                                                          @PathVariable("methodId") Integer methodId,
-                                                          @RequestBody PaymentTransactionRequest request) {
+                                             @PathVariable("methodId") Integer methodId,
+                                             @RequestBody PaymentTransactionRequest request) {
         
     var command = PaymentTransactionCommand.builder()
             .paymentId(PaymentId.of(paymentId))

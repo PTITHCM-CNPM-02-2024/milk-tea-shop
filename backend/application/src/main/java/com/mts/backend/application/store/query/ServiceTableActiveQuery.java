@@ -13,6 +13,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServiceTableActiveQuery implements IQuery<CommandResult> {
     private Boolean active;
-    private Integer page;
-    private Integer size;
 }

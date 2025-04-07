@@ -7,11 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @NoArgsConstructor
 @Data
 @Builder
 @AllArgsConstructor
 public class  DefaultAreaQuery  implements IQuery<CommandResult> {
-    private Integer page;
-    private Integer size;
+    private Boolean active;
+    
+    public Optional<Boolean> getActive() {
+        return Optional.ofNullable(active);
+    }
 }

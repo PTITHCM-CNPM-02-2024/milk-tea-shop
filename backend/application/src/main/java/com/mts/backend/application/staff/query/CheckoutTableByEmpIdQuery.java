@@ -12,4 +12,6 @@ import lombok.Data;
 @Builder
 public class CheckoutTableByEmpIdQuery implements IQuery<CommandResult> {
     private EmployeeId employeeId;
+    private Integer size;
+    private Integer page;
 }

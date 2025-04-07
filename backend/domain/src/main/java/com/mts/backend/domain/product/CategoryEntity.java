@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.lang.Nullable;
 
 import java.util.Optional;
@@ -56,16 +54,5 @@ public class CategoryEntity extends BaseEntity<Integer> {
         return Optional.ofNullable(description);
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Comment("Mã danh mục sản phẩm cha")
-    @JoinColumn(name = "parent_category_id")
-    @Nullable
-    private CategoryEntity parentCategoryEntity;
-    
-    public Optional<CategoryEntity> getParentCategoryEntity(){
-        return Optional.ofNullable(this.parentCategoryEntity);
-    }
-
-    
 
 }

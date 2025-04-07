@@ -27,7 +27,7 @@ public class GetAllMemberTypeQueryHandler implements IQueryHandler<DefaultMember
     public CommandResult handle(DefaultMemberQuery query) {
         Objects.requireNonNull(query, "Default member query is required");
 
-        var memberTypes = membershipTypeRepository.findAll(PageRequest.of(query.getPage(), query.getSize()));
+        var memberTypes = membershipTypeRepository.findAll();
 
         List<MemberTypeDetailResponse> responses = new ArrayList<>();
 

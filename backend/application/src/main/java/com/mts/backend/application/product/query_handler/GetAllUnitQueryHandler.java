@@ -26,13 +26,14 @@ public class GetAllUnitQueryHandler implements IQueryHandler<DefaultUnitQuery, C
         
         var units = unitRepository.findAll();
         
-        List<UnitDetailResponse> responses = new ArrayList<>();
-        
-        units.forEach(unit -> {
-            UnitDetailResponse response = UnitDetailResponse.builder().id(unit.getId()).name(unit.getName().getValue()).symbol(unit.getSymbol().getValue()).description(unit.getDescription().orElse("")).build();
-            
-            responses.add(response);
-        });
+        List<UnitDetailResponse> responses = units.stream().map(unit -> {
+            return UnitDetailResponse.builder()
+                    .id(unit.getId())
+                    .name(unit.getName().getValue())
+                    .symbol(unit.getSymbol().getValue())
+                    .description(unit.getDescription().orElse(null))
+                    .build();
+        }).toList();
         
         return CommandResult.success(responses);
     }

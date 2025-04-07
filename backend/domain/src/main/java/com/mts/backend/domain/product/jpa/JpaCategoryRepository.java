@@ -26,7 +26,7 @@ public interface JpaCategoryRepository extends JpaRepository<CategoryEntity, Int
 
     @EntityGraph(attributePaths = {"parentCategoryEntity"})
     @Query("select c from CategoryEntity c")
-    List<CategoryEntity> findAllWithJoinFetch(Pageable pageable);
+    List<CategoryEntity> findAllWithJoinFetch();
 
     @Modifying
     @Transactional

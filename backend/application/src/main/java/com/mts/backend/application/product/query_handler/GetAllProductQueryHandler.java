@@ -3,9 +3,11 @@ package com.mts.backend.application.product.query_handler;
 import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
+import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +28,9 @@ public class GetAllProductQueryHandler implements IQueryHandler<DefaultProductQu
     public CommandResult handle(DefaultProductQuery query) {
         Objects.requireNonNull(query);
         
-        var products = productRepository.findAllWithDetails(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
+        Page<ProductEntity> products = productRepository.findAllWithDetails(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
-        List<ProductDetailResponse> responses = new ArrayList<>();
-
-        products.forEach(product -> {
+        Page<ProductDetailResponse> responses = products.map(product -> {
             ProductDetailResponse response =
                     ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
 
@@ -51,7 +51,7 @@ public class GetAllProductQueryHandler implements IQueryHandler<DefaultProductQu
                 response.getPrices().add(priceDetail);
             }
 
-            responses.add(response);
+            return response;
         });
 
         return CommandResult.success(responses);

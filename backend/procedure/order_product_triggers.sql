@@ -51,4 +51,4 @@ BEGIN
     CALL sp_update_order_total(OLD.order_id);
 END //
 
-DELIMITER ; 
+DELIMITER ;

@@ -27,7 +27,7 @@ public class PaymentMethodController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createPaymentMethod(@RequestBody CreatePaymentMethodRequest request) {
+    public ResponseEntity<?> createPaymentMethod(@RequestBody CreatePaymentMethodRequest request) {
         CreatePaymentMethodCommand command = CreatePaymentMethodCommand.builder()
                 .name(PaymentMethodName.builder().value(request.getName()).build())
                 .description(request.getDescription().orElse(null))
@@ -35,12 +35,12 @@ public class PaymentMethodController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updatePaymentMethod(@PathVariable("id") Integer id,
+    public ResponseEntity<?> updatePaymentMethod(@PathVariable("id") Integer id,
                                                               @RequestBody UpdatePaymentMethodRequest request){
         UpdatePaymentMethodCommand command = UpdatePaymentMethodCommand.builder()
                 .paymentMethodId(PaymentMethodId.of(id))
@@ -50,17 +50,17 @@ public class PaymentMethodController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllPaymentMethod() {
+    public ResponseEntity<?> getAllPaymentMethod() {
         
         var command = new DefaultPaymentMethodQuery();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

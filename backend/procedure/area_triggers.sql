@@ -4,23 +4,13 @@ DELIMITER //
 
 -- Kiểm tra trước khi thêm khu vực
 CREATE TRIGGER before_area_insert
-    BEFORE INSERT ON Area
-    FOR EACH ROW
+BEFORE INSERT ON Area
+FOR EACH ROW
 BEGIN
-    DECLARE area_exists BOOLEAN;
-
     -- Kiểm tra tên khu vực
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF NEW.name REGEXP '^[a-zA-Z0-9_-]{3}$' = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tên khu vực không được để trống';
-    END IF;
-
-    -- Kiểm tra tên khu vực đã tồn tại chưa
-    SELECT EXISTS(SELECT 1 FROM Area WHERE name = NEW.name) INTO area_exists;
-
-    IF area_exists THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tên khu vực đã tồn tại';
+            SET MESSAGE_TEXT = 'Tên khu vực chỉ được chứa chữ cái, số, dấu gạch dưới, dấu gạch ngang và có độ dài 3 ký tự';
     END IF;
 
     -- Kiểm tra số bàn tối đa phải lớn hơn 0 nếu được chỉ định
@@ -32,33 +22,26 @@ END //
 
 -- Kiểm tra trước khi cập nhật khu vực
 CREATE TRIGGER before_area_update
-    BEFORE UPDATE ON Area
-    FOR EACH ROW
+BEFORE UPDATE ON Area
+FOR EACH ROW
 BEGIN
-    DECLARE area_exists BOOLEAN;
     DECLARE current_tables INT;
-
+    DECLARE order_count INT;
     -- Kiểm tra tên khu vực
-    IF NEW.name IS NULL OR LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) = 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tên khu vực không được để trống';
     END IF;
 
-    -- Kiểm tra tên khu vực đã tồn tại chưa (trừ chính nó)
-    IF NEW.name != OLD.name THEN
-        SELECT EXISTS(SELECT 1 FROM Area WHERE name = NEW.name AND area_id != NEW.area_id)
-        INTO area_exists;
-
-        IF area_exists THEN
-            SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Tên khu vực đã tồn tại';
-        END IF;
+    IF  NEW.name REGEXP '^[a-zA-Z0-9_-]{3}$' = 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Tên khu vực chỉ được chứa chữ cái, số, dấu gạch dưới, dấu gạch ngang và có độ dài 3 ký tự';
     END IF;
 
-    -- Kiểm tra số bàn tối đa phải lớn hơn 0 nếu được chỉ định
-    IF NEW.max_tables IS NOT NULL AND NEW.max_tables <= 0 THEN
+    -- Kiểm tra số bàn tối đa phải lớn hơn 0, nhỏ hơn 100
+    IF NEW.max_tables IS NOT NULL AND (NEW.max_tables <= 0 OR NEW.max_tables >= 100) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Số bàn tối đa phải lớn hơn 0';
+            SET MESSAGE_TEXT = 'Số bàn tối đa phải lớn hơn 0 và nhỏ hơn 100';
     END IF;
 
     -- Kiểm tra số bàn tối đa phải lớn hơn hoặc bằng số bàn hiện có
@@ -70,34 +53,31 @@ BEGIN
                 SET MESSAGE_TEXT = 'Số bàn tối đa phải lớn hơn hoặc bằng số bàn hiện có';
         END IF;
     END IF;
+
+    IF OLD.is_active <> NEW.is_active AND NEW.is_active = 0 THEN
+        -- Nếu là 0 cần kiểm tra order status = processing
+        SELECT COUNT(*) INTO order_count FROM `Order` WHERE area_id = NEW.area_id AND status = 'PROCESSING';
+            
+            IF order_count > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Không thể deactive khu vực có đơn hàng đang xử lý';
+            END IF;
+    END IF;
 END //
 
 -- Kiểm tra trước khi xóa khu vực
 CREATE TRIGGER before_area_delete
-    BEFORE DELETE ON Area
-    FOR EACH ROW
+BEFORE DELETE ON Area
+FOR EACH ROW
 BEGIN
-    -- Cập nhật bàn để đặt area_id thành NULL
-    UPDATE ServiceTable
-    SET area_id = NULL,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE area_id = OLD.area_id;
+    DECLARE order_count INT;
+    -- Kiểm tra xem order có đang xử lý trong khu vực không
+    SELECT COUNT(*) INTO order_count FROM `Order` WHERE area_id = OLD.area_id AND status = 'PROCESSING';
+
+    IF order_count > 0 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Không thể xóa khu vực có đơn hàng đang xử lý';
+    END IF;
 END //
 
 DELIMITER ;
-
-DELIMITER //
-
--- Thêm khu vực mới
-CREATE PROCEDURE sp_insert_area(
-    IN p_name CHAR(3),
-    IN p_description VARCHAR(255),
-    IN p_max_tables INT,
-    IN p_is_active TINYINT(1)
-)
-BEGIN
-    INSERT INTO Area(name, description, max_tables, is_active)
-    VALUES(p_name, p_description, p_max_tables, p_is_active);
-
-    SELECT LAST_INSERT_ID() AS area_id;
-END //

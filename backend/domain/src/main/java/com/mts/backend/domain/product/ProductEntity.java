@@ -182,11 +182,21 @@ public class ProductEntity extends BaseEntity<Integer> {
                 .findFirst();
     }
     
-    public Optional<ProductPriceEntity> getProductPriceEntity(Long productPriceId) {
+    private Optional<ProductPriceEntity> getProductPriceEntity(Long productPriceId) {
         Objects.requireNonNull(productPriceId, "Product price id is required");
         return productPrices.stream()
                 .filter(productPrice -> productPrice.getId().equals(productPriceId))
                 .findFirst();
+    }
+    
+    public Optional<ProductPriceEntity> getProductPriceEntity(ProductPriceId productPriceId) {
+        Objects.requireNonNull(productPriceId, "Product price id is required");
+        return getProductPriceEntity(productPriceId.getValue());
+    }
+    
+    public Optional<ProductPriceEntity> getProductPriceEntity(ProductSizeId productSizeId) {
+        Objects.requireNonNull(productSizeId, "Product size id is required");
+        return getProductPriceEntity(productSizeId.getValue());
     }
     
     public Optional<ProductPriceEntity> getProductPriceEntity(Integer productSizeId) {
