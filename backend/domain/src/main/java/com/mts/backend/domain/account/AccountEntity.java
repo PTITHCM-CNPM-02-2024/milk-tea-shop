@@ -15,6 +15,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.sql.Types.TIMESTAMP;
@@ -140,6 +141,7 @@ public class AccountEntity extends BaseEntity<Long> {
             throw new DomainException("Tài khoản đã bị khóa không thể đăng xuất");
         }
         
+        this.incrementTokenVersion();
         this.active = false;
     }
     
@@ -150,12 +152,31 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public void unlock() {
-        this.active = true;
+        this.active = null;
         this.incrementTokenVersion();
         this.locked = false;
     }
+    
+    public boolean changeLock(boolean locked) {
+        if (this.locked.equals(locked)) {
+            return false;
+        }
+
+        if (locked) {
+            lock();
+        } else {
+            unlock();
+        }
+
+        return true;
+    }
+
     @Transient
     public Long incrementTokenVersion() {
-        return ++tokenVersion;
+        if (this.tokenVersion == null) {
+            this.tokenVersion = 0L;
+        }
+        this.tokenVersion++;
+        return this.tokenVersion;
     }
 }

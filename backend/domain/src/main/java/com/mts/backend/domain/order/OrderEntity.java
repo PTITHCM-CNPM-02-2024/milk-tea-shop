@@ -118,8 +118,8 @@ public class OrderEntity extends BaseEntity<Long> {
 
     public void setCustomerEntity(CustomerEntity customerEntity) {
         orderCanBeModified();
-        recalculateTotalAmount();
         this.customerEntity = customerEntity;
+        recalculateTotalAmount();
     }
 
     public Optional<Money> getTotalAmount() {
@@ -395,6 +395,14 @@ public class OrderEntity extends BaseEntity<Long> {
         for (OrderTableEntity orderTable : orderTables) {
             orderTable.setCheckOut(null);
         }
+    }
+    
+    @Transient
+    public Optional<Money> getDiscountAmount() {
+        if (getTotalAmount().isPresent() && getFinalAmount().isPresent()) {
+            return Optional.of(getTotalAmount().get().subtract(getFinalAmount().get()));
+        }
+        return Optional.empty();
     }
 
 }

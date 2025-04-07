@@ -10,6 +10,7 @@ import com.mts.backend.application.product.command.*;
 import com.mts.backend.application.product.query.DefaultProductQuery;
 import com.mts.backend.application.product.query.ProductForSaleQuery;
 import com.mts.backend.application.product.query.SignatureProductForSaleQuery;
+import com.mts.backend.application.product.query.ToppingForSaleQuery;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
@@ -170,6 +171,34 @@ public class ProductController implements IController {
 
         var result = productQueryBus.dispatch(getProductDetailCommand);
 
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("/topping")
+    public ResponseEntity<ApiResponse<?>> getToppingProductDetail(@RequestParam(value = "page",
+            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
+        ToppingForSaleQuery getProductDetailCommand = ToppingForSaleQuery.builder()
+                .page(page)
+                .size(size)
+                .isOrdered(Boolean.TRUE)
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
+        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+    }
+    
+    @GetMapping("/unavailable-topping")
+    public ResponseEntity<ApiResponse<?>> getUnavailableToppingProductDetail(@RequestParam(value = "page",
+            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
+        ToppingForSaleQuery getProductDetailCommand = ToppingForSaleQuery.builder()
+                .isOrdered(Boolean.FALSE)
+                .page(page)
+                .size(size)
+                .build();
+        
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+        
         return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
     }
 

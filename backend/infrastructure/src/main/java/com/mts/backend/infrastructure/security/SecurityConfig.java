@@ -26,7 +26,7 @@ import java.util.List;
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
-@Profile("dev")
+@Profile("prod")
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUserDetailService jwtUserDetailService;
