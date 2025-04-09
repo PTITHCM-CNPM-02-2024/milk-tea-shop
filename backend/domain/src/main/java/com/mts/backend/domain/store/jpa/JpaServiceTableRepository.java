@@ -43,14 +43,10 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
 
   @Query("select (count(s) > 0) from ServiceTableEntity s where s.tableNumber = :tableNumber")
   boolean existsByTableNumber(@Param("tableNumber") @NonNull TableNumber tableNumber);
-
-  @Modifying
-  @Transactional
-  @Query(value = "DELETE FROM milk_tea_shop_prod.ServiceTable WHERE table_id = :id", nativeQuery = true)
-  void deleteServiceTable(@Param("id") Integer id);
+  
 
   @Query("select s from ServiceTableEntity s where s.areaEntity.id = :id")
-  Set<ServiceTableEntity> findByAreaEntity_Id(@Param("id") @NonNull Integer id);
+  Page<ServiceTableEntity> findByAreaEntity_Id(@Param("id") @Nullable Integer id, Pageable pageable);
 
 
   

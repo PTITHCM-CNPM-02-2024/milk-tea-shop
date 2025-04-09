@@ -132,7 +132,7 @@
         <!-- Areas & Tables -->
         <v-list-item
           prepend-icon="mdi-table-furniture"
-          :title="rail ? '' : 'Areas & Tables'"
+          title="Khu vực & Bàn"
           value="areas"
           rounded="lg"
           to="/areas"

@@ -92,9 +92,9 @@ const router = createRouter({
     {
       path: '/areas',
       name: 'areas',
-      //component: () => import('@/views/AreasTables.vue'),
+      component: () => import('@/views/AreaTableManagement.vue'),
       meta: {
-        title: 'Areas & Tables'
+        title: 'Quản lý khu vực & bàn'
       }
     },
     {

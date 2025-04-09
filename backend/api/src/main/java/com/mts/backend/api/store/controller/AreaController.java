@@ -12,6 +12,7 @@ import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
+import com.mts.backend.application.store.query.ServiceTableByAreaIdQuery;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
@@ -89,6 +90,23 @@ public class AreaController implements IController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getAreaById(@PathVariable("id") Integer id) {
         var query = AreaByIdQuery.builder().id(AreaId.of(id)).build();
+        
+        var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+    
+    
+    @GetMapping("/{id}/tables")
+    public ResponseEntity<?> getAreaTables(@PathVariable("id") Integer id,
+                                           @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                           @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        
+        var query = ServiceTableByAreaIdQuery.builder()
+                .areaId(AreaId.of(id))
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(query);
         

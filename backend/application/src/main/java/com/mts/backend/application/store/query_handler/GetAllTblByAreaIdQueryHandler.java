@@ -1,12 +1,12 @@
 package com.mts.backend.application.store.query_handler;
 
-import com.mts.backend.application.store.query.DefaultServiceTableQuery;
+import com.mts.backend.application.store.query.ServiceTableByAreaIdQuery;
 import com.mts.backend.application.store.response.ServiceTableSummaryResponse;
 import com.mts.backend.domain.store.AreaEntity;
+import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
-public class GetAllServiceTableQueryHandler implements IQueryHandler<DefaultServiceTableQuery, CommandResult> {
-    private final JpaServiceTableRepository serviceTableRepository;
+public class GetAllTblByAreaIdQueryHandler implements IQueryHandler<ServiceTableByAreaIdQuery, CommandResult> {
+    private final JpaServiceTableRepository jpaServiceTableRepository;
 
-    public GetAllServiceTableQueryHandler(JpaServiceTableRepository serviceTableRepository) {
-        this.serviceTableRepository = serviceTableRepository;
+    public GetAllTblByAreaIdQueryHandler(JpaServiceTableRepository jpaServiceTableRepository) {
+        this.jpaServiceTableRepository = jpaServiceTableRepository;
     }
 
     /**
@@ -26,14 +26,12 @@ public class GetAllServiceTableQueryHandler implements IQueryHandler<DefaultServ
      * @return
      */
     @Override
-    @Transactional
-    public CommandResult handle(DefaultServiceTableQuery query) {
-        Objects.requireNonNull(query, "DefaultServiceTableQuery is required");
-
-        var serviceTables =
-                serviceTableRepository.findAllFetchArea(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
+    public CommandResult handle(ServiceTableByAreaIdQuery query) {
+        Objects.requireNonNull(query, "ServiceTableByAreaIdQuery is required");
 
 
+        var serviceTables = jpaServiceTableRepository.findByAreaEntity_Id(query.getAreaId().map(AreaId::getValue).orElse(null), Pageable.ofSize(query.getSize()).withPage(query.getPage()));
+        
         Page<ServiceTableSummaryResponse> responses = serviceTables.map(se -> {
             var response = ServiceTableSummaryResponse.builder()
                     .id(se.getId())
@@ -43,9 +41,7 @@ public class GetAllServiceTableQueryHandler implements IQueryHandler<DefaultServ
                     .build();
             return response;
         });
-
+        
         return CommandResult.success(responses);
     }
-
-
 }
