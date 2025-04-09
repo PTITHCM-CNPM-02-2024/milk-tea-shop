@@ -75,6 +75,40 @@
           ></v-list-item>
         </v-list-group>
 
+        <!-- Người dùng -->
+        <v-list-group value="users">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-account-group-outline"
+              title="Người dùng"
+              value="users"
+              rounded="lg"
+              class="mb-1"
+            ></v-list-item>
+          </template>
+          
+          <v-list-item
+            title="Nhân viên"
+            value="employees"
+            rounded="lg"
+            prepend-icon="mdi-account-tie"
+            class="ms-2"
+            to="/users/employees"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+          
+          <v-list-item
+            title="Khách hàng & CT Thành viên"
+            value="customers-membership"
+            rounded="lg" 
+            prepend-icon="mdi-account-star"
+            class="ms-2"
+            to="/users/customers"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+        </v-list-group>
+
         <!-- Products & Categories -->
         <v-list-group value="products">
           <template v-slot:activator="{ props }">
@@ -116,16 +150,6 @@
           value="orders"
           rounded="lg"
           to="/orders"
-          class="mb-1"
-        ></v-list-item>
-
-        <!-- Customers & Members -->
-        <v-list-item
-          prepend-icon="mdi-account-group-outline"
-          :title="rail ? '' : 'Customers & Members'"
-          value="customers"
-          rounded="lg"
-          to="/customers"
           class="mb-1"
         ></v-list-item>
 

@@ -73,6 +73,33 @@ const router = createRouter({
         }
       ]
     },
+    // Phần quản lý người dùng
+    {
+      path: '/users',
+      component: () => import('@/views/UserManagementLayout.vue'),
+      children: [
+        {
+          path: '',
+          redirect: '/users/employees'
+        },
+        {
+          path: 'employees',
+          name: 'employees',
+          component: () => import('@/views/EmployeeList.vue'),
+          meta: {
+            title: 'Quản lý nhân viên'
+          }
+        },
+        {
+          path: 'customers',
+          name: 'customers-membership',
+          component: () => import('@/views/CustomersMembers.vue'),
+          meta: {
+            title: 'Quản lý khách hàng & CT thành viên'
+          }
+        }
+      ]
+    },
     {
       path: '/orders',
       name: 'orders',

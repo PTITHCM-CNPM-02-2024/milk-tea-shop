@@ -5,8 +5,6 @@ import com.mts.backend.application.customer.response.MemberTypeDetailResponse;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,6 +37,7 @@ public class GetAllMemberTypeQueryHandler implements IQueryHandler<DefaultMember
                     .discountValue(memberType.getMemberDiscountValue().getValue())
                     .requiredPoints(memberType.getRequiredPoint())
                     .validUntil(memberType.getValidUntil().orElse(null))
+                    .description(memberType.getDescription().orElse(null))
                     .isActive(memberType.getActive())
                     .build());
         });

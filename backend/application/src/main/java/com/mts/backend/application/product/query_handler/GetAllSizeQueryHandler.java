@@ -26,7 +26,6 @@ public class GetAllSizeQueryHandler implements IQueryHandler<DefaultSizeQuery, C
     }
 
     @Override
-    @Transactional
     public CommandResult handle(DefaultSizeQuery query) {
         Objects.requireNonNull(query, "DefaultSizeQuery is required");
 
@@ -36,7 +35,7 @@ public class GetAllSizeQueryHandler implements IQueryHandler<DefaultSizeQuery, C
             return SizeSummaryResponse.builder()
                     .id(size.getId())
                     .name(size.getName().getValue())
-                    .id(size.getUnit().getId())
+                    .unitId(size.getUnit().getId())
                     .quantity(size.getQuantity().getValue())
                     .build();
         });

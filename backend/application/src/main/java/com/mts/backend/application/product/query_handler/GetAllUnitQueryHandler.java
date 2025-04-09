@@ -32,6 +32,7 @@ public class GetAllUnitQueryHandler implements IQueryHandler<DefaultUnitQuery, C
         Page<UnitDetailResponse> responses = units.map(unit -> {
             return UnitDetailResponse.builder()
                     .id(unit.getId())
+                    .symbol(unit.getSymbol().getValue())
                     .name(unit.getName().getValue())
                     .build();
         });

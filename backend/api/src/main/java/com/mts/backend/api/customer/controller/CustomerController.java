@@ -94,8 +94,8 @@ public class CustomerController implements IController {
     
     
     @GetMapping
-    public ResponseEntity<?> getCustomers(@RequestParam(value = "page", defaultValue = "0") int page,
-                                          @RequestParam(value = "size", defaultValue = "10") int size){
+    public ResponseEntity<?> getCustomers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                          @RequestParam(value = "size", defaultValue = "10") Integer size){
         var request = DefaultCustomerQuery.builder().
                 page(page)
                 .size(size)

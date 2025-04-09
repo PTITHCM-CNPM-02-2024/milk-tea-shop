@@ -78,11 +78,9 @@ public class MembershipController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getMemberships(@RequestParam(value = "page", defaultValue = "0") int page,
-                                            @RequestParam(value = "size", defaultValue = "10") int size){
-        var query = DefaultMemberQuery.builder().
-                page(page)
-                .size(size)
+    public ResponseEntity<?> getMemberships(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size){
+        var query = DefaultMemberQuery.builder()
                 .build();
         
         var result = queryBus.dispatch(query);

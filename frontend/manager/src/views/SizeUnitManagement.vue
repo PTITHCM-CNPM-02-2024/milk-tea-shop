@@ -63,7 +63,7 @@
           
           <v-data-table
             :headers="sizeHeaders"
-            :items="sizes"
+            :items="sizeUnitStore.productSizes"
             :loading="sizeUnitStore.loading"
             loading-text="Đang tải dữ liệu..."
             no-data-text="Không có dữ liệu"
@@ -77,25 +77,9 @@
               {{ index + 1 }}
             </template>
             
-            <!-- Cột Ký hiệu -->
-            <template v-slot:item.symbol="{ item }">
-              <v-chip
-                color="primary"
-                size="small"
-                label
-                class="font-weight-medium"
-              >
-                {{ item.symbol }}
-              </v-chip>
-            </template>
-            
-            <!-- Cột mặc định -->
-            <template v-slot:item.isDefault="{ item }">
-              <v-icon
-                :icon="item.isDefault ? 'mdi-check-circle' : 'mdi-minus-circle'"
-                :color="item.isDefault ? 'success' : 'grey'"
-                size="small"
-              ></v-icon>
+            <!-- Cột Đơn vị tính -->
+            <template v-slot:item.unitId="{ item }">
+              {{ getUnitNameById(item.unitId) }}
             </template>
             
             <!-- Cột Hành động -->
@@ -121,6 +105,17 @@
               </div>
             </template>
           </v-data-table>
+          
+          <!-- Phân trang cho kích thước -->
+          <div class="d-flex justify-center mt-4">
+            <v-pagination
+              v-if="sizeUnitStore.totalProductSizes > 0"
+              v-model="sizePage"
+              :length="sizeUnitStore.totalSizePages"
+              :total-visible="7"
+              @update:model-value="handleSizePageChange"
+            ></v-pagination>
+          </div>
         </v-card>
       </v-window-item>
       
@@ -145,7 +140,7 @@
           
           <v-data-table
             :headers="unitHeaders"
-            :items="units"
+            :items="sizeUnitStore.units"
             :loading="sizeUnitStore.loading"
             loading-text="Đang tải dữ liệu..."
             no-data-text="Không có dữ liệu"
@@ -171,15 +166,6 @@
               </v-chip>
             </template>
             
-            <!-- Cột mặc định -->
-            <template v-slot:item.isDefault="{ item }">
-              <v-icon
-                :icon="item.isDefault ? 'mdi-check-circle' : 'mdi-minus-circle'"
-                :color="item.isDefault ? 'success' : 'grey'"
-                size="small"
-              ></v-icon>
-            </template>
-            
             <!-- Cột Hành động -->
             <template v-slot:item.actions="{ item }">
               <div class="d-flex gap-2">
@@ -203,66 +189,60 @@
               </div>
             </template>
           </v-data-table>
+          
+          <!-- Phân trang cho đơn vị tính -->
+          <div class="d-flex justify-center mt-4">
+            <v-pagination
+              v-if="sizeUnitStore.totalUnits > 0"
+              v-model="unitPage"
+              :length="sizeUnitStore.totalUnitPages"
+              :total-visible="7"
+              @update:model-value="handleUnitPageChange"
+            ></v-pagination>
+          </div>
         </v-card>
       </v-window-item>
     </v-window>
     
-    <!-- Dialog thêm mới -->
-    <v-dialog v-model="addDialog" width="500" persistent>
+    <!-- Dialog thêm/chỉnh sửa kích thước -->
+    <v-dialog v-model="sizeDialog" width="500" persistent>
       <v-card>
         <v-card-title class="text-h5 font-weight-bold pa-4">
-          {{ dialogTitle }}
+          {{ editMode ? 'Chỉnh sửa kích thước' : 'Thêm kích thước mới' }}
         </v-card-title>
         
         <v-divider></v-divider>
         
         <v-card-text class="pa-4">
-          <v-form ref="addForm" @submit.prevent="saveSizeUnit">
-            <v-radio-group v-model="editedItem.type" class="mb-3">
-              <v-radio
-                label="Kích thước"
-                value="SIZE"
-              ></v-radio>
-              <v-radio
-                label="Đơn vị tính"
-                value="UNIT"
-              ></v-radio>
-            </v-radio-group>
-            
+          <v-form ref="sizeForm" @submit.prevent="saveSizeData">
             <v-text-field
-              v-model="editedItem.name"
-              label="Tên"
+              v-model="editedSize.name"
+              label="Tên kích thước"
               variant="outlined"
               required
-              :rules="[v => !!v || 'Vui lòng nhập tên']"
+              :rules="[v => !!v || 'Vui lòng nhập tên kích thước']"
               class="mb-3"
             ></v-text-field>
             
-            <v-text-field
-              v-model="editedItem.symbol"
-              label="Ký hiệu"
+            <v-select
+              v-model="editedSize.unitId"
+              :items="unitsForSelect"
+              label="Đơn vị tính"
               variant="outlined"
               required
-              :rules="[v => !!v || 'Vui lòng nhập ký hiệu']"
+              :rules="[v => !!v || 'Vui lòng chọn đơn vị tính']"
+              class="mb-3"
+            ></v-select>
+            
+            <v-text-field
+              v-model="editedSize.quantity"
+              label="Số lượng"
+              variant="outlined"
+              required
+              type="number"
+              :rules="[v => !!v || 'Vui lòng nhập số lượng']"
               class="mb-3"
             ></v-text-field>
-            
-            <v-textarea
-              v-model="editedItem.description"
-              label="Mô tả"
-              variant="outlined"
-              auto-grow
-              rows="3"
-              class="mb-3"
-            ></v-textarea>
-            
-            <v-switch
-              v-model="editedItem.isDefault"
-              label="Đặt làm mặc định"
-              color="primary"
-              hide-details
-              class="mb-3"
-            ></v-switch>
           </v-form>
         </v-card-text>
         
@@ -270,10 +250,57 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeSizeDialog">Hủy</v-btn>
           <v-btn 
             color="primary" 
-            @click="saveSizeUnit" 
+            @click="saveSizeData" 
+            :loading="sizeUnitStore.loading"
+          >
+            Lưu
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <!-- Dialog thêm/chỉnh sửa đơn vị tính -->
+    <v-dialog v-model="unitDialog" width="500" persistent>
+      <v-card>
+        <v-card-title class="text-h5 font-weight-bold pa-4">
+          {{ editMode ? 'Chỉnh sửa đơn vị tính' : 'Thêm đơn vị tính mới' }}
+        </v-card-title>
+        
+        <v-divider></v-divider>
+        
+        <v-card-text class="pa-4">
+          <v-form ref="unitForm" @submit.prevent="saveUnitData">
+            <v-text-field
+              v-model="editedUnit.name"
+              label="Tên đơn vị tính"
+              variant="outlined"
+              required
+              :rules="[v => !!v || 'Vui lòng nhập tên đơn vị tính']"
+              class="mb-3"
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="editedUnit.symbol"
+              label="Ký hiệu"
+              variant="outlined"
+              required
+              :rules="[v => !!v || 'Vui lòng nhập ký hiệu']"
+              class="mb-3"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+        
+        <v-divider></v-divider>
+        
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="closeUnitDialog">Hủy</v-btn>
+          <v-btn 
+            color="primary" 
+            @click="saveUnitData" 
             :loading="sizeUnitStore.loading"
           >
             Lưu
@@ -290,18 +317,23 @@
         </v-card-title>
         
         <v-card-text class="pa-4">
-          Bạn có chắc chắn muốn xóa {{ isSize ? 'kích thước' : 'đơn vị tính' }} <strong>{{ editedItem.name }}</strong>?
-          <p class="text-medium-emphasis mt-2">Lưu ý: Sản phẩm sử dụng {{ isSize ? 'kích thước' : 'đơn vị tính' }} này sẽ bị ảnh hưởng.</p>
+          <p v-if="activeTab === 'size'">
+            Bạn có chắc chắn muốn xóa kích thước <strong>{{ editedSize.name }}</strong>?
+          </p>
+          <p v-else>
+            Bạn có chắc chắn muốn xóa đơn vị tính <strong>{{ editedUnit.name }}</strong>?
+          </p>
+          <p class="text-medium-emphasis mt-2">Lưu ý: Sản phẩm sử dụng dữ liệu này sẽ bị ảnh hưởng.</p>
         </v-card-text>
         
         <v-divider></v-divider>
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
           <v-btn 
             color="error" 
-            @click="deleteSelectedItem" 
+            @click="deleteItem" 
             :loading="sizeUnitStore.loading"
           >
             Xóa
@@ -321,7 +353,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useSizeUnitStore } from '@/stores/sizeUnit'
 
 // Khởi tạo store
@@ -331,16 +363,25 @@ const sizeUnitStore = useSizeUnitStore()
 const activeTab = ref('size')
 const searchSizeQuery = ref('')
 const searchUnitQuery = ref('')
-const addDialog = ref(false)
+const sizePage = ref(1)
+const unitPage = ref(1)
+const sizeDialog = ref(false)
+const unitDialog = ref(false)
 const deleteDialog = ref(false)
 const editMode = ref(false)
-const editedItem = ref({
+
+// Đối tượng đang được chỉnh sửa
+const editedSize = ref({
   id: null,
   name: '',
-  symbol: '',
-  description: '',
-  type: 'SIZE',
-  isDefault: false
+  unitId: null,
+  quantity: 0
+})
+
+const editedUnit = ref({
+  id: null,
+  name: '',
+  symbol: ''
 })
 
 const snackbar = ref({
@@ -348,36 +389,16 @@ const snackbar = ref({
   message: '',
   color: 'success'
 })
-const addForm = ref(null)
 
-// Mẫu dữ liệu kích thước và đơn vị tính
-const sizeUnitsData = ref([
-  { id: 1, name: 'Nhỏ', symbol: 'S', description: 'Kích thước nhỏ', type: 'SIZE', isDefault: false },
-  { id: 2, name: 'Vừa', symbol: 'M', description: 'Kích thước vừa', type: 'SIZE', isDefault: true },
-  { id: 3, name: 'Lớn', symbol: 'L', description: 'Kích thước lớn', type: 'SIZE', isDefault: false },
-  { id: 4, name: 'Cực lớn', symbol: 'XL', description: 'Kích thước cực lớn', type: 'SIZE', isDefault: false },
-  { id: 5, name: 'Mililít', symbol: 'ml', description: 'Đơn vị đo dung tích', type: 'UNIT', isDefault: true },
-  { id: 6, name: 'Gram', symbol: 'g', description: 'Đơn vị đo khối lượng', type: 'UNIT', isDefault: false },
-  { id: 7, name: 'Gói', symbol: 'bag', description: 'Đơn vị đếm', type: 'UNIT', isDefault: false }
-])
-
-// Lọc ra danh sách kích thước
-const sizes = computed(() => {
-  return sizeUnitsData.value.filter(item => item.type === 'SIZE')
-})
-
-// Lọc ra danh sách đơn vị tính
-const units = computed(() => {
-  return sizeUnitsData.value.filter(item => item.type === 'UNIT')
-})
+const sizeForm = ref(null)
+const unitForm = ref(null)
 
 // Cấu hình headers cho bảng kích thước
 const sizeHeaders = [
   { title: 'STT', key: 'index', width: '80px', sortable: false },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
-  { title: 'Ký hiệu', key: 'symbol', align: 'start', sortable: true, width: '100px' },
-  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
-  { title: 'Mặc định', key: 'isDefault', align: 'center', sortable: false, width: '100px' },
+  { title: 'Đơn vị tính', key: 'unitId', align: 'start', sortable: false },
+  { title: 'Số lượng', key: 'quantity', align: 'start', sortable: true, width: '100px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '120px' }
 ]
 
@@ -386,32 +407,47 @@ const unitHeaders = [
   { title: 'STT', key: 'index', width: '80px', sortable: false },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
   { title: 'Ký hiệu', key: 'symbol', align: 'start', sortable: true, width: '100px' },
-  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
-  { title: 'Mặc định', key: 'isDefault', align: 'center', sortable: false, width: '100px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '120px' }
 ]
 
-// Kiểm tra xem đang làm việc với kích thước hay không
-const isSize = computed(() => {
-  return editedItem.value.type === 'SIZE'
+// Danh sách đơn vị tính cho select dropdown
+const unitsForSelect = computed(() => {
+  return sizeUnitStore.units.map(unit => ({
+    title: `${unit.name} (${unit.symbol})`,
+    value: unit.id
+  }))
 })
 
-// Tiêu đề dialog
-const dialogTitle = computed(() => {
-  if (editMode.value) {
-    return `Chỉnh sửa ${isSize.value ? 'kích thước' : 'đơn vị tính'}`
+// Lấy tên đơn vị tính theo ID
+function getUnitNameById(unitId) {
+  const unit = sizeUnitStore.units.find(u => u.id === unitId)
+  return unit ? `${unit.name} (${unit.symbol})` : 'Không xác định'
+}
+
+// Tải dữ liệu
+async function loadData() {
+  if (activeTab.value === 'size') {
+    await loadSizes()
+  } else {
+    await loadUnits()
   }
-  return `Thêm ${isSize.value ? 'kích thước' : 'đơn vị tính'} mới`
-})
+}
 
-// Tải danh sách kích thước và đơn vị tính
-async function loadSizeUnits() {
+// Tải danh sách kích thước
+async function loadSizes() {
   try {
-    // Trong thực tế sẽ gọi API từ store
-    // await sizeUnitStore.fetchSizeUnits()
-    console.log('Đã tải danh sách kích thước và đơn vị tính')
+    await sizeUnitStore.fetchProductSizes(sizePage.value - 1, 10)
   } catch (error) {
-    showSnackbar('Không thể tải danh sách kích thước và đơn vị tính.', 'error')
+    console.error('Lỗi khi tải danh sách kích thước:', error)
+  }
+}
+
+// Tải danh sách đơn vị tính
+async function loadUnits() {
+  try {
+    await sizeUnitStore.fetchUnits(unitPage.value - 1, 10)
+  } catch (error) {
+    console.error('Lỗi khi tải danh sách đơn vị tính:', error)
   }
 }
 
@@ -420,8 +456,8 @@ let searchSizeTimeout = null
 function debounceSizeSearch() {
   clearTimeout(searchSizeTimeout)
   searchSizeTimeout = setTimeout(() => {
-    // Trong thực tế sẽ gọi API với tham số tìm kiếm
-    console.log('Tìm kiếm kích thước:', searchSizeQuery.value)
+    // Thực hiện tìm kiếm
+    loadSizes()
   }, 500)
 }
 
@@ -430,124 +466,156 @@ let searchUnitTimeout = null
 function debounceUnitSearch() {
   clearTimeout(searchUnitTimeout)
   searchUnitTimeout = setTimeout(() => {
-    // Trong thực tế sẽ gọi API với tham số tìm kiếm
-    console.log('Tìm kiếm đơn vị tính:', searchUnitQuery.value)
+    // Thực hiện tìm kiếm
+    loadUnits()
   }, 500)
 }
 
 // Mở dialog thêm mới
 function openAddDialog() {
   editMode.value = false
-  editedItem.value = {
-    id: null,
-    name: '',
-    symbol: '',
-    description: '',
-    type: activeTab.value === 'size' ? 'SIZE' : 'UNIT',
-    isDefault: false
+  
+  if (activeTab.value === 'size') {
+    editedSize.value = {
+      id: null,
+      name: '',
+      unitId: null,
+      quantity: 0
+    }
+    sizeDialog.value = true
+  } else {
+    editedUnit.value = {
+      id: null,
+      name: '',
+      symbol: ''
+    }
+    unitDialog.value = true
   }
-  addDialog.value = true
 }
 
 // Mở dialog chỉnh sửa kích thước
 function openEditSizeDialog(item) {
   editMode.value = true
-  editedItem.value = { ...item }
-  addDialog.value = true
+  editedSize.value = { ...item }
+  sizeDialog.value = true
 }
 
 // Mở dialog chỉnh sửa đơn vị tính
 function openEditUnitDialog(item) {
   editMode.value = true
-  editedItem.value = { ...item }
-  addDialog.value = true
+  editedUnit.value = { ...item }
+  unitDialog.value = true
 }
 
 // Mở dialog xác nhận xóa kích thước
 function openDeleteSizeDialog(item) {
-  editedItem.value = { ...item }
+  editedSize.value = { ...item }
+  activeTab.value = 'size'
   deleteDialog.value = true
 }
 
 // Mở dialog xác nhận xóa đơn vị tính
 function openDeleteUnitDialog(item) {
-  editedItem.value = { ...item }
+  editedUnit.value = { ...item }
+  activeTab.value = 'unit'
   deleteDialog.value = true
 }
 
-// Đóng dialog
-function closeDialog() {
-  addDialog.value = false
-  deleteDialog.value = false
-  
-  setTimeout(() => {
-    editedItem.value = {
-      id: null,
-      name: '',
-      symbol: '',
-      description: '',
-      type: activeTab.value === 'size' ? 'SIZE' : 'UNIT',
-      isDefault: false
-    }
-  }, 300)
+// Đóng dialog kích thước
+function closeSizeDialog() {
+  sizeDialog.value = false
 }
 
-// Lưu kích thước/đơn vị tính
-async function saveSizeUnit() {
-  if (!addForm.value) return
+// Đóng dialog đơn vị tính
+function closeUnitDialog() {
+  unitDialog.value = false
+}
+
+// Đóng dialog xác nhận xóa
+function closeDeleteDialog() {
+  deleteDialog.value = false
+}
+
+// Lưu dữ liệu kích thước
+async function saveSizeData() {
+  if (!sizeForm.value) return
   
-  const { valid } = await addForm.value.validate()
+  const { valid } = await sizeForm.value.validate()
   if (!valid) return
   
   try {
-    // Trong thực tế sẽ gọi API từ store
-    console.log('Lưu dữ liệu:', editedItem.value)
-    
     if (editMode.value) {
-      // Cập nhật dữ liệu hiện có
-      const index = sizeUnitsData.value.findIndex(item => item.id === editedItem.value.id)
-      if (index !== -1) {
-        sizeUnitsData.value[index] = { ...editedItem.value }
-      }
-      showSnackbar(`${isSize.value ? 'Kích thước' : 'Đơn vị tính'} đã được cập nhật thành công.`, 'success')
+      await sizeUnitStore.updateProductSize(editedSize.value.id, editedSize.value)
+      showSnackbar('Kích thước đã được cập nhật thành công', 'success')
     } else {
-      // Thêm dữ liệu mới
-      const newId = Math.max(...sizeUnitsData.value.map(item => item.id)) + 1
-      sizeUnitsData.value.push({ ...editedItem.value, id: newId })
-      showSnackbar(`${isSize.value ? 'Kích thước' : 'Đơn vị tính'} đã được tạo thành công.`, 'success')
+      await sizeUnitStore.createProductSize(editedSize.value)
+      showSnackbar('Kích thước đã được tạo thành công', 'success')
     }
     
-    // Nếu item mới được đặt làm mặc định, cập nhật các item khác
-    if (editedItem.value.isDefault) {
-      sizeUnitsData.value.forEach(item => {
-        if (item.id !== editedItem.value.id && item.type === editedItem.value.type) {
-          item.isDefault = false
-        }
-      })
-    }
-    
-    closeDialog()
+    closeSizeDialog()
+    loadSizes()
   } catch (error) {
-    showSnackbar(`Không thể ${editMode.value ? 'cập nhật' : 'tạo'} ${isSize.value ? 'kích thước' : 'đơn vị tính'}. Vui lòng thử lại.`, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
   }
 }
 
-// Xóa kích thước/đơn vị tính đã chọn
-async function deleteSelectedItem() {
+// Lưu dữ liệu đơn vị tính
+async function saveUnitData() {
+  if (!unitForm.value) return
+  
+  const { valid } = await unitForm.value.validate()
+  if (!valid) return
+  
   try {
-    // Trong thực tế sẽ gọi API từ store
-    console.log('Xóa dữ liệu:', editedItem.value)
-    
-    const index = sizeUnitsData.value.findIndex(item => item.id === editedItem.value.id)
-    if (index !== -1) {
-      sizeUnitsData.value.splice(index, 1)
+    if (editMode.value) {
+      await sizeUnitStore.updateUnit(editedUnit.value.id, editedUnit.value)
+      showSnackbar('Đơn vị tính đã được cập nhật thành công', 'success')
+    } else {
+      await sizeUnitStore.createUnit(editedUnit.value)
+      showSnackbar('Đơn vị tính đã được tạo thành công', 'success')
     }
     
-    showSnackbar(`${isSize.value ? 'Kích thước' : 'Đơn vị tính'} đã được xóa thành công.`, 'success')
-    closeDialog()
+    closeUnitDialog()
+    loadUnits()
+    
+    // Nếu đã thêm đơn vị tính mới và đang ở tab kích thước, cập nhật danh sách đơn vị tính cho dropdown
+    if (activeTab.value === 'size') {
+      await sizeUnitStore.fetchUnits(0, 100)
+    }
   } catch (error) {
-    showSnackbar(`Không thể xóa ${isSize.value ? 'kích thước' : 'đơn vị tính'}. Vui lòng thử lại.`, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
   }
+}
+
+// Xóa item (kích thước hoặc đơn vị tính)
+async function deleteItem() {
+  try {
+    if (activeTab.value === 'size') {
+      await sizeUnitStore.deleteProductSize(editedSize.value.id)
+      showSnackbar('Kích thước đã được xóa thành công', 'success')
+      loadSizes()
+    } else {
+      await sizeUnitStore.deleteUnit(editedUnit.value.id)
+      showSnackbar('Đơn vị tính đã được xóa thành công', 'success')
+      loadUnits()
+    }
+    
+    closeDeleteDialog()
+  } catch (error) {
+    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+  }
+}
+
+// Xử lý thay đổi trang kích thước
+function handleSizePageChange(page) {
+  sizePage.value = page
+  loadSizes()
+}
+
+// Xử lý thay đổi trang đơn vị tính
+function handleUnitPageChange(page) {
+  unitPage.value = page
+  loadUnits()
 }
 
 // Hiển thị snackbar thông báo
@@ -560,8 +628,15 @@ function showSnackbar(message, color = 'success') {
 }
 
 // Hook lifecycle - mounted
-onMounted(() => {
-  loadSizeUnits()
+onMounted(async () => {
+  // Tải đơn vị tính trước để có thể hiển thị trong bảng kích thước
+  await sizeUnitStore.fetchUnits(0, 100)
+  loadData()
+})
+
+// Theo dõi thay đổi tab
+watch(activeTab, () => {
+  loadData()
 })
 </script>
 
