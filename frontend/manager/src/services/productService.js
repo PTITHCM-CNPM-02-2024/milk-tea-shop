@@ -2,9 +2,15 @@ import api from './api'
 
 export const productService = {
   // Lấy danh sách sản phẩm
-  getProducts(page = 0, size = 10) {
+  getProducts(page = 0, size = 10, filters = {}) {
     return api.get('/products', {
-      params: { page, size }
+      params: { 
+        page, 
+        size,
+        name: filters.name || undefined,
+        categoryId: filters.categoryId || undefined,
+        status: filters.status || undefined
+      }
     })
   },
   
@@ -29,9 +35,13 @@ export const productService = {
   },
 
   // Lấy danh sách danh mục
-  getCategories(page = 0, size = 100) {
+  getCategories(page = 0, size = 100, name = '') {
     return api.get('/categories', {
-      params: { page, size }
+      params: { 
+        page, 
+        size,
+        name: name || undefined
+      }
     })
   },
   

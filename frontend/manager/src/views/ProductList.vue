@@ -77,7 +77,6 @@
                   variant="outlined"
                   hide-details
                   clearable
-                  @update:model-value="loadProducts"
                 ></v-select>
               </v-col>
               
@@ -90,7 +89,6 @@
                   variant="outlined"
                   hide-details
                   clearable
-                  @update:model-value="loadProducts"
                 ></v-select>
               </v-col>
               
@@ -111,7 +109,7 @@
             <!-- Grid hiển thị sản phẩm -->
             <v-row class="px-2">
               <v-col 
-                v-for="product in productStore.products" 
+                v-for="product in paginatedProducts" 
                 :key="product.id" 
                 cols="12" 
                 sm="6" 
@@ -173,7 +171,7 @@
 
               <!-- Hiển thị khi không có dữ liệu -->
               <v-col 
-                v-if="!productStore.loading && productStore.products.length === 0" 
+                v-if="!productStore.loading && filteredProducts.length === 0" 
                 cols="12"
                 class="text-center py-6"
               >
@@ -190,6 +188,19 @@
                   <v-skeleton-loader type="card" height="300"></v-skeleton-loader>
                 </v-col>
               </template>
+            </v-row>
+
+            <!-- Pagination cho sản phẩm -->
+            <v-row v-if="filteredProducts.length > 0" class="py-4">
+              <v-col cols="12" class="d-flex justify-center">
+                <v-pagination
+                  v-model="productPage"
+                  :length="totalProductPages"
+                  :total-visible="5"
+                  @update:model-value="handleProductPageChange"
+                  rounded
+                ></v-pagination>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -265,6 +276,19 @@
                 <v-skeleton-loader type="list-item-avatar-two-line"></v-skeleton-loader>
               </div>
             </v-list>
+
+            <!-- Pagination cho danh mục -->
+            <v-row v-if="productStore.categories.length > 0" class="py-4">
+              <v-col cols="12" class="d-flex justify-center">
+                <v-pagination
+                  v-model="categoryPage"
+                  :length="Math.ceil(categoryTotal / categoryPageSize)"
+                  :total-visible="5"
+                  @update:model-value="handleCategoryPageChange"
+                  rounded
+                ></v-pagination>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-window-item>
@@ -597,7 +621,11 @@ import { debounce } from 'lodash'
 const productStore = useProductStore()
 
 // State cho sản phẩm
-const page = ref(1)
+const productPage = ref(1)
+const productPageSize = ref(12)
+const categoryPage = ref(1)
+const categoryPageSize = ref(10)
+const categoryTotal = ref(0)
 const searchQuery = ref('')
 const selectedCategory = ref(null)
 const selectedStatus = ref(null)
@@ -621,6 +649,9 @@ const defaultProduct = {
   signature: false
 }
 
+// Lưu trữ toàn bộ sản phẩm để lọc ở frontend
+const allProducts = ref([])
+
 // State cho danh mục
 const addCategoryDialog = ref(false)
 const editCategoryDialog = ref(false)
@@ -643,9 +674,47 @@ const snackbar = reactive({
   color: 'success'
 })
 
-// Computed
+// Computed properties cho lọc và phân trang
 const hasFilters = computed(() => {
   return searchQuery.value || selectedCategory.value || selectedStatus.value
+})
+
+// Lọc sản phẩm ở frontend
+const filteredProducts = computed(() => {
+  let result = [...allProducts.value]
+  
+  // Lọc theo tên sản phẩm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(product => 
+      product.name.toLowerCase().includes(query) || 
+      (product.description && product.description.toLowerCase().includes(query))
+    )
+  }
+  
+  // Lọc theo danh mục
+  if (selectedCategory.value) {
+    result = result.filter(product => product.catId === selectedCategory.value)
+  }
+  
+  // Lọc theo trạng thái
+  if (selectedStatus.value) {
+    result = result.filter(product => product.status === selectedStatus.value)
+  }
+  
+  return result
+})
+
+// Sản phẩm đã được phân trang
+const paginatedProducts = computed(() => {
+  const startIndex = (productPage.value - 1) * productPageSize.value
+  const endIndex = startIndex + productPageSize.value
+  return filteredProducts.value.slice(startIndex, endIndex)
+})
+
+// Tổng số trang sau khi lọc
+const totalProductPages = computed(() => {
+  return Math.ceil(filteredProducts.value.length / productPageSize.value)
 })
 
 const categoryOptions = computed(() => {
@@ -662,12 +731,26 @@ const statusOptions = ref([
 ])
 
 // Methods cho sản phẩm
-const loadProducts = () => {
-  productStore.fetchProducts(page.value - 1, 12)
+const loadProducts = async () => {
+  try {
+    const response = await productStore.fetchProducts(0, 1000) // Lấy tất cả sản phẩm
+    allProducts.value = response.content || []
+    // Reset lại trang khi cập nhật bộ lọc
+    if (hasFilters.value) {
+      productPage.value = 1
+    }
+  } catch (error) {
+    console.error("Lỗi khi tải sản phẩm:", error)
+  }
 }
 
-const loadCategories = () => {
-  productStore.fetchCategories()
+const loadCategories = async () => {
+  try {
+    const response = await productStore.fetchCategories(categoryPage.value - 1, categoryPageSize.value)
+    categoryTotal.value = response.totalElements || 0
+  } catch (error) {
+    console.error("Lỗi khi tải danh mục:", error)
+  }
 }
 
 const getCategoryName = (catId) => {
@@ -730,22 +813,20 @@ const deleteSelectedProduct = async () => {
   }
 }
 
-const handlePageChange = (newPage) => {
-  page.value = newPage
-  loadProducts()
+const handleProductPageChange = (newPage) => {
+  productPage.value = newPage
 }
 
 const resetFilters = () => {
   searchQuery.value = ''
   selectedCategory.value = null
   selectedStatus.value = null
-  loadProducts()
+  productPage.value = 1
 }
 
 // Methods cho danh mục
 const selectCategory = (category) => {
   selectedCategory.value = category.id
-  loadProducts()
 }
 
 const openAddCategoryDialog = () => {
@@ -806,11 +887,15 @@ const deleteSelectedCategory = async () => {
     // Nếu đang lọc theo danh mục này, reset lọc
     if (selectedCategory.value === editedCategory.value.id) {
       selectedCategory.value = null
-      loadProducts()
     }
   } catch (error) {
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
   }
+}
+
+const handleCategoryPageChange = (newPage) => {
+  categoryPage.value = newPage
+  loadCategories()
 }
 
 // Snackbar
@@ -822,7 +907,7 @@ const showSnackbar = (text, color = 'success') => {
 
 // Debounce search
 const debounceSearch = debounce(() => {
-  loadProducts()
+  productPage.value = 1 // Reset về trang đầu tiên khi tìm kiếm
 }, 300)
 
 // Lifecycle
@@ -838,8 +923,12 @@ watch(activeTab, (newTab) => {
     loadCategories()
   } else {
     // Có thể làm gì đó khi chuyển sang tab sản phẩm
-    loadProducts()
   }
+})
+
+// Theo dõi các thay đổi bộ lọc
+watch([searchQuery, selectedCategory, selectedStatus], () => {
+  productPage.value = 1 // Reset lại trang 1 khi thay đổi bộ lọc
 })
 </script>
 

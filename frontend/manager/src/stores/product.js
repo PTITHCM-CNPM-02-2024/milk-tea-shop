@@ -16,7 +16,7 @@ export const useProductStore = defineStore('product', () => {
   const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value))
   
   // Lấy danh sách sản phẩm
-  async function fetchProducts(page = 0, size = 10) {
+  async function fetchProducts(page = 0, size = 10, filters = {}) {
     loading.value = true
     error.value = null
     
@@ -24,7 +24,7 @@ export const useProductStore = defineStore('product', () => {
       currentPage.value = page
       pageSize.value = size
       
-      const response = await productService.getProducts(page, size)
+      const response = await productService.getProducts(page, size, filters)
       products.value = response.data.content || []
       totalProducts.value = response.data.totalElements || 0
       return response.data
@@ -107,12 +107,12 @@ export const useProductStore = defineStore('product', () => {
   }
   
   // Lấy danh sách danh mục
-  async function fetchCategories(page = 0, size = 100) {
+  async function fetchCategories(page = 0, size = 100, name = '') {
     loading.value = true
     error.value = null
     
     try {
-      const response = await productService.getCategories(page, size)
+      const response = await productService.getCategories(page, size, name)
       categories.value = response.data.content || []
       return response.data
     } catch (err) {
