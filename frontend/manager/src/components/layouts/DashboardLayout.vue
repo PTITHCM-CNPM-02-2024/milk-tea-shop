@@ -76,14 +76,38 @@
         </v-list-group>
 
         <!-- Products & Categories -->
-        <v-list-item
-          prepend-icon="mdi-cube-outline"
-          :title="rail ? '' : 'Products & Categories'"
-          value="products"
-          rounded="lg"
-          to="/products"
-          class="mb-1"
-        ></v-list-item>
+        <v-list-group value="products">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-cube-outline"
+              title="Sản phẩm"
+              value="products"
+              rounded="lg"
+              class="mb-1"
+            ></v-list-item>
+          </template>
+          
+          <v-list-item
+            title="Sản phẩm & Danh mục"
+            value="product-and-categories"
+            rounded="lg"
+            prepend-icon="mdi-package-variant-closed"
+            class="ms-2"
+            to="/products/list"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+          
+          <v-list-item
+            title="Kích thước & Đơn vị tính"
+            value="size-units"
+            rounded="lg"
+            prepend-icon="mdi-ruler"
+            class="ms-2"
+            to="/products/size-units"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+        </v-list-group>
 
         <!-- Orders & Payments -->
         <v-list-item

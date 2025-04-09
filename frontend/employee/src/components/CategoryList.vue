@@ -270,7 +270,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 140px;
+  width: 200px;
   height: 120px;
   min-width: 100px;
   flex: 0 0 auto;

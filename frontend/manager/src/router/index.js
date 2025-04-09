@@ -46,11 +46,32 @@ const router = createRouter({
     },
     {
       path: '/products',
-      name: 'products',
-      component: () => import('@/views/ProductsCategories.vue'),
+      component: () => import('@/views/ProductManagementLayout.vue'),
       meta: {
-        title: 'Products & Categories'
-      }
+        title: 'Sản phẩm'
+      },
+      children: [
+        {
+          path: '',
+          redirect: '/products/list'
+        },
+        {
+          path: 'list',
+          name: 'product-list',
+          component: () => import('@/views/ProductList.vue'),
+          meta: {
+            title: 'Sản phẩm & Danh mục'
+          }
+        },
+        {
+          path: 'size-units',
+          name: 'size-units',
+          component: () => import('@/views/SizeUnitManagement.vue'),
+          meta: {
+            title: 'Kích thước & Đơn vị tính'
+          }
+        }
+      ]
     },
     {
       path: '/orders',
