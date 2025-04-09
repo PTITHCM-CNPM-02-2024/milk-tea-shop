@@ -13,8 +13,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name = "Coupon", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "coupon", columnNames = {"coupon"})
+@Table(name = "coupon", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "coupon_uk", columnNames = {"coupon"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

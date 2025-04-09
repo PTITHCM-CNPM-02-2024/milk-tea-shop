@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Account
+create table milk_tea_shop_prod.account
 (
     account_id    int unsigned auto_increment comment 'Mã tài khoản'
         primary key,
@@ -11,13 +11,13 @@ create table milk_tea_shop_prod.Account
     token_version int unsigned default '0'               not null comment 'Kiểm tra tính hợp lệ của token',
     created_at    datetime     default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at    datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    constraint username
+    constraint account_username_uk
         unique (username),
-    constraint Account_ibfk_1
-        foreign key (role_id) references milk_tea_shop_prod.Role (role_id)
+    constraint account_ibfk_1
+        foreign key (role_id) references milk_tea_shop_prod.role (role_id)
             on update cascade
 );
 
-create index role_id
-    on milk_tea_shop_prod.Account (role_id);
+create index account_role_idx
+    on milk_tea_shop_prod.account (role_id);
 

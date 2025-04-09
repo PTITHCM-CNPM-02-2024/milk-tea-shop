@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Product
+create table milk_tea_shop_prod.product
 (
     product_id   mediumint unsigned auto_increment comment 'Mã sản phẩm'
         primary key,
@@ -10,11 +10,11 @@ create table milk_tea_shop_prod.Product
     image_path   varchar(1000)                        null comment 'Đường dẫn mô tả hình ảnh',
     created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    constraint Product_ibfk_1
-        foreign key (category_id) references milk_tea_shop_prod.Category (category_id)
+    constraint product_ibfk_1
+        foreign key (category_id) references milk_tea_shop_prod.category (category_id)
             on update cascade on delete set null
 );
 
-create index category_id
-    on milk_tea_shop_prod.Product (category_id);
+create index product_category_idx
+    on milk_tea_shop_prod.product (category_id);
 

@@ -15,8 +15,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "Category", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "Category_pk", columnNames = {"name"})
+@Table(name = "category", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "category_pk", columnNames = {"name"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

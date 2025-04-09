@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Store
+create table milk_tea_shop_prod.store
 (
     store_id     tinyint unsigned auto_increment comment 'Mã cửa hàng'
         primary key,

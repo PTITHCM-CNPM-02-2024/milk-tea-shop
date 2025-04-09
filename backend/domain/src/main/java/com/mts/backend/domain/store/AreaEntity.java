@@ -20,8 +20,8 @@ import java.util.Set;
 
 
 @Entity
-@Table(name = "Area", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "Area_pk", columnNames = {"name"})
+@Table(name = "area", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "area_pk", columnNames = {"name"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

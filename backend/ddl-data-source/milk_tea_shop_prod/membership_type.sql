@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.MembershipType
+create table milk_tea_shop_prod.membership_type
 (
     membership_type_id tinyint unsigned auto_increment comment 'Mã loại thành viên'
         primary key,
@@ -11,9 +11,9 @@ create table milk_tea_shop_prod.MembershipType
     is_active          tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint MembershipType_pk
+    constraint membership_type_pk
         unique (type),
-    constraint MembershipType_pk_2
+    constraint membership_type_pk_2
         unique (required_point)
 );
 

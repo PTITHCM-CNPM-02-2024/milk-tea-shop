@@ -18,11 +18,11 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "OrderTable", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "order_table", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "order_id", columnList = "order_id"),
         @Index(name = "table_id", columnList = "table_id")
 }, uniqueConstraints = {
-        @UniqueConstraint(name = "OrderTable_pk", columnNames = {"order_id", "table_id"})
+        @UniqueConstraint(name = "order_table_pk", columnNames = {"order_id", "table_id"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

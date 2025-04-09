@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Area
+create table milk_tea_shop_prod.area
 (
     area_id     smallint unsigned auto_increment comment 'Mã khu vực'
         primary key,
@@ -8,7 +8,7 @@ create table milk_tea_shop_prod.Area
     is_active   tinyint(1) default 1                 null comment 'Trạng thái hoạt động (1: Có, 0: Không)',
     created_at  datetime   default CURRENT_TIMESTAMP null,
     updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint Area_pk
+    constraint area_pk
         unique (name)
 );
 

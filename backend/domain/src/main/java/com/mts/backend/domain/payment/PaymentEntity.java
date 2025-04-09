@@ -22,7 +22,7 @@ import java.util.Optional;
 @Getter
 @Setter
 @Entity
-@Table(name = "Payment", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "payment", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "payment_method_id", columnList = "payment_method_id")
 })
 @AttributeOverrides({

@@ -20,7 +20,7 @@ call sp_create_staff_account_with_permissions(
     
 
 
-INSERT INTO Category (category_id, name, description)
+INSERT INTO category (category_id, name, description)
 VALUES (3,UPPER('Trân châu đường đen'), 'Các loại đồ uống kết hợp với trân châu đường đen, mang vị ngọt caramel đặc 
 trưng.') ,
        (4,UPPER('Trà sữa'), 'Danh mục tổng hợp các loại trà sữa truyền thống và phổ biến.'),
@@ -29,7 +29,7 @@ trưng.') ,
        (7,UPPER('Hoa hồng'), 'Đồ uống có thành phần từ hoa hồng, mang hương thơm tự nhiên và thanh mát.'),
        (8,UPPER('Trà giải khát'), 'Các loại trà thảo mộc và trà trái cây giúp giải nhiệt và tăng cường sức khỏe.');
 
-insert into Product (product_id, category_id, name, description, is_available, is_signature, image_path, created_at, updated_at)
+insert into product (product_id, category_id, name, description, is_available, is_signature, image_path, created_at, updated_at)
 values  (1001, 3, 'Sữa tươi trân châu đường đen', 'Một sự kết hợp hoàn hảo giữa vị ngọt thanh của đường đen và sự béo ngậy của sữa tươi nguyên chất. Điểm nhấn chính là những viên trân châu dai mềm, ngấm đều hương đường, tạo nên hương vị khó quên.', 1, 1, 'https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/milk_tcdd.png', '2025-04-02 07:51:34', '2025-04-06 06:59:55'),
         (1002, 3, 'Caramel trân châu đường đen', 'Đậm đà với lớp caramel mịn màng, hòa quyện cùng vị ngọt dịu của đường đen và trân châu dai mềm. Thức uống này mang lại cảm giác ngọt ngào, béo nhẹ, rất thích hợp cho những tín đồ hảo ngọt.', 1, 1, 'https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/caramel_tcdd.png', '2025-04-02 07:51:34', '2025-04-06 06:59:54'),
         (1003, 3, 'Socola trân châu đường đen', 'Hương vị thơm nồng, đậm đà của socola hòa quyện cùng đường đen ngọt thanh. Trân châu dẻo dai làm tăng thêm sự thú vị cho mỗi ngụm thưởng thức. Đây là lựa chọn lý tưởng cho những ai yêu thích sự đậm đà và ngọt ngào.', 1, 1, 'https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/socola_tcdd.png', '2025-04-02 07:51:34', '2025-04-06 06:59:54'),
@@ -84,7 +84,7 @@ values  (1001, 3, 'Sữa tươi trân châu đường đen', 'Một sự kết h
         (6007, 2, 'Phô mai khổng lồ', 'Viên phô mai béo ngậy, tan chảy trong miệng, là lựa chọn tuyệt vời cho những 
 tín đồ phô mai.', 1, 1, 'https://pub-6eff879fefb648ca96740b42eb728d1d.r2.dev/diamond_black.png', '2025-04-02 07:51:34', '2025-04-06 06:59:55');
 
-insert into ProductPrice ( product_id, size_id, price)
+insert into product_price ( product_id, size_id, price)
 values  (1001, 2, 40000.000),
         ( 1001, 3, 45000.000),
         (1002, 2, 45000.000),
@@ -170,7 +170,7 @@ values  (1001, 2, 40000.000),
         (6006, 4, 10000.000),
         ( 6007, 4, 10000.000);
 
-insert into Coupon(coupon_id, coupon, description)
+insert into coupon(coupon_id, coupon, description)
 values (1, 'KHUYENMAI304', 'Khuyến mãi 30/04'),
        (2, 'GIAMGIA01', 'Mã demo'),
        (3, 'GIAMGIA02', 'Giảm giá 20% cho đơn hàng thứ hai'),
@@ -178,27 +178,27 @@ values (1, 'KHUYENMAI304', 'Khuyến mãi 30/04'),
        (5, 'GIAMGIA04', 'Giảm giá 40% cho đơn hàng thứ tư'),
        (6, 'GIAMGIA05', 'Giảm giá 50% cho đơn hàng thứ năm');
 
-insert into Discount (discount_id, name, description, coupon_id, discount_value, discount_type, min_required_order_value, max_discount_amount, min_required_product, valid_from, valid_until, current_uses, max_uses, max_uses_per_customer, is_active, created_at, updated_at)
+insert into discount (discount_id, name, description, coupon_id, discount_value, discount_type, min_required_order_value, max_discount_amount, min_required_product, valid_from, valid_until, current_uses, max_uses, max_uses_per_customer, is_active, created_at, updated_at)
 values  (1, 'Khuyến mãi 30/04', null, 1, 15.000, 'PERCENTAGE', 2000.000, 40000.000, 2, null, '2025-05-30 21:22:16', 
          0, 10000, null, 1, '2025-04-04 21:23:22', '2025-04-05 20:46:31'),
         (2, 'Khuyến mãi 01/05', null, 2, 20000, 'FIXED', 2000.000, 40000.000, 2, null, '2025-05-30 21:22:16',
             0, 10000, 1, 1, '2025-04-04 21:23:22', '2025-04-05 20:46:31');
 
 
-insert into Customer (customer_id, membership_type_id, account_id, last_name, first_name, phone, 
+insert into customer (customer_id, membership_type_id, account_id, last_name, first_name, phone, 
                                          email, current_points, gender)
 values  (4143047638, 1, null, 'PHƯƠNG', 'Nguyễn AN', '0987488914', null, 4, 'FEMALE'),
         (4198039702, 1, null, null, null, '0987456356', null, 1, 'MALE'),
         (4268434481, 3, null, 'NAM', 'NGUYỄN PHONG', '0902147456', null, 57, 'MALE');
 
 
-insert into Area (area_id, name, description, max_tables, is_active, created_at, updated_at)
+insert into area (area_id, name, description, max_tables, is_active, created_at, updated_at)
 values  (1, 'S01', null, null, 1, '2025-04-05 09:02:26', '2025-04-05 09:02:26'),
         (2, 'S02', null, null, 1, '2025-04-05 09:02:40', '2025-04-05 09:02:40'),
         (3, 'S03', null, 20, 1, '2025-04-06 08:17:13', '2025-04-06 08:17:13'),
         (4, 'S04', null, null, 1, '2025-04-06 08:17:26', '2025-04-06 08:17:26');
 
-insert into ServiceTable (table_id, area_id, table_number, is_active, created_at, updated_at)
+insert into service_table (table_id, area_id, table_number, is_active, created_at, updated_at)
 values  (1, 1, 'TB01', 1, '2025-04-05 09:01:11', '2025-04-05 09:04:46'),
         (2, null, 'TB02', 1, '2025-04-05 20:25:25', '2025-04-05 20:25:25'),
         (7, 2, 'TB03', 0, '2025-04-06 08:19:38', '2025-04-06 08:19:38'),

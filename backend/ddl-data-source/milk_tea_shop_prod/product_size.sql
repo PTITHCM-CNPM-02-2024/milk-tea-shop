@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.ProductSize
+create table milk_tea_shop_prod.product_size
 (
     size_id     smallint unsigned auto_increment comment 'Mã kích thước'
         primary key,
@@ -8,10 +8,10 @@ create table milk_tea_shop_prod.ProductSize
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint ProductSize_pk
+    constraint product_size_pk
         unique (unit_id, name),
-    constraint ProductSize_ibfk_1
-        foreign key (unit_id) references milk_tea_shop_prod.UnitOfMeasure (unit_id)
+    constraint product_size_ibfk_1
+        foreign key (unit_id) references milk_tea_shop_prod.unit_of_measure (unit_id)
             on update cascade
 );
 

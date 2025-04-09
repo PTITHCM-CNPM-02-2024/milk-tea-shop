@@ -33,7 +33,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "`Order`", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "`order`", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "employee_id", columnList = "employee_id")
 })
 @AttributeOverrides({

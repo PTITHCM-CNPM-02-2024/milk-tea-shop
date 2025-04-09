@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Manager
+create table milk_tea_shop_prod.manager
 (
     manager_id int unsigned auto_increment comment 'Mã quản lý'
         primary key,
@@ -10,10 +10,10 @@ create table milk_tea_shop_prod.Manager
     email      varchar(100)                       not null comment 'Email',
     created_at datetime default CURRENT_TIMESTAMP null,
     updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint account_id
+    constraint manager_account_uk
         unique (account_id),
-    constraint Manager_ibfk_1
-        foreign key (account_id) references milk_tea_shop_prod.Account (account_id)
+    constraint manager_ibfk_1
+        foreign key (account_id) references milk_tea_shop_prod.account (account_id)
             on update cascade
 );
 

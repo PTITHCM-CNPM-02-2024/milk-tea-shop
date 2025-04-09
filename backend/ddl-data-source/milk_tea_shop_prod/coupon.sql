@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Coupon
+create table milk_tea_shop_prod.coupon
 (
     coupon_id   int unsigned auto_increment comment 'Mã coupon'
         primary key,
@@ -6,7 +6,7 @@ create table milk_tea_shop_prod.Coupon
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint coupon
+    constraint coupon_uk
         unique (coupon)
 );
 

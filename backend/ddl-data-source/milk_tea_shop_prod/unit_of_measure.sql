@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.UnitOfMeasure
+create table milk_tea_shop_prod.unit_of_measure
 (
     unit_id     smallint unsigned auto_increment comment 'Mã đơn vị tính'
         primary key,
@@ -7,9 +7,9 @@ create table milk_tea_shop_prod.UnitOfMeasure
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint UnitOfMeasure_pk
+    constraint unit_of_measure_pk
         unique (name),
-    constraint UnitOfMeasure_pk_2
+    constraint unit_of_measure_pk_2
         unique (symbol)
 );
 

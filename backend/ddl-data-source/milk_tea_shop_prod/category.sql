@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Category
+create table milk_tea_shop_prod.category
 (
     category_id smallint unsigned auto_increment comment 'Mã danh mục'
         primary key,
@@ -6,7 +6,7 @@ create table milk_tea_shop_prod.Category
     description varchar(1000)                      null comment 'Mô tả danh mục',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    constraint Category_pk
+    constraint category_pk
         unique (name)
 );
 

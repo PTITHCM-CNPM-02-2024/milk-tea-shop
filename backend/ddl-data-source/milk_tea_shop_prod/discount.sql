@@ -1,4 +1,4 @@
-create table milk_tea_shop_prod.Discount
+create table milk_tea_shop_prod.discount
 (
     discount_id              int unsigned auto_increment comment 'Mã định danh duy nhất cho chương trình giảm giá'
         primary key,
@@ -18,12 +18,12 @@ create table milk_tea_shop_prod.Discount
     is_active                tinyint(1) default 1                 not null comment 'Trạng thái kích hoạt: 1 - đang hoạt động, 0 - không hoạt động',
     created_at               datetime   default CURRENT_TIMESTAMP null comment 'Thời điểm tạo chương trình giảm giá',
     updated_at               datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời điểm cập nhật gần nhất',
-    constraint Discount_pk
+    constraint discount_pk
         unique (coupon_id),
-    constraint Discount_pk_2
+    constraint discount_pk_2
         unique (name),
-    constraint Discount_ibfk_1
-        foreign key (coupon_id) references milk_tea_shop_prod.Coupon (coupon_id)
+    constraint discount_ibfk_1
+        foreign key (coupon_id) references milk_tea_shop_prod.coupon (coupon_id)
             on update cascade
 );
 

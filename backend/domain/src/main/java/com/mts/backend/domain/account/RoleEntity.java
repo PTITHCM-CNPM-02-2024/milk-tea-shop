@@ -16,8 +16,8 @@ import java.util.Optional;
 @Getter
 @Setter
 @Entity
-@Table(name = "Role", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "Role_pk", columnNames = {"name"})
+@Table(name = "role", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "role_pk", columnNames = {"name"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

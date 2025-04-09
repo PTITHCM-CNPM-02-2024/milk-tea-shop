@@ -17,10 +17,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name = "ServiceTable", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "service_table", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "area_id", columnList = "area_id")
 }, uniqueConstraints = {
-        @UniqueConstraint(name = "ServiceTable_pk", columnNames = {"area_id", "table_number"})
+        @UniqueConstraint(name = "service_table_pk", columnNames = {"area_id", "table_number"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

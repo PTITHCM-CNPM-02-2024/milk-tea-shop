@@ -23,7 +23,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "Product", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "product", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "category_id", columnList = "category_id")
 })
 @AttributeOverrides({

@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name = "Discount", schema = "milk_tea_shop_prod")
+@Table(name = "discount", schema = "milk_tea_shop_prod")
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))

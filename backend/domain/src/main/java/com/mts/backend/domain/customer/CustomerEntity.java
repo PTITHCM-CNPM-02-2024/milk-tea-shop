@@ -20,7 +20,7 @@ import java.util.Optional;
 @Getter
 @Setter
 @Entity
-@Table(name = "Customer", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "customer", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "membership_type_id", columnList = "membership_type_id"),
         @Index(name = "account_id", columnList = "account_id")
 }, uniqueConstraints = {
