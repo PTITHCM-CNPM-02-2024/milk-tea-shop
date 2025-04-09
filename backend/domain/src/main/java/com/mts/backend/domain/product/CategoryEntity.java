@@ -8,7 +8,9 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.springframework.lang.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,7 +37,15 @@ public class CategoryEntity extends BaseEntity<Integer> {
     @Convert(converter = CategoryName.CategoryNameConverter.class)
     @NotNull
     private CategoryName name;
+
+    @OneToMany(mappedBy = "categoryEntity", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ProductEntity> products = new LinkedHashSet<>();
     
+    public Set<ProductEntity> getProducts() {
+        return Set.copyOf(products);
+    }
+
     public boolean changeName(CategoryName name){
         if(this.name.equals(name)){
             return false;

@@ -60,8 +60,13 @@ public class ProductSizeController implements IController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllProductSize() {
-        DefaultSizeQuery query = DefaultSizeQuery.builder().build();
+    public ResponseEntity<?> getAllProductSize(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        DefaultSizeQuery query = DefaultSizeQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
 
         var result = sizeQueryBus.dispatch(query);
 

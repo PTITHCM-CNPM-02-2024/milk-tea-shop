@@ -12,5 +12,6 @@ create table milk_tea_shop_prod.ProductSize
         unique (unit_id, name),
     constraint ProductSize_ibfk_1
         foreign key (unit_id) references milk_tea_shop_prod.UnitOfMeasure (unit_id)
+            on update cascade
 );
 

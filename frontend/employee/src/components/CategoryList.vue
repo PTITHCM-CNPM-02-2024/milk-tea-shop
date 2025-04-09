@@ -19,6 +19,9 @@
           <div class="category-name">
             {{ getCategoryDisplayName(category) }}
           </div>
+          <div v-if="getCategoryMinPrice(category)" class="category-price">
+            {{ formatPrice(getCategoryMinPrice(category)) }}
+          </div>
         </div>
       </div>
     </div>
@@ -58,6 +61,10 @@ const uniqueCategories = computed(() => {
     categoryMap.set(categoryId, category);
   });
 
+  // Debug
+  console.log('Products passed to CategoryList:', props.products);
+  console.log('First product image URL:', props.products && props.products.length > 0 ? (props.products[0].image_url || props.products[0].imageUrl || 'No image URL') : 'No products');
+
   // Chuyển đổi Map thành mảng
   return Array.from(categoryMap.values());
 });
@@ -93,29 +100,100 @@ function getCategoryImage(category) {
   if (!props.products || props.products.length === 0) return null;
   
   const categoryName = getCategoryDisplayName(category).toLowerCase();
+  const categoryId = typeof category === 'object' ? category.id : category;
   
   // Tất cả là danh mục đặc biệt - lấy hình ảnh sản phẩm đầu tiên
   if (categoryName === 'tất cả') {
     const firstProduct = props.products[0];
-    return firstProduct && firstProduct.image_url ? firstProduct.image_url : null;
+    // Kiểm tra cả hai trường hợp image_url và imageUrl
+    return firstProduct && (firstProduct.image_url || firstProduct.imageUrl) 
+      ? (firstProduct.image_url || firstProduct.imageUrl) 
+      : null;
+  }
+
+  // Xử lý danh mục "Không danh mục"
+  if (categoryId === 'null' || categoryId === null) {
+    // Tìm sản phẩm đầu tiên không có danh mục
+    const productsWithoutCategory = props.products.filter(product => {
+      return !product.category || product.category === null || 
+             (typeof product.category === 'object' && product.category.id === null);
+    });
+    
+    if (productsWithoutCategory.length > 0) {
+      const product = productsWithoutCategory[0];
+      // Kiểm tra cả hai trường hợp
+      return product.image_url || product.imageUrl || null;
+    }
+    return null;
   }
   
   // Tìm sản phẩm đầu tiên thuộc danh mục này
-  const categoryId = typeof category === 'object' ? category.id : category;
-  
   const productsInCategory = props.products.filter(product => {
-    if (typeof product.category === 'object') {
-      return product.category && product.category.id === categoryId;
-    }
-    return product.category === categoryId;
+    const productCategoryId = typeof product.category === 'object' 
+      ? (product.category ? product.category.id : null) 
+      : product.category;
+    
+    return productCategoryId === categoryId || 
+           (productCategoryId === categoryId.toString()) || 
+           (productCategoryId && categoryId && productCategoryId.toString() === categoryId.toString());
   });
   
   if (productsInCategory.length > 0) {
     const product = productsInCategory[0];
-    return product.image_url || null;
+    // Kiểm tra cả hai trường hợp
+    return product.image_url || product.imageUrl || null;
   }
   
   return null;
+}
+
+// Lấy giá thấp nhất cho một danh mục
+function getCategoryMinPrice(category) {
+  if (!props.products || props.products.length === 0) return null;
+  
+  const categoryId = typeof category === 'object' ? category.id : category;
+  
+  // Xử lý các trường hợp đặc biệt
+  if (categoryId === 'all' || categoryId === 'null' || categoryId === null) {
+    return null;
+  }
+  
+  // Tìm tất cả sản phẩm thuộc danh mục này
+  const productsInCategory = props.products.filter(product => {
+    const productCategoryId = typeof product.category === 'object' 
+      ? (product.category ? product.category.id : null) 
+      : product.category;
+    
+    return productCategoryId === categoryId || 
+           (productCategoryId === categoryId.toString()) || 
+           (productCategoryId && categoryId && productCategoryId.toString() === categoryId.toString());
+  });
+  
+  if (productsInCategory.length === 0) return null;
+  
+  // Tìm giá thấp nhất từ tất cả sản phẩm trong danh mục
+  const minPrice = Math.min(...productsInCategory.map(product => {
+    // Ưu tiên sử dụng minPrice nếu có
+    if (product.minPrice !== undefined && product.minPrice !== null) {
+      return parseFloat(product.minPrice);
+    }
+    
+    // Nếu không có minPrice, kiểm tra mảng prices
+    if (product.prices && Array.isArray(product.prices) && product.prices.length > 0) {
+      const prices = product.prices.map(p => parseFloat(p.price || 0));
+      return Math.min(...prices);
+    }
+    
+    return Infinity;
+  }));
+  
+  return minPrice !== Infinity ? minPrice : null;
+}
+
+// Format số thành định dạng tiền tệ VND
+function formatPrice(price) {
+  if (price === null || price === undefined) return '';
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 }
 
 function getCategoryIcon(category) {
@@ -294,5 +372,20 @@ onMounted(() => {
   white-space: nowrap;
   z-index: 10;
   display: none; /* Tạm thời ẩn tooltip này */
+}
+
+.category-price {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #FF6B00;
+  margin-top: 4px;
+  background-color: rgba(255, 107, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+.category-card-active .category-price {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.3);
 }
 </style>

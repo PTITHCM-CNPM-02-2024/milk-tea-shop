@@ -6,17 +6,17 @@ import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Entity
@@ -28,6 +28,9 @@ import java.util.Optional;
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
 @Builder
+@Getter
+@Setter
+@AllArgsConstructor
 public class AreaEntity extends BaseEntity<Integer> {
     @Id
     @Comment("Mã khu vực")
@@ -59,6 +62,15 @@ public class AreaEntity extends BaseEntity<Integer> {
     @Column(name = "is_active", nullable = false)
     @NotNull
     private Boolean active;
+
+    @Setter
+    @OneToMany(mappedBy = "areaEntity", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ServiceTableEntity> serviceTables = new LinkedHashSet<>();
+
+    public Set<ServiceTableEntity> getServiceTables() {
+        return Set.copyOf(serviceTables);
+    }
 
     public AreaEntity(@NotNull Integer id, @NotNull AreaName name, String description, MaxTable maxTable,
                       @NotNull Boolean active) {

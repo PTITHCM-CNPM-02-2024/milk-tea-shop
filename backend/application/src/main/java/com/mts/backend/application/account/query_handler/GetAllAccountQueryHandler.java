@@ -8,11 +8,11 @@ import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -32,11 +32,8 @@ public class GetAllAccountQueryHandler implements IQueryHandler<DefaultAccountQu
         
         var accounts = accountRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
 
-        List<AccountDetailResponse> accountDetailResponses = new ArrayList<>();
-        
-        accounts.forEach(account -> {
-            
-            accountDetailResponses.add(AccountDetailResponse.builder()
+        Page<AccountDetailResponse> accountDetailResponses = accounts.map(account -> {
+            return AccountDetailResponse.builder()
                     .id(account.getId())
                     .username(account.getUsername().getValue())
                     .role(RoleDetailResponse.builder()
@@ -44,8 +41,7 @@ public class GetAllAccountQueryHandler implements IQueryHandler<DefaultAccountQu
                             .name(account.getRoleEntity().getName().getValue())
                             .description(account.getRoleEntity().getDescription().orElse(null))
                             .build())
-                    .build());
-            
+                    .build();
         });
         
         return CommandResult.success(accountDetailResponses);

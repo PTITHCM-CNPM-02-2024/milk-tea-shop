@@ -4,7 +4,10 @@ import com.mts.backend.domain.store.AreaEntity;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.AreaName;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +25,7 @@ public interface JpaAreaRepository extends JpaRepository<AreaEntity, Integer> {
     List<AreaEntity> findByActiveTrue();
 
     @Query("select a from AreaEntity a where a.active = :active")
-    List<AreaEntity> findByActive(@Param("active") @NonNull Boolean active, Pageable pageable);
+    Slice<AreaEntity> findByActive(@Param("active") @NonNull Boolean active, Pageable pageable);
 
     @Query("select a from AreaEntity a where a.createdAt is null or a.createdAt > :createdAt")
     List<AreaEntity> findByCreatedAtNullOrCreatedAtGreaterThan(@Param("createdAt") @NonNull LocalDateTime createdAt, Pageable pageable);
@@ -38,10 +41,16 @@ public interface JpaAreaRepository extends JpaRepository<AreaEntity, Integer> {
     @Query("select (count(a) > 0) from AreaEntity a where a.name = :name")
     boolean existsByName(@Param("name") @NonNull AreaName name);
 
-
-    @Query("select a from AreaEntity a where a.active = :isActive")
-    List<AreaEntity> findByIsActive(@Param("isActive") @NonNull Boolean isActive);
-
     @Query("select (count(a) > 0) from AreaEntity a where a.id <> :id and a.name = :name")
     boolean existsByIdNotAndName(@Param("id") Integer id, @Param("name") @NonNull AreaName name);
+    
+    @EntityGraph(attributePaths = {"serviceTables"})
+    @Query("select a from AreaEntity a where a.id = :id")
+    Optional<AreaEntity> findByIdFetch(@Param("id") @NonNull Integer id);
+    
+    @Query("""
+            select a from AreaEntity a
+            where a.active = :active
+            """)
+    Slice<AreaEntity> findAllByActiveNotFetch(@Param("active") @NonNull Boolean active, Pageable pageable);
 }

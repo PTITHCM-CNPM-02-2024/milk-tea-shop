@@ -22,7 +22,8 @@ create table milk_tea_shop_prod.Discount
         unique (coupon_id),
     constraint Discount_pk_2
         unique (name),
-    constraint Discount_ibfk_2
+    constraint Discount_ibfk_1
         foreign key (coupon_id) references milk_tea_shop_prod.Coupon (coupon_id)
+            on update cascade
 );
 

@@ -14,9 +14,7 @@ import java.util.Optional;
 @Builder
 @AllArgsConstructor
 public class  DefaultAreaQuery  implements IQuery<CommandResult> {
-    private Boolean active;
-    
-    public Optional<Boolean> getActive() {
-        return Optional.ofNullable(active);
-    }
+    private Integer page;
+    private Integer size;
+
 }

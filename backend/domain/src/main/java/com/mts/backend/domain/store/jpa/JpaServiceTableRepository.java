@@ -4,6 +4,7 @@ import com.mts.backend.domain.store.ServiceTableEntity;
 import com.mts.backend.domain.store.value_object.TableNumber;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
@@ -18,11 +19,13 @@ import java.util.Set;
 public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEntity, Integer> {
   @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
   @Query("select s from ServiceTableEntity s WHERE s.active = :active")
-  List<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active);
+  Slice<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active, Pageable pageable);
 
   @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
-  @Query("select s from ServiceTableEntity s WHERE s.active = :active")
-  Page<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active, Pageable pageable);
+  @Query("select s from ServiceTableEntity s WHERE s.active = :active and s.areaEntity.id = :areaId")
+  Slice<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active,
+                                                     @Param("areaId") @Nullable Integer areaId, Pageable pageable);
+  
   
   @EntityGraph(attributePaths = {"areaEntity"})
   @Query("select s from ServiceTableEntity s WHERE (s.active = :active or :active is null)")
@@ -30,7 +33,7 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
 
   @EntityGraph(attributePaths = {"areaEntity"})
   @Query("select s from ServiceTableEntity s")
-  List<ServiceTableEntity> findAllFetchArea();
+  Page<ServiceTableEntity> findAllFetchArea(Pageable pageable);
 
 
   @Query("select count(s) from ServiceTableEntity s where s.areaEntity.id = :id")

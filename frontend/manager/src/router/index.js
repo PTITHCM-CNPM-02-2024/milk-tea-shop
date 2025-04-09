@@ -1,58 +1,98 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import EmployeeManagementNew from '@/components/EmployeeManagementNew.vue'
-import CategoryList from '@/components/products/CategoryList.vue'
-import ProductList from '@/components/products/ProductList.vue'
-import ProductDetail from '@/components/products/ProductDetail.vue'
-import OrderList from '@/orders & payment/OrderList.vue'
-import PaymentManagement from '@/orders & payment/PaymentManagement.vue'
-import CustomerList from '@/customersmembers/CustomerList.vue'
-import Membership from '@/customersmembers/Membership.vue'
-import AreasList from '@/components/areastables/AreasList.vue'
-import Tables from '@/components/areastables/Tables.vue'
-import StoreManagement from '@/components/storemanagement/Store.vue'
-import DiscountList from '@/components/discountpromotion/DiscountList.vue'
-import Promotion from '@/components/discountpromotion/Promotion.vue'
+import Dashboard from '@/views/Dashboard.vue'
+import AccountManagementLayout from '@/views/AccountManagementLayout.vue'
+import AccountList from '@/views/AccountList.vue'
+import RoleManagement from '@/views/RoleManagement.vue'
 
-// Tạo đối tượng router với cấu hình đường dẫn và lịch sử web
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-
     {
-      path : '/',
-      name : 'home',
-      redirectTo : '/accounts'
+      path: '/',
+      name: 'dashboard',
+      component: Dashboard,
+      meta: {
+        title: 'Dashboard'
+      }
     },
-    // Quản lý nhân viên
-    { path: '/accounts', component: EmployeeManagementNew },
-
-    // Quản lý sản phẩm và danh mục
-    { path: '/products', component: CategoryList },
-    { path: '/products/categories', component: CategoryList },
-    { path: '/products/product-list', component: ProductList },
-    { path: '/products/product-detail', component: ProductDetail },
-
-    // Quản lý đơn hàng và thanh toán
-    { path: '/orders', component: OrderList },
-    { path: '/orders/list', component: OrderList },
-    { path: '/orders/payment', component: PaymentManagement },
-
-    // Quản lý khách hàng và thành viên
-    { path: '/customers', component: CustomerList },
-    { path: '/customers/list', component: CustomerList },
-    { path: '/customers/membership', component: Membership },
-
-    // Quản lý khu vực và bàn
-    { path: '/areas/list', component: AreasList },
-    { path: '/areas/tables', component: Tables },
-
-    // Quản lý cửa hàng
-    { path: '/store', component: StoreManagement },
-
-    // Quản lý khuyến mãi và giảm giá
-    { path: '/discount/list', component: DiscountList },
-    { path: '/discount/promotion', component: Promotion },
-  ],
+    {
+      path: '/account',
+      component: AccountManagementLayout,
+      meta: {
+        title: 'Tài khoản'
+      },
+      children: [
+        {
+          path: '',
+          redirect: '/account/list'
+        },
+        {
+          path: 'list',
+          name: 'account-list',
+          component: AccountList,
+          meta: {
+            title: 'Quản lý tài khoản'
+          }
+        },
+        {
+          path: 'roles',
+          name: 'roles',
+          component: RoleManagement,
+          meta: {
+            title: 'Quản lý vai trò'
+          }
+        }
+      ]
+    },
+    {
+      path: '/products',
+      name: 'products',
+      component: () => import('@/views/ProductsCategories.vue'),
+      meta: {
+        title: 'Products & Categories'
+      }
+    },
+    {
+      path: '/orders',
+      name: 'orders',
+      //component: () => import('@/views/OrdersPayments.vue'),
+      meta: {
+        title: 'Orders & Payments'
+      }
+    },
+    {
+      path: '/customers',
+      name: 'customers',
+      //component: () => import('@/views/CustomersMembers.vue'),
+      meta: {
+        title: 'Customers & Members'
+      }
+    },
+    {
+      path: '/areas',
+      name: 'areas',
+      //component: () => import('@/views/AreasTables.vue'),
+      meta: {
+        title: 'Areas & Tables'
+      }
+    },
+    {
+      path: '/store',
+      name: 'store',
+      //component: () => import('@/views/StoreManagement.vue'),
+      meta: {
+        title: 'Store Management'
+      }
+    },
+    {
+      path: '/discounts',
+      name: 'discounts',
+      //component: () => import('@/views/DiscountsPromotions.vue'),
+      meta: {
+        title: 'Discounts & Promotions'
+      }
+    }
+  ]
 })
 
 export default router

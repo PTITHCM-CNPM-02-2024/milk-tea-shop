@@ -16,9 +16,4 @@ import java.util.Optional;
 public class DefaultServiceTableQuery implements IQuery<CommandResult> {
     private Integer size;
     private Integer page;
-    private Boolean active;
-    
-    public Optional<Boolean> getActive() {
-        return Optional.ofNullable(active);
-    }
 }

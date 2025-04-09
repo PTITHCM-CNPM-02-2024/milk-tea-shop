@@ -61,7 +61,4 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     
     @EntityGraph(value = "OrderEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
     Optional<OrderEntity> findDetailById(Long id);
-
-    @Query("select exists(select 1 from OrderEntity o where o.orderProducts.productPriceEntity.productEntity.id = :id and o.status = :status)")
-    boolean existsByOrderProducts_ProductPriceEntity_ProductEntity_IdAndStatus(@Param("id") @NonNull Integer id, @Param("status") @NonNull OrderStatus status);
 }

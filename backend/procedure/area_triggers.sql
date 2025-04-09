@@ -70,14 +70,6 @@ CREATE TRIGGER before_area_delete
 BEFORE DELETE ON Area
 FOR EACH ROW
 BEGIN
-    DECLARE order_count INT;
-    -- Kiểm tra xem order có đang xử lý trong khu vực không
-    SELECT COUNT(*) INTO order_count FROM `Order` WHERE area_id = OLD.area_id AND status = 'PROCESSING';
-
-    IF order_count > 0 THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Không thể xóa khu vực có đơn hàng đang xử lý';
-    END IF;
 END //
 
 DELIMITER ;

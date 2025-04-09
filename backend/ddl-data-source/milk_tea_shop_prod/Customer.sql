@@ -17,9 +17,11 @@ create table milk_tea_shop_prod.Customer
     constraint phone
         unique (phone),
     constraint Customer_ibfk_1
-        foreign key (membership_type_id) references milk_tea_shop_prod.MembershipType (membership_type_id),
+        foreign key (membership_type_id) references milk_tea_shop_prod.MembershipType (membership_type_id)
+            on update cascade,
     constraint Customer_ibfk_2
         foreign key (account_id) references milk_tea_shop_prod.Account (account_id)
+            on update cascade on delete set null
 );
 
 create index account_id
@@ -27,4 +29,22 @@ create index account_id
 
 create index membership_type_id
     on milk_tea_shop_prod.Customer (membership_type_id);
+
+grant insert, update on table milk_tea_shop_prod.Customer to test_staff_2_staff;
+
+grant insert, update on table milk_tea_shop_prod.Customer to thanhphuong_staff;
+
+grant insert, update on table milk_tea_shop_prod.Customer to thanhanh2_staff;
+
+grant insert, update on table milk_tea_shop_prod.Customer to vanphong_staff;
+
+grant insert, update on table milk_tea_shop_prod.Customer to vanphong_staff@localhost;
+
+grant insert, update on table milk_tea_shop_prod.Customer to test_staff_2_staff@localhost;
+
+grant insert, update on table milk_tea_shop_prod.Customer to thanhphuong_staff@localhost;
+
+grant insert, update on table milk_tea_shop_prod.Customer to thanhanh_staff@localhost;
+
+grant insert, update on table milk_tea_shop_prod.Customer to thanhanh_staff;
 

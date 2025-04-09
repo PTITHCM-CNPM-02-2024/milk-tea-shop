@@ -36,7 +36,7 @@ public class AreaController implements IController {
         var command = CreateAreaCommand.builder()
                 .name(AreaName.builder().value(request.getName()).build())
                 .isActive(request.getIsActive())
-                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
+                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
                 .build();
 
         var result = commandBus.dispatch(command);
@@ -51,6 +51,9 @@ public class AreaController implements IController {
         var command = UpdateAreaCommand.builder()
                 .areaId(AreaId.of(id))
                 .name(AreaName.builder().value(request.getName()).build())
+                .description(request.getDescription().orElse(null))
+                .active(request.getIsActive())
+                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -58,29 +61,29 @@ public class AreaController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-    @PutMapping("/{id}/max-and-active")
-    public ResponseEntity<?> updateAreaMaxAndActive(@PathVariable("id") Integer id,
-                                                                 @RequestBody UpdateMaxAndActiveRequest request) {
-        
-        var command = UpdateAreaMaxAndActiveCommand.builder()
-                .areaId(AreaId.of(id))
-                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
-                .isActive(request.getIsActive())
-                .build();
-        
-        var result = commandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
-    }
     
     @GetMapping
-    public ResponseEntity<?> getAllArea(@RequestParam(value = "active", required = false) Boolean active) {
-        var query = DefaultAreaQuery.builder().active(active).build();
+    public ResponseEntity<?> getAllArea(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var query = DefaultAreaQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(query);
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
+    }
+    
+    @GetMapping("/active/{active}")
+    public ResponseEntity<?> getAllAreaActive(@PathVariable("active") Boolean active) {
+        var query = AreaActiveQuery.builder().active(active).build();
+        
+        var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")

@@ -11,8 +11,27 @@ create table milk_tea_shop_prod.ServiceTable
         unique (area_id, table_number),
     constraint ServiceTable_ibfk_1
         foreign key (area_id) references milk_tea_shop_prod.Area (area_id)
+            on update cascade on delete set null
 );
 
 create index area_id
     on milk_tea_shop_prod.ServiceTable (area_id);
+
+grant update on table milk_tea_shop_prod.ServiceTable to thanhanh_staff;
+
+grant update on table milk_tea_shop_prod.ServiceTable to test_staff_2_staff@localhost;
+
+grant update on table milk_tea_shop_prod.ServiceTable to vanphong_staff;
+
+grant update on table milk_tea_shop_prod.ServiceTable to test_staff_2_staff;
+
+grant update on table milk_tea_shop_prod.ServiceTable to vanphong_staff@localhost;
+
+grant update on table milk_tea_shop_prod.ServiceTable to thanhanh2_staff;
+
+grant update on table milk_tea_shop_prod.ServiceTable to thanhanh_staff@localhost;
+
+grant update on table milk_tea_shop_prod.ServiceTable to thanhphuong_staff;
+
+grant update on table milk_tea_shop_prod.ServiceTable to thanhphuong_staff@localhost;
 

@@ -109,8 +109,8 @@ public class AccountController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
-                                         @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getAccounts(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         DefaultAccountQuery query = DefaultAccountQuery.builder()
             .page(page)
             .size(size)

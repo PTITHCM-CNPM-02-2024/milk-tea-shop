@@ -70,10 +70,17 @@ public class ServiceTableController implements IController {
                 handleError(result);
     }
     
-    @GetMapping("/active")
-    public ResponseEntity<?> getAllServiceTableActive(@RequestParam(value = "active", defaultValue = 
-            "true") Boolean active) {
-        var query = ServiceTableActiveQuery.builder().active(active).build();
+    @GetMapping("/active/{active}")
+    public ResponseEntity<?> getAllServiceTableActive(@PathVariable("active") Boolean active, 
+                                                        @RequestParam(value = "areaId", required = false) Integer areaId,
+                                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                      @RequestParam(value = "size", defaultValue = "40") Integer size) {
+        var query = ServiceTableActiveQuery.builder()
+                .active(active)
+                .areaId(Objects.isNull(areaId) ? null : AreaId.of(areaId))
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(query);
         
@@ -83,13 +90,13 @@ public class ServiceTableController implements IController {
     
     @GetMapping
     public ResponseEntity<?> getAllServiceTable(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                             @RequestParam(value = "size", defaultValue = "40") Integer size,
-                                                @RequestParam(value = "active", required = false) Boolean active) {
-        var query = DefaultServiceTableQuery.builder().page(page).size(size).active(active).build();
+                                                             @RequestParam(value = "size", defaultValue = "40") Integer size) {
+        var query = DefaultServiceTableQuery.builder().page(page).size(size).build();
         
         var result = queryBus.dispatch(query);
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
+    
 }

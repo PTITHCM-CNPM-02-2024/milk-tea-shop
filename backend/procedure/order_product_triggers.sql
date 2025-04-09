@@ -5,6 +5,15 @@ CREATE TRIGGER before_order_product_insert
 BEFORE INSERT ON OrderProduct
 FOR EACH ROW
 BEGIN
+
+    -- đơn hàng phải ở trạng thái processing
+    DECLARE order_status ENUM('PROCESSING', 'CANCELLED', 'COMPLETED');
+    SELECT status INTO order_status FROM `Order` WHERE order_id = NEW.order_id;
+    IF order_status <> 'PROCESSING' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Không thể thêm sản phẩm vào đơn hàng không ở trạng thái processing';
+    END IF;
+
     -- Kiểm tra số lượng phải lớn hơn 0
     IF NEW.quantity <= 0 THEN
         SIGNAL SQLSTATE '45000'
@@ -17,6 +26,22 @@ CREATE TRIGGER before_order_product_update
 BEFORE UPDATE ON OrderProduct
 FOR EACH ROW
 BEGIN
+
+    -- Kiểm tra xem order ở trạng thái khác PROCESSING thì không được cập nhật
+    DECLARE order_status ENUM('PROCESSING', 'CANCELLED', 'COMPLETED');
+    SELECT status INTO order_status FROM `Order` WHERE order_id = NEW.order_id;
+
+    IF NEW.order_id IS NOT NULL AND NEW.order_id <> OLD.order_id THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Không thể cập nhật số lượng sản phẩm cho đơn hàng khác';
+    END IF;
+
+    -- Kiểm tra xem order ở trạng thái khác PROCESSING thì không được cập nhật
+    IF order_status = 'COMPLETED' OR order_status = 'CANCELLED' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Không được cập nhật số lượng sản phẩm cho đơn hàng đã hoàn thành hoặc đã hủy';
+    END IF;
+
     -- Kiểm tra số lượng phải lớn hơn 0
     IF NEW.quantity <= 0 THEN
         SIGNAL SQLSTATE '45000'

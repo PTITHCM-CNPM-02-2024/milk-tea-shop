@@ -15,5 +15,6 @@ create table milk_tea_shop_prod.Employee
         unique (account_id),
     constraint Employee_ibfk_1
         foreign key (account_id) references milk_tea_shop_prod.Account (account_id)
+            on update cascade
 );
 

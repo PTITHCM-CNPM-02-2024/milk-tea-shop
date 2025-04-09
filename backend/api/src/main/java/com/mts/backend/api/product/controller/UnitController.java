@@ -55,8 +55,13 @@ public class UnitController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getAllUnit(){
-        DefaultUnitQuery query = DefaultUnitQuery.builder().build();
+    public ResponseEntity<?> getAllUnit(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        DefaultUnitQuery query = DefaultUnitQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = unitQueryBus.dispatch(query);
             

@@ -15,6 +15,7 @@ create table milk_tea_shop_prod.Account
         unique (username),
     constraint Account_ibfk_1
         foreign key (role_id) references milk_tea_shop_prod.Role (role_id)
+            on update cascade
 );
 
 create index role_id

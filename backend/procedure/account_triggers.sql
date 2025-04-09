@@ -23,6 +23,10 @@ BEGIN
             SET MESSAGE_TEXT = 'Mật khẩu phải được mã hóa trước khi lưu vào cơ sở dữ liệu';
     END IF;
 
+    -- Đặt token_version mặc định
+    IF NEW.token_version IS NULL THEN
+        SET NEW.token_version = 0;
+    END IF;
 END //
 
 -- Kiểm tra trước khi cập nhật tài khoản
@@ -30,7 +34,6 @@ CREATE TRIGGER before_account_update
 BEFORE UPDATE ON Account
 FOR EACH ROW
 BEGIN
-    
     IF LENGTH(TRIM(NEW.username)) = 0 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tên đăng nhập không được để trống';

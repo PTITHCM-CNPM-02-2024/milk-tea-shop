@@ -7,16 +7,12 @@ import com.mts.backend.api.product.request.UpdateProductInformRequest;
 import com.mts.backend.application.product.ProductCommandBus;
 import com.mts.backend.application.product.ProductQueryBus;
 import com.mts.backend.application.product.command.*;
-import com.mts.backend.application.product.query.DefaultProductQuery;
-import com.mts.backend.application.product.query.ProductForSaleQuery;
-import com.mts.backend.application.product.query.SignatureProductForSaleQuery;
-import com.mts.backend.application.product.query.ToppingForSaleQuery;
+import com.mts.backend.application.product.query.*;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.value_object.ProductName;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,6 +82,17 @@ public class ProductController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProductDetailById(@PathVariable("id") Integer id) {
+        ProdByIdQuery getProductDetailCommand = ProdByIdQuery.builder()
+                .id(ProductId.of(id))
+                .build();
+
+        var result = productQueryBus.dispatch(getProductDetailCommand);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
 
     @PostMapping("/{id}/prices")
     public ResponseEntity<?> createProductPrice(@PathVariable("id") Integer id,
@@ -142,27 +149,15 @@ public class ProductController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok("Giá sản phẩm đã được xóa") : handleError(result);
     }
-
-    @GetMapping("/not-available")
-    public ResponseEntity<?> getUnavailableOrderProductDetail(@RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
-        ProductForSaleQuery getProductDetailCommand = ProductForSaleQuery.builder()
-                .isOrdered(Boolean.FALSE)
-                .page(page)
-                .size(size)
-                .build();
-
-        var result = productQueryBus.dispatch(getProductDetailCommand);
-
-        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
-    }
-
-    @GetMapping("/available")
-    public ResponseEntity<?> getAvailableOrderProductDetail(@RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
+    
+    @GetMapping("/available-order/{available}")
+    public ResponseEntity<?> getAvailableOrderProductDetail(@PathVariable("available") Boolean available,
+                                                            @RequestParam(value = "page",
+            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size
+                                                            ) {
 
         ProductForSaleQuery getProductDetailCommand = ProductForSaleQuery.builder()
-                .isOrdered(Boolean.TRUE)
+                .availableOrder(available)
                 .page(page)
                 .size(size)
                 .build();
@@ -185,26 +180,11 @@ public class ProductController implements IController {
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-    
-    @GetMapping("/unavailable-topping")
-    public ResponseEntity<?> getUnavailableToppingProductDetail(@RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
-        ToppingForSaleQuery getProductDetailCommand = ToppingForSaleQuery.builder()
-                .isOrdered(Boolean.FALSE)
-                .page(page)
-                .size(size)
-                .build();
-        
-        var result = productQueryBus.dispatch(getProductDetailCommand);
-        
-        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
-    }
-
     @GetMapping("/search")
     public ResponseEntity<?> getSignatureProductDetail(@RequestParam(value = "isAvailableOrder",
             required = false, defaultValue = "true") Boolean isAvailableOrder, @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
         SignatureProductForSaleQuery getProductDetailCommand = SignatureProductForSaleQuery.builder()
-                .isOrdered(isAvailableOrder)
+                .availableOrder(isAvailableOrder)
                 .isSignature(isSignature)
                 .build();
 
@@ -212,4 +192,6 @@ public class ProductController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
+    
+    
 }

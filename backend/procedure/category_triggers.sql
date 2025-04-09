@@ -31,12 +31,6 @@ BEGIN
             SET MESSAGE_TEXT = 'Tên danh mục không được để trống và có độ dài tối đa 100 ký tự';
     END IF;
 
-    -- Không cho phép cập nhật danh mục có parent_category_id là id của chính nó
-    IF NEW.parent_category_id IS NOT NULL AND NEW.parent_category_id = NEW.category_id THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Không thể chọn chính mình làm danh mục cha';
-    END IF;
-
 
 END //
 

@@ -7,6 +7,8 @@ import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,33 +29,42 @@ public class GetAllProductForSaleQueryHandler implements IQueryHandler<ProductFo
     @Override
     public CommandResult handle(ProductForSaleQuery query) {
         Objects.requireNonNull(query, "OrderedProductQuery is required");
-        List<ProductEntity> products = productRepository.findAllForSaleFetch(query.getIsOrdered());
+        Slice<ProductEntity> products = productRepository.findAllForSaleFetch(query.getAvailableOrder(), Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
-        List<ProductDetailResponse> responses = products.stream().map(product -> {
-            return ProductDetailResponse.builder()
+        Slice<ProductDetailResponse> responses = products.map(product -> {
+            ProductDetailResponse response = ProductDetailResponse.builder()
                     .id(product.getId())
                     .description(product.getDescription())
                     .name(product.getName().getValue())
                     .image_url(product.getImagePath())
                     .signature(product.getSignature())
-                    .category(product.getCategoryEntity().map(category -> CategoryDetailResponse.builder()
-                            .id(category.getId())
-                            .name(category.getName().getValue())
-                            .build()).orElse(null))
-                    .prices(product.getProductPriceEntities().stream().map(price -> {
-                        return ProductDetailResponse.PriceDetail.builder()
-                                .id(price.getId())
-                                .price(price.getPrice().getValue())
-                                .sizeId(price.getSize().getId())
-                                .quantity(price.getSize().getQuantity().getValue())
-                                .size(price.getSize().getName().getValue())
-                                .currency("VND")
-                                .unitName(price.getSize().getUnit().getName().getValue())
-                                .unitSymbol(price.getSize().getUnit().getSymbol().getValue())
-                                .build();
-                    }).toList())
                     .build();
-        }).toList();
+            
+            product.getCategoryEntity().ifPresent(category -> {
+                response.setCategory(CategoryDetailResponse.builder()
+                        .id(category.getId())
+                        .name(category.getName().getValue())
+                        .build());
+            });
+            
+            for (var price : product.getProductPriceEntities()) {
+                ProductDetailResponse.PriceDetail priceDetail = ProductDetailResponse.PriceDetail.builder()
+                        .price(price.getPrice().getValue())
+                        .currency("VND")
+                        .build();
+                
+                priceDetail.setSizeId(price.getSize().getId());
+                priceDetail.setQuantity(price.getSize().getQuantity().getValue());
+                priceDetail.setSize(price.getSize().getName().getValue());
+                priceDetail.setCurrency("VND");
+                priceDetail.setUnitName(price.getSize().getUnit().getName().getValue());
+                priceDetail.setUnitSymbol(price.getSize().getUnit().getSymbol().getValue());
+                
+                response.getPrices().add(priceDetail);
+            }
+            
+            return response;
+        });
         
         
         return CommandResult.success(responses);

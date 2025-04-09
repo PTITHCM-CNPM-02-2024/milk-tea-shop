@@ -11,7 +11,7 @@
     <v-card-text>
       <div class="d-flex mt-2 mb-4">
         <v-img
-            :src="product.image_url || '/images/default-product.png'"
+            :src="getProductImage(product)"
             :alt="product.name"
             width="80"
             height="80"
@@ -193,6 +193,11 @@ const props = defineProps({
     default: () => ({})
   }
 });
+
+// Lấy hình ảnh sản phẩm, kiểm tra cả hai trường hợp
+function getProductImage(product) {
+  return product.image_url || product.imageUrl || '/images/default-product.png';
+}
 
 const emit = defineEmits(['add-to-cart', 'cancel']);
 const availableToppings = ref([]);

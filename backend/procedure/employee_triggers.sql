@@ -11,32 +11,26 @@ BEGIN
             SET MESSAGE_TEXT = 'Chức vụ không được để trống';
     END IF;
 
-    IF LENGTH(TRIM(NEW.last_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.last_name)) = 0 OR LENGTH(TRIM(NEW.last_name)) > 70 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Họ không được để trống';
+            SET MESSAGE_TEXT = 'Họ không được để trống và có độ dài tối đa 70 ký tự';
     END IF;
 
-    IF LENGTH(TRIM(NEW.first_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.first_name)) = 0 OR LENGTH(TRIM(NEW.first_name)) > 70 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tên không được để trống';
+            SET MESSAGE_TEXT = 'Tên không được để trống và có độ dài tối đa 70 ký tự';
     END IF;
 
     -- Kiểm tra số điện thoại hợp lệ
-    IF LENGTH(TRIM(NEW.phone)) = 0 THEN
+    IF NEW.phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\d]+|$)' = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Số điện thoại không được để trống';
-    ELSEIF NEW.phone NOT REGEXP '^[0-9]+$' THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Số điện thoại chỉ được chứa các chữ số';
+            SET MESSAGE_TEXT = 'Số điện thoại không hợp lệ';
     END IF;
 
     -- Kiểm tra email hợp lệ
-    IF LENGTH(TRIM(NEW.email)) = 0 THEN
+    IF NEW.email REGEXP '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$' = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Email không được để trống';
-    ELSEIF NEW.email NOT REGEXP '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$' THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Định dạng email không hợp lệ';
+            SET MESSAGE_TEXT = 'Email không hợp lệ';
     END IF;
 END //
 
@@ -51,32 +45,26 @@ BEGIN
             SET MESSAGE_TEXT = 'Chức vụ không được để trống';
     END IF;
 
-    IF LENGTH(TRIM(NEW.last_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.last_name)) = 0 OR LENGTH(TRIM(NEW.last_name)) > 70 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Họ không được để trống';
+            SET MESSAGE_TEXT = 'Họ không được để trống và có độ dài tối đa 70 ký tự';
     END IF;
 
-    IF LENGTH(TRIM(NEW.first_name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.first_name)) = 0 OR LENGTH(TRIM(NEW.first_name)) > 70 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Tên không được để trống';
+            SET MESSAGE_TEXT = 'Tên không được để trống và có độ dài tối đa 70 ký tự';
     END IF;
 
     -- Kiểm tra số điện thoại hợp lệ
-    IF LENGTH(TRIM(NEW.phone)) = 0 THEN
+    IF NEW.phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\d]+|$)' = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Số điện thoại không được để trống';
-    ELSEIF NEW.phone NOT REGEXP '^[0-9]+$' THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Số điện thoại chỉ được chứa các chữ số';
+            SET MESSAGE_TEXT = 'Số điện thoại không hợp lệ';
     END IF;
 
     -- Kiểm tra email hợp lệ
-    IF LENGTH(TRIM(NEW.email)) = 0 THEN
+    IF NEW.email REGEXP '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$' = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Email không được để trống';
-    ELSEIF NEW.email NOT REGEXP '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$' THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Định dạng email không hợp lệ';
+            SET MESSAGE_TEXT = 'Email không hợp lệ';
     END IF;
 END //
 
@@ -95,6 +83,15 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Không thể xóa nhân viên đã xử lý đơn hàng';
     END IF;
+END //
+
+
+-- Trigger sau khi xóa nhân viên, xóa tài khoản của nhân viên
+CREATE TRIGGER after_employee_delete
+AFTER DELETE ON Employee
+FOR EACH ROW
+BEGIN
+    DELETE  FROM Account WHERE account_id = OLD.account_id; 
 END //
 
 DELIMITER ;

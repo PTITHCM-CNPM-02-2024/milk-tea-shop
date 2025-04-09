@@ -7,14 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Optional;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @SuperBuilder
 public class ProductForSaleQuery implements IQuery<CommandResult> {
-    protected Boolean isOrdered;
+    protected Boolean availableOrder;
     protected Integer size;
     protected Integer page;
 }

@@ -13,13 +13,19 @@ BEGIN
             SET MESSAGE_TEXT = 'Thời gian kết thúc khuyến mãi phải sau thời điểm hiện tại';
     END IF;
 
+
+    IF NEW.valid_from is not null and NEW.valid_until is not null and NEW.valid_from >= NEW.valid_until THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Thời gian bắt đầu khuyến mãi phải trước thời gian kết thúc';
+    END IF; 
+
     -- Kiểm tra giá trị discount
     IF NEW.discount_type = 'PERCENTAGE' AND (NEW.discount_value <= 0 OR NEW.discount_value > 100) THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Giá trị giảm giá phần trăm phải nằm trong khoảng 0-100%';
-    ELSEIF NEW.discount_type = 'FIXED' AND NEW.discount_value <= 0 THEN
+    ELSEIF NEW.discount_type = 'FIXED' AND NEW.discount_value <= 1000 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Giá trị giảm giá cố định phải lớn hơn 0';
+            SET MESSAGE_TEXT = 'Giá trị giảm giá cố định phải lớn hơn 1000 VNĐ';
     END IF;
 
     -- Đặt giá trị mặc định cho current_uses
@@ -39,13 +45,18 @@ BEGIN
             SET MESSAGE_TEXT = 'Thời gian kết thúc khuyến mãi phải sau thời điểm hiện tại';
     END IF;
 
+    IF NEW.valid_from is not null and NEW.valid_until is not null and NEW.valid_from >= NEW.valid_until THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Thời gian bắt đầu khuyến mãi phải trước thời gian kết thúc';
+    END IF;
+
     -- Kiểm tra giá trị discount
     IF NEW.discount_type = 'PERCENTAGE' AND (NEW.discount_value <= 0 OR NEW.discount_value > 100) THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Giá trị giảm giá phần trăm phải nằm trong khoảng 0-100%';
-    ELSEIF NEW.discount_type = 'FIXED' AND NEW.discount_value <= 0 THEN
+    ELSEIF NEW.discount_type = 'FIXED' AND NEW.discount_value <= 1000 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Giá trị giảm giá cố định phải lớn hơn 0';
+            SET MESSAGE_TEXT = 'Giá trị giảm giá cố định phải lớn hơn 1000 VNĐ';
     END IF;
 END//
 

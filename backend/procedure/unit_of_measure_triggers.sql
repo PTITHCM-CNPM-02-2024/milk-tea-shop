@@ -6,14 +6,14 @@ BEFORE INSERT ON UnitOfMeasure
 FOR EACH ROW
 BEGIN
     -- Kiểm tra dữ liệu không rỗng nhưng định dạng không đúng
-    IF LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) < 1 OR LENGTH(TRIM(NEW.name)) > 30 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Tên đơn vị không được để trống';
+        SET MESSAGE_TEXT = 'Tên đơn vị phải có độ dài từ 1 đến 30 ký tự';
     END IF;
     
-    IF LENGTH(TRIM(NEW.symbol)) = 0 THEN
+    IF LENGTH(TRIM(NEW.symbol)) < 1 OR LENGTH(TRIM(NEW.symbol)) > 10 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ký hiệu đơn vị không được để trống';
+        SET MESSAGE_TEXT = 'Ký hiệu đơn vị phải có độ dài từ 1 đến 10 ký tự';
     END IF;
 END //
 
@@ -23,14 +23,14 @@ BEFORE UPDATE ON UnitOfMeasure
 FOR EACH ROW
 BEGIN
     -- Kiểm tra dữ liệu không rỗng nhưng định dạng không đúng
-    IF LENGTH(TRIM(NEW.name)) = 0 THEN
+    IF LENGTH(TRIM(NEW.name)) < 1 OR LENGTH(TRIM(NEW.name)) > 30 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Tên đơn vị không được để trống';
+        SET MESSAGE_TEXT = 'Tên đơn vị phải có độ dài từ 1 đến 30 ký tự';
     END IF;
     
-    IF LENGTH(TRIM(NEW.symbol)) = 0 THEN
+    IF LENGTH(TRIM(NEW.symbol)) < 1 OR LENGTH(TRIM(NEW.symbol)) > 10 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ký hiệu đơn vị không được để trống';
+        SET MESSAGE_TEXT = 'Ký hiệu đơn vị phải có độ dài từ 1 đến 10 ký tự';
     END IF;
 END //
 
@@ -39,15 +39,6 @@ CREATE TRIGGER before_unit_of_measure_delete
 BEFORE DELETE ON UnitOfMeasure
 FOR EACH ROW
 BEGIN
-    DECLARE product_size_count INT;
-    SELECT COUNT(*) INTO product_size_count 
-    FROM ProductSize 
-    WHERE unit_id = OLD.unit_id;
-    
-    IF product_size_count > 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Không thể xóa đơn vị tính đang được sử dụng bởi kích thước sản phẩm';
-    END IF;
 END //
 
 DELIMITER ;
