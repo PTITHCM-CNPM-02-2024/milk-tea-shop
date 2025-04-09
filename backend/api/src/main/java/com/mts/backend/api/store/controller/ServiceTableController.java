@@ -71,15 +71,9 @@ public class ServiceTableController implements IController {
     }
     
     @GetMapping("/active/{active}")
-    public ResponseEntity<?> getAllServiceTableActive(@PathVariable("active") Boolean active, 
-                                                        @RequestParam(value = "areaId", required = false) Integer areaId,
-                                                      @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                      @RequestParam(value = "size", defaultValue = "40") Integer size) {
+    public ResponseEntity<?> getAllServiceTableActive(@PathVariable("active") Boolean active) {
         var query = ServiceTableActiveQuery.builder()
                 .active(active)
-                .areaId(Objects.isNull(areaId) ? null : AreaId.of(areaId))
-                .page(page)
-                .size(size)
                 .build();
         
         var result = queryBus.dispatch(query);

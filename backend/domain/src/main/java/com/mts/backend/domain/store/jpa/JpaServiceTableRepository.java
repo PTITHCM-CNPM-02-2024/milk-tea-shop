@@ -22,9 +22,8 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
   Slice<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active, Pageable pageable);
 
   @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
-  @Query("select s from ServiceTableEntity s WHERE s.active = :active and s.areaEntity.id = :areaId")
-  Slice<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active,
-                                                     @Param("areaId") @Nullable Integer areaId, Pageable pageable);
+  @Query("select s from ServiceTableEntity s WHERE s.active = :active")
+  List<ServiceTableEntity> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active);
   
   
   @EntityGraph(attributePaths = {"areaEntity"})

@@ -32,16 +32,23 @@ public class GetAllServiceTableActiveQueryHandler implements IQueryHandler<Servi
     public CommandResult handle(ServiceTableActiveQuery query) {
         Objects.requireNonNull(query, "Service table active query is required");
         
-        var serviceTables = serviceTableRepository.findAllByActiveFetchArea(query.getActive(),
-                query.getAreaId().map(AreaId::getValue).orElse(null), Pageable.ofSize(query.getSize()).withPage(query.getPage()));
+        var serviceTables = serviceTableRepository.findAllByActiveFetchArea(query.getActive());
 
-        Slice<ServiceTableSummaryResponse> responses = serviceTables
-                .map(e -> ServiceTableSummaryResponse.builder()
-                        .id(e.getId())
-                        .name(e.getTableNumber().getValue())
-                        .areaId(e.getAreaEntity().map(AreaEntity::getId).orElse(null))
-                        .isActive(e.getActive())
-                        .build());
+        List<ServiceTableSummaryResponse> responses = serviceTables.stream()
+                .map(e -> {
+                    var serviceTableResponse = ServiceTableSummaryResponse.builder()
+                            .id(e.getId())
+                            .isActive(e.getActive())
+                            .name(e.getTableNumber().getValue())
+                            .areaId(e.getAreaEntity().map(AreaEntity::getId).orElse(null))
+                            .build();
+                    
+                    e.getAreaEntity().ifPresent(area -> {
+                        serviceTableResponse.setAreaId(area.getId());
+                    });
+                    
+                    return serviceTableResponse;
+                }).toList();
         
         return CommandResult.success(responses);
     }

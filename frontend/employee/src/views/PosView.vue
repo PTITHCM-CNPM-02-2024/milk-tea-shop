@@ -3,9 +3,10 @@
     <div class="d-flex flex-grow-1 main-content">
       <div class="left-panel">
         <CategoryList
-            :categories="categoryStore.categories"
+            :categories="categoryStore.allCategories"
             :selectedCategory="categoryStore.selectedCategory"
             :products="productStore.products"
+            :allProducts="productStore.allProducts"
             @select-category="handleCategorySelect"
         />
 
@@ -150,8 +151,12 @@ const billHtml = ref('');
 
 // Xử lý khi chọn danh mục
 function handleCategorySelect(category) {
+  // Thay đổi danh mục đã chọn trong store
   categoryStore.selectCategory(category);
-  productStore.handleCategoryChange(category);
+  
+  // Lọc sản phẩm từ dữ liệu đã tải (không gọi API)
+  const categoryId = typeof category === 'object' ? category.id : category;
+  productStore.handleCategoryChange(categoryId);
 }
 
 // Mở modal tùy chỉnh sản phẩm
@@ -299,13 +304,14 @@ function closeBillDialog() {
 
 // Tải dữ liệu khi component được tạo
 onMounted(async () => {
-  // Tải danh mục
+  // Tải tất cả sản phẩm trước
+  await productStore.fetchAllProducts();
+  
+  // Sau đó tải danh mục
   await categoryStore.fetchCategories();
   
-  // Nếu đã có danh mục, tải sản phẩm cho danh mục đầu tiên
-  if (categoryStore.categories.length > 0) {
-    productStore.handleCategoryChange(categoryStore.selectedCategory);
-  }
+  // Cài đặt danh mục được chọn là 'all'
+  categoryStore.selectCategory('all');
   
   // Set up watcher cho bất kỳ thay đổi nào của giỏ hàng
   watch(() => [cartStore.items.length, cartStore.selectedCustomer], () => {

@@ -49,7 +49,7 @@ public interface JpaProductRepository extends JpaRepository<ProductEntity, Integ
             or
             (:isOrdered = false and (size(p.productPrices) = 0 or p.available = false)))
             """)
-    @EntityGraph(attributePaths = {"categoryEntity", "productPrices.size.unit"})
+    @EntityGraph(attributePaths = {"categoryEntity", "productPrices"})
     List<ProductEntity> findAllForSaleFetch(@Param("isOrdered") Boolean isOrdered);
 
     @Query("""

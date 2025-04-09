@@ -7,6 +7,7 @@ import { useCategoryStore } from './categoryStore';
 export const useProductStore = defineStore('product', () => {
   // State
   const products = ref([]);
+  const allProducts = ref([]); // Lưu trữ tất cả sản phẩm đã tải
   const currentProductDetail = ref(null);
   const loading = ref(false);
   const error = ref(null);
@@ -16,65 +17,46 @@ export const useProductStore = defineStore('product', () => {
     const categoryStore = useCategoryStore();
     const selectedCategory = categoryStore.selectedCategory;
     
-    if (!selectedCategory || selectedCategory.id === 'all') {
+    // Nếu không có danh mục được chọn hoặc chọn "Tất cả", hiển thị tất cả sản phẩm
+    if (!selectedCategory || selectedCategory === 'all' || (typeof selectedCategory === 'object' && selectedCategory.id === 'all')) {
       return products.value;
     }
     
-    // Lọc sản phẩm theo danh mục đã chọn, trừ topping
+    // Xử lý trường hợp danh mục "Khác" (hiển thị sản phẩm có catId là null)
+    if (selectedCategory === 'null' || (typeof selectedCategory === 'object' && selectedCategory.id === 'null')) {
+      return products.value.filter(product => !product.catId);
+    }
+    
+    // Lọc sản phẩm theo danh mục đã chọn
+    const categoryId = typeof selectedCategory === 'object' ? selectedCategory.id : selectedCategory;
+    
     return products.value.filter(product => {
-      // Kiểm tra và loại bỏ topping
-      const categoryName = product.category && typeof product.category === 'object' 
-        ? product.category.name?.toLowerCase() 
-        : '';
-      
-      const productName = product.name?.toLowerCase() || '';
-      
-      // Kiểm tra nếu là topping
-      if (categoryName.includes('topping') || productName.includes('topping')) {
-        return false;
-      }
-      
-      return true;
+      return product.catId === categoryId || (product.catId && product.catId.toString() === categoryId.toString());
     });
   });
   
   // Actions
   async function fetchProductsByCategory(categoryId, page = 0, size = 100, availableOrdered = true) {
-    if (categoryId === 'all') {
-      // Nếu là danh mục "Tất cả", tải tất cả sản phẩm
-      return await fetchAllProducts(page, size);
-    }
-    
+    // Không gọi API nữa mà chỉ lọc từ allProducts đã tải trước đó
     loading.value = true;
-    error.value = null;
     
     try {
-      const response = await CategoryService.getCategoryProducts(categoryId, availableOrdered, page, size);
-      
-      if (response && response.data) {
-        console.log(`DEBUG: Sản phẩm theo categoryId=${categoryId}:`, response.data);
-        
-        if (Array.isArray(response.data)) {
-          products.value = response.data;
-          // Debug một sản phẩm đầu tiên để kiểm tra cấu trúc
-          if (response.data.length > 0) {
-            console.log('DEBUG: Cấu trúc một sản phẩm:', response.data[0]);
-          }
-        } else if (response.data.content && Array.isArray(response.data.content)) {
-          // Trường hợp API trả về Page object
-          products.value = response.data.content;
-          // Debug một sản phẩm đầu tiên để kiểm tra cấu trúc
-          if (response.data.content.length > 0) {
-            console.log('DEBUG: Cấu trúc một sản phẩm (từ Page):', response.data.content[0]);
-          }
-        } else {
-          products.value = [];
-          console.error('Cấu trúc dữ liệu sản phẩm không đúng:', response.data);
-        }
+      if (categoryId === 'all') {
+        // Nếu là danh mục "Tất cả", hiển thị tất cả sản phẩm
+        products.value = [...allProducts.value];
+      } else if (categoryId === 'null') {
+        // Nếu là danh mục "Khác", lọc sản phẩm không có danh mục
+        products.value = allProducts.value.filter(product => !product.catId);
+      } else {
+        // Lọc sản phẩm theo danh mục đã chọn
+        products.value = allProducts.value.filter(product => {
+          return product.catId === categoryId || 
+                 (product.catId && categoryId && product.catId.toString() === categoryId.toString());
+        });
       }
     } catch (err) {
-      console.error('Lỗi khi tải sản phẩm theo danh mục:', err);
-      error.value = err.message || 'Không thể tải sản phẩm theo danh mục';
+      console.error('Lỗi khi lọc sản phẩm theo danh mục:', err);
+      error.value = err.message || 'Không thể lọc sản phẩm theo danh mục';
     } finally {
       loading.value = false;
     }
@@ -85,15 +67,18 @@ export const useProductStore = defineStore('product', () => {
     error.value = null;
     
     try {
-      const response = await ProductService.getAvailableProducts(page, size);
+      const response = await ProductService.getAvailableProducts(true, page, size);
       
       if (response && response.data) {
         if (Array.isArray(response.data)) {
+          allProducts.value = response.data;
           products.value = response.data;
         } else if (response.data.content && Array.isArray(response.data.content)) {
           // Trường hợp API trả về Page object
+          allProducts.value = response.data.content;
           products.value = response.data.content;
         } else {
+          allProducts.value = [];
           products.value = [];
           console.error('Cấu trúc dữ liệu sản phẩm không đúng:', response.data);
         }
@@ -103,6 +88,30 @@ export const useProductStore = defineStore('product', () => {
       error.value = err.message || 'Không thể tải sản phẩm';
     } finally {
       loading.value = false;
+    }
+  }
+  
+  async function fetchToppings() {
+    // Tải topping từ API khi cần - topping thuộc danh mục có id là 1
+    console.log('Đang tải topping từ danh mục 1...');
+    try {
+      const response = await CategoryService.getCategoryProducts(1, true);
+      
+      console.log('Kết quả API topping:', response);
+      
+      if (response && response.data) {
+        const toppingList = Array.isArray(response.data) 
+          ? response.data 
+          : (response.data.content && Array.isArray(response.data.content) ? response.data.content : []);
+          
+        console.log('Danh sách topping đã tải:', toppingList);
+        return toppingList;
+      }
+      console.log('Không có topping được tìm thấy');
+      return [];
+    } catch (err) {
+      console.error('Lỗi khi tải topping:', err);
+      return [];
     }
   }
   
@@ -135,6 +144,7 @@ export const useProductStore = defineStore('product', () => {
   return {
     // State
     products,
+    allProducts,
     currentProductDetail,
     loading,
     error,
@@ -146,6 +156,7 @@ export const useProductStore = defineStore('product', () => {
     fetchProductsByCategory,
     fetchAllProducts,
     fetchProductDetail,
+    fetchToppings,
     handleCategoryChange
   };
 }); 

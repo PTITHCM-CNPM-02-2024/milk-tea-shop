@@ -151,15 +151,10 @@ public class ProductController implements IController {
     }
     
     @GetMapping("/available-order/{available}")
-    public ResponseEntity<?> getAvailableOrderProductDetail(@PathVariable("available") Boolean available,
-                                                            @RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size
-                                                            ) {
+    public ResponseEntity<?> getAvailableOrderProductDetail(@PathVariable("available") Boolean available){
 
         ProductForSaleQuery getProductDetailCommand = ProductForSaleQuery.builder()
                 .availableOrder(available)
-                .page(page)
-                .size(size)
                 .build();
 
         var result = productQueryBus.dispatch(getProductDetailCommand);

@@ -6,6 +6,7 @@ import com.mts.backend.application.product.response.CategorySummaryResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.application.product.response.ProductSummaryResponse;
 import com.mts.backend.domain.product.CategoryEntity;
+import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -34,7 +35,7 @@ public class GetAllProdByCatIdQueryHandler implements IQueryHandler<ProdByCatIdQ
         if (query.getId().isPresent() && (query.getId().get().getValue() == 1)){
             
             var topping = productRepository.findAllByCategoryEntity_Id(1).stream()
-                    .filter(product -> !product.isOrdered())
+                    .filter(ProductEntity::isOrdered)
                     .toList();
 
             List<ProductDetailResponse> responses = topping.stream().map(product -> {

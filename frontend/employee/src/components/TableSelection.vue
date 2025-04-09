@@ -10,7 +10,7 @@
       </div>
       
       <div class="modal-body">
-        <div v-if="loading" class="loading text-center py-4">
+        <div v-if="tableStore.loading" class="loading text-center py-4">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Đang tải...</span>
           </div>
@@ -20,10 +20,10 @@
         <div v-else>
           <div class="area-tabs">
             <button
-              v-for="area in areas"
+              v-for="area in tableStore.allAreas"
               :key="area.id"
-              :class="['area-tab', selectedArea === area.id ? 'active' : '']"
-              @click="selectedArea = area.id"
+              :class="['area-tab', tableStore.selectedArea === area.id ? 'active' : '']"
+              @click="tableStore.selectArea(area.id)"
             >
               {{ area.name }}
             </button>
@@ -31,7 +31,7 @@
           
           <div class="table-grid mt-3">
             <div
-              v-for="table in filteredTables"
+              v-for="table in tableStore.filteredTables"
               :key="table.id"
               :class="['table-item', isTableSelected(table.id) ? 'selected' : '', !table.isActive ? 'inactive' : '']"
               @click="toggleTableSelection(table)"
@@ -40,11 +40,14 @@
                 <v-icon>{{ table.isActive ? 'mdi-table-chair' : 'mdi-table-off' }}</v-icon>
               </div>
               <div class="table-name">{{ table.name }}</div>
+              <div v-if="table.area && table.area.id" class="table-area-info">
+                {{ getAreaName(table.area.id) }}
+              </div>
               <div v-if="!table.isActive" class="table-status">Không hoạt động</div>
             </div>
           </div>
           
-          <div v-if="filteredTables.length === 0" class="no-tables text-center py-4">
+          <div v-if="tableStore.filteredTables.length === 0" class="no-tables text-center py-4">
             <v-icon size="x-large" color="grey" class="mb-3">mdi-table-chair</v-icon>
             <p>Không có bàn trong khu vực này</p>
           </div>
@@ -83,8 +86,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import TableService from '../services/table.service';
+import { useTableStore } from '../stores/tableStore';
 
+const tableStore = useTableStore();
 const emit = defineEmits(['select-tables', 'cancel']);
 
 const props = defineProps({
@@ -94,84 +98,17 @@ const props = defineProps({
   }
 });
 
-const areas = ref([]);
-const tables = ref([]);
-const selectedArea = ref(null);
+// Danh sách bàn đã chọn
 const selectedTables = ref((props.initialTables && props.initialTables.length > 0) 
   ? props.initialTables.map(table => table.id) 
   : []);
-const loading = ref(true);
-
-// Add a special NO_AREA_ID constant
-const NO_AREA_ID = 'no-area';
-
-// Lọc bàn theo khu vực đã chọn
-const filteredTables = computed(() => {
-  if (!selectedArea.value) return [];
-  
-  // If "No Area" is selected, show tables without areas
-  if (selectedArea.value === NO_AREA_ID) {
-    return tables.value.filter(table => !table.area);
-  }
-  
-  // Otherwise filter by selected area
-  return tables.value.filter(table => table.area && table.area.id === selectedArea.value);
-});
 
 // Lấy thông tin chi tiết của các bàn được chọn
 const selectedTableObjects = computed(() => {
   return selectedTables.value.map(id => {
-    return tables.value.find(table => table.id === id);
+    return tableStore.tables.find(table => table.id === id);
   }).filter(table => table); // Loại bỏ các giá trị undefined
 });
-
-// Tải danh sách khu vực
-async function loadAreas() {
-  try {
-    console.log('Đang tải danh sách khu vực...');
-    const response = await TableService.getActiveAreas();
-    
-    // Kiểm tra và xử lý dữ liệu Spring Boot Page
-    if (response && response.data) {
-      areas.value = response.data;
-    }
-
-    // Add a special "No Area" option
-    areas.value.push({
-      id: NO_AREA_ID,
-      name: 'Khác',
-      isActive: true
-    });
-    
-    console.log('Đã tải khu vực:', areas.value);
-    
-    // Chọn khu vực đầu tiên nếu có
-    if (areas.value.length > 0) {
-      selectedArea.value = areas.value[0].id;
-    }
-  } catch (error) {
-    console.error('Lỗi khi tải danh sách khu vực:', error);
-    alert('Không thể tải danh sách khu vực');
-  }
-}
-
-// Tải danh sách bàn
-async function loadTables() {
-  loading.value = true;
-  try {
-    console.log('Đang tải danh sách bàn...');
-    const response = await TableService.getActiveServiceTables();
-    
-    tables.value = response.data;
-    
-    console.log('Đã tải bàn:', tables.value);
-  } catch (error) {
-    console.error('Lỗi khi tải danh sách bàn:', error);
-    alert('Không thể tải danh sách bàn');
-  } finally {
-    loading.value = false;
-  }
-}
 
 // Kiểm tra xem bàn có được chọn hay không
 function isTableSelected(tableId) {
@@ -207,9 +144,29 @@ function confirmSelection() {
   emit('select-tables', selectedTableObjects.value);
 }
 
+// Lấy tên khu vực từ ID
+function getAreaName(areaId) {
+  const area = tableStore.areas.find(a => a.id === areaId);
+  return area ? area.name : 'Không xác định';
+}
+
 // Tải dữ liệu khi component được tạo
-onMounted(() => {
-  Promise.all([loadAreas(), loadTables()]);
+onMounted(async () => {
+  // Tải khu vực và bàn từ store
+  await Promise.all([tableStore.fetchAreas(), tableStore.fetchTables()]);
+  
+  // Debug: In ra cấu trúc dữ liệu của bàn đầu tiên nếu có
+  if (tableStore.tables.length > 0) {
+    console.log('Cấu trúc dữ liệu bàn:', tableStore.tables[0]);
+    console.log('Danh sách bàn không có khu vực:', tableStore.tables.filter(t => !t.areaId).length);
+    
+    // Kiểm tra các khu vực trong danh sách bàn
+    const areaIds = [...new Set(tableStore.tables.filter(t => t.areaId).map(t => t.areaId))];
+    console.log('Khu vực từ bàn:', areaIds);
+    
+    // Kiểm tra khớp với danh sách khu vực
+    console.log('Danh sách khu vực:', tableStore.areas.map(a => a.id));
+  }
 });
 </script>
 
@@ -313,6 +270,9 @@ onMounted(() => {
   align-items: center;
   cursor: pointer;
   transition: all 0.2s;
+  height: 120px;
+  position: relative;
+  overflow: hidden;
 }
 
 .table-item:hover:not(.inactive) {
@@ -342,6 +302,12 @@ onMounted(() => {
   font-size: 0.9rem;
   text-align: center;
   font-weight: 500;
+}
+
+.table-area-info {
+  font-size: 0.7rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
 }
 
 .table-status {

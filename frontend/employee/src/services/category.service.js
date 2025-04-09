@@ -17,7 +17,7 @@ export default {
   },
   
   // Lấy sản phẩm theo danh mục
-  getCategoryProducts(categoryId, availableOrdered = true, page = 0, size = 50) {
+  getCategoryProducts(categoryId = 1, availableOrdered = true, page = 0, size = 50) {
     // Nếu categoryId là null, gọi API với tham số đặc biệt để lấy sản phẩm không thuộc danh mục nào
     if (categoryId === null || categoryId === 'null') {
       return apiClient.get(`/categories/null/products`, {

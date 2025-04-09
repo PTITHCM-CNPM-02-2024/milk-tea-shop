@@ -29,17 +29,18 @@ public class GetAllAreaActiveQueryHandler implements IQueryHandler<AreaActiveQue
     @Override
     public CommandResult handle(AreaActiveQuery query) {
         Objects.requireNonNull(query, "Area active query is required");
-        var areas = areaRepository.findByActive(query.getActive(), Pageable.ofSize(query.getSize()));
+        var areas = areaRepository.findByActive(query.getActive());
         
-        Slice<AreaSummaryResponse> result = areas.map(area -> {
-            return AreaSummaryResponse.builder()
+        List<AreaSummaryResponse> result = areas.stream().map(area -> {
+            var areaResponse = AreaSummaryResponse.builder()
                     .id(area.getId())
                     .name(area.getName().getValue())
                     .description(area.getDescription().orElse(null))
                     .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
                     .isActive(area.getActive())
                     .build();
-        });
+            return areaResponse;
+        }).toList();
         
         return CommandResult.success(result);
     }

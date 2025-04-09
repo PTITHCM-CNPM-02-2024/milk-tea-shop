@@ -1,16 +1,34 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import CategoryService from '../services/category.service';
 
 export const useCategoryStore = defineStore('category', () => {
   // State
   const categories = ref([]);
-  const selectedCategory = ref({ id: 'all', name: 'Tất cả' });
+  const selectedCategory = ref('all');
   const loading = ref(false);
   const error = ref(null);
   
+  // Computed
+  const allCategories = computed(() => {
+    // Luôn thêm danh mục "Tất cả" vào đầu danh sách
+    const allCategoriesOption = { id: 'all', name: 'Tất cả' };
+    
+    // Thêm danh mục "Khác" để hiển thị sản phẩm không có danh mục
+    const nullCategoryOption = { id: 'null', name: 'Khác' };
+    
+    // Lọc bỏ danh mục topping từ danh sách danh mục
+    const filteredCategories = categories.value.filter(category => {
+      const name = category.name?.toLowerCase() || '';
+      return !name.includes('topping');
+    });
+    
+    // Gộp danh sách (không thêm topping)
+    return [allCategoriesOption, ...filteredCategories, nullCategoryOption];
+  });
+  
   // Actions
-  async function fetchCategories(page = 0, size = 50) {
+  async function fetchCategories(page = 0, size = 100) {
     loading.value = true;
     error.value = null;
     
@@ -18,32 +36,14 @@ export const useCategoryStore = defineStore('category', () => {
       const response = await CategoryService.getAllCategories(page, size);
       
       if (response && response.data) {
-        let categoriesList = [];
-        
         if (Array.isArray(response.data)) {
-          categoriesList = response.data;
+          categories.value = response.data;
         } else if (response.data.content && Array.isArray(response.data.content)) {
-          // Trường hợp API trả về Page object
-          categoriesList = response.data.content;
+          // Xử lý trường hợp API trả về Page object
+          categories.value = response.data.content;
         } else {
+          categories.value = [];
           console.error('Cấu trúc dữ liệu danh mục không đúng:', response.data);
-        }
-        
-        // Lọc bỏ danh mục topping (nếu có thể xác định bằng tên)
-        categoriesList = categoriesList.filter(cat => 
-          !cat.name || !cat.name.toLowerCase().includes('topping')
-        );
-        
-        // Thêm danh mục đặc biệt
-        categories.value = [
-          { id: 'all', name: 'Tất cả' },
-          ...categoriesList,
-          { id: 'null', name: 'Không danh mục' } // Thêm danh mục đặc biệt cho sản phẩm không thuộc danh mục nào
-        ];
-        
-        // Nếu chưa có danh mục nào được chọn, chọn danh mục đầu tiên
-        if (!selectedCategory.value || selectedCategory.value.id === 'all') {
-          selectedCategory.value = categories.value[0];
         }
       }
     } catch (err) {
@@ -64,6 +64,9 @@ export const useCategoryStore = defineStore('category', () => {
     selectedCategory,
     loading,
     error,
+    
+    // Computed
+    allCategories,
     
     // Actions
     fetchCategories,

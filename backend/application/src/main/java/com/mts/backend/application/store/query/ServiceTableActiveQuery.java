@@ -17,11 +17,4 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ServiceTableActiveQuery implements IQuery<CommandResult> {
     private Boolean active;
-    private AreaId areaId;
-    private Integer page;
-    private Integer size;
-    
-    public Optional<AreaId> getAreaId() {
-        return Optional.ofNullable(areaId);
-    }
 }

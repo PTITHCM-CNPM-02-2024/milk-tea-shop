@@ -173,7 +173,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import ToppingService from "@/services/topping.service.js";
+import { useProductStore } from '@/stores/productStore';
+const productStore = useProductStore();
 const note = ref('');
 const props = defineProps({
   product: {
@@ -204,19 +205,20 @@ const availableToppings = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
-// Lấy danh sách topping từ API
+// Tải danh sách topping
 async function loadToppings() {
   loading.value = true;
   try {
-    const response = await ToppingService.getAvailableToppings();
-    availableToppings.value = response.data || [];
+    // Sử dụng hàm fetchToppings từ productStore thay vì gọi API riêng
+    availableToppings.value = await productStore.fetchToppings() || [];
   } catch (error) {
     console.error('Lỗi khi tải danh sách topping:', error);
-    error.value = 'Không thể tải danh sách topping. Vui lòng thử lại sau.';
+    availableToppings.value = [];
   } finally {
     loading.value = false;
   }
 }
+
 // Các tùy chọn có sẵn
 const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
 const iceOptions = ['0%', '30%', '50%', '70%', '100%'];
@@ -312,11 +314,28 @@ function addToCart() {
 
   // Chuẩn bị mảng topping
   const toppingsArray = selectedToppings.value.map(topping => {
+    // Log để debug cấu trúc topping
+    console.log('Topping đang xử lý:', topping);
+    
+    // Xử lý nhiều trường hợp cấu trúc topping khác nhau
+    let toppingPrice = getToppingPrice(topping);
+    let toppingSizeId = null;
+    
+    // Xác định sizeId
+    if (topping.prices && Array.isArray(topping.prices) && topping.prices.length > 0) {
+      const naSize = topping.prices.find(price => price.size === "NA");
+      if (naSize) {
+        toppingSizeId = naSize.sizeId;
+      } else {
+        toppingSizeId = topping.prices[0].sizeId;
+      }
+    }
+    
     return {
       id: topping.id || 0,
       name: topping.name || '',
-      sizeId: topping.prices.find(price => price.size === "NA").sizeId,
-      price: getToppingPrice(topping)
+      sizeId: toppingSizeId,
+      price: toppingPrice
     };
   });
 
@@ -342,6 +361,7 @@ function addToCart() {
     total: totalPrice
   };
 
+  console.log('Thêm vào giỏ hàng:', cartItem);
   emit('add-to-cart', cartItem, props.editIndex);
 }
 
@@ -349,9 +369,11 @@ function addToCart() {
 function getToppingPrice(topping) {
   // Kiểm tra topping có hợp lệ không
   if (!topping) return 0;
+  
+  console.log('Cấu trúc topping:', topping); // Log để debug
 
   // Nếu topping có mảng prices
-  if (topping.prices && topping.prices.length > 0) {
+  if (topping.prices && Array.isArray(topping.prices) && topping.prices.length > 0) {
     // Tìm size "NA" trước
     const naSize = topping.prices.find(price => price.size === "NA");
     if (naSize && !isNaN(naSize.price)) return Number(naSize.price);
@@ -360,10 +382,9 @@ function getToppingPrice(topping) {
     const firstPrice = Number(topping.prices[0].price);
     return !isNaN(firstPrice) ? firstPrice : 0;
   }
+  
 
-  // Nếu topping đã có price trực tiếp
-  const directPrice = Number(topping.price);
-  return !isNaN(directPrice) ? directPrice : 0;
+  return 0;
 }
 
 // Cập nhật hàm tính tổng giá tiền để đảm bảo không trả về NaN

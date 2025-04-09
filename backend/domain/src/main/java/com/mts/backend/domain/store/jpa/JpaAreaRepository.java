@@ -27,6 +27,9 @@ public interface JpaAreaRepository extends JpaRepository<AreaEntity, Integer> {
     @Query("select a from AreaEntity a where a.active = :active")
     Slice<AreaEntity> findByActive(@Param("active") @NonNull Boolean active, Pageable pageable);
 
+    @Query("select a from AreaEntity a where a.active = :active")
+    List<AreaEntity> findByActive(@Param("active") @NonNull Boolean active);
+
     @Query("select a from AreaEntity a where a.createdAt is null or a.createdAt > :createdAt")
     List<AreaEntity> findByCreatedAtNullOrCreatedAtGreaterThan(@Param("createdAt") @NonNull LocalDateTime createdAt, Pageable pageable);
 

@@ -209,6 +209,13 @@ public class ProductEntity extends BaseEntity<Integer> {
     public boolean isOrdered() {
         return available.booleanValue() && !productPrices.isEmpty();
     }
+    
+    public Money getMinPrice(){
+        return productPrices.stream()
+                .map(ProductPriceEntity::getPrice)
+                .min(Money::compareTo)
+                .orElse(Money.ZERO);
+    }
 
     @Override
     public final boolean equals(Object o) {

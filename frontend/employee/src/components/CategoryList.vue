@@ -19,9 +19,6 @@
           <div class="category-name">
             {{ getCategoryDisplayName(category) }}
           </div>
-          <div v-if="getCategoryMinPrice(category)" class="category-price">
-            {{ formatPrice(getCategoryMinPrice(category)) }}
-          </div>
         </div>
       </div>
     </div>
@@ -41,6 +38,10 @@ const props = defineProps({
     required: true
   },
   products: {
+    type: Array,
+    default: () => []
+  },
+  allProducts: {
     type: Array,
     default: () => []
   }
@@ -86,61 +87,56 @@ const updateSelectedIndex = () => {
 function getCategoryDisplayName(category) {
   // Xử lý trường hợp category là đối tượng
   if (typeof category === 'object' && category !== null) {
-    if (category.id === 'all' || category === 'all') return 'Tất cả';
+    if (category.id === 'all') return 'Tất cả';
+    if (category.id === 'null' || category.id === null) return 'Khác';
     return category.name || 'Không tên';
   }
 
   // Xử lý trường hợp category là string hoặc giá trị khác
   if (category === 'all') return 'Tất cả';
+  if (category === 'null' || category === null) return 'Khác';
   return category;
 }
 
 function getCategoryImage(category) {
+  // Ưu tiên sử dụng allProducts (tất cả sản phẩm) nếu có
+  const productsSource = props.allProducts && props.allProducts.length > 0 ? props.allProducts : props.products;
+  
   // Nếu không có sản phẩm, trả về null
-  if (!props.products || props.products.length === 0) return null;
+  if (!productsSource || productsSource.length === 0) return null;
   
   const categoryName = getCategoryDisplayName(category).toLowerCase();
   const categoryId = typeof category === 'object' ? category.id : category;
   
   // Tất cả là danh mục đặc biệt - lấy hình ảnh sản phẩm đầu tiên
   if (categoryName === 'tất cả') {
-    const firstProduct = props.products[0];
+    const firstProduct = productsSource[0];
     // Kiểm tra cả hai trường hợp image_url và imageUrl
     return firstProduct && (firstProduct.image_url || firstProduct.imageUrl) 
       ? (firstProduct.image_url || firstProduct.imageUrl) 
       : null;
   }
 
-  // Xử lý danh mục "Không danh mục"
+  // Xử lý danh mục "Khác"
   if (categoryId === 'null' || categoryId === null) {
-    // Tìm sản phẩm đầu tiên không có danh mục
-    const productsWithoutCategory = props.products.filter(product => {
-      return !product.category || product.category === null || 
-             (typeof product.category === 'object' && product.category.id === null);
-    });
+    // Tìm sản phẩm đầu tiên không có danh mục (catId là null hoặc undefined)
+    const productsWithoutCategory = productsSource.filter(product => !product.catId);
     
     if (productsWithoutCategory.length > 0) {
       const product = productsWithoutCategory[0];
-      // Kiểm tra cả hai trường hợp
       return product.image_url || product.imageUrl || null;
     }
     return null;
   }
   
-  // Tìm sản phẩm đầu tiên thuộc danh mục này
-  const productsInCategory = props.products.filter(product => {
-    const productCategoryId = typeof product.category === 'object' 
-      ? (product.category ? product.category.id : null) 
-      : product.category;
-    
-    return productCategoryId === categoryId || 
-           (productCategoryId === categoryId.toString()) || 
-           (productCategoryId && categoryId && productCategoryId.toString() === categoryId.toString());
+  // Tìm sản phẩm đầu tiên thuộc danh mục này (dựa vào catId)
+  const productsInCategory = productsSource.filter(product => {
+    return product.catId === categoryId || 
+           (product.catId && categoryId && product.catId.toString() === categoryId.toString());
   });
   
   if (productsInCategory.length > 0) {
     const product = productsInCategory[0];
-    // Kiểm tra cả hai trường hợp
     return product.image_url || product.imageUrl || null;
   }
   
@@ -149,7 +145,10 @@ function getCategoryImage(category) {
 
 // Lấy giá thấp nhất cho một danh mục
 function getCategoryMinPrice(category) {
-  if (!props.products || props.products.length === 0) return null;
+  // Ưu tiên sử dụng allProducts (tất cả sản phẩm) nếu có
+  const productsSource = props.allProducts && props.allProducts.length > 0 ? props.allProducts : props.products;
+  
+  if (!productsSource || productsSource.length === 0) return null;
   
   const categoryId = typeof category === 'object' ? category.id : category;
   
@@ -158,15 +157,10 @@ function getCategoryMinPrice(category) {
     return null;
   }
   
-  // Tìm tất cả sản phẩm thuộc danh mục này
-  const productsInCategory = props.products.filter(product => {
-    const productCategoryId = typeof product.category === 'object' 
-      ? (product.category ? product.category.id : null) 
-      : product.category;
-    
-    return productCategoryId === categoryId || 
-           (productCategoryId === categoryId.toString()) || 
-           (productCategoryId && categoryId && productCategoryId.toString() === categoryId.toString());
+  // Tìm tất cả sản phẩm thuộc danh mục này (dựa vào catId)
+  const productsInCategory = productsSource.filter(product => {
+    return product.catId === categoryId || 
+           (product.catId && categoryId && product.catId.toString() === categoryId.toString());
   });
   
   if (productsInCategory.length === 0) return null;
@@ -276,7 +270,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 180px;
+  width: 140px;
   height: 120px;
   min-width: 100px;
   flex: 0 0 auto;
@@ -286,7 +280,7 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #eaeaea;
-  padding: 12px 8px; /* Giảm padding ngang để có thêm không gian cho chữ */
+  padding: 12px 8px;
   user-select: none;
   position: relative;
 }
@@ -313,13 +307,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   margin-bottom: 8px;
   background-color: rgba(var(--v-theme-primary), 0.1);
   overflow: hidden;
-  flex-shrink: 0; /* Ngăn hình ảnh co lại */
+  flex-shrink: 0;
 }
 
 .category-card-active .category-image-wrapper {
@@ -334,21 +328,19 @@ onMounted(() => {
 }
 
 .category-name {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 500;
   text-align: center;
-  margin-top: 6px;
-  width: 100%; /* Đảm bảo text được phép sử dụng toàn bộ chiều rộng */
-  /* Giảm xuống còn 1 dòng để tránh bị tràn */
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 1; /* Chỉ hiển thị 1 dòng */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.2;
-  max-height: 1.2em;
-  white-space: normal; /* Cho phép xuống dòng nếu cần */
-  color: #333; /* Màu chữ tối hơn cho dễ đọc */
+  max-height: 2.4em;
+  white-space: normal;
+  color: #333;
 }
 
 .category-card-active .category-name {
