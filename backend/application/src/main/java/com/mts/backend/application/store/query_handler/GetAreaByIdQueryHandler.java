@@ -40,7 +40,7 @@ public class GetAreaByIdQueryHandler implements IQueryHandler<AreaByIdQuery, Com
                 .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
                 .isActive(area.getActive())
                 .areas(area.getServiceTables().stream().map(serviceTable -> {
-                    var serviceTableResponse = ServiceTableSummaryResponse.builder()
+                    ServiceTableSummaryResponse serviceTableResponse = ServiceTableSummaryResponse.builder()
                             .id(serviceTable.getId())
                             .name(serviceTable.getTableNumber().getValue())
                             .isActive(serviceTable.getActive())
