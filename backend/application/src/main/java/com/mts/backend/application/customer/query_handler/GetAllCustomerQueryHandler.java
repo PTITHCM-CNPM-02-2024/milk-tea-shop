@@ -10,6 +10,7 @@ import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,17 +27,14 @@ public class GetAllCustomerQueryHandler implements IQueryHandler<DefaultCustomer
     }
 
     @Override
-    @Transactional
     public CommandResult handle(DefaultCustomerQuery query) {
         Objects.requireNonNull(query, "Default customer query is required");
 
-        var customers = customerRepository.findAll(Pageable.ofSize(query.getSize())
+        var customers = customerRepository.findAllFetch(Pageable.ofSize(query.getSize())
                 .withPage(query.getPage()));
 
-        List<CustomerDetailResponse> responses = new ArrayList<>();
-
-        customers.forEach(customer -> {
-            responses.add(CustomerDetailResponse.builder()
+        Page<CustomerDetailResponse> responses = customers.map(customer -> {
+            return CustomerDetailResponse.builder()
                     .id(customer.getId())
                     .firstName(customer.getFirstName().map(FirstName::getValue).orElse(null))
                     .lastName(customer.getLastName().map(LastName::getValue).orElse(null))
@@ -45,8 +43,9 @@ public class GetAllCustomerQueryHandler implements IQueryHandler<DefaultCustomer
                     .membershipId(customer.getMembershipTypeEntity().getId())
                     .rewardPoint(customer.getCurrentPoints().getValue())
                     .accountId(customer.getAccountEntity().map(AccountEntity::getId).orElse(null))
-                    .build());
+                    .build();
         });
+        
 
         return CommandResult.success(responses);
     }

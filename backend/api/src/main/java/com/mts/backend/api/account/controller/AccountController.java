@@ -28,7 +28,7 @@ public class AccountController implements IController {
         this.accountQueryBus = accountQueryBus;
     }
     
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
             .username(Username.builder().value(request.getUsername()).build())
@@ -56,7 +56,7 @@ public class AccountController implements IController {
         
     }
     
-    @PutMapping("/{id}/change-password")
+    @PutMapping("/{id}/password")
     public ResponseEntity<?> changePassword(@PathVariable("id") Long id,
                                             @RequestBody UpdateAccountRequest request) {
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
@@ -71,7 +71,7 @@ public class AccountController implements IController {
         
     }
     
-    @PutMapping("/{id}/change-role")
+    @PutMapping("/{id}/role")
     public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
             .id(AccountId.of(id))

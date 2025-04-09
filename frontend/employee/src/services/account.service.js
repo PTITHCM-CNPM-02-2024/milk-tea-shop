@@ -20,7 +20,7 @@ const AccountService = {
   
   // Đổi mật khẩu
   changePassword(id, newPassword, confirmPassword) {
-    return apiClient.put(`/accounts/${id}/change-password`, {
+    return apiClient.put(`/accounts/${id}/password`, {
       newPassword,
       confirmPassword
     });

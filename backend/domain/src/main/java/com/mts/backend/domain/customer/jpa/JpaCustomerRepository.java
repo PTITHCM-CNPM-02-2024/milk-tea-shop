@@ -6,6 +6,8 @@ import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.customer.CustomerEntity;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,6 +40,10 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
     @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue"})
     @Query("select c from CustomerEntity c where c.id = :id")
   Optional<CustomerEntity> findByIdFetchMembershipType(@NotNull @Param("id") Long id);
+    
+    @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue", "accountEntity"})
+    @Query("select c from CustomerEntity c")
+    Page<CustomerEntity> findAllFetch(Pageable pageable);
 
 
 }

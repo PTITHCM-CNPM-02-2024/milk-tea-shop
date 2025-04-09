@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import * as areaTableService from '@/services/areaTableService'
+import { areaTableService } from '@/services/areaTableService'
 
 export const useAreaTableStore = defineStore('areaTable', () => {
   // State
@@ -35,8 +35,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
     error.value = null
     try {
       const response = await areaTableService.getAreas(page, size)
-      areas.value = response.content || []
-      totalAreas.value = response.totalElements || 0
+      areas.value = response.data.content || []
+      totalAreas.value = response.data.totalElements || 0
     } catch (err) {
       error.value = 'Có lỗi xảy ra khi tải danh sách khu vực: ' + (err.message || 'Lỗi không xác định')
       console.error(err)
@@ -49,7 +49,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
     loading.value = true
     error.value = null
     try {
-      const newArea = await areaTableService.createArea(areaData)
+      const response = await areaTableService.createArea(areaData)
+      const newArea = response.data
       // Thêm vào danh sách nếu cần
       areas.value.push(newArea)
       return newArea
@@ -66,7 +67,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedArea = await areaTableService.updateArea(id, areaData)
+      const response = await areaTableService.updateArea(id, areaData)
+      const updatedArea = response.data
       // Cập nhật trong danh sách
       const index = areas.value.findIndex(area => area.id === id)
       if (index !== -1) {
@@ -114,8 +116,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       } else {
         response = await areaTableService.getTables(page, size)
       }
-      tables.value = response.content || []
-      totalTables.value = response.totalElements || 0
+      tables.value = response.data.content || []
+      totalTables.value = response.data.totalElements || 0
     } catch (err) {
       error.value = 'Có lỗi xảy ra khi tải danh sách bàn: ' + (err.message || 'Lỗi không xác định')
       console.error(err)
@@ -128,7 +130,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
     loading.value = true
     error.value = null
     try {
-      const newTable = await areaTableService.createTable(tableData)
+      const response = await areaTableService.createTable(tableData)
+      const newTable = response.data
       // Thêm vào danh sách nếu cần
       tables.value.push(newTable)
       return newTable
@@ -145,7 +148,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
     loading.value = true
     error.value = null
     try {
-      const updatedTable = await areaTableService.updateTable(id, tableData)
+      const response = await areaTableService.updateTable(id, tableData)
+      const updatedTable = response.data
       // Cập nhật trong danh sách
       const index = tables.value.findIndex(table => table.id === id)
       if (index !== -1) {
