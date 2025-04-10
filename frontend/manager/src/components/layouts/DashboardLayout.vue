@@ -144,14 +144,38 @@
         </v-list-group>
 
         <!-- Orders & Payments -->
-        <v-list-item
-          prepend-icon="mdi-cart-outline"
-          :title="rail ? '' : 'Orders & Payments'"
-          value="orders"
-          rounded="lg"
-          to="/orders"
-          class="mb-1"
-        ></v-list-item>
+        <v-list-group value="orders-payments">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-cart-outline"
+              title="Đơn hàng & Thanh toán"
+              value="orders-payments"
+              rounded="lg"
+              class="mb-1"
+            ></v-list-item>
+          </template>
+          
+          <v-list-item
+            title="Đơn hàng"
+            value="orders"
+            rounded="lg"
+            prepend-icon="mdi-clipboard-text-outline"
+            class="ms-2"
+            to="/orders"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+          
+          <v-list-item
+            title="Thanh toán & Phương thức"
+            value="payments"
+            rounded="lg" 
+            prepend-icon="mdi-credit-card-outline"
+            class="ms-2"
+            to="/payments"
+            active-class="gradient-background text-white"
+          ></v-list-item>
+        </v-list-group>
 
         <!-- Areas & Tables -->
         <v-list-item
@@ -164,24 +188,24 @@
         ></v-list-item>
 
         <!-- Store Management -->
-        <v-list-item
+        <!-- <v-list-item
           prepend-icon="mdi-store-outline"
           :title="rail ? '' : 'Store Management'"
           value="store"
           rounded="lg"
           to="/store"
           class="mb-1"
-        ></v-list-item>
+        ></v-list-item> -->
 
         <!-- Discounts & Promotions -->
-        <v-list-item
-          prepend-icon="mdi-tag-outline"
-          :title="rail ? '' : 'Discounts & Promotions'"
-          value="discounts"
-          rounded="lg"
-          to="/discounts"
-          class="mb-1"
-        ></v-list-item>
+          <v-list-item
+            title="Chương trình & Mã giảm giá"
+            value="discounts"
+            rounded="lg"
+            prepend-icon="mdi-sale"
+            to="/discounts"
+            class="mb-1"
+          ></v-list-item>
       </v-list>
     </v-navigation-drawer>
 

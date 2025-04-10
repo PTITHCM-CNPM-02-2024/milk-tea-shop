@@ -59,8 +59,8 @@ public class CouponController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getAllCoupon(@RequestParam(defaultValue = "0") Integer page,
-                                          @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAllCoupon(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultCouponQuery.builder().
                 page(page)
                 .size(size)

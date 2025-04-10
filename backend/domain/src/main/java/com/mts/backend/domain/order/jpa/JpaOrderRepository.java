@@ -1,6 +1,5 @@
 package com.mts.backend.domain.order.jpa;
 
-import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.product.ProductPriceEntity;
@@ -59,6 +58,12 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
             "and ot.checkOut is null")
     Page<OrderEntity> findByEmployeeEntity_IdFetchOrdTbs(@Param("id") @NonNull Long id, @Param("status") @NonNull OrderStatus status, Pageable pageable);
     
-    @EntityGraph(value = "OrderEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
-    Optional<OrderEntity> findDetailById(Long id);
+    
+    @EntityGraph(value = "graph.order.fetchEmpCus", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("select o from OrderEntity o")
+    Page<OrderEntity> findAllFetchEmpCus(Pageable pageable);
+    
+    @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderDiscounts.discount.couponEntity", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.productPriceEntity.productEntity", "orderTables.table", "payments.paymentMethod"})
+    @Query("select o from OrderEntity o where o.id = :id")
+    Optional<OrderEntity> findByIdFetch(@Param("id") Long id);
 }

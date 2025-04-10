@@ -103,9 +103,19 @@ const router = createRouter({
     {
       path: '/orders',
       name: 'orders',
-      //component: () => import('@/views/OrdersPayments.vue'),
+      component: () => import('@/views/OrderList.vue'),
       meta: {
-        title: 'Orders & Payments'
+        title: 'Quản lý đơn hàng',
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/payments',
+      name: 'payments',
+      component: () => import('@/views/PaymentManagement.vue'),
+      meta: {
+        title: 'Quản lý thanh toán',
+        requiresAuth: true
       }
     },
     {
@@ -135,9 +145,10 @@ const router = createRouter({
     {
       path: '/discounts',
       name: 'discounts',
-      //component: () => import('@/views/DiscountsPromotions.vue'),
+      component: () => import('@/views/DiscountManagement.vue'),
       meta: {
-        title: 'Discounts & Promotions'
+        title: 'Quản lý khuyến mãi',
+        requiresAuth: true
       }
     }
   ]

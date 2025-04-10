@@ -88,8 +88,8 @@ public class DiscountController implements IController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getAllDiscount(@RequestParam(defaultValue = "0") Integer page,
-                                                         @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAllDiscount(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultDiscountQuery.builder()
                 .page(page)
                 .size(size)

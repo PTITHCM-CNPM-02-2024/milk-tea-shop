@@ -5,7 +5,7 @@ import com.mts.backend.application.order.response.OrderDiscountDetailResponse;
 import com.mts.backend.application.order.response.OrderProductDetailResponse;
 import com.mts.backend.application.order.response.OrderTableDetailResponse;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
-import com.mts.backend.application.security.model.UserPrincipal;
+import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.OrderDiscountEntity;
 import com.mts.backend.domain.order.OrderEntity;
@@ -15,7 +15,6 @@ import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -197,7 +196,8 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         DecimalFormat currency = new DecimalFormat("#,###");
         var paymentDetail = getPayment(payment);
 
-        template = template.replace("{{paymentMethod}}", paymentDetail.getPaymentMethod());
+        template = template.replace("{{paymentMethod}}", paymentDetail.getPaymentMethod()
+                .getName());
         template = template.replace("{{amountPaid}}", currency.format(paymentDetail.getAmountPaid()));
         template = template.replace("{{changeAmount}}", currency.format(paymentDetail.getChange()));
 
@@ -257,7 +257,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         var paymentMethod = payment.getPaymentMethod();
 
         return PaymentDetailResponse.builder()
-                .paymentMethod(paymentMethod.getPaymentName().getValue())
+                .paymentMethod(new PaymentMethodDetailResponse(
+                        paymentMethod.getId(),
+                        paymentMethod.getPaymentName().getValue(),
+                        paymentMethod.getPaymentDescription().orElse(null)))
                 .amountPaid(payment.getAmountPaid()
                         .map(Money::getValue)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy số tiền đã thanh toán")))

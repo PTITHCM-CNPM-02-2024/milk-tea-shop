@@ -4,6 +4,9 @@ import com.mts.backend.api.common.IController;
 import com.mts.backend.api.order.request.OrderBaseRequest;
 import com.mts.backend.application.order.OrderCommandBus;
 import com.mts.backend.application.order.command.*;
+import com.mts.backend.application.order.query.DefaultOrderQuery;
+import com.mts.backend.application.order.query.OrderByIdQuery;
+import com.mts.backend.application.order.OrderQueryBus;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.product.identifier.ProductId;
@@ -22,9 +25,10 @@ import java.util.Objects;
 @RequestMapping("/api/v1/orders")
 public class OrderController implements IController {
     private final OrderCommandBus commandBus;
-
-    public OrderController(OrderCommandBus commandBus) {
+    private final OrderQueryBus orderQueryBus;
+    public OrderController(OrderCommandBus commandBus, OrderQueryBus orderQueryBus) {
         this.commandBus = commandBus;
+        this.orderQueryBus = orderQueryBus;
     }
 
     @PostMapping
@@ -132,5 +136,30 @@ public class OrderController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
 
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllOrders(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var command = DefaultOrderQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
+
+        var result = orderQueryBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+    
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getOrderById(@PathVariable("orderId") Long orderId) {
+        var command = OrderByIdQuery.builder()
+                .orderId(OrderId.of(orderId))
+                .build();
+
+        var result = orderQueryBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }
