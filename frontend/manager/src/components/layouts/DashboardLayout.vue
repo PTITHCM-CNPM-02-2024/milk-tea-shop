@@ -21,18 +21,18 @@
           </v-avatar>
           <span class="text-h6 font-weight-bold primary--text" v-if="!rail">MATERIO</span>
         </div>
-        <v-btn 
-          v-if="!rail && !isMobile" 
-          icon="mdi-chevron-left" 
-          size="small" 
-          variant="text" 
+        <v-btn
+          v-if="!rail && !isMobile"
+          icon="mdi-chevron-left"
+          size="small"
+          variant="text"
           @click="toggleRail"
         ></v-btn>
-        <v-btn 
-          v-if="rail && !isMobile" 
-          icon="mdi-chevron-right" 
-          size="small" 
-          variant="text" 
+        <v-btn
+          v-if="rail && !isMobile"
+          icon="mdi-chevron-right"
+          size="small"
+          variant="text"
           @click="toggleRail"
         ></v-btn>
       </div>
@@ -53,7 +53,7 @@
               class="mb-1"
             ></v-list-item>
           </template>
-          
+
           <v-list-item
             title="Danh sách tài khoản"
             value="account-list"
@@ -63,11 +63,11 @@
             to="/account/list"
             active-class="gradient-background text-white"
           ></v-list-item>
-          
+
           <v-list-item
             title="Vai trò người dùng"
             value="account-roles"
-            rounded="lg" 
+            rounded="lg"
             prepend-icon="mdi-shield-account"
             class="ms-2"
             to="/account/roles"
@@ -87,7 +87,7 @@
               class="mb-1"
             ></v-list-item>
           </template>
-          
+
           <v-list-item
             title="Nhân viên"
             value="employees"
@@ -97,11 +97,11 @@
             to="/users/employees"
             active-class="gradient-background text-white"
           ></v-list-item>
-          
+
           <v-list-item
             title="Khách hàng & CT Thành viên"
             value="customers-membership"
-            rounded="lg" 
+            rounded="lg"
             prepend-icon="mdi-account-star"
             class="ms-2"
             to="/users/customers"
@@ -121,7 +121,7 @@
               class="mb-1"
             ></v-list-item>
           </template>
-          
+
           <v-list-item
             title="Sản phẩm & Danh mục"
             value="product-and-categories"
@@ -131,7 +131,7 @@
             to="/products/list"
             active-class="gradient-background text-white"
           ></v-list-item>
-          
+
           <v-list-item
             title="Kích thước & Đơn vị tính"
             value="size-units"
@@ -155,7 +155,7 @@
               class="mb-1"
             ></v-list-item>
           </template>
-          
+
           <v-list-item
             title="Đơn hàng"
             value="orders"
@@ -165,11 +165,11 @@
             to="/orders"
             active-class="gradient-background text-white"
           ></v-list-item>
-          
+
           <v-list-item
             title="Thanh toán & Phương thức"
             value="payments"
-            rounded="lg" 
+            rounded="lg"
             prepend-icon="mdi-credit-card-outline"
             class="ms-2"
             to="/payments"
@@ -187,16 +187,6 @@
           class="mb-1"
         ></v-list-item>
 
-        <!-- Store Management -->
-        <!-- <v-list-item
-          prepend-icon="mdi-store-outline"
-          :title="rail ? '' : 'Store Management'"
-          value="store"
-          rounded="lg"
-          to="/store"
-          class="mb-1"
-        ></v-list-item> -->
-
         <!-- Discounts & Promotions -->
           <v-list-item
             title="Chương trình & Mã giảm giá"
@@ -206,23 +196,34 @@
             to="/discounts"
             class="mb-1"
           ></v-list-item>
+
+
+        <!-- Store Management -->
+        <v-list-item
+          prepend-icon="mdi-store-outline"
+          title="Thông tin cửa hàng"
+          value="store"
+          rounded="lg"
+          to="/store"
+          class="mb-1"
+        ></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <!-- Main Content Area -->
     <v-main>
       <!-- App Bar -->
-      <v-app-bar 
-        :elevation="0" 
+      <v-app-bar
+        :elevation="0"
         :color="darkMode ? 'background' : 'white'"
         height="64"
       >
         <v-container class="d-flex align-center px-4" fluid>
           <!-- Mobile Menu Toggle -->
-          <v-btn 
-            icon 
-            variant="text" 
-            @click="drawer = !drawer" 
+          <v-btn
+            icon
+            variant="text"
+            @click="drawer = !drawer"
             v-if="isMobile"
           >
             <v-icon>mdi-menu</v-icon>
@@ -310,7 +311,7 @@ onMounted(() => {
   darkMode.value = appStore.darkMode
   rail.value = appStore.sidebarMini
   drawer.value = appStore.sidebarVisible
-  
+
   // Adjust sidebar on mobile
   if (isMobile.value) {
     drawer.value = false
@@ -366,4 +367,4 @@ function toggleDarkMode() {
 :deep(.v-list-item:hover:not(.v-list-item--active)) {
   background-color: rgba(115, 103, 240, 0.08) !important;
 }
-</style> 
+</style>

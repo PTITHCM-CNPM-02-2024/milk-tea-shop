@@ -58,11 +58,15 @@ public class AccountController implements IController {
     
     @PutMapping("/{id}/password")
     public ResponseEntity<?> changePassword(@PathVariable("id") Long id,
-                                            @RequestBody UpdateAccountRequest request) {
+                                            @RequestParam(value = "oldPassword", required = true) String oldPassword,
+                                            @RequestParam(value = "newPassword", required = true) String newPassword,
+                                            @RequestParam(value = "confirmPassword", required = true) String confirmPassword
+    ) {     
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
             .id(AccountId.of(id))
-            .newPassword(PasswordHash.builder().value(request.getNewPassword()).build())
-            .confirmPassword(PasswordHash.builder().value(request.getConfirmPassword()).build())
+            .oldPassword(PasswordHash.builder().value(oldPassword).build())
+            .newPassword(PasswordHash.builder().value(newPassword).build())
+            .confirmPassword(PasswordHash.builder().value(confirmPassword).build())
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -72,10 +76,10 @@ public class AccountController implements IController {
     }
     
     @PutMapping("/{id}/role")
-    public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
+    public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestParam("value") Integer roleId) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
             .id(AccountId.of(id))
-            .roleId(RoleId.of(request.getRoleId()))
+            .roleId(RoleId.of(roleId))
             .build();
         
         var result = accountCommandBus.dispatch(command);
@@ -123,7 +127,7 @@ public class AccountController implements IController {
     }
     
     @PutMapping("/{id}/lock")
-    public ResponseEntity<?> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "locked",
+    public ResponseEntity<?> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "value",
             required = true) Boolean locked) {
         var command = UpdateLockAccountCommand.builder().id(AccountId.of(id))
                 .isLocked(locked)

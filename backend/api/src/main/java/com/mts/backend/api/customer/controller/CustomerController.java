@@ -13,6 +13,9 @@ import com.mts.backend.application.customer.query.CustomerByPhoneQuery;
 import com.mts.backend.application.customer.query.DefaultCustomerQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
@@ -35,15 +38,20 @@ public class CustomerController implements IController {
     
     @PostMapping
     public ResponseEntity<?> createCustomer(@RequestBody CreateCustomerRequest request) {
-        CreateCustomerCommand command = CreateCustomerCommand.builder()
+            CreateCustomerCommand command = CreateCustomerCommand.builder()
                 .firstName(Objects.isNull(request.getFirstName()) ? null : FirstName.builder().value(request.getFirstName()).build())
                 .lastName(Objects.isNull(request.getLastName()) ? null : LastName.builder().value(request.getLastName()).build())
-                .accountId(Objects.isNull(request.getAccountId()) ? null : AccountId.of(request.getAccountId()))
                 .email(Objects.isNull(request.getEmail()) ? null : Email.builder().value(request.getEmail()).build())
-                .membershipId(Objects.isNull(request.getMemberId()) ? null : MembershipTypeId.of(request.getMemberId()))
                 .gender(Objects.isNull(request.getGender()) ? null : Gender.valueOf(request.getGender()))
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                    .membershipId(Objects.isNull(request.getMemberId()) ? null:
+                            MembershipTypeId.of(request.getMemberId()))
                 .build();
+            
+         if (!Objects.isNull(request.getUsername()) && !Objects.isNull(request.getPassword()))  { 
+            command.setUsername(Username.builder().value(request.getUsername()).build());
+            command.setPasswordHash(PasswordHash.builder().value(request.getPassword()).build());
+            command.setRoleId(RoleId.of(request.getRoleId()));}
                 
         
         var result = customerCommandBus.dispatch(command);
@@ -62,6 +70,7 @@ public class CustomerController implements IController {
                 .lastName(Objects.isNull(request.getLastName()) ? null :
                         LastName.builder().value(request.getLastName()).build())
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .gender(Objects.isNull(request.getGender()) ?  null : Gender.valueOf(request.getGender())) 
                 .build();
         
         var result = customerCommandBus.dispatch(command);
@@ -70,10 +79,10 @@ public class CustomerController implements IController {
     }
     
     @PutMapping("/{id}/membership")
-    public ResponseEntity<?> updateMembership(@PathVariable("id") Long id, @RequestParam("membershipId") Integer membershipId){
+    public ResponseEntity<?> updateMembership(@PathVariable("id") Long id, @RequestParam("value") Integer value){
         UpdateMemberForCustomer command = UpdateMemberForCustomer.builder()
                 .customerId(CustomerId.of(id))
-                .memberId(MembershipTypeId.of(membershipId))
+                .memberId(MembershipTypeId.of(value))
                 .build();
         
         var result = customerCommandBus.dispatch(command);

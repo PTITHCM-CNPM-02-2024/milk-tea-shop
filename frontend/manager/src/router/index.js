@@ -137,9 +137,10 @@ const router = createRouter({
     {
       path: '/store',
       name: 'store',
-      //component: () => import('@/views/StoreManagement.vue'),
+      component: () => import('@/views/StoreInfo.vue'),
       meta: {
-        title: 'Store Management'
+        title: 'Thông tin cửa hàng',
+        requiresAuth: true
       }
     },
     {

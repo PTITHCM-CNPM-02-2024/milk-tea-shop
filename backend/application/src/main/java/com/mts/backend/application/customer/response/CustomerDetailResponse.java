@@ -9,6 +9,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Data
 public class CustomerDetailResponse extends UserDetailResponse {
     private Integer rewardPoint;
     private Integer membershipId;

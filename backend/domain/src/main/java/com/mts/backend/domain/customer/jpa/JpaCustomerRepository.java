@@ -44,6 +44,10 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
     @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue", "accountEntity"})
     @Query("select c from CustomerEntity c")
     Page<CustomerEntity> findAllFetch(Pageable pageable);
-
+    
+    
+    @EntityGraph(value = "graph.customer.fetchMembershipTypeAndAccount", type = EntityGraph.EntityGraphType.FETCH)
+    @Query("select c from CustomerEntity c where c.id = :id")
+    Optional<CustomerEntity> findByIdFetchMembershipTypeAndAccount(@NotNull @Param("id") Long id);
 
 }

@@ -1,18 +1,5 @@
 <template>
   <dashboard-layout>
-    <!-- <v-card class="mb-4">
-      <v-card-text>
-        <div class="d-flex flex-column flex-md-row justify-space-between align-md-center">
-          <div>
-            <h1 class="text-h4 font-weight-bold">Quản lý tài khoản</h1>
-            <p class="text-medium-emphasis mt-1">
-              Quản lý tài khoản người dùng và vai trò trong hệ thống
-            </p>
-          </div>
-        </div>
-      </v-card-text>
-    </v-card> -->
-    
     <v-card>
       <v-tabs
         v-model="activeTab"
@@ -29,7 +16,7 @@
           Vai trò người dùng
         </v-tab>
       </v-tabs>
-      
+
       <router-view></router-view>
     </v-card>
   </dashboard-layout>
@@ -62,4 +49,4 @@ watch(() => route.path, (newPath) => {
   min-width: 150px;
   font-weight: 500;
 }
-</style> 
+</style>

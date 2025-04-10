@@ -7,9 +7,11 @@ import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
+import com.mts.backend.domain.customer.value_object.RewardPoint;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -25,12 +27,17 @@ public class UpdateMemberForCustomerCommandHandler implements ICommandHandler<Up
     }
     
     @Override
+    @Transactional
     public CommandResult handle(UpdateMemberForCustomer command) {
         
         CustomerEntity customer = mustExistCustomer(command.getCustomerId());
         MembershipTypeEntity membershipType = mustExistMembershipType(command.getMemberId());
         
-        customer.setMembershipTypeEntity(membershipType);
+        if (customer.changeMembershipType(membershipType)) {
+            customer.changeRewardPoint(RewardPoint.builder().
+                    value(membershipType.getRequiredPoint())
+                    .build());
+        }
         
         var updatedCustomer = customerRepository.save(customer);
         

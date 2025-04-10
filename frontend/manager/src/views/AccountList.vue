@@ -126,9 +126,20 @@
             :icon="item.isActive ? 'mdi-check-circle' : 'mdi-close-circle'"
             size="small"
             class="mr-1"
+          >
+        </v-icon>          
+        {{ item.isActive ? 'Hoạt động' : 'Không hoạt động' }}
+        </div>
+      </template>
+      
+      <!-- Cột Khóa -->
+      <template v-slot:item.lock="{ item }">
+        <div class="d-flex align-center">
+          <v-icon
+            :icon="item.isLocked ? 'mdi-lock-open' : 'mdi-lock'"
+            size="small"
+            :color="item.isLocked ? 'success' : 'warning'"
           ></v-icon>
-          {{ item.isActive ? 'Hoạt động' : 'Không hoạt động' }}
-          
           <v-tooltip v-if="item.isLocked" location="top">
             <template v-slot:activator="{ props }">
               <v-icon
@@ -141,47 +152,6 @@
             </template>
             <span>Tài khoản đang bị khóa</span>
           </v-tooltip>
-        </div>
-      </template>
-      
-      <!-- Cột Hành động -->
-      <template v-slot:item.actions="{ item }">
-        <div class="d-flex gap-2">
-          <!-- Nút chỉnh sửa -->
-          <v-btn
-            icon="mdi-pencil"
-            size="small"
-            color="primary"
-            variant="text"
-            @click="openEditDialog(item)"
-          ></v-btn>
-          
-          <!-- Nút khóa/mở khóa -->
-          <v-btn
-            :icon="item.isLocked ? 'mdi-lock-open' : 'mdi-lock'"
-            size="small"
-            :color="item.isLocked ? 'success' : 'warning'"
-            variant="text"
-            @click="toggleLock(item)"
-          ></v-btn>
-          
-          <!-- Nút kích hoạt/vô hiệu hóa -->
-          <v-btn
-            :icon="item.isActive ? 'mdi-close-circle' : 'mdi-check-circle'"
-            size="small"
-            :color="item.isActive ? 'error' : 'success'"
-            variant="text"
-            @click="toggleActive(item)"
-          ></v-btn>
-          
-          <!-- Nút xóa -->
-          <v-btn
-            icon="mdi-delete"
-            size="small"
-            color="error"
-            variant="text"
-            @click="openDeleteDialog(item)"
-          ></v-btn>
         </div>
       </template>
     </v-data-table>
@@ -455,7 +425,7 @@ const headers = [
   { title: 'Mô tả', key: 'description', sortable: false },
   { title: 'Vai trò', key: 'role', sortable: false },
   { title: 'Trạng thái', key: 'status', sortable: false },
-  { title: 'Hành động', key: 'actions', sortable: false, align: 'end', width: '150px' }
+  { title: 'Khóa', key: 'lock', sortable: false, align: 'end', width: '70px' }
 ]
 
 // Danh sách vai trò để filter

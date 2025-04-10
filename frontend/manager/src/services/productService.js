@@ -107,28 +107,5 @@ export const productService = {
   // Xóa đơn vị tính
   deleteUnit(id) {
     return api.delete(`/units/${id}`)
-  },
-
-  // API cho quản lý nhân viên
-  getEmployees(page = 0, size = 10) {
-    return api.get('/employees', {
-      params: { page, size }
-    })
-  },
-
-  getEmployeeById(id) {
-    return api.get(`/employees/${id}`)
-  },
-
-  createEmployee(employeeData) {
-    return api.post('/employees', employeeData)
-  },
-
-  updateEmployee(id, employeeData) {
-    return api.put(`/employees/${id}`, employeeData)
-  },
-
-  deleteEmployee(id) {
-    return api.delete(`/employees/${id}`)
   }
 } 

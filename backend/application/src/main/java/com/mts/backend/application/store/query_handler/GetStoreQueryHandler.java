@@ -1,9 +1,7 @@
 package com.mts.backend.application.store.query_handler;
 
-import com.mts.backend.application.store.query.StoreByIdQuery;
+import com.mts.backend.application.store.query.DefaultStoreQuery;
 import com.mts.backend.application.store.response.StoreDetailResponse;
-import com.mts.backend.domain.store.StoreEntity;
-import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.DomainException;
@@ -13,11 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
-public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, CommandResult> {
+public class GetStoreQueryHandler implements IQueryHandler<DefaultStoreQuery, CommandResult> {
     
     private final JpaStoreRepository storeRepository;
     
-    public GetStoreByIdQueryHandler(JpaStoreRepository storeRepository) {
+    public GetStoreQueryHandler(JpaStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
     /**
@@ -25,10 +23,11 @@ public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, C
      * @return
      */
     @Override
-    public CommandResult handle(StoreByIdQuery query) {
+    public CommandResult handle(DefaultStoreQuery query) {
         Objects.requireNonNull(query, "Store by id query is required");
         
-        var store = mustExistStore(query.getId());
+        var store = storeRepository.findAll().stream().findFirst().orElseThrow(() -> new DomainException("Không tìm " +
+                                                                                                         "thấy thông tin cửa hàng"));
         
         var response = StoreDetailResponse.builder()
                 .id(store.getId())
@@ -37,15 +36,11 @@ public class GetStoreByIdQueryHandler implements IQueryHandler<StoreByIdQuery, C
                 .phone(store.getPhone().getValue())
                 .email(store.getEmail().getValue())
                 .taxCode(store.getTaxCode())
+                .openingDate(store.getOpeningDate())
                 .openTime(store.getOpeningTime())
                 .closeTime(store.getClosingTime())
                 .build();
         
         return CommandResult.success(response);
-    }
-    
-    private StoreEntity mustExistStore(StoreId id) {
-        return storeRepository.findById(id.getValue())
-                .orElseThrow(() -> new DomainException("Cửa hàng" + id.getValue() + " không tồn tại"));
     }
 }

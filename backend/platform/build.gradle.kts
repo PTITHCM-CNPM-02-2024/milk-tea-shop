@@ -39,6 +39,7 @@ dependencies {
         api("org.springframework.boot:spring-boot-starter-actuator:3.4.2")
         api("org.springframework.boot:spring-boot-starter-validation:3.4.2")
         api("io.jsonwebtoken:jjwt-api:0.12.6")
+        api("com.google.firebase:firebase-storage:21.0.1")
     }
 }
 

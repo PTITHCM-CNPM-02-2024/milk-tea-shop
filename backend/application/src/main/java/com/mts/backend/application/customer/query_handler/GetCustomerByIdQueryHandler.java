@@ -27,7 +27,6 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
     }
     
     @Override
-    @Transactional
     public CommandResult handle(CustomerByIdQuery query) {
         Objects.requireNonNull(query, "Get customer by id query is required");
         
@@ -38,6 +37,7 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
                 .firstName(customer.getFirstName().map(FirstName::getValue).orElse(null))
                 .lastName(customer.getLastName().map(LastName::getValue).orElse(null))
                 .email(customer.getEmail().map(Email::getValue).orElse(null))
+                .gender(customer.getGender().map(Enum::name).orElse(null))
                 .phone(customer.getPhone().getValue())
                 .membershipId(customer.getMembershipTypeEntity().getId())
                 .rewardPoint(customer.getCurrentPoints().getValue())
@@ -49,7 +49,7 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
     
     private CustomerEntity mustExistCustomer(CustomerId customerId) {
         Objects.requireNonNull(customerId, "Customer id is required");
-        return customerRepository.findById(customerId.getValue())
+        return customerRepository.findByIdFetchMembershipTypeAndAccount(customerId.getValue())
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));
     }
     

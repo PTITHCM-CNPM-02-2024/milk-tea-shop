@@ -41,6 +41,8 @@ public class GetAllAccountQueryHandler implements IQueryHandler<DefaultAccountQu
                             .name(account.getRoleEntity().getName().getValue())
                             .description(account.getRoleEntity().getDescription().orElse(null))
                             .build())
+                    .isLocked(account.getLocked())
+                    .isActive(account.getActive().orElse(null))
                     .build();
         });
         

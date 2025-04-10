@@ -17,6 +17,6 @@ import org.springframework.data.domain.Page;
 public class PaymentReportResponse {
     private BigDecimal totalAmount;
     private BigDecimal averageAmount;
-    private Integer totalPayment;
+    private Long totalPayment;
     private List<PaymentDetailResponse> paymentDetailResponses;
 }

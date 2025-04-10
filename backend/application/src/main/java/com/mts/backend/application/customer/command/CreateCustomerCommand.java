@@ -1,6 +1,9 @@
 package com.mts.backend.application.customer.command;
 
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.shared.command.CommandResult;
@@ -24,6 +27,9 @@ public class CreateCustomerCommand implements ICommand<CommandResult> {
     private PhoneNumber phone;
     private MembershipTypeId membershipId;
     private AccountId accountId;
+    private Username username;
+    private PasswordHash passwordHash;
+    private RoleId roleId;
     
     public Optional<FirstName> getFirstName() {
         return Optional.ofNullable(firstName);
@@ -48,6 +54,19 @@ public class CreateCustomerCommand implements ICommand<CommandResult> {
     
     public Optional<Gender> getGender(){
         return Optional.of(gender);
+    }
+    
+    
+    public Optional<Username> getUsername() {
+        return Optional.ofNullable(username);
+    }
+    
+    public Optional<PasswordHash> getPasswordHash() {
+        return Optional.ofNullable(passwordHash);
+    }
+    
+    public RoleId getRoleId() {
+        return roleId;
     }
     
 }

@@ -6,6 +6,7 @@ import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.domain.account.AccountEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,18 @@ import java.util.Optional;
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
+})
+
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "graph.customer.fetchMembershipType",
+                attributeNodes = @NamedAttributeNode("membershipTypeEntity")),
+        @NamedEntityGraph(name = "graph.customer.fetchAccount",
+                attributeNodes = @NamedAttributeNode("accountEntity")),
+        @NamedEntityGraph(name = "graph.customer.fetchMembershipTypeAndAccount",
+                attributeNodes = {
+                        @NamedAttributeNode("membershipTypeEntity"),
+                        @NamedAttributeNode("accountEntity")
+                })
 })
 @Builder
 public class CustomerEntity extends BaseEntity<Long> {
@@ -60,6 +73,15 @@ public class CustomerEntity extends BaseEntity<Long> {
     @JoinColumn(name = "membership_type_id")
     @NotNull
     private MembershipTypeEntity membershipTypeEntity;
+    
+    public boolean changeMembershipType(MembershipTypeEntity membershipTypeEntity) {
+        Objects.requireNonNull(membershipTypeEntity, "Membership type is required");
+        if (Objects.equals(this.membershipTypeEntity, membershipTypeEntity)) {
+            return false;
+        }
+        this.membershipTypeEntity = membershipTypeEntity;
+        return true;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
@@ -102,9 +124,17 @@ public class CustomerEntity extends BaseEntity<Long> {
     @Comment("Giới tính")
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
+    @Nullable
     private Gender gender;
+    
+    public Optional<Gender> getGender(){
+        return Optional.ofNullable(gender);
+    }
 
-    public CustomerEntity(Long id, @NotNull MembershipTypeEntity membershipTypeEntity, @Nullable AccountEntity accountEntity, @Nullable LastName lastName, @Nullable FirstName firstName, @NotNull PhoneNumber phone, @Nullable Email email, @NotNull RewardPoint currentPoints, Gender gender) {
+    public CustomerEntity(Long id, @NotNull MembershipTypeEntity membershipTypeEntity,
+                          @Nullable AccountEntity accountEntity, @Nullable LastName lastName,
+                          @Nullable FirstName firstName, @NotNull PhoneNumber phone, @Nullable Email email,
+                          @NotNull RewardPoint currentPoints,@Nullable Gender gender) {
         this.id = id;
         this.membershipTypeEntity = membershipTypeEntity;
         this.accountEntity = accountEntity;
