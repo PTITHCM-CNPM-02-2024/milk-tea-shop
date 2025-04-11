@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
@@ -17,22 +18,21 @@ import java.io.IOException;
 @Data
 public class FirebaseProperties {
     private String bucket;
+    private FirebaseApp firebaseApp;
 
     @PostConstruct
-    public void initialize() {
-        try {
-            ClassPathResource resource = new ClassPathResource("account-key.json");
+    public void initialize() throws IOException {
+        ClassPathResource resource = new ClassPathResource("account-key.json");
 
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
-                    .setStorageBucket(bucket)
-                    .build();
-
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Không thể khởi tạo Firebase", e);
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
+                .setStorageBucket(bucket)
+                .build();
+        
+        if (FirebaseApp.getApps().isEmpty()) {
+            this.firebaseApp = FirebaseApp.initializeApp(options);
         }
     }
+    
+    
 }

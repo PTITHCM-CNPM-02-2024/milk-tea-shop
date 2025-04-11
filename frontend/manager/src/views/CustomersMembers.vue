@@ -280,7 +280,7 @@
                   </v-card-text>
 
                   <v-chip
-                    v-if="  item.isActive"
+                    v-if="item.isActive"
                     class="status-chip"
                     color="error"
                     size="small"
@@ -660,103 +660,120 @@
       </v-card>
     </v-dialog>
 
-    <!-- Dialog thêm/sửa loại thành viên -->
-    <v-dialog v-model="membershipDialog" max-width="600" persistent>
+    <!-- Dialog thêm/sửa chương trình thành viên -->
+    <v-dialog v-model="membershipDialog" max-width="600px" persistent>
       <v-card>
         <v-card-title class="text-h5 font-weight-bold pa-4">
-          {{ editMode ? 'Chỉnh sửa loại thành viên' : 'Thêm loại thành viên mới' }}
+          {{ editMode ? 'Chỉnh sửa chương trình thành viên' : 'Thêm chương trình thành viên mới' }}
         </v-card-title>
 
         <v-divider></v-divider>
 
-        <v-card-text class="pa-4">
-          <v-form ref="membershipForm" @submit.prevent="saveMembership">
-            <v-text-field
-              v-model="editedMembership.name"
-              label="Tên loại thành viên"
-              variant="outlined"
-              :rules="[v => !!v || 'Vui lòng nhập tên loại thành viên']"
-              class="mb-4"
-            ></v-text-field>
-
-            <v-text-field
-              v-model="editedMembership.description"
-              label="Mô tả"
-              variant="outlined"
-              hint="Có thể để trống"
-              persistent-hint
-            ></v-text-field>
-
-            <v-text-field
-              v-model="editedMembership.requiredPoints"
-              label="Điểm yêu cầu"
-              variant="outlined"
-              type="number"
-              :rules="[
-                v => !!v || 'Vui lòng nhập điểm yêu cầu',
-                v => v >= 0 || 'Điểm yêu cầu không thể là số âm'
-              ]"
-              class="mb-4"
-            ></v-text-field>
-
-            <div class="d-flex gap-4 mb-4">
-              <v-text-field
-                v-model="editedMembership.discountValue"
-                label="Giá trị giảm giá"
-                variant="outlined"
-                type="number"
-                :rules="[
-                  v => !!v || 'Vui lòng nhập giá trị giảm giá',
-                  v => v >= 0 || 'Giá trị giảm giá không thể là số âm',
-                  v => editedMembership.discountUnit !== 'PERCENTAGE' || v <= 100 || 'Phần trăm giảm giá tối đa là 100%'
-                ]"
-                style="flex: 1"
-              ></v-text-field>
-
-              <v-select
-                v-model="editedMembership.discountUnit"
-                :items="[
-                  { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
-                  { title: 'Số tiền cố định', value: 'FIXED' }
-                ]"
-                label="Đơn vị giảm giá"
-                variant="outlined"
-                style="flex: 1"
-              ></v-select>
-            </div>
-
-            <v-menu
-              v-model="dateMenu"
-              :close-on-content-click="false"
-              location="end"
-              transition="scale-transition"
-              min-width="auto"
-              class="mb-4"
-            >
-              <template v-slot:activator="{ props }">
+        <v-card-text>
+          <v-form ref="membershipForm" @submit.prevent="saveMembership" class="pa-4">
+            <v-row>
+              <v-col cols="12">
                 <v-text-field
-                  v-model="formattedValidUntil"
-                  label="Thời hạn hiệu lực (để trống nếu không giới hạn)"
-                  prepend-icon="mdi-calendar"
-                  readonly
+                  v-model="editedMembership.name"
+                  label="Tên chương trình"
                   variant="outlined"
-                  v-bind="props"
-                  clearable
-                  @click:clear="editedMembership.validUntil = null"
+                  :rules="[v => !!v || 'Vui lòng nhập tên chương trình']"
                 ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="editedMembership.validUntil"
-                @update:model-value="dateMenu = false"
-              ></v-date-picker>
-            </v-menu>
+              </v-col>
 
-            <v-checkbox
-              v-model="editedMembership.isActive"
-              label="Kích hoạt loại thành viên này"
-              hide-details
-              class="mb-4"
-            ></v-checkbox>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="editedMembership.description"
+                  label="Mô tả"
+                  variant="outlined"
+                  rows="3"
+                  hint="Mô tả chi tiết về chương trình thành viên"
+                  persistent-hint
+                ></v-textarea>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="editedMembership.discountUnit"
+                  label="Đơn vị giảm giá"
+                  variant="outlined"
+                  :items="[
+                    { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
+                    { title: 'Giá trị cố định (VNĐ)', value: 'FIXED' },
+                  ]"
+                  :rules="[v => !!v || 'Vui lòng chọn đơn vị giảm giá']"
+                ></v-select>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model.number="editedMembership.discountValue"
+                  label="Giá trị giảm giá"
+                  variant="outlined"
+                  type="number"
+                  min="0"
+                  :rules="[
+                    v => !!v || 'Vui lòng nhập giá trị giảm giá',
+                    v => v >= 0 || 'Giá trị phải lớn hơn hoặc bằng 0',
+                    v => editedMembership.discountUnit !== 'PERCENTAGE' || v <= 100 || 'Phần trăm không được vượt quá 100%',
+                    v => editedMembership.discountUnit !== 'FIXED' || v >= 1000 || 'Giá trị phải lớn hơn 1000'
+                  ]"
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model.number="editedMembership.requiredPoints"
+                  label="Điểm thưởng yêu cầu"
+                  variant="outlined"
+                  type="number"
+                  min="0"
+                  :rules="[
+                    v => !!v || 'Vui lòng nhập số điểm thưởng yêu cầu',
+                    v => v >= 0 || 'Số điểm phải lớn hơn hoặc bằng 0'
+                  ]"
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-menu
+                  v-model="dateMenu"
+                  :close-on-content-click="false"
+                  location="bottom"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-text-field
+                      v-model="formattedValidUntil"
+                      label="Ngày hết hạn"
+                      variant="outlined"
+                      readonly
+                      v-bind="props"
+                      clearable
+                      @click:clear="editedMembership.validUntil = null"
+                      hint="Để trống nếu không có hạn sử dụng"
+                      persistent-hint
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="editedMembership.validUntil"
+                    @update:model-value="dateMenu = false"
+                    type="date"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+
+              <v-col cols="12" v-if="editMode">
+                <v-switch
+                  v-model="editedMembership.isActive"
+                  label="Đang hoạt động"
+                  color="success"
+                  inset
+                ></v-switch>
+                <div class="text-caption text-medium-emphasis">
+                  Chỉ hiển thị và áp dụng các chương trình đang hoạt động
+                </div>
+              </v-col>
+            </v-row>
           </v-form>
         </v-card-text>
 
@@ -1225,7 +1242,7 @@ const saveCustomer = async () => {
     loadCustomers()
   } catch (error) {
     console.error('Lỗi khi lưu thông tin khách hàng:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message || 'Không xác định'), 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message || 'Không xác định'), 'error')
   }
 }
 
@@ -1246,7 +1263,7 @@ const saveMembership = async () => {
     closeMembershipDialog()
     loadMemberships()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
   }
 }
 
@@ -1263,7 +1280,7 @@ const deleteItem = async () => {
     }
     closeDeleteDialog()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
   }
 }
 
@@ -1310,7 +1327,7 @@ const savePasswordChange = async () => {
     }
     activeCustomerTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
   } finally {
     loading.value = false
   }
@@ -1337,7 +1354,7 @@ const saveRoleChange = async () => {
     showSnackbar('Thay đổi vai trò thành công', 'success')
     activeCustomerTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
   } finally {
     loading.value = false
   }

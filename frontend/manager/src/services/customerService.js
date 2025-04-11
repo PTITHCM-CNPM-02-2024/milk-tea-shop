@@ -36,11 +36,28 @@ export const customerService = {
   },
 
   createMembershipType(data) {
-    return api.post('/memberships', data)
+    const request = {
+      name: data.name,
+      description: data.description,
+      discountUnit: data.discountUnit,
+      discountValue: data.discountValue,
+      requiredPoint: data.requiredPoints,
+      validUntil: data.validUntil
+    }
+    return api.post('/memberships', request)
   },
 
   updateMembershipType(id, data) {
-    return api.put(`/memberships/${id}`, data)
+    const request = {
+      name: data.name,
+      description: data.description,
+      discountUnit: data.discountUnit,
+      discountValue: data.discountValue,
+      requiredPoint: data.requiredPoints,
+      validUntil: data.validUntil,
+      active: data.isActive
+    }
+    return api.put(`/memberships/${id}`, request)
   },
 
   deleteMembershipType(id) {

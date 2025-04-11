@@ -439,7 +439,23 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </div>
+      <!-- Snackbar thông báo -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+    >
+      {{ snackbar.message }}
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          icon="mdi-close"
+          variant="text"
+          @click="snackbar.show = false"
+        ></v-btn>
+      </template>
+    </v-snackbar>
+    </div>  
   </dashboard-layout>
 </template>
 
@@ -449,6 +465,20 @@ import { useAreaTableStore } from '@/stores/areaTable'
 import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 const areaTableStore = useAreaTableStore()
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success'
+})
+
+function showSnackbar(message, color = 'success') {
+  snackbar.value = {  
+    show: true,
+    message,
+    color
+  }
+}
 
 // Data cho chọn khu vực
 const selectedAreaId = ref(null)
@@ -568,7 +598,7 @@ const submitAreaForm = async () => {
       selectArea({id: selectedAreaId.value, name: areaForm.value.name})
     }
   } catch (err) {
-    console.error('Lỗi khi lưu khu vực:', err)
+    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
   }
 }
 
@@ -582,7 +612,7 @@ const confirmDeleteArea = async () => {
       selectedAreaId.value = null
     }
   } catch (err) {
-    console.error('Lỗi khi xóa khu vực:', err)
+    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
   }
 }
 
@@ -633,7 +663,7 @@ const submitTableForm = async () => {
       }
     }
   } catch (err) {
-    console.error('Lỗi khi lưu bàn:', err)
+    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
   }
 }
 
@@ -642,7 +672,7 @@ const confirmDeleteTable = async () => {
     await areaTableStore.deleteTable(selectedTableToDelete.value.id)
     deleteTableDialog.value = false
   } catch (err) {
-    console.error('Lỗi khi xóa bàn:', err)
+    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
   }
 }
 

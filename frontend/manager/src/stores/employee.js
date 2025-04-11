@@ -28,7 +28,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       totalEmployees.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách nhân viên'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -44,7 +44,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       const response = await employeeService.getEmployeeById(id)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin nhân viên'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -62,7 +62,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo nhân viên mới'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo nhân viên mới'
       throw err
     } finally {
       loading.value = false
@@ -80,7 +80,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật nhân viên'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -98,7 +98,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa nhân viên'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa nhân viên'
       throw err
     } finally {
       loading.value = false

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -12,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class CreateMembershipTypeRequest {
     private String name;
     private String description;
-    private int requiredPoint;
+    private Integer requiredPoint;
     private String discountUnit;
-    private double discountValue;
+    private BigDecimal discountValue;
     private String validUntil;
 }

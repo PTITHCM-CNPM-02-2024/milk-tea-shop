@@ -600,7 +600,7 @@
       :color="snackbar.color"
       :timeout="3000"
     >
-      {{ snackbar.text }}
+      {{ snackbar.message }}
       <template v-slot:actions>
         <v-btn
           color="white"
@@ -668,9 +668,9 @@ const defaultCategory = {
 }
 
 // Snackbar
-const snackbar = reactive({
-  show: false,
-  text: '',
+const snackbar = ref({
+  show: false ,
+  message: '',
   color: 'success'
 })
 
@@ -899,10 +899,12 @@ const handleCategoryPageChange = (newPage) => {
 }
 
 // Snackbar
-const showSnackbar = (text, color = 'success') => {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
+function showSnackbar(message, color = 'success') {
+  snackbar.value = {
+    show: true,
+    message,
+    color
+  }
 }
 
 // Debounce search

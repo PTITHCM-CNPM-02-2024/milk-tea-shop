@@ -52,5 +52,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+    
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity<?> handleJpaSystemException(JpaSystemException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMostSpecificCause().getMessage());
+    }
 
 }

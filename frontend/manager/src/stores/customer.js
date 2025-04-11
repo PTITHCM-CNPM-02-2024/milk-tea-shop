@@ -47,7 +47,7 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await customerService.getCustomerById(id)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin khách hàng'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -83,7 +83,7 @@ export const useCustomerStore = defineStore('customer', () => {
       await fetchCustomers(currentCustomerPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật khách hàng'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -122,7 +122,7 @@ export const useCustomerStore = defineStore('customer', () => {
       totalMembershipTypes.value = response.data.length || 0
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách loại thành viên'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách loại thành viên'
       throw err
     } finally {
       loading.value = false

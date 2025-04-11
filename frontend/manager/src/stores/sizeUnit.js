@@ -67,7 +67,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       await fetchProductSizes(currentSizePage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật kích thước sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật kích thước sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -85,7 +85,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       await fetchProductSizes(currentSizePage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa kích thước sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa kích thước sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -105,7 +105,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       totalUnits.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách đơn vị tính'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách đơn vị tính'
       throw err
     } finally {
       loading.value = false
@@ -123,7 +123,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       await fetchUnits(currentUnitPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo đơn vị tính mới'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo đơn vị tính mới'
       throw err
     } finally {
       loading.value = false
@@ -141,7 +141,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       await fetchUnits(currentUnitPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật đơn vị tính'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật đơn vị tính'
       throw err
     } finally {
       loading.value = false
@@ -159,7 +159,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       await fetchUnits(currentUnitPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa đơn vị tính'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa đơn vị tính'
       throw err
     } finally {
       loading.value = false

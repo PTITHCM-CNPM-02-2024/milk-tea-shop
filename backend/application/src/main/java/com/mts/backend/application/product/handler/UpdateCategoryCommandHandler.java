@@ -40,9 +40,8 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
             verifyUniqueName(category.getName());
         }
         
-        var updatedCategory = categoryRepository.save(category);
         
-        return CommandResult.success(updatedCategory.getId());
+        return CommandResult.success(category.getId());
     }
 
     

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/v1/memberships")
@@ -38,9 +39,9 @@ public class MembershipController implements IController {
                 .name(MemberTypeName.builder().value(request.getName()).build())
                 .description(request.getDescription())
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
-                .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
+                .discountValue(request.getDiscountValue())
                 .requiredPoints(request.getRequiredPoint())
-                .validUntil(request.getValidUntil() == null ? null : LocalDateTime.parse(request.getValidUntil()))
+                .validUntil(request.getValidUntil() == null ? null : ZonedDateTime.parse(request.getValidUntil()).toLocalDateTime())
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -57,7 +58,7 @@ public class MembershipController implements IController {
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
                 .requiredPoints(request.getRequiredPoint())
-                .validUntil(LocalDateTime.parse(request.getValidUntil()))
+                .validUntil(request.getValidUntil() == null ? null : ZonedDateTime.parse(request.getValidUntil()).toLocalDateTime())
                 .active(request.isActive())
                 .build();
         

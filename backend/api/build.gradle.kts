@@ -14,8 +14,8 @@ dependencies{
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-security")
-    api("com.google.firebase:firebase-firestore:25.1.3")
-    api("com.google.firebase:firebase-admin:9.4.3")
+    implementation("com.google.firebase:firebase-storage:21.0.1")
+    implementation("com.google.firebase:firebase-admin:9.4.3")
 }
 
 group = "com.mts.backend"

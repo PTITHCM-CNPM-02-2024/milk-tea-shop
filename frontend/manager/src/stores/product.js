@@ -29,7 +29,7 @@ export const useProductStore = defineStore('product', () => {
       totalProducts.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -45,7 +45,7 @@ export const useProductStore = defineStore('product', () => {
       const response = await productService.getProductById(id)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -63,7 +63,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo sản phẩm mới'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo sản phẩm mới'
       throw err
     } finally {
       loading.value = false
@@ -81,7 +81,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -99,7 +99,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa sản phẩm'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -116,7 +116,7 @@ export const useProductStore = defineStore('product', () => {
       categories.value = response.data.content || []
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách danh mục'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách danh mục'
       throw err
     } finally {
       loading.value = false
@@ -134,7 +134,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo danh mục mới'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo danh mục mới'
       throw err
     } finally {
       loading.value = false
@@ -152,7 +152,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật danh mục'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật danh mục'
       throw err
     } finally {
       loading.value = false
@@ -170,7 +170,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa danh mục'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa danh mục'
       throw err
     } finally {
       loading.value = false
