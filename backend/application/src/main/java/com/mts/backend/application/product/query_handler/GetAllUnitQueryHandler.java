@@ -5,6 +5,9 @@ import com.mts.backend.application.product.response.UnitDetailResponse;
 import com.mts.backend.domain.product.jpa.JpaUnitOfMeasureRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,14 +27,14 @@ public class GetAllUnitQueryHandler implements IQueryHandler<DefaultUnitQuery, C
     public CommandResult handle(DefaultUnitQuery query) {
         Objects.requireNonNull(query, "DefaultUnitQuery is required");
         
-        var units = unitRepository.findAll();
+        var units = unitRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
-        List<UnitDetailResponse> responses = new ArrayList<>();
-        
-        units.forEach(unit -> {
-            UnitDetailResponse response = UnitDetailResponse.builder().id(unit.getId()).name(unit.getName().getValue()).symbol(unit.getSymbol().getValue()).description(unit.getDescription().orElse("")).build();
-            
-            responses.add(response);
+        Page<UnitDetailResponse> responses = units.map(unit -> {
+            return UnitDetailResponse.builder()
+                    .id(unit.getId())
+                    .symbol(unit.getSymbol().getValue())
+                    .name(unit.getName().getValue())
+                    .build();
         });
         
         return CommandResult.success(responses);

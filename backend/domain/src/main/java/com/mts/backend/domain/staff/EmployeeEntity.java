@@ -17,7 +17,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "Employee", schema = "milk_tea_shop_prod", uniqueConstraints = {
+@Table(name = "employee", schema = "milk_tea_shop_prod", uniqueConstraints = {
         @UniqueConstraint(name = "account_id", columnNames = {"account_id"})
 })
 @AttributeOverrides({
@@ -136,6 +136,10 @@ public class EmployeeEntity extends BaseEntity<Long> {
         }
         this.position = position;
         return true;
+    }
+    
+    public String getFullName() {
+        return this.firstName.getValue() + " " + this.lastName.getValue();
     }
 
     @Override

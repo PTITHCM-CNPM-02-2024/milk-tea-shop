@@ -5,6 +5,7 @@ import com.mts.backend.application.promotion.response.CouponDetailResponse;
 import com.mts.backend.domain.promotion.jpa.JpaCouponRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +30,12 @@ public class GetAllCouponQueryHandler implements IQueryHandler<DefaultCouponQuer
         
         var coupons = couponRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
-        List<CouponDetailResponse> responses = new ArrayList<>();
-        
-        coupons.forEach(coupon -> {
-            responses.add(CouponDetailResponse.builder()
+        Page<CouponDetailResponse> responses = coupons.map(coupon -> {
+            return CouponDetailResponse.builder()
                     .id(coupon.getId())
                     .coupon(coupon.getCoupon().getValue())
                     .description(coupon.getDescription().orElse(null))
-                    .build());
+                    .build();
         });
         
         return CommandResult.success(responses);

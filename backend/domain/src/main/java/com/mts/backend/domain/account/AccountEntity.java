@@ -23,7 +23,7 @@ import static java.sql.Types.TIMESTAMP;
 @Getter
 @Setter
 @Entity
-@Table(name = "Account", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "account", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "role_id", columnList = "role_id")
 }, uniqueConstraints = {
         @UniqueConstraint(name = "username", columnNames = {"username"})

@@ -38,8 +38,23 @@ export default {
       return apiClient.post('/orders/utilities/calculate', orderData);
   },
 
-  // Phương thức lấy danh sách đơn hàng đang sử dụng bàn
-  getActiveTableOrders() {
-    return axios.get('/api/orders/active-tables');
+  // Lấy danh sách đơn hàng và bàn theo ID nhân viên
+  getOrderTables(employeeId) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`);
+  },
+  
+  // API checkout bàn (cần bổ sung khi có thông tin API cụ thể)
+  checkoutTable(orderId) {
+    return apiClient.put(`/orders/${orderId}/checkout`);
+  },
+  
+  // Lấy danh sách đơn hàng đang sử dụng bàn
+  getActiveTableOrders(employeeId, page = 0, size = 10) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`, {
+      params: {
+        page,
+        size
+      }
+    });
   }
 };

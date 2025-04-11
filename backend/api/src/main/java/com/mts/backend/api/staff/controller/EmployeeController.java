@@ -7,17 +7,15 @@ import com.mts.backend.application.staff.EmployeeCommandBus;
 import com.mts.backend.application.staff.EmployeeQueryBus;
 import com.mts.backend.application.staff.command.CreateEmployeeCommand;
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
+import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
-import com.mts.backend.application.staff.response.EmployeeDetailResponse;
-import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +31,7 @@ public class EmployeeController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createEmployee(@RequestBody CreateEmployeeRequest request) {
+    public ResponseEntity<?> createEmployee(@RequestBody CreateEmployeeRequest request) {
         var command = CreateEmployeeCommand.builder()
                 .email(Email.builder().value(request.getEmail()).build())
                 .firstName(FirstName.builder().value(request.getFirstName()).build())
@@ -48,11 +46,11 @@ public class EmployeeController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Long>> updateEmployee(@PathVariable("id") Long id, @RequestBody UpdateEmployeeRequest request) {
+    public ResponseEntity<?> updateEmployee(@PathVariable("id") Long id, @RequestBody UpdateEmployeeRequest request) {
         var command = UpdateEmployeeCommand.builder()
                 .id(EmployeeId.of(id))
                 .email(Email.builder().value(request.getEmail()).build())
@@ -65,22 +63,22 @@ public class EmployeeController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getEmployee(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getEmployee(@PathVariable("id") Long id) {
         var query = EmployeeByIdQuery.builder().id(EmployeeId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((EmployeeDetailResponse) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getEmployees(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getEmployees(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var request = DefaultEmployeeQuery.builder()
                 .page(page)
                 .size(size)
@@ -88,6 +86,17 @@ public class EmployeeController implements IController {
         
         var result = queryBus.dispatch(request);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+    
+    @GetMapping("/{id}/orders/order-tables")
+    public ResponseEntity<?> getOrderTablesByEmployeeId(@PathVariable("id") Long id,
+                                                       @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var query = CheckoutTableByEmpIdQuery.builder().employeeId(EmployeeId.of(id)).page(page).size(size).build();
+        
+        var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

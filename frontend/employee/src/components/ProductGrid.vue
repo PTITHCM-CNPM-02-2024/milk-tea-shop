@@ -8,14 +8,14 @@
         class="ma-auto d-block mt-10"
     ></v-progress-circular>
 
-    <v-container v-else-if="products.length === 0" class="d-flex flex-column align-center justify-center py-12">
+    <v-container v-else-if="filteredProducts.length === 0" class="d-flex flex-column align-center justify-center py-12">
       <v-icon size="x-large" color="grey" class="mb-4">mdi-coffee</v-icon>
       <span class="text-subtitle-1 text-grey">Không có sản phẩm nào</span>
     </v-container>
 
     <v-row v-else>
       <v-col
-          v-for="product in products"
+          v-for="product in filteredProducts"
           :key="product.id"
           cols="12" sm="6" md="4" lg="3" xl="2"
       >
@@ -26,7 +26,7 @@
             @click="$emit('add-to-cart', product)"
         >
           <v-img
-              :src="product.image_url || '/images/default-product.png'"
+              :src="getProductImage(product)"
               :alt="product.name"
               height="120"
               cover
@@ -46,8 +46,11 @@
           <v-card-title class="text-subtitle-1 px-3 py-2">{{ product.name }}</v-card-title>
 
           <v-card-text class="px-3 py-1">
-            <div class="text-primary font-weight-medium">
-              {{ formatPrice(getLowestPrice(product)) }}
+            <div class="d-flex align-center">
+              <div class="mr-2 text-caption text-grey-darken-1">Từ</div>
+              <div class="text-primary font-weight-bold price-display">
+                {{ formatPrice(getProductPrice(product)) }}
+              </div>
             </div>
           </v-card-text>
         </v-card>
@@ -57,7 +60,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
   products: {
@@ -71,6 +74,37 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['add-to-cart']);
+
+// Lọc bỏ các sản phẩm topping
+const filteredProducts = computed(() => {
+  return props.products.filter(product => {
+    // Kiểm tra nếu sản phẩm là topping dựa vào tên danh mục hoặc tên sản phẩm
+    const categoryName = product.category && typeof product.category === 'object' 
+      ? product.category.name?.toLowerCase() 
+      : '';
+    
+    const productName = product.name?.toLowerCase() || '';
+    
+    const isTopping = categoryName.includes('topping') || productName.includes('topping');
+    
+    return !isTopping;
+  });
+});
+
+// Lấy hình ảnh sản phẩm, kiểm tra cả hai trường hợp
+function getProductImage(product) {
+  return product.image_url || product.imageUrl || '/images/default-product.png';
+}
+
+function getProductPrice(product) {
+  // Nếu có minPrice, sử dụng nó
+  if (product.minPrice !== undefined && product.minPrice !== null) {
+    return product.minPrice;
+  }
+  
+  // Nếu không có minPrice, tìm giá thấp nhất từ mảng giá (như cũ)
+  return getLowestPrice(product);
+}
 
 function getLowestPrice(product) {
   if (!product.prices || product.prices.length === 0) return 0;
@@ -94,5 +128,13 @@ function formatPrice(price) {
 
 .product-card:hover {
   transform: translateY(-4px);
+}
+
+.price-display {
+  font-size: 1.1rem;
+  color: #FF6B00 !important;
+  background-color: rgba(255, 107, 0, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 </style>

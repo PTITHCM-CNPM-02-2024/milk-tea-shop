@@ -9,6 +9,7 @@ import com.mts.backend.domain.product.value_object.UnitSymbol;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class UpdateUnitCommandHandler implements ICommandHandler<UpdateUnitComma
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(UpdateUnitCommand command) {
         Objects.requireNonNull(command, "UpdateUnitCommand is required");
         

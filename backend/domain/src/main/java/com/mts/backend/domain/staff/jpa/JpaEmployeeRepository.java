@@ -1,11 +1,10 @@
 package com.mts.backend.domain.staff.jpa;
 
-import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.staff.EmployeeEntity;
-import com.mts.backend.domain.staff.identifier.EmployeeId;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -45,9 +44,14 @@ public interface JpaEmployeeRepository extends JpaRepository<EmployeeEntity, Lon
 
     @EntityGraph(attributePaths = {"accountEntity"})
     @Query("select e from EmployeeEntity e")
-    List<EmployeeEntity> findAllWithJoinFetch(Pageable pageable);
+    Page<EmployeeEntity> findAllWithJoinFetch(Pageable pageable);
 
     @EntityGraph(attributePaths = {"accountEntity"})
     @Query("select e from EmployeeEntity e where e.id = :id")
     Optional<EmployeeEntity> findByIdWithJoinFetch(@NotNull @Param("id") Long id);
+
+    @Query("select e from EmployeeEntity e where e.accountEntity.id = :id")
+    Optional<EmployeeEntity> findByAccountEntity_Id(@Param("id") Long id);
+    
+    
 }

@@ -2,24 +2,29 @@ import {createRouter, createWebHistory} from "vue-router";
 
 // Sử dụng import động để tải lazy các components
 const PosView = () => import('../views/PosView.vue')
-const OrdersView = () => import('../views/OrdersView.vue')
 const ReportsView = () => import('../views/ReportsView.vue')
-
+const OrdersView = () => import('../views/OrdersView.vue')
+const UserProfileView = () => import('../views/UserProfileView.vue')
 const routes = [
     {
         path : '/',
         name : 'pos',
-        component : () => import('../views/PosView.vue')
+        component : PosView
     },
     {
         path : '/orders',
-        name : 'orders',
-        component : () => import('../views/OrdersView.vue')
+        name : 'Orders',
+        component : OrdersView
     },
     {
         path : '/reports',
         name : 'reports',
-        component : () => import('../views/ReportsView.vue')
+        component : ReportsView
+    },
+    {
+        path: '/profile',
+        name: 'profile',
+        component: UserProfileView
     },
     // Thêm fallback route
     {

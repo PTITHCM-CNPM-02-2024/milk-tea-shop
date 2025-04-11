@@ -48,4 +48,6 @@ public interface JpaAccountRepository extends JpaRepository<AccountEntity, Long>
                    CALL milk_tea_shop_prod.sp_lock_unlock_account(:p_account_id, :p_locked)
                    """, nativeQuery = true)
     List<Object[]> lockUnlockAccount(@Param("p_account_id") Long p_account_id, @Param("p_locked") Boolean p_locked);
+    
+    
 }

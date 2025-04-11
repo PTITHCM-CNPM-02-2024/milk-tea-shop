@@ -7,14 +7,12 @@ import com.mts.backend.application.store.StoreCommandBus;
 import com.mts.backend.application.store.StoreQueryBus;
 import com.mts.backend.application.store.command.CreateStoreCommand;
 import com.mts.backend.application.store.command.UpdateStoreCommand;
-import com.mts.backend.application.store.query.StoreByIdQuery;
-import com.mts.backend.application.store.response.StoreDetailResponse;
+import com.mts.backend.application.store.query.DefaultStoreQuery;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.value_object.Address;
 import com.mts.backend.domain.store.value_object.StoreName;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +32,7 @@ public class StoreController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createStore(@RequestBody CreateStoreRequest request) {
+    public ResponseEntity<?> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
                 .name(StoreName.builder().value(request.getName()).build())
                 .address(Address.builder().value(request.getAddress()).build())
@@ -48,11 +46,11 @@ public class StoreController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateStore(@PathVariable("id") Integer id,
+    public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,
                                                       @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
                 .id(StoreId.of(id))
@@ -68,17 +66,17 @@ public class StoreController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer)result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getStoreById(@PathVariable("id") Integer id) {
-        var query = StoreByIdQuery.builder().id(StoreId.of(id)).build();
+    @GetMapping("/info")
+    public ResponseEntity<?> getStoreById() {
+        var query = DefaultStoreQuery.builder().build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((StoreDetailResponse) result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
 }

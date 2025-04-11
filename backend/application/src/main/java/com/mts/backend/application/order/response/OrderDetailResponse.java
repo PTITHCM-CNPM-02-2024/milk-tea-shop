@@ -1,5 +1,6 @@
 package com.mts.backend.application.order.response;
 
+import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,4 +33,6 @@ public class OrderDetailResponse {
     private List<OrderTableDetailResponse> orderTables = new ArrayList<>();
     @Builder.Default
     private List<OrderDiscountDetailResponse> orderDiscounts = new ArrayList<>();
+    @Builder.Default
+    private List<PaymentDetailResponse> orderPayments = new ArrayList<>();
 }

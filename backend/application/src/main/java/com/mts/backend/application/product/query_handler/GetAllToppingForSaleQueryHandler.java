@@ -3,6 +3,7 @@ package com.mts.backend.application.product.query_handler;
 import com.mts.backend.application.product.query.ToppingForSaleQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
+import com.mts.backend.application.product.response.ProductSummaryResponse;
 import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -41,7 +42,7 @@ public class GetAllToppingForSaleQueryHandler implements IQueryHandler<ToppingFo
                     .toList();
         }
 
-        List<ProductDetailResponse> responses = new ArrayList<>();
+        List<ProductSummaryResponse> responses = new ArrayList<>();
 
         products.forEach(product -> {
             ProductDetailResponse response =

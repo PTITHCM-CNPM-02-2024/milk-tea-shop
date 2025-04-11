@@ -3,14 +3,14 @@ package com.mts.backend.application.product.query_handler;
 import com.mts.backend.application.product.query.SignatureProductForSaleQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
+import com.mts.backend.application.product.response.ProductSummaryResponse;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -34,11 +34,9 @@ public class GetAllSignatureProductQueryHandler implements IQueryHandler<Signatu
 
         var products =
                 productRepository.findBySignature(query.isSignature(),
-                        Pageable.ofSize(query.getSize()).withPage(query.getPage())).stream().filter(p -> p.isOrdered() == query.getIsOrdered()).toList();
+                        Pageable.ofSize(query.getSize()).withPage(query.getPage()));
 
-        List<ProductDetailResponse> responses = new ArrayList<>();
-
-        products.forEach(product -> {
+        Page<ProductSummaryResponse> responses = products.map(product -> {
             ProductDetailResponse response =
                     ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
 
@@ -59,7 +57,7 @@ public class GetAllSignatureProductQueryHandler implements IQueryHandler<Signatu
                 response.getPrices().add(priceDetail);
             }
 
-            responses.add(response);
+            return response;
         });
 
         return CommandResult.success(responses);

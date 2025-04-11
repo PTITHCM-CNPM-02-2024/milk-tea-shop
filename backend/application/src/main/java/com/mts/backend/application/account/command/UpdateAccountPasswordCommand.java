@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class UpdateAccountPasswordCommand implements ICommand<CommandResult> {
     private AccountId id;
+    private PasswordHash oldPassword;
     private PasswordHash newPassword;
     private PasswordHash confirmPassword;
 }

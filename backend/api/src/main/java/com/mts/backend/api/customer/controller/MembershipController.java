@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/v1/memberships")
@@ -32,24 +33,24 @@ public class MembershipController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createMembership(@RequestBody CreateMembershipTypeRequest request) {
+    public ResponseEntity<?> createMembership(@RequestBody CreateMembershipTypeRequest request) {
         var command = CreateMembershipCommand.
                 builder()
                 .name(MemberTypeName.builder().value(request.getName()).build())
                 .description(request.getDescription())
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
-                .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
+                .discountValue(request.getDiscountValue())
                 .requiredPoints(request.getRequiredPoint())
-                .validUntil(request.getValidUntil() == null ? null : LocalDateTime.parse(request.getValidUntil()))
+                .validUntil(request.getValidUntil() == null ? null : ZonedDateTime.parse(request.getValidUntil()).toLocalDateTime())
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateMembership(@PathVariable("id") Integer id, @RequestBody UpdateMembershipTypeRequest request){
+    public ResponseEntity<?> updateMembership(@PathVariable("id") Integer id, @RequestBody UpdateMembershipTypeRequest request){
         var command = UpdateMemberCommand.builder()
                 .memberId(MembershipTypeId.of(id))
                 .name(MemberTypeName.builder().value(request.getName()).build())
@@ -57,36 +58,34 @@ public class MembershipController implements IController {
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
                 .requiredPoints(request.getRequiredPoint())
-                .validUntil(LocalDateTime.parse(request.getValidUntil()))
+                .validUntil(request.getValidUntil() == null ? null : ZonedDateTime.parse(request.getValidUntil()).toLocalDateTime())
                 .active(request.isActive())
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getMembership(@PathVariable("id") Integer id){
+    public ResponseEntity<?> getMembership(@PathVariable("id") Integer id){
         var query = MemberTypeByIdQuery.builder()
                 .id(MembershipTypeId.of(id))
                 .build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( (MemberTypeDetailResponse) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getMemberships(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                         @RequestParam(value = "size", defaultValue = "10") int size){
-        var query = DefaultMemberQuery.builder().
-                page(page)
-                .size(size)
+    public ResponseEntity<?> getMemberships(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size){
+        var query = DefaultMemberQuery.builder()
                 .build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

@@ -13,6 +13,9 @@ import com.mts.backend.application.customer.query.CustomerByPhoneQuery;
 import com.mts.backend.application.customer.query.DefaultCustomerQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.identifier.RoleId;
+import com.mts.backend.domain.account.value_object.PasswordHash;
+import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
@@ -34,26 +37,31 @@ public class CustomerController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createCustomer(@RequestBody CreateCustomerRequest request) {
-        CreateCustomerCommand command = CreateCustomerCommand.builder()
+    public ResponseEntity<?> createCustomer(@RequestBody CreateCustomerRequest request) {
+            CreateCustomerCommand command = CreateCustomerCommand.builder()
                 .firstName(Objects.isNull(request.getFirstName()) ? null : FirstName.builder().value(request.getFirstName()).build())
                 .lastName(Objects.isNull(request.getLastName()) ? null : LastName.builder().value(request.getLastName()).build())
-                .accountId(Objects.isNull(request.getAccountId()) ? null : AccountId.of(request.getAccountId()))
                 .email(Objects.isNull(request.getEmail()) ? null : Email.builder().value(request.getEmail()).build())
-                .membershipId(Objects.isNull(request.getMemberId()) ? null : MembershipTypeId.of(request.getMemberId()))
                 .gender(Objects.isNull(request.getGender()) ? null : Gender.valueOf(request.getGender()))
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                    .membershipId(Objects.isNull(request.getMemberId()) ? null:
+                            MembershipTypeId.of(request.getMemberId()))
                 .build();
+            
+         if (!Objects.isNull(request.getUsername()) && !Objects.isNull(request.getPassword()))  { 
+            command.setUsername(Username.builder().value(request.getUsername()).build());
+            command.setPasswordHash(PasswordHash.builder().value(request.getPassword()).build());
+            command.setRoleId(RoleId.of(request.getRoleId()));}
                 
         
         var result = customerCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateCustomer(@PathVariable("id") Long id, @RequestBody UpdateCustomerRequest request){
+    public ResponseEntity<?> updateCustomer(@PathVariable("id") Long id, @RequestBody UpdateCustomerRequest request){
         UpdateCustomerCommand command = UpdateCustomerCommand.builder()
                 .id(CustomerId.of(id))
                 .email(Objects.isNull(request.getEmail()) ? null : Email.builder().value(request.getEmail()).build())
@@ -62,40 +70,41 @@ public class CustomerController implements IController {
                 .lastName(Objects.isNull(request.getLastName()) ? null :
                         LastName.builder().value(request.getLastName()).build())
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .gender(Objects.isNull(request.getGender()) ?  null : Gender.valueOf(request.getGender())) 
                 .build();
         
         var result = customerCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}/membership")
-    public ResponseEntity<ApiResponse<?>> updateMembership(@PathVariable("id") Long id, @RequestParam("membershipId") Integer membershipId){
+    public ResponseEntity<?> updateMembership(@PathVariable("id") Long id, @RequestParam("value") Integer value){
         UpdateMemberForCustomer command = UpdateMemberForCustomer.builder()
                 .customerId(CustomerId.of(id))
-                .memberId(MembershipTypeId.of(membershipId))
+                .memberId(MembershipTypeId.of(value))
                 .build();
         
         var result = customerCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getCustomer(@PathVariable("id") Long id){
+    public ResponseEntity<?> getCustomer(@PathVariable("id") Long id){
         var query = CustomerByIdQuery.builder().
                 id(CustomerId.of(id))
                 .build();
         
         var result = customerQueryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((CustomerDetailResponse)result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getCustomers(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                       @RequestParam(value = "size", defaultValue = "10") int size){
+    public ResponseEntity<?> getCustomers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                          @RequestParam(value = "size", defaultValue = "10") Integer size){
         var request = DefaultCustomerQuery.builder().
                 page(page)
                 .size(size)
@@ -103,15 +112,15 @@ public class CustomerController implements IController {
         
         var result = customerQueryBus.dispatch(request);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/search/phone")
-    public ResponseEntity<ApiResponse<?>> getCustomerByPhone(@RequestParam("phone") String phone){
+    public ResponseEntity<?> getCustomerByPhone(@RequestParam("phone") String phone){
         var request = CustomerByPhoneQuery.builder().phone(PhoneNumber.builder().value(phone).build()).build();
         
         var result = customerQueryBus.dispatch(request);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((CustomerDetailResponse)result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }
