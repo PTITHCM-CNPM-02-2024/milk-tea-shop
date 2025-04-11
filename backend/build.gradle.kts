@@ -9,6 +9,7 @@ plugins{
 repositories{
     gradlePluginPortal()
     mavenCentral()
+    google()
 }
 
 dependencies{
@@ -25,6 +26,8 @@ dependencies{
     implementation("org.flywaydb:flyway-core")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("org.springframework.boot:spring-boot-configuration-processor:3.4.2")
+    implementation("com.google.firebase:firebase-firestore:25.1.3")
+    implementation("com.google.firebase:firebase-admin:9.4.3")
 }
 
 tasks.register("flywayCleanDev", FlywayCleanTask::class){

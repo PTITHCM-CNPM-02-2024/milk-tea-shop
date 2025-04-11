@@ -6,6 +6,8 @@ group = "com.mts.backend"
 version = "1.0-SNAPSHOT"
 
 repositories{
+    google()
+
     gradlePluginPortal()
     mavenCentral()
 }
@@ -18,5 +20,6 @@ dependencies{
     api("io.jsonwebtoken:jjwt-api")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.12.6")
-    implementation("com.google.firebase:firebase-storage:21.0.1")
+    api("com.google.firebase:firebase-firestore:25.1.3")
+    api("com.google.firebase:firebase-admin:9.4.3")
 }
