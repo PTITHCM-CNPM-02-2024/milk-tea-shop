@@ -41,6 +41,7 @@ export const useStoreInfoStore = defineStore('storeInfo', () => {
     
     try {
       const response = await storeService.getStoreInfo()
+      console.log(response.data)
       storeInfo.value = response.data
       return response.data
     } catch (err) {

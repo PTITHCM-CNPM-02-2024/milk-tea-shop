@@ -49,11 +49,9 @@ public class StoreController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,
-                                                      @RequestBody UpdateStoreRequest request) {
+    @PutMapping("/info")
+    public ResponseEntity<?> updateStore(@RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
-                .id(StoreId.of(id))
                 .name(StoreName.builder().value(request.getName()).build())
                 .address(Address.builder().value(request.getAddress()).build())
                 .phone(PhoneNumber.builder().value(request.getAddress()).build())

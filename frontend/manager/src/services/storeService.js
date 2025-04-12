@@ -8,6 +8,6 @@ export const storeService = {
 
   // Cập nhật thông tin cửa hàng
   updateStoreInfo(storeData) {
-    return api.put('/store', storeData)
+    return api.put('/store/info', storeData)
   }
 } 

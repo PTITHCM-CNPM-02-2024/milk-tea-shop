@@ -11,9 +11,9 @@
       
       <v-btn 
         color="primary" 
-        prepend-icon="mdi-ruler-square-compass" 
         @click="openAddDialog"
       >
+        <v-icon start>mdi-ruler-square-compass</v-icon>
         Thêm mới
       </v-btn>
     </div>
@@ -87,21 +87,23 @@
               <div class="d-flex gap-2">
                 <!-- Nút chỉnh sửa -->
                 <v-btn
-                  icon="mdi-pencil"
                   size="small"
                   color="primary"
                   variant="text"
                   @click="openEditSizeDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
                 
                 <!-- Nút xóa -->
                 <v-btn
-                  icon="mdi-delete"
                   size="small"
                   color="error"
                   variant="text"
                   @click="openDeleteSizeDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
               </div>
             </template>
           </v-data-table>
@@ -171,21 +173,23 @@
               <div class="d-flex gap-2">
                 <!-- Nút chỉnh sửa -->
                 <v-btn
-                  icon="mdi-pencil"
                   size="small"
                   color="primary"
                   variant="text"
                   @click="openEditUnitDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
                 
                 <!-- Nút xóa -->
                 <v-btn
-                  icon="mdi-delete"
                   size="small"
                   color="error"
                   variant="text"
                   @click="openDeleteUnitDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
               </div>
             </template>
           </v-data-table>
@@ -346,7 +350,9 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000">
       {{ snackbar.message }}
       <template v-slot:actions>
-        <v-btn variant="text" icon="mdi-close" @click="snackbar.show = false"></v-btn>
+        <v-btn variant="text" @click="snackbar.show = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </template>
     </v-snackbar>
   </div>
