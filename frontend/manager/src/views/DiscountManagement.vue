@@ -389,11 +389,14 @@
                 <v-select
                   v-model="discountForm.couponId"
                   label="Mã giảm giá"
-                  :items="discountStore.coupons"
+                  :items="editDiscountId ? [...discountStore.unusedCoupons, selectedCoupon] : discountStore.unusedCoupons"
                   item-title="coupon"
                   item-value="id"
                   :rules="[v => !!v || 'Vui lòng chọn mã giảm giá']"
                   required
+                  :loading="discountStore.loading"
+                  :hint="'Chọn mã giảm giá cho chương trình'"
+                  persistent-hint
                 ></v-select>
               </v-col>
               <v-col cols="12">
@@ -428,7 +431,7 @@
                     v => v > 0 || 'Giá trị phải lớn hơn 0',
                     v => (discountForm.discountUnit !== 'PERCENTAGE' || v <= 100) || 'Giá trị phần trăm không được vượt quá 100%',
                     v => (discountForm.discountUnit !== 'PERCENTAGE' || v > 0) || 'Giá trị phần trăm phải lớn hơn 0',
-                    v => (discountForm.discountUnit !== 'AMOUNT' || v >= 1000) || 'Giá trị giảm cố định phải từ 1000đ trở lên'
+                    v => (discountForm.discountUnit !== 'FIXED' || v >= 1000) || 'Giá trị giảm cố định phải từ 1000đ trở lên'
                   ]"
                   required
                 ></v-text-field>
@@ -765,7 +768,10 @@ const deleteCoupon = async () => {
 const openDiscountDialog = async (id = null) => {
   resetDiscountForm()
   
-  // Tải danh sách coupon nếu chưa có
+  // Tải danh sách coupon
+  await discountStore.fetchUnusedCoupons()
+  
+  // Nếu chưa có dữ liệu tất cả coupons, tải thêm
   if (!discountStore.coupons || discountStore.coupons.length === 0) {
     await discountStore.fetchCoupons()
   }
@@ -793,9 +799,26 @@ const openDiscountDialog = async (id = null) => {
       discountForm.maxUsagePerCustomer = discountDetail.maxUsagePerCustomer
       discountForm.active = discountDetail.isActive
       discountForm.currentUsage = discountDetail.currentUsage || 0
+      
+      // Lưu thông tin coupon hiện tại để hiển thị trong danh sách lựa chọn
+      let currentCoupon = discountStore.coupons.find(c => c.id === discountDetail.couponId)
+      
+      // Nếu chưa có thông tin coupon hiện tại, tải thông tin chi tiết
+      if (!currentCoupon && discountDetail.couponId) {
+        const couponDetail = await discountStore.getCouponById(discountDetail.couponId)
+        if (couponDetail) {
+          currentCoupon = couponDetail
+        }
+      }
+      
+      selectedCoupon.value = {
+        id: discountDetail.couponId,
+        coupon: currentCoupon?.coupon || 'Mã hiện tại'
+      }
     }
   } else {
     editDiscountId.value = null
+    selectedCoupon.value = null
   }
   
   discountDialog.value = true

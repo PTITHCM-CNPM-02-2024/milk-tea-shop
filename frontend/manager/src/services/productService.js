@@ -107,5 +107,20 @@ export const productService = {
   // Xóa đơn vị tính
   deleteUnit(id) {
     return api.delete(`/units/${id}`)
+  },
+
+  // Thêm giá sản phẩm
+  addProductPrice(id, priceData) {
+    return api.post(`/products/${id}/prices`, { productPrices: priceData })
+  },
+
+  // Cập nhật giá sản phẩm
+  updateProductPrice(id, priceData) {
+    return api.put(`/products/${id}/prices`, { productPrices: priceData })
+  },
+
+  // Xóa giá sản phẩm theo kích cỡ
+  deleteProductPrice(productId, sizeId) {
+    return api.delete(`/products/${productId}/prices/${sizeId}`)
   }
 } 

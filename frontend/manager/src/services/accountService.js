@@ -44,11 +44,12 @@ export const accountService = {
   },
 
   // Thay đổi mật khẩu tài khoản
-  changePassword(id, oldPassword, newPassword) {
+  changePassword(id, oldPassword, newPassword, confirmPassword) {
     return api.put(`/accounts/${id}/password`, null, {
       params: {
         oldPassword,
-        newPassword
+        newPassword,
+        confirmPassword
       }
     })
   },

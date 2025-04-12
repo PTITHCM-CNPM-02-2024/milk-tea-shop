@@ -116,7 +116,7 @@ public class ProductEntity extends BaseEntity<Integer> {
         Objects.requireNonNull(price, "Product price is required");
         
         if (productPrices.contains(price)) {
-            throw new DuplicateException("Giá sản phẩm đã tồn tại");
+            return price;  
         }
         
         var productPrice = findBySizeId(price.getSize().getId());

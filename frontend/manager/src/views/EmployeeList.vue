@@ -777,7 +777,8 @@ const savePasswordChange = async () => {
     await accountService.changePassword(
       employeeDetail.value.accountId, 
       passwordChange.value.oldPassword, 
-      passwordChange.value.newPassword
+      passwordChange.value.newPassword,
+      passwordChange.value.confirmPassword
     )
     showSnackbar('Đổi mật khẩu thành công', 'success')
     

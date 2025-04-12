@@ -58,6 +58,7 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
                 .maxUsesPerCustomer(command.getMaxUsagePerCustomer().orElse(null))
                 .maxUse(command.getMaxUsage().orElse(null))
                 .currentUses(0L)
+                .active(true)
                 .build();
         
         

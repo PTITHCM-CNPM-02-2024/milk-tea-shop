@@ -5,6 +5,7 @@ export const useDiscountStore = defineStore('discount', {
   state: () => ({
     discounts: [],
     coupons: [],
+    unusedCoupons: [],
     loading: false,
     error: null,
     pagination: {
@@ -190,6 +191,31 @@ export const useDiscountStore = defineStore('discount', {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa chương trình khuyến mãi'
         console.error('Error deleting discount:', error)
         return false
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchUnusedCoupons(page = 0, size = 100) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.getUnusedCoupons(page, size)
+        
+        if (response && response.data && response.data.content) {
+          this.unusedCoupons = response.data.content
+          return this.unusedCoupons
+        } else {
+          this.unusedCoupons = []
+          console.error('Invalid response format from API:', response)
+          this.error = 'Định dạng dữ liệu không hợp lệ'
+          return []
+        }
+      } catch (error) {
+        this.unusedCoupons = []
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải danh sách mã giảm giá chưa được sử dụng'
+        console.error('Error fetching unused coupons:', error)
+        return []
       } finally {
         this.loading = false
       }

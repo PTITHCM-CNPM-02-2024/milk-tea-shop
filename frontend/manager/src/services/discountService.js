@@ -49,6 +49,11 @@ export const discountService = {
   // Xóa mã giảm giá
   deleteCoupon(id) {
     return api.delete(`/coupons/${id}`)
+  },
+
+  // Lấy danh sách coupon chưa được sử dụng
+  getUnusedCoupons(page = 0, size = 100) {
+    return api.get(`/coupons/unused?page=${page}&size=${size}`)
   }
 }
 

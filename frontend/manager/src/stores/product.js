@@ -11,6 +11,7 @@ export const useProductStore = defineStore('product', () => {
   const currentPage = ref(0)
   const pageSize = ref(10)
   const categories = ref([])
+  const productSizes = ref([])
   
   // Getter
   const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value))
@@ -177,6 +178,71 @@ export const useProductStore = defineStore('product', () => {
     }
   }
   
+  // Lấy danh sách kích cỡ sản phẩm
+  async function fetchProductSizes() {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await productService.getProductSizes()
+      productSizes.value = response.data.content || []
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách kích cỡ sản phẩm'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  // Thêm giá cho sản phẩm
+  async function addProductPrice(productId, prices) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await productService.addProductPrice(productId, prices)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi thêm giá sản phẩm'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  // Cập nhật giá sản phẩm
+  async function updateProductPrice(productId, prices) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await productService.updateProductPrice(productId, prices)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật giá sản phẩm'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  // Xóa giá sản phẩm theo kích cỡ
+  async function deleteProductPrice(productId, sizeId) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await productService.deleteProductPrice(productId, sizeId)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa giá sản phẩm'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+  
   return {
     // State
     products,
@@ -186,6 +252,7 @@ export const useProductStore = defineStore('product', () => {
     currentPage,
     pageSize,
     categories,
+    productSizes,
     
     // Getters
     totalPages,
@@ -199,6 +266,10 @@ export const useProductStore = defineStore('product', () => {
     fetchCategories,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    fetchProductSizes,
+    addProductPrice,
+    updateProductPrice,
+    deleteProductPrice
   }
 }) 
