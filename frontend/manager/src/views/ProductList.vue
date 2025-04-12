@@ -364,13 +364,40 @@
               clearable
             ></v-select>
             
-            <v-text-field
-              v-model="editedProduct.imageUrl"
-              label="Đường dẫn hình ảnh"
-              variant="outlined"
-              class="mb-3"
-              placeholder="https://..."
-            ></v-text-field>
+            <div class="mb-3">
+              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
+              
+              <div class="d-flex align-center gap-4">
+                <v-img
+                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
+                  width="100"
+                  height="100"
+                  cover
+                  class="bg-grey-lighten-2 rounded"
+                ></v-img>
+                
+                <div class="flex-grow-1">
+                  <v-file-input
+                    v-model="productImage"
+                    accept="image/*"
+                    label="Tải lên hình ảnh"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    :show-size="true"
+                    @update:model-value="handleImageChange"
+                  ></v-file-input>
+                  
+                  <div v-if="uploadingImage" class="mt-2">
+                    <v-progress-linear
+                      indeterminate
+                      color="primary"
+                    ></v-progress-linear>
+                    <p class="text-caption text-center mt-1">Đang tải lên...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <div class="d-flex gap-3 mb-3">
               <v-switch
@@ -516,13 +543,40 @@
               clearable
             ></v-select>
             
-            <v-text-field
-              v-model="editedProduct.imageUrl"
-              label="Đường dẫn hình ảnh"
-              variant="outlined"
-              class="mb-3"
-              placeholder="https://..."
-            ></v-text-field>
+            <div class="mb-3">
+              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
+              
+              <div class="d-flex align-center gap-4">
+                <v-img
+                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
+                  width="100"
+                  height="100"
+                  cover
+                  class="bg-grey-lighten-2 rounded"
+                ></v-img>
+                
+                <div class="flex-grow-1">
+                  <v-file-input
+                    v-model="productImage"
+                    accept="image/*"
+                    label="Tải lên hình ảnh"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    :show-size="true"
+                    @update:model-value="handleImageChange"
+                  ></v-file-input>
+                  
+                  <div v-if="uploadingImage" class="mt-2">
+                    <v-progress-linear
+                      indeterminate
+                      color="primary"
+                    ></v-progress-linear>
+                    <p class="text-caption text-center mt-1">Đang tải lên...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <div class="d-flex gap-3 mb-3">
               <v-switch
@@ -875,6 +929,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { debounce } from 'lodash'
+import { productService } from '@/services/productService'
 
 const productStore = useProductStore()
 
@@ -944,71 +999,9 @@ const snackbar = ref({
   color: 'success'
 })
 
-// Computed properties cho lọc và phân trang
-const hasFilters = computed(() => {
-  return searchQuery.value || selectedCategory.value || selectedStatus.value
-})
-
-// Lọc sản phẩm ở frontend
-const filteredProducts = computed(() => {
-  let result = [...allProducts.value]
-  
-  // Lọc theo tên sản phẩm
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(product => 
-      product.name.toLowerCase().includes(query) || 
-      (product.description && product.description.toLowerCase().includes(query))
-    )
-  }
-  
-  // Lọc theo danh mục
-  if (selectedCategory.value) {
-    result = result.filter(product => product.catId === selectedCategory.value)
-  }
-  
-  // Lọc theo trạng thái
-  if (selectedStatus.value) {
-    result = result.filter(product => product.status === selectedStatus.value)
-  }
-  
-  return result
-})
-
-// Sản phẩm đã được phân trang
-const paginatedProducts = computed(() => {
-  const startIndex = (productPage.value - 1) * productPageSize.value
-  const endIndex = startIndex + productPageSize.value
-  return filteredProducts.value.slice(startIndex, endIndex)
-})
-
-// Tổng số trang sau khi lọc
-const totalProductPages = computed(() => {
-  return Math.ceil(filteredProducts.value.length / productPageSize.value)
-})
-
-const categoryOptions = computed(() => {
-  if (!productStore.categories) return []
-  return productStore.categories.map(cat => ({
-    title: cat.name,
-    value: cat.id
-  }))
-})
-
-const statusOptions = ref([
-  { title: 'Đang bán', value: 'active' },
-  { title: 'Ngừng bán', value: 'inactive' }
-])
-
-// Danh sách kích cỡ đã được chọn
-const selectedSizes = computed(() => {
-  return editedProduct.value.prices.map(p => p.sizeId)
-})
-
-// Danh sách kích cỡ còn lại có thể chọn
-const availableSizes = computed(() => {
-  return productStore.productSizes.filter(size => !selectedSizes.value.includes(size.id))
-})
+// Xử lý hình ảnh
+const productImage = ref(null)
+const uploadingImage = ref(false)
 
 // Methods cho sản phẩm
 const loadProducts = async () => {
@@ -1363,6 +1356,91 @@ const formatCurrency = (value) => {
   if (!value) return '0 ₫'
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
+
+// Hàm xử lý khi chọn hình ảnh
+const handleImageChange = async (file) => {
+  if (!file) return
+  
+  try {
+    uploadingImage.value = true
+    const imageData = await productService.uploadProductImage(file)
+    console.log(imageData)
+    // Cập nhật đường dẫn hình ảnh
+    editedProduct.value.imageUrl = imageData.fileUrl
+    showSnackbar('Tải hình ảnh lên thành công', 'success')
+  } catch (error) {
+    showSnackbar('Lỗi khi tải hình ảnh: ' + error.message, 'error')
+  } finally {
+    uploadingImage.value = false
+    productImage.value = null
+  }
+}
+
+// Computed properties cho lọc và phân trang
+const hasFilters = computed(() => {
+  return searchQuery.value || selectedCategory.value || selectedStatus.value
+})
+
+// Lọc sản phẩm ở frontend
+const filteredProducts = computed(() => {
+  let result = [...allProducts.value]
+  
+  // Lọc theo tên sản phẩm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(product => 
+      product.name.toLowerCase().includes(query) || 
+      (product.description && product.description.toLowerCase().includes(query))
+    )
+  }
+  
+  // Lọc theo danh mục
+  if (selectedCategory.value) {
+    result = result.filter(product => product.catId === selectedCategory.value)
+  }
+  
+  // Lọc theo trạng thái
+  if (selectedStatus.value) {
+    result = result.filter(product => product.status === selectedStatus.value)
+  }
+  
+  return result
+})
+
+// Sản phẩm đã được phân trang
+const paginatedProducts = computed(() => {
+  const startIndex = (productPage.value - 1) * productPageSize.value
+  const endIndex = startIndex + productPageSize.value
+  return filteredProducts.value.slice(startIndex, endIndex)
+})
+
+// Tổng số trang sau khi lọc
+const totalProductPages = computed(() => {
+  return Math.ceil(filteredProducts.value.length / productPageSize.value)
+})
+
+const categoryOptions = computed(() => {
+  if (!productStore.categories) return []
+  return productStore.categories.map(cat => ({
+    title: cat.name,
+    value: cat.id
+  }))
+})
+
+const statusOptions = ref([
+  { title: 'Đang bán', value: 'active' },
+  { title: 'Ngừng bán', value: 'inactive' }
+])
+
+// Danh sách kích cỡ đã được chọn
+const selectedSizes = computed(() => {
+  return editedProduct.value.prices.map(p => p.sizeId)
+})
+
+// Danh sách kích cỡ còn lại có thể chọn
+const availableSizes = computed(() => {
+  return productStore.productSizes.filter(size => !selectedSizes.value.includes(size.id))
+})
 </script>
 
 <style scoped>

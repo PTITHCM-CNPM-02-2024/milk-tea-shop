@@ -61,6 +61,7 @@ public class ProductController implements IController {
                 .description(updateProductInformRequest.getDescription())
                 .categoryId(Objects.isNull(updateProductInformRequest.getCategoryId()) ? null :
                         CategoryId.of(updateProductInformRequest.getCategoryId()))
+                .imagePath(updateProductInformRequest.getImagePath())
                 .isAvailable(updateProductInformRequest.getAvailable())
                 .isSignature(updateProductInformRequest.getSignature())
                 .build();

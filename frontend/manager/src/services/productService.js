@@ -1,4 +1,5 @@
 import api from './api'
+import { imageService } from './imageService'
 
 export const productService = {
   // Lấy danh sách sản phẩm
@@ -107,6 +108,25 @@ export const productService = {
   // Xóa đơn vị tính
   deleteUnit(id) {
     return api.delete(`/units/${id}`)
+  },
+
+  // Upload hình ảnh sản phẩm
+  async uploadProductImage(file) {
+    try {
+      const response = await imageService.uploadImage(file)
+      return response.data
+    } catch (error) {
+      throw error
+    }
+  },
+
+  // Xóa hình ảnh sản phẩm
+  async deleteProductImage(fileName) {
+    try {
+      return await imageService.deleteImage(fileName)
+    } catch (error) {
+      throw error
+    }
   },
 
   // Thêm giá sản phẩm
