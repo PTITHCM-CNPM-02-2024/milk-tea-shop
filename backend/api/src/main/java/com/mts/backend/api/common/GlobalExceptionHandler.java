@@ -5,11 +5,13 @@ import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import com.mts.backend.shared.response.ApiResponse;
+import jakarta.transaction.TransactionalException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -55,6 +57,11 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(JpaSystemException.class)
     public ResponseEntity<?> handleJpaSystemException(JpaSystemException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMostSpecificCause().getMessage());
+    }
+    
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<?> handleTransactionalException(TransactionSystemException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMostSpecificCause().getMessage());
     }
 

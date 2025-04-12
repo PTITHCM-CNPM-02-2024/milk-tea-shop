@@ -57,13 +57,11 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
                 .validUntil(command.getValidUntil())
                 .maxUsesPerCustomer(command.getMaxUsagePerCustomer().orElse(null))
                 .maxUse(command.getMaxUsage().orElse(null))
+                .currentUses(0L)
                 .build();
         
-        try{
+        
             discount = discountRepository.save(discount);
-        } catch (EntityNotFoundException e) {
-            throw new NotFoundException("Không tìm thấy mã giảm giá");
-        }
         
         return CommandResult.success(discount.getId());
     }
@@ -71,7 +69,7 @@ public class CreateDiscountCommandHandler implements ICommandHandler<CreateDisco
     private void verifyUniqueCoupon(CouponId couponId){
         Objects.requireNonNull(couponId, "Coupon id is required");
         
-        if (!discountRepository.existsByCouponEntity_Id(couponId.getValue())){
+        if (discountRepository.existsByCouponEntity_Id(couponId.getValue())){
             throw new DuplicateException("Coupon " + couponId + " đã tồn tại");
         }
     }

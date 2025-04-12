@@ -57,9 +57,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     private Integer minRequiredProduct;
     
     
-   @IValidDateRange
-    @IValidMaxUseDiscount
-    public DiscountEntity(Long id, CouponEntity couponEntity, @org.springframework.lang.Nullable @Positive(message = "Số lượng sản phẩm tối thiểu phải lớn hơn 0") Integer minRequiredProduct, PromotionDiscountValue promotionDiscountValue, @Nullable  LocalDateTime validFrom, @NotNull(message = "Thời gian kết thúc hiệu lực không được để trống") @Future(message = "Thời gian kết thúc hiệu lực phải lớn hơn thời gian hiện tại") LocalDateTime validUntil, Long currentUses, @Nullable @Positive(message = "Số lần sử dụng tối đa phải lớn hơn 0") Long maxUse, @org.springframework.lang.Nullable @Positive(message = "Số lần sử dụng tối đa mỗi khách hàng phải lớn hơn 0") Integer maxUsesPerCustomer, Boolean active, @NotNull DiscountName name, String description, Money minRequiredOrderValue) {
+    public DiscountEntity(Long id, CouponEntity couponEntity, @org.springframework.lang.Nullable @Positive(message = "Số lượng sản phẩm tối thiểu phải lớn hơn 0") Integer minRequiredProduct, PromotionDiscountValue promotionDiscountValue, @Nullable  LocalDateTime validFrom, @NotNull(message = "Thời gian kết thúc hiệu lực không được để trống") LocalDateTime validUntil, Long currentUses, @Nullable @Positive(message = "Số lần sử dụng tối đa phải lớn hơn 0") Long maxUse, @org.springframework.lang.Nullable @Positive(message = "Số lần sử dụng tối đa mỗi khách hàng phải lớn hơn 0") Integer maxUsesPerCustomer, Boolean active, @NotNull DiscountName name, String description, Money minRequiredOrderValue) {
         this.id = id;
         this.couponEntity = couponEntity;
         this.minRequiredProduct = minRequiredProduct;
@@ -134,7 +132,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     @Comment("Số lần đã sử dụng chương trình giảm giá này")
     @ColumnDefault("'0'")
     @Column(name = "current_uses", columnDefinition = "int UNSIGNED")
-    @NotNull
+    @NotNull(message = "Số lần sử dụng không được để trống")
     private Long currentUses;
     
     public long increaseCurrentUses() {
@@ -214,7 +212,6 @@ public class DiscountEntity extends BaseEntity<Long> {
     public Optional<Long> getMaxUse() {
         return Optional.ofNullable(maxUse);
     }
-    @IValidMaxUseDiscount
     public boolean changeMaxUsesPerCustomer(Integer maxUsesPerCustomer) {
         if (Objects.equals(this.maxUsesPerCustomer, maxUsesPerCustomer)) {
             return false;
@@ -223,7 +220,6 @@ public class DiscountEntity extends BaseEntity<Long> {
         this.maxUsesPerCustomer = maxUsesPerCustomer;
         return true;
     }
-    //@IValidMaxUseDiscount
     public boolean changeMaxUse(Long maxUse) {
         if (Objects.equals(this.maxUse, maxUse)) {
             return false;
@@ -301,7 +297,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     }
 
     // Cập nhật phương thức changeValidFrom để xử lý trạng thái active
-    @IValidDateRange
+    @IValidDateRange(message = "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc")
     public boolean changeValidFrom(LocalDateTime validFrom) {
         if (Objects.equals(this.validFrom, validFrom)) {
             return false;
@@ -316,7 +312,6 @@ public class DiscountEntity extends BaseEntity<Long> {
     }
 
     // Cập nhật phương thức changeValidUntil để xử lý trạng thái active
-    @IValidDateRange
     public boolean changeValidUntil(LocalDateTime validUntil) {
         Objects.requireNonNull(validUntil, "Thời gian kết thúc không được để trống");
         if (this.validUntil.equals(validUntil)) {

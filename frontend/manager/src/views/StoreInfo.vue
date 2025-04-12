@@ -237,20 +237,24 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useStoreInfoStore } from '@/stores/store'
+import { storeToRefs } from 'pinia'
 import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 // Store
 const storeInfoStore = useStoreInfoStore()
+
+// Sử dụng storeToRefs để giữ tính reactive của các state từ store
 const { 
   storeInfo, 
   loading, 
   error, 
   formattedOpeningDate, 
   formattedOpenTime, 
-  formattedCloseTime, 
-  fetchStoreInfo, 
-  updateStoreInfo 
-} = storeInfoStore
+  formattedCloseTime 
+} = storeToRefs(storeInfoStore)
+
+// Lấy các actions từ store
+const { fetchStoreInfo, updateStoreInfo } = storeInfoStore
 
 // Form
 const form = ref(null)
@@ -267,7 +271,7 @@ const showConfirmDialog = ref(false)
 // Phương thức
 function resetForm() {
   // Reset form về giá trị ban đầu
-  Object.assign(editedStore, storeInfo.value)
+  editedStore.value = { ...storeInfo.value }
   
   // Ẩn các thông báo
   showSuccessAlert.value = false
@@ -284,11 +288,11 @@ async function saveStoreInfo() {
 
 async function confirmSave() {
   try {
-    // Hiển thị loading
-    loading.value = true
+    // Tạo một bản sao plain object từ editedStore để tránh tham chiếu vòng tròn
+    const storeData = { ...editedStore.value }
     
-    // Gọi API cập nhật
-    await updateStoreInfo(editedStore)
+    // Gọi API cập nhật với dữ liệu đã được xử lý
+    await updateStoreInfo(storeData)
     
     // Hiển thị thông báo thành công
     successMessage.value = 'Cập nhật thông tin cửa hàng thành công!'
@@ -316,28 +320,28 @@ async function confirmSave() {
 
 // Theo dõi thay đổi của storeInfo để cập nhật form
 function updateEditedStore() {
-  editedStore.value.id = storeInfo.value.id
-  editedStore.value.name = storeInfo.value.name
-  editedStore.value.address = storeInfo.value.address
-  editedStore.value.phone = storeInfo.value.phone
-  editedStore.value.email = storeInfo.value.email
-  editedStore.value.taxCode = storeInfo.value.taxCode
-  editedStore.value.openTime = storeInfo.value.openTime
-  editedStore.value.closeTime = storeInfo.value.closeTime
-  editedStore.value.openingDate = storeInfo.value.openingDate
+  editedStore.value = { ...storeInfo.value }
 }
 
 // Mounted
 onMounted(async () => {
   try {
-    editedStore.value = await fetchStoreInfo()
+    await fetchStoreInfo()
+    editedStore.value = { ...storeInfo.value }
   } catch (error) {
     // Nếu có lỗi khi lấy thông tin, tạo dữ liệu mẫu
-    
+    editedStore.value = {
+      id: 1,
+      name: 'Cửa hàng Trà sữa',
+      address: '123 Đường ABC, Quận 1, TP.HCM',
+      phone: '0123456789',
+      email: 'info@milktea.com',
+      taxCode: '0123456789',
+      openTime: '08:00',
+      closeTime: '22:00',
+      openingDate: '2023-01-01'
+    }
   }
-  
-  // Cập nhật form
-  //updateEditedStore()
 })
 
 // Kiểm tra quyền chỉnh sửa (đơn giản là ROLE_MANAGER)

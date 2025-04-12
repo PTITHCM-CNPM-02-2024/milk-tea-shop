@@ -55,7 +55,7 @@
                   @click="selectArea(area)"
                 >
                   <template v-slot:prepend>
-                    <v-avatar color="primary" size="36">
+                    <v-avatar :color="area.isActive ? 'success' : 'grey-darken-1'" size="36">
                       <span class="text-h7 font-weight-medium">{{ area.name}}</span>
                     </v-avatar>
                   </template>
@@ -155,12 +155,12 @@
                   @click="showTableDetails(table)"
                 >
                   <v-card-text class="d-flex flex-column align-center justify-center pa-2 h-100">
-                    <v-icon size="large" color="primary">mdi-table-furniture</v-icon>
+                    <v-icon size="large" :color="table.isActive ? 'success' : 'grey-darken-1'">mdi-table-furniture</v-icon>
                     <span class="text-h6 mt-2">{{ table.name }}</span>
                     <div class="d-flex mt-2">
                       <v-icon 
                         size="x-small" 
-                        color="primary"
+                        :color="table.isActive ? 'success' : 'grey-darken-1'"
                         class="mr-1"
                       >mdi-circle</v-icon>
                       <span class="text-caption" v-if="table.areaId">{{ table.isActive ? 'Hoạt động' : 'Không hoạt động' }}</span>
@@ -402,7 +402,7 @@
           <v-card-text class="pa-4" v-if="selectedTableDetails">
             <v-list-item class="px-0">
               <template v-slot:prepend>
-                <v-avatar color="primary" size="48">
+                <v-avatar :color="selectedTableDetails.isActive ? 'success' : 'grey-darken-1'" size="48">
                   <v-icon color="white">mdi-table-furniture</v-icon>
                 </v-avatar>
               </template>
@@ -421,7 +421,7 @@
             <v-divider class="my-3"></v-divider>
             
             <div class="d-flex align-center mb-2">
-              <v-icon class="mr-2" color="primary">mdi-map-marker</v-icon>
+              <v-icon class="mr-2" :color="selectedTableDetails.area ? 'primary' : 'grey-darken-1'">mdi-map-marker</v-icon>
               <span>
                 Khu vực: {{ selectedTableDetails.area ? selectedTableDetails.area.name : 'Chưa gán khu vực' }}
               </span>

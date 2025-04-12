@@ -35,7 +35,7 @@ export const useDiscountStore = defineStore('discount', {
         }
       } catch (error) {
         this.discounts = []
-        this.error = error.message || 'Đã xảy ra lỗi khi tải dữ liệu'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu'
         console.error('Error fetching discounts:', error)
       } finally {
         this.loading = false
@@ -62,8 +62,134 @@ export const useDiscountStore = defineStore('discount', {
         }
       } catch (error) {
         this.coupons = []
-        this.error = error.message || 'Đã xảy ra lỗi khi tải dữ liệu'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu'
         console.error('Error fetching coupons:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async getCouponById(id) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.getCouponDetail(id)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải thông tin mã giảm giá'
+        console.error('Error fetching coupon detail:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createCoupon(couponData) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.createCoupon(couponData)
+        await this.fetchCoupons(this.pagination.page)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tạo mã giảm giá'
+        console.error('Error creating coupon:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateCoupon(id, couponData) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.updateCoupon(id, couponData)
+        await this.fetchCoupons(this.pagination.page)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật mã giảm giá'
+        console.error('Error updating coupon:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteCoupon(id) {
+      try {
+        this.loading = true
+        this.error = null
+        await discountService.deleteCoupon(id)
+        await this.fetchCoupons(this.pagination.page)
+        return true
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa mã giảm giá'
+        console.error('Error deleting coupon:', error)
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async getDiscountById(id) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.getDiscountDetail(id)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải thông tin chương trình khuyến mãi'
+        console.error('Error fetching discount detail:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async createDiscount(discountData) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.createDiscount(discountData)
+        await this.fetchDiscounts(this.pagination.page)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tạo chương trình khuyến mãi'
+        console.error('Error creating discount:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateDiscount(id, discountData) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await discountService.updateDiscount(id, discountData)
+        await this.fetchDiscounts(this.pagination.page)
+        return response.data
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật chương trình khuyến mãi'
+        console.error('Error updating discount:', error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteDiscount(id) {
+      try {
+        this.loading = true
+        this.error = null
+        await discountService.deleteDiscount(id)
+        await this.fetchDiscounts(this.pagination.page)
+        return true
+      } catch (error) {
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa chương trình khuyến mãi'
+        console.error('Error deleting discount:', error)
+        return false
       } finally {
         this.loading = false
       }

@@ -20,6 +20,8 @@ import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/api/v1/discounts")
 public class DiscountController implements IController {
@@ -35,7 +37,7 @@ public class DiscountController implements IController {
     public ResponseEntity<?> createDiscount(@RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
                 .name(DiscountName.builder().value(request.getName()).build())
-                .description(request.getDescription())
+                .description(Objects.isNull(request.getDescription()) ? null : request.getDescription())
                 .couponId(CouponId.of(request.getCouponId()))
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
@@ -46,10 +48,10 @@ public class DiscountController implements IController {
                         .value(request.getMinimumOrderValue())
                         .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
-                .validFrom(request.getValidFrom())
+                .validFrom(Objects.isNull(request.getValidFrom()) ? null : request.getValidFrom())
                 .validUntil(request.getValidUntil())
-                .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
-                .maxUsage(request.getMaxUsage())
+                .maxUsagePerCustomer(Objects.isNull(request.getMaxUsagePerCustomer()) ? null : request.getMaxUsagePerCustomer())
+                .maxUsage(Objects.isNull(request.getMaxUsage()) ? null : request.getMaxUsage())
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -64,7 +66,7 @@ public class DiscountController implements IController {
         var command = UpdateDiscountCommand.builder()
                 .id(DiscountId.of(id))
                 .name(DiscountName.builder().value(request.getName()).build())
-                .description(request.getDescription())
+                .description(Objects.isNull(request.getDescription()) ? null : request.getDescription())
                 .couponId(CouponId.of(request.getCouponId()))
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
@@ -75,10 +77,10 @@ public class DiscountController implements IController {
                         .value(request.getMinimumOrderValue())
                         .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
-                .validFrom(request.getValidFrom())
+                .validFrom(Objects.isNull(request.getValidFrom()) ? null : request.getValidFrom())
                 .validUntil(request.getValidUntil())
                 .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
-                .maxUsage(request.getMaxUsage())
+                .maxUsage(Objects.isNull(request.getMaxUsage()) ? null : request.getMaxUsage())
                 .active(request.getActive())
                 .build();
         
