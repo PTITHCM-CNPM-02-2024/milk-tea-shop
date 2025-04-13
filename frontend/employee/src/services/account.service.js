@@ -1,9 +1,9 @@
 import apiClient from './api.js';
 
 const AccountService = {
-  // Lấy thông tin người dùng (nhân viên)
-  getUserInfo(id) {
-    return apiClient.get(`/accounts/${id}/user-info`);
+  // Lấy thông tin nhân viên
+  getEmployeeInfo(id) {
+    return apiClient.get(`/employees/${id}`);
   },
   
   // Lấy thông tin tài khoản
@@ -18,15 +18,12 @@ const AccountService = {
     });
   },
   
-  // Đổi mật khẩu
-  changePassword(id, newPassword, confirmPassword) {
-    return apiClient.put(`/accounts/${id}/password`, {
-      newPassword,
-      confirmPassword
-    });
+  // Đổi mật khẩu - cập nhật theo API mới
+  changePassword(id, oldPassword, newPassword, confirmPassword) {
+    return apiClient.put(`/accounts/${id}/password?oldPassword=${oldPassword}&newPassword=${newPassword}&confirmPassword=${confirmPassword}`);
   },
   
-  // Cập nhật thông tin nhân viên
+  // Cập nhật thông tin nhân viên - giữ lại nhưng không sử dụng
   updateEmployee(id, employeeData) {
     return apiClient.put(`/employees/${id}`, employeeData);
   }

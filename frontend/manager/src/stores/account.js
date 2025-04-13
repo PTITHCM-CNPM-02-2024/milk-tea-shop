@@ -93,6 +93,38 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
+  // Cập nhật username
+  async function updateUsername(id, data) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await accountService.updateUsername(id, data)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật tên đăng nhập'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Cập nhật mật khẩu
+  async function updatePassword(id, data){
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await accountService.changePassword(id, data.oldPassword, data.newPassword, data.confirmPassword)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật mật khẩu'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Xóa tài khoản
   async function deleteAccount(id) {
     loading.value = true
@@ -182,6 +214,8 @@ export const useAccountStore = defineStore('account', () => {
     fetchAccountById,
     createAccount,
     updateAccount,
+    updateUsername,
+    updatePassword,
     deleteAccount,
     toggleAccountLock,
     toggleAccountActive,

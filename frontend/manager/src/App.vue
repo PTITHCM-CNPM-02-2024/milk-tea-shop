@@ -3,7 +3,8 @@ import { useTheme } from 'vuetify'
 import { onMounted, ref, watch, computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useDisplay } from 'vuetify'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
 // import Login from './components/MainLayout/Login.vue'
 // import { HomeIcon, Cog6ToothIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/vue/24/outline'
 // import Posdasboard from './components/MainLayout/SideBar.vue'
@@ -52,7 +53,9 @@ const currentRouteName = computed(() => route.meta.title || route.name || 'Dashb
 </script>
 
 <template>
-  <router-view />
+  <DefaultLayout>
+    <router-view />
+  </DefaultLayout>
 </template>
 
 <style>

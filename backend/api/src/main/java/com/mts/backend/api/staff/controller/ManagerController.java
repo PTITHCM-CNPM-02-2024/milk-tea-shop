@@ -74,8 +74,8 @@ public class ManagerController implements IController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var request = DefaultManagerQuery.builder()
                 .page(page)
                 .size(size)

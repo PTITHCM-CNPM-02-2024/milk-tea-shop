@@ -23,6 +23,11 @@ export const accountService = {
     return api.put(`/accounts/${id}`, accountData)
   },
 
+  // Cập nhật tên đăng nhập
+  updateUsername(id, data) {
+    return api.put(`/accounts/${id}/username`, data)
+  },
+
   // Xóa tài khoản
   deleteAccount(id) {
     return api.delete(`/accounts/${id}`)
@@ -35,12 +40,12 @@ export const accountService = {
 
   // Khóa/Mở khóa tài khoản
   toggleAccountLock(id, isLocked) {
-    return api.patch(`/accounts/${id}/lock`, { isLocked })
+    return api.put(`/accounts/${id}/lock`, { locked: isLocked })
   },
 
   // Kích hoạt/Vô hiệu hóa tài khoản
   toggleAccountActive(id, isActive) {
-    return api.patch(`/accounts/${id}/activate`, { isActive })
+    return api.put(`/accounts/${id}/active`, { active: isActive })
   },
 
   // Thay đổi mật khẩu tài khoản

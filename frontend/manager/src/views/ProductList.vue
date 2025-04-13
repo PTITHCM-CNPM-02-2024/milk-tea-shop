@@ -364,41 +364,6 @@
               clearable
             ></v-select>
             
-            <div class="mb-3">
-              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
-              
-              <div class="d-flex align-center gap-4">
-                <v-img
-                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
-                  width="100"
-                  height="100"
-                  cover
-                  class="bg-grey-lighten-2 rounded"
-                ></v-img>
-                
-                <div class="flex-grow-1">
-                  <v-file-input
-                    v-model="productImage"
-                    accept="image/*"
-                    label="Tải lên hình ảnh"
-                    variant="outlined"
-                    density="compact"
-                    prepend-icon=""
-                    :show-size="true"
-                    @update:model-value="handleImageChange"
-                  ></v-file-input>
-                  
-                  <div v-if="uploadingImage" class="mt-2">
-                    <v-progress-linear
-                      indeterminate
-                      color="primary"
-                    ></v-progress-linear>
-                    <p class="text-caption text-center mt-1">Đang tải lên...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div class="d-flex gap-3 mb-3">
               <v-switch
                 v-model="editedProduct.signature"
@@ -413,6 +378,66 @@
                 color="success"
                 hide-details
               ></v-switch>
+
+              <v-switch
+                v-model="editedProduct.isTopping"
+                label="Là topping"
+                color="info"
+                hide-details
+                @update:model-value="handleToppingChange"
+              ></v-switch>
+            </div>
+            
+            <div class="mb-3">
+              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
+              
+              <div class="d-flex flex-column flex-md-row align-center gap-4">
+                <v-img
+                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
+                  width="120"
+                  height="120"
+                  cover
+                  class="bg-grey-lighten-2 rounded elevation-1"
+                ></v-img>
+                
+                <div class="flex-grow-1">
+                  <v-card variant="outlined" class="pa-3">
+                    <v-file-input
+                      v-model="productImage"
+                      accept="image/*"
+                      label="Tải lên hình ảnh"
+                      variant="outlined"
+                      density="compact"
+                      prepend-icon="mdi-camera"
+                      :show-size="true"
+                      @update:model-value="handleImageChange"
+                      hint="Chọn ảnh có kích thước tối ưu 500x500px"
+                      persistent-hint
+                    ></v-file-input>
+                    
+                    <div v-if="uploadingImage" class="mt-2">
+                      <v-progress-linear
+                        indeterminate
+                        color="primary"
+                      ></v-progress-linear>
+                      <p class="text-caption text-center mt-1">Đang tải lên...</p>
+                    </div>
+
+                    <div v-if="editedProduct.imageUrl" class="mt-2 d-flex justify-end">
+                      <v-btn 
+                        size="small" 
+                        color="error" 
+                        variant="text" 
+                        density="compact"
+                        prepend-icon="mdi-delete"
+                        @click="removeImage"
+                      >
+                        Xóa ảnh
+                      </v-btn>
+                    </div>
+                  </v-card>
+                </div>
+              </div>
             </div>
             
             <!-- Phần quản lý giá theo size -->
@@ -543,41 +568,6 @@
               clearable
             ></v-select>
             
-            <div class="mb-3">
-              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
-              
-              <div class="d-flex align-center gap-4">
-                <v-img
-                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
-                  width="100"
-                  height="100"
-                  cover
-                  class="bg-grey-lighten-2 rounded"
-                ></v-img>
-                
-                <div class="flex-grow-1">
-                  <v-file-input
-                    v-model="productImage"
-                    accept="image/*"
-                    label="Tải lên hình ảnh"
-                    variant="outlined"
-                    density="compact"
-                    prepend-icon=""
-                    :show-size="true"
-                    @update:model-value="handleImageChange"
-                  ></v-file-input>
-                  
-                  <div v-if="uploadingImage" class="mt-2">
-                    <v-progress-linear
-                      indeterminate
-                      color="primary"
-                    ></v-progress-linear>
-                    <p class="text-caption text-center mt-1">Đang tải lên...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div class="d-flex gap-3 mb-3">
               <v-switch
                 v-model="editedProduct.signature"
@@ -592,6 +582,66 @@
                 color="success"
                 hide-details
               ></v-switch>
+
+              <v-switch
+                v-model="editedProduct.isTopping"
+                label="Là topping"
+                color="info"
+                hide-details
+                @update:model-value="handleToppingChange"
+              ></v-switch>
+            </div>
+            
+            <div class="mb-3">
+              <label class="text-subtitle-2 mb-2 d-block">Hình ảnh sản phẩm</label>
+              
+              <div class="d-flex flex-column flex-md-row align-center gap-4">
+                <v-img
+                  :src="editedProduct.imageUrl || '/images/placeholder.png'"
+                  width="120"
+                  height="120"
+                  cover
+                  class="bg-grey-lighten-2 rounded elevation-1"
+                ></v-img>
+                
+                <div class="flex-grow-1">
+                  <v-card variant="outlined" class="pa-3">
+                    <v-file-input
+                      v-model="productImage"
+                      accept="image/*"
+                      label="Tải lên hình ảnh"
+                      variant="outlined"
+                      density="compact"
+                      prepend-icon="mdi-camera"
+                      :show-size="true"
+                      @update:model-value="handleImageChange"
+                      hint="Chọn ảnh có kích thước tối ưu 500x500px"
+                      persistent-hint
+                    ></v-file-input>
+                    
+                    <div v-if="uploadingImage" class="mt-2">
+                      <v-progress-linear
+                        indeterminate
+                        color="primary"
+                      ></v-progress-linear>
+                      <p class="text-caption text-center mt-1">Đang tải lên...</p>
+                    </div>
+
+                    <div v-if="editedProduct.imageUrl" class="mt-2 d-flex justify-end">
+                      <v-btn 
+                        size="small" 
+                        color="error" 
+                        variant="text" 
+                        density="compact"
+                        prepend-icon="mdi-delete"
+                        @click="removeImage"
+                      >
+                        Xóa ảnh
+                      </v-btn>
+                    </div>
+                  </v-card>
+                </div>
+              </div>
             </div>
             
             <!-- Phần quản lý giá theo size -->
@@ -957,6 +1007,7 @@ const editedProduct = ref({
   imageUrl: '',
   signature: false,
   available: true,
+  isTopping: false,
   prices: []
 })
 const defaultProduct = {
@@ -966,6 +1017,7 @@ const defaultProduct = {
   imageUrl: '',
   signature: false,
   available: true,
+  isTopping: false,
   prices: []
 }
 
@@ -1071,6 +1123,7 @@ const openEditDialog = async (product) => {
       imageUrl: productDetail.image_url || '',
       signature: productDetail.signature || false,
       available: productDetail.available !== undefined ? productDetail.available : true,
+      isTopping: productDetail.isTopping || false,
       prices: (productDetail.prices || []).map(p => ({
         id: p.id,
         sizeId: p.sizeId,
@@ -1110,8 +1163,19 @@ const closeAddPriceDialog = () => {
 }
 
 const saveProductPrice = () => {
-  if (!newPrice.value.sizeId || newPrice.value.price <= 0) {
-    showSnackbar('Vui lòng nhập đầy đủ thông tin', 'error')
+  if (!newPrice.value.sizeId) {
+    showSnackbar('Vui lòng chọn kích cỡ', 'error')
+    return
+  }
+  
+  // Kiểm tra giá tối thiểu nếu sản phẩm là topping
+  if (editedProduct.value.isTopping && newPrice.value.price < 1000) {
+    showSnackbar('Giá topping phải từ 1.000đ trở lên', 'error')
+    return
+  }
+  
+  if (newPrice.value.price <= 0) {
+    showSnackbar('Giá phải lớn hơn 0', 'error')
     return
   }
   
@@ -1163,6 +1227,23 @@ const deletePrice = async () => {
 
 const saveProduct = async () => {
   try {
+    // Kiểm tra nếu là topping
+    if (editedProduct.value.isTopping) {
+      // Kiểm tra danh mục
+      const isValidCategory = editedProduct.value.categoryId === 1 || editedProduct.value.categoryId === 2
+      if (!isValidCategory) {
+        showSnackbar('Topping phải thuộc danh mục Topping hoặc Topping bán lẻ', 'error')
+        return
+      }
+      
+      // Kiểm tra giá
+      const hasInvalidPrice = editedProduct.value.prices.some(price => price.price < 1000)
+      if (hasInvalidPrice) {
+        showSnackbar('Giá topping phải từ 1.000đ trở lên', 'error')
+        return
+      }
+    }
+    
     const productData = {
       name: editedProduct.value.name,
       description: editedProduct.value.description || '',
@@ -1170,6 +1251,7 @@ const saveProduct = async () => {
       imagePath: editedProduct.value.imageUrl,
       signature: editedProduct.value.signature,
       available: editedProduct.value.available,
+      isTopping: editedProduct.value.isTopping,
       prices: {}
     }
     
@@ -1189,6 +1271,23 @@ const saveProduct = async () => {
 
 const updateProduct = async () => {
   try {
+    // Kiểm tra nếu là topping
+    if (editedProduct.value.isTopping) {
+      // Kiểm tra danh mục
+      const isValidCategory = editedProduct.value.categoryId === 1 || editedProduct.value.categoryId === 2
+      if (!isValidCategory) {
+        showSnackbar('Topping phải thuộc danh mục Topping hoặc Topping bán lẻ', 'error')
+        return
+      }
+      
+      // Kiểm tra giá
+      const hasInvalidPrice = editedProduct.value.prices.some(price => price.price < 1000)
+      if (hasInvalidPrice) {
+        showSnackbar('Giá topping phải từ 1.000đ trở lên', 'error')
+        return
+      }
+    }
+    
     // 1. Cập nhật thông tin cơ bản của sản phẩm
     const productData = {
       name: editedProduct.value.name,
@@ -1196,7 +1295,8 @@ const updateProduct = async () => {
       categoryId: editedProduct.value.categoryId,
       imagePath: editedProduct.value.imageUrl,
       signature: editedProduct.value.signature,
-      available: editedProduct.value.available
+      available: editedProduct.value.available,
+      isTopping: editedProduct.value.isTopping
     }
     
     await productStore.updateProduct(editedProduct.value.id, productData)
@@ -1374,6 +1474,46 @@ const handleImageChange = async (file) => {
     uploadingImage.value = false
     productImage.value = null
   }
+}
+
+// Thêm hàm xử lý khi thay đổi trạng thái topping
+const handleToppingChange = (value) => {
+  if (value) {
+    // Nếu là topping, tự động thêm kích thước NA nếu chưa có
+    const hasNASize = editedProduct.value.prices.some(price => {
+      const size = productStore.productSizes.find(s => s.id === price.sizeId)
+      return size && size.name === 'NA'
+    })
+    
+    if (!hasNASize) {
+      const naSize = productStore.productSizes.find(s => s.name === 'NA')
+      if (naSize) {
+        // Xóa tất cả kích thước hiện có và thêm NA
+        editedProduct.value.prices = [{
+          sizeId: naSize.id,
+          price: 1000 // Giá mặc định tối thiểu cho topping
+        }]
+      }
+    }
+    
+    // Tự động chọn danh mục Topping hoặc Topping bán lẻ
+    const toppingCategories = productStore.categories.filter(cat => 
+      cat.id === 1 || cat.id === 2
+    )
+    
+    if (toppingCategories.length > 0) {
+      // Mặc định chọn danh mục Topping (ID: 1)
+      const defaultToppingCategory = toppingCategories.find(cat => cat.id === 1) || toppingCategories[0]
+      editedProduct.value.categoryId = defaultToppingCategory.id
+    }
+  }
+}
+
+// Thêm hàm xóa ảnh
+const removeImage = () => {
+  editedProduct.value.imageUrl = ''
+  productImage.value = null
+  showSnackbar('Đã xóa ảnh sản phẩm', 'info')
 }
 
 // Computed properties cho lọc và phân trang

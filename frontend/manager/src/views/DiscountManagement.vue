@@ -1,583 +1,579 @@
 <template>
-  <dashboard-layout>
-    <div>
-      <v-card>
-        <v-card-title>
-          <h1 class="text-h5 font-weight-medium">Quản lý khuyến mãi</h1>
-        </v-card-title>
-        
-        <!-- Hiển thị thông báo lỗi nếu có -->
-        <v-alert
-          v-if="discountStore.error"
-          type="error"
-          variant="tonal"
-          closable
-          class="mx-4 mt-2"
-        >
-          {{ discountStore.error }}
-        </v-alert>
-        
-        <v-tabs v-model="activeTab" color="primary" class="px-4">
-          <v-tab value="discounts" class="text-none">Khuyến mãi</v-tab>
-          <v-tab value="coupons" class="text-none">Mã giảm giá</v-tab>
-        </v-tabs>
+  <div>
+    <v-card>
+      <v-card-title>
+        <h1 class="text-h5 font-weight-medium">Quản lý khuyến mãi</h1>
+      </v-card-title>
+      
+      <!-- Hiển thị thông báo lỗi nếu có -->
+      <v-alert
+        v-if="discountStore.error"
+        type="error"
+        variant="tonal"
+        closable
+        class="mx-4 mt-2"
+      >
+        {{ discountStore.error }}
+      </v-alert>
+      
+      <v-tabs v-model="activeTab" color="primary" class="px-4">
+        <v-tab value="discounts" class="text-none">Khuyến mãi</v-tab>
+        <v-tab value="coupons" class="text-none">Mã giảm giá</v-tab>
+      </v-tabs>
 
-        <v-window v-model="activeTab" class="px-4 pb-4">
-          <!-- Tab Chương trình khuyến mãi -->
-          <v-window-item value="discounts">
-            <div class="d-flex align-center my-4">
-              <v-text-field
-                v-model="searchDiscount"
-                label="Tìm kiếm chương trình"
-                prepend-inner-icon="mdi-magnify"
-                density="compact"
-                hide-details
-                class="mr-4"
-                bg-color="background"
-                variant="outlined"
-                style="max-width: 300px;"
-              ></v-text-field>
-              <v-spacer></v-spacer>
-              <v-btn 
-                color="primary" 
-                class="text-none" 
-                rounded="lg" 
-                prepend-icon="mdi-plus"
-                @click="openDiscountDialog()"
-              >
-                THÊM CHƯƠNG TRÌNH
-              </v-btn>
-            </div>
-
-            <v-data-table
-              :headers="discountHeaders"
-              :items="discountStore.discounts || []"
-              :loading="discountStore.loading"
-              hover
-              class="mt-2 bg-surface rounded"
+      <v-window v-model="activeTab" class="px-4 pb-4">
+        <!-- Tab Chương trình khuyến mãi -->
+        <v-window-item value="discounts">
+          <div class="d-flex align-center my-4">
+            <v-text-field
+              v-model="searchDiscount"
+              label="Tìm kiếm chương trình"
+              prepend-inner-icon="mdi-magnify"
+              density="compact"
+              hide-details
+              class="mr-4"
+              bg-color="background"
+              variant="outlined"
+              style="max-width: 300px;"
+            ></v-text-field>
+            <v-spacer></v-spacer>
+            <v-btn 
+              color="primary" 
+              class="text-none" 
+              rounded="lg" 
+              prepend-icon="mdi-plus"
+              @click="openDiscountDialog()"
             >
-              <template v-slot:no-data>
-                <div class="text-center py-6">No data available</div>
-              </template>
-              
-              <template v-slot:item.discountValue="{ item }">
-                {{ formatDiscountValue(item.discountValue, item.discountUnit) }}
-              </template>
+              THÊM CHƯƠNG TRÌNH
+            </v-btn>
+          </div>
 
-              <template v-slot:item.maxDiscountAmount="{ item }">
-                {{ formatCurrency(item.maxDiscountAmount) }}
-              </template>
-
-              <template v-slot:item.minimumOrderValue="{ item }">
-                {{ formatCurrency(item.minimumOrderValue) }}
-              </template>
-
-              <template v-slot:item.validFrom="{ item }">
-                {{ formatDate(item.validFrom) }}
-              </template>
-
-              <template v-slot:item.validUntil="{ item }">
-                {{ formatDate(item.validUntil) }}
-              </template>
-
-              <template v-slot:item.isActive="{ item }">
-                <v-chip
-                  v-if="item.isActive"
-                  color="success"
-                  text="Hoạt động"
-                  size="small"
-                ></v-chip>
-                <span v-else>Không hoạt động</span>
-              </template>
-
-              <template v-slot:item.actions="{ item }">
-                <div class="d-flex">
-                  <v-btn icon variant="text" color="primary" size="small" @click="viewDiscountDetail(item.id)">
-                    <v-icon>mdi-eye</v-icon>
-                    <v-tooltip activator="parent" location="top">Xem chi tiết</v-tooltip>
-                  </v-btn>
-                  <v-btn icon variant="text" color="warning" size="small" @click="openDiscountDialog(item.id)">
-                    <v-icon>mdi-pencil</v-icon>
-                    <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
-                  </v-btn>
-                  <v-btn icon variant="text" color="error" size="small" @click="confirmDeleteDiscount(item.id)">
-                    <v-icon>mdi-delete</v-icon>
-                    <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
-                  </v-btn>
-                </div>
-              </template>
-
-              <template v-slot:bottom>
-                <div class="d-flex align-center justify-center py-2">
-                  <v-pagination
-                    v-model="discountPage"
-                    :length="Math.ceil(discountStore.pagination.total / discountStore.pagination.size) || 1"
-                    total-visible="7"
-                    @update:modelValue="onDiscountPageChange"
-                  ></v-pagination>
-                </div>
-              </template>
-            </v-data-table>
-          </v-window-item>
-
-          <!-- Tab Mã giảm giá -->
-          <v-window-item value="coupons">
-            <div class="d-flex align-center my-4">
-              <v-text-field
-                v-model="searchCoupon"
-                label="Tìm kiếm mã giảm giá"
-                prepend-inner-icon="mdi-magnify"
-                density="compact"
-                hide-details
-                class="mr-4"
-                bg-color="background"
-                variant="outlined"
-                style="max-width: 300px;"
-              ></v-text-field>
-              <v-spacer></v-spacer>
-              <v-btn 
-                color="primary" 
-                class="text-none" 
-                rounded="lg" 
-                prepend-icon="mdi-plus"
-                @click="openCouponDialog()"
-              >
-                THÊM MÃ GIẢM GIÁ
-              </v-btn>
-            </div>
-
-            <v-data-table
-              :headers="couponHeaders"
-              :items="discountStore.coupons || []"
-              :loading="discountStore.loading"
-              hover
-              class="mt-2 bg-surface rounded"
-            >
-              <template v-slot:no-data>
-                <div class="text-center py-6">No data available</div>
-              </template>
-              
-              <template v-slot:item.actions="{ item }">
-                <div class="d-flex">
-                  <v-btn icon variant="text" color="primary" size="small" @click="viewCouponDetail(item.id)">
-                    <v-icon>mdi-eye</v-icon>
-                    <v-tooltip activator="parent" location="top">Xem chi tiết</v-tooltip>
-                  </v-btn>
-                  <v-btn icon variant="text" color="warning" size="small" @click="openCouponDialog(item.id)">
-                    <v-icon>mdi-pencil</v-icon>
-                    <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
-                  </v-btn>
-                  <v-btn icon variant="text" color="error" size="small" @click="confirmDeleteCoupon(item.id)">
-                    <v-icon>mdi-delete</v-icon>
-                    <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
-                  </v-btn>
-                </div>
-              </template>
-
-              <template v-slot:bottom>
-                <div class="d-flex align-center justify-center py-2">
-                  <v-pagination
-                    v-model="couponPage"
-                    :length="Math.ceil(discountStore.pagination.total / discountStore.pagination.size) || 1"
-                    total-visible="7"
-                    @update:modelValue="onCouponPageChange"
-                  ></v-pagination>
-                </div>
-              </template>
-            </v-data-table>
-          </v-window-item>
-        </v-window>
-      </v-card>
-    </div>
-
-    <!-- Dialog xem chi tiết mã giảm giá -->
-    <v-dialog v-model="couponDetailDialog" max-width="500">
-      <v-card>
-        <v-card-title class="text-h5">
-          Chi tiết mã giảm giá
-        </v-card-title>
-        <v-card-text v-if="selectedCoupon">
-          <v-row>
-            <v-col cols="12">
-              <div class="text-subtitle-1 font-weight-bold">Mã giảm giá:</div>
-              <div>{{ selectedCoupon.coupon }}</div>
-            </v-col>
-            <v-col cols="12">
-              <div class="text-subtitle-1 font-weight-bold">Mô tả:</div>
-              <div>{{ selectedCoupon.description || 'Không có mô tả' }}</div>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="couponDetailDialog = false">
-            Đóng
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Dialog thêm/sửa mã giảm giá -->
-    <v-dialog v-model="couponDialog" max-width="500">
-      <v-card>
-        <v-card-title class="text-h5">
-          {{ editCouponId ? 'Cập nhật mã giảm giá' : 'Thêm mã giảm giá mới' }}
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="couponFormRef" v-model="validCouponForm" @submit.prevent="saveCoupon">
-            <v-row>
-              <v-col cols="12">
-                <v-text-field
-                  v-model="couponForm.coupon"
-                  label="Mã giảm giá"
-                  :rules="[v => !!v || 'Vui lòng nhập mã giảm giá',
-                          v => /^[a-zA-Z0-9]{3,15}$/.test(v) || 'Mã giảm giá phải từ 3 đến 15 ký tự, chỉ chứa chữ và số'
-                  ]"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="couponForm.description"
-                  label="Mô tả"
-                  rows="3"
-                  auto-grow
-                ></v-textarea>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" text @click="couponDialog = false">
-            Hủy
-          </v-btn>
-          <v-btn 
-            color="primary" 
-            text 
-            @click="saveCoupon"
+          <v-data-table
+            :headers="discountHeaders"
+            :items="discountStore.discounts || []"
             :loading="discountStore.loading"
-            :disabled="!validCouponForm"
+            hover
+            class="mt-2 bg-surface rounded"
           >
-            {{ editCouponId ? 'Cập nhật' : 'Tạo mới' }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            <template v-slot:no-data>
+              <div class="text-center py-6">No data available</div>
+            </template>
+            
+            <template v-slot:item.discountValue="{ item }">
+              {{ formatDiscountValue(item.discountValue, item.discountUnit) }}
+            </template>
 
-    <!-- Dialog xác nhận xóa -->
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h5">
-          Xác nhận xóa
-        </v-card-title>
-        <v-card-text>
-          Bạn có chắc chắn muốn xóa {{ activeTab === 'discounts' ? 'chương trình khuyến mãi' : 'mã giảm giá' }} này?
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="deleteDialog = false">
-            Hủy
-          </v-btn>
-          <v-btn 
-            color="error" 
-            text 
-            @click="activeTab === 'discounts' ? deleteDiscount() : deleteCoupon()"
-            :loading="discountStore.loading"
-          >
-            Xóa
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            <template v-slot:item.maxDiscountAmount="{ item }">
+              {{ formatCurrency(item.maxDiscountAmount) }}
+            </template>
 
-    <!-- Dialog xem chi tiết chương trình khuyến mãi -->
-    <v-dialog v-model="discountDetailDialog" max-width="750">
-      <v-card>
-        <v-card-title class="text-h5">
-          Chi tiết chương trình khuyến mãi
-        </v-card-title>
-        <v-card-text v-if="selectedDiscount">
-          <v-row>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Tên chương trình:</div>
-              <div>{{ selectedDiscount.name }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Mã coupon:</div>
-              <div>{{ selectedDiscount.couponId }}</div>
-            </v-col>
-            <v-col cols="12">
-              <div class="text-subtitle-1 font-weight-bold">Mô tả:</div>
-              <div>{{ selectedDiscount.description || 'Không có mô tả' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Giá trị giảm:</div>
-              <div>{{ formatDiscountValue(selectedDiscount.discountValue, selectedDiscount.discountUnit) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Giảm tối đa:</div>
-              <div>{{ formatCurrency(selectedDiscount.maxDiscountAmount) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Đơn hàng tối thiểu:</div>
-              <div>{{ formatCurrency(selectedDiscount.minimumOrderValue) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Số sản phẩm tối thiểu:</div>
-              <div>{{ selectedDiscount.minimumRequiredProduct || 'Không giới hạn' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Ngày bắt đầu:</div>
-              <div>{{ formatDate(selectedDiscount.validFrom) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Ngày kết thúc:</div>
-              <div>{{ formatDate(selectedDiscount.validUntil) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng tối đa:</div>
-              <div>{{ selectedDiscount.maxUsage || 'Không giới hạn' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng hiện tại:</div>
-              <div>{{ selectedDiscount.currentUsage || 0 }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng tối đa/khách hàng:</div>
-              <div>{{ selectedDiscount.maxUsagePerCustomer || 'Không giới hạn' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="text-subtitle-1 font-weight-bold">Trạng thái:</div>
-              <div>
-                <v-chip
-                  :color="selectedDiscount.isActive ? 'success' : 'error'"
-                  :text="selectedDiscount.isActive ? 'Hoạt động' : 'Không hoạt động'"
-                  size="small"
-                ></v-chip>
+            <template v-slot:item.minimumOrderValue="{ item }">
+              {{ formatCurrency(item.minimumOrderValue) }}
+            </template>
+
+            <template v-slot:item.validFrom="{ item }">
+              {{ formatDate(item.validFrom) }}
+            </template>
+
+            <template v-slot:item.validUntil="{ item }">
+              {{ formatDate(item.validUntil) }}
+            </template>
+
+            <template v-slot:item.isActive="{ item }">
+              <v-chip
+                v-if="item.isActive"
+                color="success"
+                text="Hoạt động"
+                size="small"
+              ></v-chip>
+              <span v-else>Không hoạt động</span>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+              <div class="d-flex">
+                <v-btn icon variant="text" color="primary" size="small" @click="viewDiscountDetail(item.id)">
+                  <v-icon>mdi-eye</v-icon>
+                  <v-tooltip activator="parent" location="top">Xem chi tiết</v-tooltip>
+                </v-btn>
+                <v-btn icon variant="text" color="warning" size="small" @click="openDiscountDialog(item.id)">
+                  <v-icon>mdi-pencil</v-icon>
+                  <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
+                </v-btn>
+                <v-btn icon variant="text" color="error" size="small" @click="confirmDeleteDiscount(item.id)">
+                  <v-icon>mdi-delete</v-icon>
+                  <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
+                </v-btn>
               </div>
+            </template>
+
+            <template v-slot:bottom>
+              <div class="d-flex align-center justify-center py-2">
+                <v-pagination
+                  v-model="discountPage"
+                  :length="Math.ceil(discountStore.pagination.total / discountStore.pagination.size) || 1"
+                  total-visible="7"
+                  @update:modelValue="onDiscountPageChange"
+                ></v-pagination>
+              </div>
+            </template>
+          </v-data-table>
+        </v-window-item>
+
+        <!-- Tab Mã giảm giá -->
+        <v-window-item value="coupons">
+          <div class="d-flex align-center my-4">
+            <v-text-field
+              v-model="searchCoupon"
+              label="Tìm kiếm mã giảm giá"
+              prepend-inner-icon="mdi-magnify"
+              density="compact"
+              hide-details
+              class="mr-4"
+              bg-color="background"
+              variant="outlined"
+              style="max-width: 300px;"
+            ></v-text-field>
+            <v-spacer></v-spacer>
+            <v-btn 
+              color="primary" 
+              class="text-none" 
+              rounded="lg" 
+              prepend-icon="mdi-plus"
+              @click="openCouponDialog()"
+            >
+              THÊM MÃ GIẢM GIÁ
+            </v-btn>
+          </div>
+
+          <v-data-table
+            :headers="couponHeaders"
+            :items="discountStore.coupons || []"
+            :loading="discountStore.loading"
+            hover
+            class="mt-2 bg-surface rounded"
+          >
+            <template v-slot:no-data>
+              <div class="text-center py-6">No data available</div>
+            </template>
+            
+            <template v-slot:item.actions="{ item }">
+              <div class="d-flex">
+                <v-btn icon variant="text" color="primary" size="small" @click="viewCouponDetail(item.id)">
+                  <v-icon>mdi-eye</v-icon>
+                  <v-tooltip activator="parent" location="top">Xem chi tiết</v-tooltip>
+                </v-btn>
+                <v-btn icon variant="text" color="warning" size="small" @click="openCouponDialog(item.id)">
+                  <v-icon>mdi-pencil</v-icon>
+                  <v-tooltip activator="parent" location="top">Chỉnh sửa</v-tooltip>
+                </v-btn>
+                <v-btn icon variant="text" color="error" size="small" @click="confirmDeleteCoupon(item.id)">
+                  <v-icon>mdi-delete</v-icon>
+                  <v-tooltip activator="parent" location="top">Xóa</v-tooltip>
+                </v-btn>
+              </div>
+            </template>
+
+            <template v-slot:bottom>
+              <div class="d-flex align-center justify-center py-2">
+                <v-pagination
+                  v-model="couponPage"
+                  :length="Math.ceil(discountStore.pagination.total / discountStore.pagination.size) || 1"
+                  total-visible="7"
+                  @update:modelValue="onCouponPageChange"
+                ></v-pagination>
+              </div>
+            </template>
+          </v-data-table>
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </div>
+
+  <!-- Dialog xem chi tiết mã giảm giá -->
+  <v-dialog v-model="couponDetailDialog" max-width="500">
+    <v-card>
+      <v-card-title class="text-h5">
+        Chi tiết mã giảm giá
+      </v-card-title>
+      <v-card-text v-if="selectedCoupon">
+        <v-row>
+          <v-col cols="12">
+            <div class="text-subtitle-1 font-weight-bold">Mã giảm giá:</div>
+            <div>{{ selectedCoupon.coupon }}</div>
+          </v-col>
+          <v-col cols="12">
+            <div class="text-subtitle-1 font-weight-bold">Mô tả:</div>
+            <div>{{ selectedCoupon.description || 'Không có mô tả' }}</div>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" text @click="couponDetailDialog = false">
+          Đóng
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialog thêm/sửa mã giảm giá -->
+  <v-dialog v-model="couponDialog" max-width="500">
+    <v-card>
+      <v-card-title class="text-h5">
+        {{ editCouponId ? 'Cập nhật mã giảm giá' : 'Thêm mã giảm giá mới' }}
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="couponFormRef" v-model="validCouponForm" @submit.prevent="saveCoupon">
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="couponForm.coupon"
+                label="Mã giảm giá"
+                :rules="[v => !!v || 'Vui lòng nhập mã giảm giá',
+                        v => /^[a-zA-Z0-9]{3,15}$/.test(v) || 'Mã giảm giá phải từ 3 đến 15 ký tự, chỉ chứa chữ và số'
+                ]"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                v-model="couponForm.description"
+                label="Mô tả"
+                rows="3"
+                auto-grow
+              ></v-textarea>
             </v-col>
           </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="discountDetailDialog = false">
-            Đóng
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="error" text @click="couponDialog = false">
+          Hủy
+        </v-btn>
+        <v-btn 
+          color="primary" 
+          text 
+          @click="saveCoupon"
+          :loading="discountStore.loading"
+          :disabled="!validCouponForm"
+        >
+          {{ editCouponId ? 'Cập nhật' : 'Tạo mới' }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
-    <!-- Dialog thêm/sửa chương trình khuyến mãi -->
-    <v-dialog v-model="discountDialog" max-width="800">
-      <v-card>
-        <v-card-title class="text-h5">
-          {{ editDiscountId ? 'Cập nhật chương trình khuyến mãi' : 'Thêm chương trình khuyến mãi mới' }}
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="discountFormRef" v-model="validDiscountForm" @submit.prevent="saveDiscount">
-            <v-row>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="discountForm.name"
-                  label="Tên chương trình"
-                  :rules="[v => !!v || 'Vui lòng nhập tên chương trình']"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-select
-                  v-model="discountForm.couponId"
-                  label="Mã giảm giá"
-                  :items="editDiscountId ? [...discountStore.unusedCoupons, selectedCoupon] : discountStore.unusedCoupons"
-                  item-title="coupon"
-                  item-value="id"
-                  :rules="[v => !!v || 'Vui lòng chọn mã giảm giá']"
-                  required
-                  :loading="discountStore.loading"
-                  :hint="'Chọn mã giảm giá cho chương trình'"
-                  persistent-hint
-                ></v-select>
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="discountForm.description"
-                  label="Mô tả"
-                  rows="3"
-                  auto-grow
-                ></v-textarea>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-select
-                  v-model="discountForm.discountUnit"
-                  label="Đơn vị giảm giá"
-                  :items="[
-                    { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
-                    { title: 'Số tiền cố định', value: 'FIXED' }
-                  ]"
-                  item-title="title"
-                  item-value="value"
-                  :rules="[v => !!v || 'Vui lòng chọn đơn vị giảm giá']"
-                  required
-                ></v-select>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.discountValue"
-                  label="Giá trị giảm"
-                  type="number"
-                  :rules="[
-                    v => !!v || 'Vui lòng nhập giá trị giảm',
-                    v => v > 0 || 'Giá trị phải lớn hơn 0',
-                    v => (discountForm.discountUnit !== 'PERCENTAGE' || v <= 100) || 'Giá trị phần trăm không được vượt quá 100%',
-                    v => (discountForm.discountUnit !== 'PERCENTAGE' || v > 0) || 'Giá trị phần trăm phải lớn hơn 0',
-                    v => (discountForm.discountUnit !== 'FIXED' || v >= 1000) || 'Giá trị giảm cố định phải từ 1000đ trở lên'
-                  ]"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.maxDiscountAmount"
-                  label="Giảm tối đa"
-                  type="number"
-                  :rules="[
-                    v => !!v || 'Vui lòng nhập giá trị giảm tối đa',
-                    v => v > 0 || 'Giá trị phải lớn hơn 0'
-                  ]"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.minimumOrderValue"
-                  label="Đơn hàng tối thiểu"
-                  type="number"
-                  :rules="[
-                    v => !!v || 'Vui lòng nhập giá trị đơn hàng tối thiểu',
-                    v => v >= 0 || 'Giá trị không được nhỏ hơn 0'
-                  ]"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.minimumRequiredProduct"
-                  label="Số sản phẩm tối thiểu"
-                  type="number"
-                  hint="Để trống nếu không yêu cầu"
-                  min="0"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.maxUsage"
-                  label="Số lần sử dụng tối đa"
-                  type="number"
-                  hint="Để trống nếu không giới hạn"
-                  min="0"
-                  :rules="[
-                    v => !v || v > 0 || 'Số lần sử dụng tối đa phải lớn hơn 0',
-                    v => !v || !discountForm.maxUsagePerCustomer || v >= discountForm.maxUsagePerCustomer || 'Số lần sử dụng tối đa phải lớn hơn hoặc bằng số lần sử dụng tối đa/khách hàng'
-                  ]"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model.number="discountForm.maxUsagePerCustomer"
-                  label="Số lần sử dụng tối đa/khách hàng"
-                  type="number"
-                  hint="Để trống nếu không giới hạn"
-                  min="0"
-                  :rules="[
-                    v => !v || v > 0 || 'Số lần sử dụng tối đa/khách hàng phải lớn hơn 0'
-                  ]"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" v-if="editDiscountId">
-                <v-text-field
-                  v-model.number="discountForm.currentUsage"
-                  label="Số lần đã sử dụng"
-                  type="number"
-                  readonly
-                  disabled
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="discountForm.validFrom"
-                  label="Ngày bắt đầu"
-                  type="datetime-local"
-                  :rules="[
-                    v => !v || !discountForm.validUntil || new Date(v) < new Date(discountForm.validUntil) || 'Ngày bắt đầu phải trước ngày kết thúc'
-                  ]"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="discountForm.validUntil"
-                  label="Ngày kết thúc"
-                  type="datetime-local"
-                  :rules="[
-                    v => !!v || 'Vui lòng nhập ngày kết thúc',
-                    v => !discountForm.validFrom || new Date(v) > new Date(discountForm.validFrom) || 'Ngày kết thúc phải sau ngày bắt đầu',
-                    v => new Date(v) > new Date() || 'Ngày kết thúc phải sau thời điểm hiện tại'
-                  ]"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" v-if="editDiscountId">
-                <v-switch
-                  v-model="discountForm.active"
-                  color="success"
-                  label="Kích hoạt chương trình"
-                  hide-details
-                ></v-switch>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" text @click="discountDialog = false">
-            Hủy
-          </v-btn>
-          <v-btn 
-            color="primary" 
-            text 
-            @click="saveDiscount"
-            :loading="discountStore.loading"
-            :disabled="!validDiscountForm"
-          >
-            {{ editDiscountId ? 'Cập nhật' : 'Tạo mới' }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <!-- Dialog xác nhận xóa -->
+  <v-dialog v-model="deleteDialog" max-width="400">
+    <v-card>
+      <v-card-title class="text-h5">
+        Xác nhận xóa
+      </v-card-title>
+      <v-card-text>
+        Bạn có chắc chắn muốn xóa {{ activeTab === 'discounts' ? 'chương trình khuyến mãi' : 'mã giảm giá' }} này?
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" text @click="deleteDialog = false">
+          Hủy
+        </v-btn>
+        <v-btn 
+          color="error" 
+          text 
+          @click="activeTab === 'discounts' ? deleteDiscount() : deleteCoupon()"
+          :loading="discountStore.loading"
+        >
+          Xóa
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="3000"
-    >
-      {{ snackbar.text }}
-      <template v-slot:actions>
-        <v-btn
-          color="white"
-          icon="mdi-close"
-          variant="text"
-          @click="snackbar.show = false"
-        ></v-btn>
-      </template>
-    </v-snackbar>
+  <!-- Dialog xem chi tiết chương trình khuyến mãi -->
+  <v-dialog v-model="discountDetailDialog" max-width="750">
+    <v-card>
+      <v-card-title class="text-h5">
+        Chi tiết chương trình khuyến mãi
+      </v-card-title>
+      <v-card-text v-if="selectedDiscount">
+        <v-row>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Tên chương trình:</div>
+            <div>{{ selectedDiscount.name }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Mã coupon:</div>
+            <div>{{ selectedDiscount.couponId }}</div>
+          </v-col>
+          <v-col cols="12">
+            <div class="text-subtitle-1 font-weight-bold">Mô tả:</div>
+            <div>{{ selectedDiscount.description || 'Không có mô tả' }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Giá trị giảm:</div>
+            <div>{{ formatDiscountValue(selectedDiscount.discountValue, selectedDiscount.discountUnit) }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Giảm tối đa:</div>
+            <div>{{ formatCurrency(selectedDiscount.maxDiscountAmount) }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Đơn hàng tối thiểu:</div>
+            <div>{{ formatCurrency(selectedDiscount.minimumOrderValue) }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Số sản phẩm tối thiểu:</div>
+            <div>{{ selectedDiscount.minimumRequiredProduct || 'Không giới hạn' }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Ngày bắt đầu:</div>
+            <div>{{ formatDate(selectedDiscount.validFrom) }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Ngày kết thúc:</div>
+            <div>{{ formatDate(selectedDiscount.validUntil) }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng tối đa:</div>
+            <div>{{ selectedDiscount.maxUsage || 'Không giới hạn' }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng hiện tại:</div>
+            <div>{{ selectedDiscount.currentUsage || 0 }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Số lần sử dụng tối đa/khách hàng:</div>
+            <div>{{ selectedDiscount.maxUsagePerCustomer || 'Không giới hạn' }}</div>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="text-subtitle-1 font-weight-bold">Trạng thái:</div>
+            <div>
+              <v-chip
+                :color="selectedDiscount.isActive ? 'success' : 'error'"
+                :text="selectedDiscount.isActive ? 'Hoạt động' : 'Không hoạt động'"
+                size="small"
+              ></v-chip>
+            </div>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" text @click="discountDetailDialog = false">
+          Đóng
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
-  </dashboard-layout>
+  <!-- Dialog thêm/sửa chương trình khuyến mãi -->
+  <v-dialog v-model="discountDialog" max-width="800">
+    <v-card>
+      <v-card-title class="text-h5">
+        {{ editDiscountId ? 'Cập nhật chương trình khuyến mãi' : 'Thêm chương trình khuyến mãi mới' }}
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="discountFormRef" v-model="validDiscountForm" @submit.prevent="saveDiscount">
+          <v-row>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="discountForm.name"
+                label="Tên chương trình"
+                :rules="[v => !!v || 'Vui lòng nhập tên chương trình']"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-select
+                v-model="discountForm.couponId"
+                label="Mã giảm giá"
+                :items="editDiscountId ? [...discountStore.unusedCoupons, selectedCoupon] : discountStore.unusedCoupons"
+                item-title="coupon"
+                item-value="id"
+                :rules="[v => !!v || 'Vui lòng chọn mã giảm giá']"
+                required
+                :loading="discountStore.loading"
+                :hint="'Chọn mã giảm giá cho chương trình'"
+                persistent-hint
+              ></v-select>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                v-model="discountForm.description"
+                label="Mô tả"
+                rows="3"
+                auto-grow
+              ></v-textarea>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-select
+                v-model="discountForm.discountUnit"
+                label="Đơn vị giảm giá"
+                :items="[
+                  { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
+                  { title: 'Số tiền cố định', value: 'FIXED' }
+                ]"
+                item-title="title"
+                item-value="value"
+                :rules="[v => !!v || 'Vui lòng chọn đơn vị giảm giá']"
+                required
+              ></v-select>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.discountValue"
+                label="Giá trị giảm"
+                type="number"
+                :rules="[
+                  v => !!v || 'Vui lòng nhập giá trị giảm',
+                  v => v > 0 || 'Giá trị phải lớn hơn 0',
+                  v => (discountForm.discountUnit !== 'PERCENTAGE' || v <= 100) || 'Giá trị phần trăm không được vượt quá 100%',
+                  v => (discountForm.discountUnit !== 'PERCENTAGE' || v > 0) || 'Giá trị phần trăm phải lớn hơn 0',
+                  v => (discountForm.discountUnit !== 'FIXED' || v >= 1000) || 'Giá trị giảm cố định phải từ 1000đ trở lên'
+                ]"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.maxDiscountAmount"
+                label="Giảm tối đa"
+                type="number"
+                :rules="[
+                  v => !!v || 'Vui lòng nhập giá trị giảm tối đa',
+                  v => v > 0 || 'Giá trị phải lớn hơn 0'
+                ]"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.minimumOrderValue"
+                label="Đơn hàng tối thiểu"
+                type="number"
+                :rules="[
+                  v => !!v || 'Vui lòng nhập giá trị đơn hàng tối thiểu',
+                  v => v >= 0 || 'Giá trị không được nhỏ hơn 0'
+                ]"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.minimumRequiredProduct"
+                label="Số sản phẩm tối thiểu"
+                type="number"
+                hint="Để trống nếu không yêu cầu"
+                min="0"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.maxUsage"
+                label="Số lần sử dụng tối đa"
+                type="number"
+                hint="Để trống nếu không giới hạn"
+                min="0"
+                :rules="[
+                  v => !v || v > 0 || 'Số lần sử dụng tối đa phải lớn hơn 0',
+                  v => !v || !discountForm.maxUsagePerCustomer || v >= discountForm.maxUsagePerCustomer || 'Số lần sử dụng tối đa phải lớn hơn hoặc bằng số lần sử dụng tối đa/khách hàng'
+                ]"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model.number="discountForm.maxUsagePerCustomer"
+                label="Số lần sử dụng tối đa/khách hàng"
+                type="number"
+                hint="Để trống nếu không giới hạn"
+                min="0"
+                :rules="[
+                  v => !v || v > 0 || 'Số lần sử dụng tối đa/khách hàng phải lớn hơn 0'
+                ]"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" v-if="editDiscountId">
+              <v-text-field
+                v-model.number="discountForm.currentUsage"
+                label="Số lần đã sử dụng"
+                type="number"
+                readonly
+                disabled
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="discountForm.validFrom"
+                label="Ngày bắt đầu"
+                type="datetime-local"
+                :rules="[
+                  v => !v || !discountForm.validUntil || new Date(v) < new Date(discountForm.validUntil) || 'Ngày bắt đầu phải trước ngày kết thúc'
+                ]"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="discountForm.validUntil"
+                label="Ngày kết thúc"
+                type="datetime-local"
+                :rules="[
+                  v => !!v || 'Vui lòng nhập ngày kết thúc',
+                  v => !discountForm.validFrom || new Date(v) > new Date(discountForm.validFrom) || 'Ngày kết thúc phải sau ngày bắt đầu',
+                  v => new Date(v) > new Date() || 'Ngày kết thúc phải sau thời điểm hiện tại'
+                ]"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" v-if="editDiscountId">
+              <v-switch
+                v-model="discountForm.active"
+                color="success"
+                label="Kích hoạt chương trình"
+                hide-details
+              ></v-switch>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="error" text @click="discountDialog = false">
+          Hủy
+        </v-btn>
+        <v-btn 
+          color="primary" 
+          text 
+          @click="saveDiscount"
+          :loading="discountStore.loading"
+          :disabled="!validDiscountForm"
+        >
+          {{ editDiscountId ? 'Cập nhật' : 'Tạo mới' }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-snackbar
+    v-model="snackbar.show"
+    :color="snackbar.color"
+    :timeout="3000"
+  >
+    {{ snackbar.text }}
+    <template v-slot:actions>
+      <v-btn
+        color="white"
+        icon="mdi-close"
+        variant="text"
+        @click="snackbar.show = false"
+      ></v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, reactive } from 'vue'
 import { useDiscountStore } from '@/stores/discount'
-import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 const discountStore = useDiscountStore()
 const activeTab = ref('discounts')

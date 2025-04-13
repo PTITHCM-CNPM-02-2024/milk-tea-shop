@@ -1,11 +1,9 @@
 <template>
-  <dashboard-layout>
-    <router-view></router-view>
-  </dashboard-layout>
+  <router-view></router-view>
 </template>
 
 <script setup>
-import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
+// Không cần import DashboardLayout
 </script>
 
 <style scoped>

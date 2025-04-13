@@ -1,23 +1,17 @@
 <template>
-  <dashboard-layout>
-    <div>
-      <!-- Phần header với tiêu đề -->
-      <div class="d-flex justify-space-between align-center mb-4 px-4 pt-4">
-        <div>
-          <h2 class="text-h5 font-weight-bold">Quản lý khu vực và bàn</h2>
-          <p class="text-subtitle-2 text-medium-emphasis mt-1">
-            Quản lý thông tin khu vực và bàn trong hệ thống
-          </p>
-        </div>
-      </div>
+  <div>
+    <v-card>
+      <v-card-title>
+        <h1 class="text-h5 font-weight-medium">Quản lý khu vực và bàn</h1>
+      </v-card-title>
       
-      <!-- Alert hiển thị lỗi nếu có -->
+      <!-- Hiển thị thông báo lỗi nếu có -->
       <v-alert
         v-if="areaTableStore.error"
         type="error"
         variant="tonal"
         closable
-        class="mx-4 mb-4"
+        class="mx-4 mt-2"
       >
         {{ areaTableStore.error }}
       </v-alert>
@@ -461,30 +455,29 @@
         </v-card>
       </v-dialog>
       <!-- Snackbar thông báo -->
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="3000"
-    >
-      {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn
-          color="white"
-          icon="mdi-close"
-          variant="text"
-          @click="snackbar.show = false"
-        ></v-btn>
-      </template>
-    </v-snackbar>
-    </div>  
-  </dashboard-layout>
+      <v-snackbar
+        v-model="snackbar.show"
+        :color="snackbar.color"
+        :timeout="3000"
+      >
+        {{ snackbar.message }}
+        <template v-slot:actions>
+          <v-btn
+            color="white"
+            icon="mdi-close"
+            variant="text"
+            @click="snackbar.show = false"
+          ></v-btn>
+        </template>
+      </v-snackbar>
+    </v-card>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useAreaTableStore } from '@/stores/areaTable'
 import { areaTableService } from '@/services/areaTableService'
-import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 const areaTableStore = useAreaTableStore()
 const loading = ref(false)

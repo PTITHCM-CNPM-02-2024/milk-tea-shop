@@ -1,8 +1,7 @@
 <template>
-  <dashboard-layout>
-    <div>
-      <v-card>
-        <v-card-title>
+  <div>
+    <v-card>
+      <v-card-title>
           <h1 class="text-h5 font-weight-medium">Quản lý thanh toán</h1>
         </v-card-title>
 
@@ -524,15 +523,13 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-    </div>
-  </dashboard-layout>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { usePaymentStore } from '@/stores/payment'
 import { useRouter } from 'vue-router'
-import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 const paymentStore = usePaymentStore()
 const router = useRouter()

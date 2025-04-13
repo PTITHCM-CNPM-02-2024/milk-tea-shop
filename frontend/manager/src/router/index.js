@@ -77,6 +77,8 @@ const router = createRouter({
     {
       path: '/users',
       component: () => import('@/views/UserManagementLayout.vue'),
+      meta: {
+      },
       children: [
         {
           path: '',
@@ -150,6 +152,16 @@ const router = createRouter({
       meta: {
         title: 'Quản lý khuyến mãi',
         requiresAuth: true
+      }
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/Profile/ProfileView.vue'),
+      meta: {
+        title: 'Hồ sơ cá nhân',
+        requiresAuth: true,
+        layout: 'default'
       }
     }
   ]

@@ -34,12 +34,7 @@ public interface JpaManagerRepository extends JpaRepository<ManagerEntity, Long>
 
     @Query("select (count(m) > 0) from ManagerEntity m where m.accountEntity.id = :id")
     boolean existsByAccountId(@Param("id") @NonNull Long id);
-
-
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM milk_tea_shop_prod.Manager WHERE manager_id = :id", nativeQuery = true)
-    void deleteManager(@Param("id") Long id);
+    
     
     
     @EntityGraph(attributePaths = {"accountEntity"})
@@ -48,7 +43,7 @@ public interface JpaManagerRepository extends JpaRepository<ManagerEntity, Long>
     
     @EntityGraph(attributePaths = {"accountEntity"})
     @Query("select m from ManagerEntity m where m.id = :id")
-    Optional<ManagerEntity> findByIdWithJoinFetch(@Param("id") @NonNull ManagerId id);
+    Optional<ManagerEntity> findByIdWithJoinFetch(@Param("id") @NonNull Long id);
 
     @Query("select (count(m) > 0) from ManagerEntity m where m.id <> ?1 and m.phone = ?2")
     boolean existsByIdNotAndPhone(@NonNull Long id, @NonNull PhoneNumber phone);

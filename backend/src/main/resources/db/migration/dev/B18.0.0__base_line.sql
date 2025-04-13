@@ -7,6 +7,8 @@ create table area
     is_active   tinyint(1) default 1                 null comment 'Trạng thái hoạt động (1: Có, 0: Không)',
     created_at  datetime   default CURRENT_TIMESTAMP null,
     updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 3),
+    CHECK (max_tables IS NULL OR max_tables > 0),
     unique key area_pk (name)
 );
 
@@ -17,6 +19,7 @@ create table category
     description        varchar(1000)                      null comment 'Mô tả danh mục',
     created_at         datetime default CURRENT_TIMESTAMP null,
     updated_at         datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 100),
     unique key category_pk (name)
 );
 
@@ -27,6 +30,7 @@ create table coupon
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (coupon REGEXP '^[a-zA-Z0-9]{3,15}$'),
     unique key coupon_uk (coupon)
 );
 
@@ -51,6 +55,18 @@ create table discount
     updated_at               datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời điểm cập nhật gần nhất',
     unique key discount_pk (coupon_id),
     unique key discount_pk_2 (name),
+    CHECK (min_required_order_value >= 1000),
+    CHECK (max_discount_amount >= 1000),
+    CHECK (discount_type = 'PERCENTAGE' AND discount_value > 0 AND discount_value <= 100 OR
+           discount_type = 'FIXED' AND discount_value >= 1000),
+   CHECK (min_required_product IS NULL OR min_required_product > 0),
+   CHECK (valid_from IS NULL OR valid_until IS NULL OR valid_from < valid_until),
+   CHECK (max_uses IS NULL OR max_uses > 0),
+   CHECK (max_uses_per_customer IS NULL OR max_uses_per_customer > 0),
+   CHECK (max_uses IS NULL OR max_uses_per_customer IS NULL OR max_uses >= max_uses_per_customer),
+   CHECK (current_uses IS NULL OR current_uses >= 0),
+   CHECK (max_uses IS NULL OR current_uses IS NULL OR max_uses >= current_uses),
+   CHECK (discount_type = 'FIXED' AND discount_value <= max_discount_amount OR discount_type = 'PERCENTAGE'),
     foreign key discount_ibfk_2 (coupon_id) references coupon (coupon_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
@@ -68,6 +84,11 @@ create table membership_type
     is_active          tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+       CHECK (LENGTH(TRIM(type)) > 0 AND LENGTH(TRIM(type)) <= 50),
+   CHECK (discount_unit = 'PERCENTAGE' AND discount_value >= 0 AND discount_value <= 100 OR
+          discount_unit = 'FIXED' AND discount_value >= 1000),
+   CHECK (required_point >= 0),
+   CHECK (valid_until IS NULL OR valid_until > CURRENT_TIMESTAMP),
     unique key membership_type_pk (type),
     unique key membership_type_pk_2 (required_point)
 );
@@ -94,6 +115,11 @@ create table product
     created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
     index product_category_idx (category_id),
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 100),
+    CHECK (LENGTH(TRIM(description)) <= 1000),
+    CHECK (is_available IN (0, 1)),
+    CHECK (is_signature IN (0, 1)),
+    CHECK (image_path IS NULL OR LENGTH(image_path) <= 1000),
     foreign key product_ibfk_1 (category_id) references category (category_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
@@ -104,6 +130,7 @@ create table role
     role_id     tinyint unsigned auto_increment comment 'Mã vai trò' primary key,
     name        varchar(50)                        not null comment 'Tên vai trò (ví dụ: admin, staff, customer)',
     description varchar(1000)                      null comment 'Mô tả vai trò',
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 50),
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     unique key role_pk (name)
@@ -121,6 +148,9 @@ create table account
     token_version int unsigned default '0'               not null comment 'Kiểm tra tính hợp lệ của token',
     created_at    datetime     default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at    datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
+    CHECK (LENGTH(TRIM(username)) > 0),
+    CHECK (username REGEXP '^[a-zA-Z0-9_-]{3,20}$'),
+    CHECK (LENGTH(password_hash) >= 20),
     unique key account_username_uk (username),
     index account_role_idx (role_id),
     foreign key account_ibfk_1 (role_id) references role (role_id)
@@ -141,6 +171,11 @@ create table customer
     gender             enum ('MALE', 'FEMALE', 'OTHER')    null comment 'Giới tính',
     created_at         timestamp default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at         timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Ngày cập nhật',
+    CHECK (LENGTH(last_name) <= 70), -- Từ LastName.java
+    CHECK (LENGTH(first_name) <= 70), -- Từ FirstName.java 
+    CHECK (phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)'), -- Từ PhoneNumber.java
+    CHECK (email IS NULL OR email REGEXP '[a-zA-Z0-9_!#$%&\'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$'), 
+    CHECK (current_points >= 0) ,-- Điểm không âm    
     unique key customer_email_uk (email),
     unique key customer_phone_uk (phone),
     index customer_account_idx (account_id),
@@ -165,6 +200,10 @@ create table employee
     email       varchar(100)                       not null comment 'Email',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(last_name) <= 70), -- Từ LastName.java
+    CHECK (LENGTH(first_name) <= 70), -- Từ FirstName.java 
+    CHECK (phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)'), -- Từ PhoneNumber.java
+    CHECK (email IS NULL OR email REGEXP '[a-zA-Z0-9_!#$%&\'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$'), -- Từ Email.java
     unique key employee_account_uk (account_id),
     foreign key employee_ibfk_1 (account_id) references account (account_id)
         ON UPDATE CASCADE
@@ -182,6 +221,10 @@ create table manager
     email      varchar(100)                       not null comment 'Email',
     created_at datetime default CURRENT_TIMESTAMP null,
     updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(last_name) <= 70), -- Từ LastName.java
+    CHECK (LENGTH(first_name) <= 70), -- Từ FirstName.java 
+    CHECK (phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)'), -- Từ PhoneNumber.java
+    CHECK (email IS NULL OR email REGEXP '^[a-zA-Z0-9_!#$%&\'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$'), -- Từ Email.java
     unique key manager_account_uk (account_id),
     foreign key manager_ibfk_1 (account_id) references account (account_id)
         ON UPDATE CASCADE
@@ -201,6 +244,27 @@ create table `order`
     point          int unsigned default '1'                      null,
     created_at     datetime     default CURRENT_TIMESTAMP        null,
     updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
+    index order_employee_idx (employee_id)
+);
+    create table `order`
+(
+    order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,
+    customer_id    int unsigned                                  null comment 'Mã khách hàng',
+    employee_id    int unsigned                                  not null comment 'Mã nhân viên',
+    order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
+    total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
+    final_amount   decimal(11, 3)                                null comment 'Thành tiền',
+    status         enum ('PROCESSING', 'CANCELLED', 'COMPLETED') null comment 'Trạng thái đơn hàng',
+    customize_note varchar(1000)                                 null comment 'Ghi chú tùy chỉnh',
+    point          int unsigned default '1'                      null,
+    created_at     datetime     default CURRENT_TIMESTAMP        null,
+    updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
+    -- Thêm các ràng buộc kiểm tra
+    CHECK (status IS NOT NULL), -- Trạng thái không được để trống
+    CHECK (total_amount IS NULL OR total_amount >= 1000), -- Tổng tiền từ Money.java
+    CHECK (final_amount IS NULL OR final_amount >= 1000), -- Thành tiền từ Money.java
+    CHECK (total_amount IS NULL OR final_amount IS NULL OR final_amount <= total_amount), -- Thành tiền không lớn hơn tổng tiền
+    CHECK (point IS NULL OR point >= 0), -- Điểm không âm
     index order_employee_idx (employee_id),
     foreign key order_ibfk_1 (customer_id) references customer (customer_id)
         ON UPDATE CASCADE
@@ -218,6 +282,7 @@ create table order_discount
     discount_amount   decimal(11, 3)                     not null comment 'Số tiền giảm giá được áp dụng',
     created_at        datetime default CURRENT_TIMESTAMP null,
     updated_at        datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (discount_amount >= 0), -- Số tiền giảm giá phải lớn hơn 1000
     unique key order_discount_pk (order_id, discount_id),
     foreign key order_discount_ibfk_1 (order_id) references `order` (order_id)
         ON UPDATE CASCADE
@@ -239,6 +304,9 @@ create table payment
     created_at        datetime       default CURRENT_TIMESTAMP null,
     updated_at        datetime       default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     index payment_method_idx (payment_method_id),
+       CHECK (amount_paid IS NULL OR amount_paid >= 0),
+   CHECK (change_amount IS NULL OR change_amount >= 0),
+   CHECK (status IS NOT NULL),
     foreign key payment_ibfk_1 (order_id) references `order` (order_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
@@ -271,6 +339,7 @@ create table order_table
     check_out      datetime                           null comment 'Thời gian rời bàn',
     created_at     datetime default CURRENT_TIMESTAMP null,
     updated_at     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (check_out IS NULL OR check_out >= check_in),
     unique key order_table_pk (order_id, table_id),
     index order_table_order_idx (order_id),
     index order_table_table_idx (table_id),
@@ -294,7 +363,11 @@ create table store
     opening_date date                               not null comment 'Ngày khai trương',
     tax_code     varchar(20)                        not null comment 'Mã số thuế',
     created_at   datetime default CURRENT_TIMESTAMP null,
-    updated_at   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
+    updated_at   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 100),
+    CHECK (LENGTH(TRIM(address)) > 0 AND LENGTH(address) <= 255),
+    CHECK (phone REGEXP '(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)'),
+    CHECK (email IS NULL OR email REGEXP '[a-zA-Z0-9_!#$%&\'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$')
 );
 
 create table unit_of_measure
@@ -305,6 +378,8 @@ create table unit_of_measure
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 30), -- Từ UnitName.java
+    CHECK (LENGTH(TRIM(symbol)) > 0 AND LENGTH(symbol) <= 5), -- Từ UnitSymbol.java
     unique key unit_of_measure_pk (name),
     unique key unit_of_measure_pk_2 (symbol)
 );
@@ -318,6 +393,8 @@ create table product_size
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 5), -- Từ ProductSizeName.java
+    CHECK (quantity > 0) ,-- Số lượng phải lớn hơn 0
     unique key product_size_pk (unit_id, name),
     foreign key product_size_ibfk_1 (unit_id) references unit_of_measure (unit_id)
         ON UPDATE CASCADE
@@ -332,6 +409,7 @@ create table product_price
     price            decimal(11, 3)                     not null comment 'Giá',
     created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
+    CHECK (price > 1000), -- Giá phải lớn hơn 1000
     unique key product_price_pk (product_id, size_id),
     index product_price_product_idx (product_id),
     index product_price_size_idx (size_id),
@@ -352,6 +430,7 @@ create table order_product
     `option`         varchar(500)                       null comment 'Tùy chọn cho việc lựa chọn lượng đá, đường ',
     created_at       datetime default CURRENT_TIMESTAMP null,
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    CHECK (quantity > 0), -- Số lượng phải lớn hơn 0
     unique key order_product_pk (order_id, product_price_id),
     index order_product_order_idx (order_id),
     index order_product_price_idx (product_price_id),

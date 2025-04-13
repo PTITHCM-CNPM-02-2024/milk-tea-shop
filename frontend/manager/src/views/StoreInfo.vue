@@ -1,7 +1,5 @@
 <template>
-  <dashboard-layout>
-    <v-container>
-
+  <v-div>
      <v-card class="mb-4">
         <v-card-title class="text-h4 d-flex align-center">
           <v-icon large class="mr-2">mdi-store</v-icon>
@@ -206,7 +204,6 @@
           </v-card-text>
         </template>
       </v-card>
-    </v-container>
     
     <!-- Hộp thoại xác nhận -->
     <v-dialog v-model="showConfirmDialog" max-width="500px">
@@ -231,7 +228,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </dashboard-layout>
+  </v-div>
 </template>
 
 <script setup>
