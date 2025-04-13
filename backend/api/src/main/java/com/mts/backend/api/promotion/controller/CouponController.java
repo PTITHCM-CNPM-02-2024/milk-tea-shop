@@ -6,6 +6,7 @@ import com.mts.backend.api.promotion.request.UpdateCouponRequest;
 import com.mts.backend.application.promotion.CouponCommandBus;
 import com.mts.backend.application.promotion.CouponQueryBus;
 import com.mts.backend.application.promotion.command.CreateCouponCommand;
+import com.mts.backend.application.promotion.command.DeleteCouponByIdCommand;
 import com.mts.backend.application.promotion.command.UpdateCouponCommand;
 import com.mts.backend.application.promotion.query.CouponByIdQuery;
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
@@ -88,6 +89,17 @@ public class CouponController implements IController {
                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = UnusedCouponQuery.builder().page(page).size(size).build();
         var result = queryBus.dispatch(command);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCoupon(@PathVariable("id") Long id) {
+        DeleteCouponByIdCommand command = DeleteCouponByIdCommand.builder()
+                .couponId(CouponId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

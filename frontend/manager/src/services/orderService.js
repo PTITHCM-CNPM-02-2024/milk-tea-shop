@@ -3,7 +3,14 @@ import api from './api'
 export const orderService = {
   // Lấy danh sách đơn hàng
   getAllOrders(page = 0, size = 10) {
-    return api.get(`/orders?page=${page}&size=${size}`)
+    return api.get('/orders', {
+      params: { page, size }
+    })
+  },
+  
+  // Lấy danh sách đơn hàng (tên method mới)
+  getOrders(page = 0, size = 10) {
+    return this.getAllOrders(page, size)
   },
 
   // Lấy chi tiết đơn hàng

@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.mts.backend.application.order.response.OrderBasicResponse;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -22,4 +24,6 @@ public class PaymentDetailResponse {
     private Long orderId;
     private LocalDateTime paymentTime;
     private String status;
+    
+    private OrderBasicResponse order;
 }

@@ -6,6 +6,7 @@ import com.mts.backend.api.customer.request.UpdateCustomerRequest;
 import com.mts.backend.application.customer.CustomerCommandBus;
 import com.mts.backend.application.customer.CustomerQueryBus;
 import com.mts.backend.application.customer.command.CreateCustomerCommand;
+import com.mts.backend.application.customer.command.DeleteCusByIdCommand;
 import com.mts.backend.application.customer.command.UpdateCustomerCommand;
 import com.mts.backend.application.customer.command.UpdateMemberForCustomer;
 import com.mts.backend.application.customer.query.CustomerByIdQuery;
@@ -121,6 +122,17 @@ public class CustomerController implements IController {
         
         var result = customerQueryBus.dispatch(request);
         
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCustomer(@PathVariable("id") Long id) {
+        DeleteCusByIdCommand command = DeleteCusByIdCommand.builder()
+                .customerId(CustomerId.of(id))
+                .build();
+
+        var result = customerCommandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

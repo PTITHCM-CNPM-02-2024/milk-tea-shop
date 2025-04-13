@@ -380,6 +380,150 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Dialog chi tiết thanh toán -->
+      <v-dialog v-model="paymentDetailsDialog" width="700">
+        <v-card>
+          <v-toolbar color="primary" density="compact">
+            <v-toolbar-title>Chi tiết thanh toán #{{ currentPayment?.id }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon="mdi-close" @click="paymentDetailsDialog = false"></v-btn>
+          </v-toolbar>
+
+          <v-card-text v-if="currentPayment" class="pa-4">
+            <v-overlay v-model="paymentStore.paymentLoading" contained class="align-center justify-center">
+              <v-progress-circular indeterminate size="64"></v-progress-circular>
+            </v-overlay>
+
+            <v-row>
+              <v-col cols="12">
+                <v-card flat border>
+                  <v-card-title class="text-subtitle-1 font-weight-bold bg-light-blue-lighten-5 py-2 px-4">
+                    Thông tin thanh toán
+                  </v-card-title>
+                  <v-card-text class="py-3">
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-identifier</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Mã thanh toán:</span>
+                      <span class="font-weight-medium">{{ currentPayment.id }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-cash-register</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Phương thức thanh toán:</span>
+                      <span class="font-weight-medium">{{ currentPayment.paymentMethod.name }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3" v-if="currentPayment.paymentMethod.description">
+                      <v-icon class="me-2" size="small">mdi-text-box</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Mô tả phương thức:</span>
+                      <span class="font-weight-medium">{{ currentPayment.paymentMethod.description }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-calendar-clock</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Thời gian thanh toán:</span>
+                      <span class="font-weight-medium">{{ formatTime(currentPayment.paymentTime) }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-check-circle</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Trạng thái thanh toán:</span>
+                      <v-chip
+                        :color="getPaymentStatusColor(currentPayment.status)"
+                        :text="getPaymentStatusText(currentPayment.status)"
+                        size="small"
+                      ></v-chip>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+
+            <v-row class="mt-2">
+              <v-col cols="12" md="6">
+                <v-card flat border height="100%">
+                  <v-card-title class="text-subtitle-1 font-weight-bold bg-light-blue-lighten-5 py-2 px-4">
+                    Thông tin tài chính
+                  </v-card-title>
+                  <v-card-text class="py-3">
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-cash-plus</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Số tiền thanh toán:</span>
+                      <span class="font-weight-bold">{{ formatCurrency(currentPayment.amountPaid) }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-cash-refund</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Tiền thừa:</span>
+                      <span class="font-weight-medium">{{ formatCurrency(currentPayment.change) }}</span>
+                    </div>
+                    <div class="border-top pt-3 mt-3">
+                      <span class="text-body-2 text-grey-darken-1">Tổng thanh toán thực tế:</span>
+                      <div class="font-weight-bold text-h6 text-primary mt-1">
+                        {{ formatCurrency(currentPayment.amountPaid - (currentPayment.change || 0)) }}
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-card flat border height="100%">
+                  <v-card-title class="text-subtitle-1 font-weight-bold bg-light-blue-lighten-5 py-2 px-4">
+                    Thông tin đơn hàng
+                  </v-card-title>
+                  <v-card-text class="py-3">
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-file-document</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Mã đơn hàng:</span>
+                      <span class="font-weight-medium">#{{ currentPayment.order.orderId }}</span>
+                      <v-btn 
+                        variant="text" 
+                        size="small" 
+                        color="primary" 
+                        class="ms-2" 
+                        @click="viewOrderDetails(currentPayment.order.orderId)"
+                      >
+                        Xem đơn hàng
+                      </v-btn>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-cash-multiple</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Tổng tiền đơn hàng:</span>
+                      <span class="font-weight-medium">{{ formatCurrency(currentPayment.order.totalAmount) }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-cash</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Thành tiền:</span>
+                      <span class="font-weight-medium">{{ formatCurrency(currentPayment.order.finalAmount) }}</span>
+                    </div>
+                    <div class="d-flex align-center mb-3">
+                      <v-icon class="me-2" size="small">mdi-flag-variant</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Trạng thái đơn hàng:</span>
+                      <v-chip
+                        :color="getOrderStatusColor(currentPayment.order.orderStatus)"
+                        size="small"
+                      >
+                        {{ getOrderStatusText(currentPayment.order.orderStatus) }}
+                      </v-chip>
+                    </div>
+                    <div class="d-flex align-center mb-3" v-if="currentPayment.order.note">
+                      <v-icon class="me-2" size="small">mdi-note-text</v-icon>
+                      <span class="text-body-2 text-grey-darken-1 me-1">Ghi chú:</span>
+                      <span class="font-weight-medium">{{ currentPayment.order.note }}</span>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+
+            <div class="d-flex justify-center mt-4">
+              <v-btn color="secondary" prepend-icon="mdi-printer" class="me-2" @click="printReceipt(currentPayment.id)">
+                In biên lai
+              </v-btn>
+              <v-btn color="primary" variant="tonal" @click="paymentDetailsDialog = false">
+                Đóng
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
   </dashboard-layout>
 </template>
@@ -396,6 +540,8 @@ const activeTab = ref('payments')
 const searchPayment = ref('')
 const searchMethod = ref('')
 const paymentPage = ref(1)
+const paymentDetailsDialog = ref(false)
+const currentPayment = ref(null)
 
 // Biến báo cáo
 const reportMonth = ref(new Date().getMonth() + 1)
@@ -484,8 +630,13 @@ const onPaymentPageChange = (page) => {
 
 // Xem chi tiết thanh toán
 const viewPaymentDetails = async (paymentId) => {
-  await paymentStore.fetchPaymentById(paymentId)
-  // Có thể mở dialog hoặc chuyển đến trang chi tiết
+  try {
+    await paymentStore.fetchPaymentById(paymentId)
+    currentPayment.value = paymentStore.currentPayment
+    paymentDetailsDialog.value = true
+  } catch (error) {
+    console.error('Lỗi khi tải chi tiết thanh toán:', error)
+  }
 }
 
 // In biên lai thanh toán
@@ -566,6 +717,25 @@ const confirmDeleteMethod = async () => {
     deleteMethodDialog.value = false
   } catch (error) {
     console.error('Lỗi khi xóa phương thức thanh toán:', error)
+  }
+}
+
+// Lấy màu sắc và text cho trạng thái đơn hàng
+const getOrderStatusColor = (status) => {
+  switch (status) {
+    case 'PROCESSING': return 'info'
+    case 'COMPLETED': return 'success'
+    case 'CANCELED': return 'error'
+    default: return 'grey'
+  }
+}
+
+const getOrderStatusText = (status) => {
+  switch (status) {
+    case 'PROCESSING': return 'Đang xử lý'
+    case 'COMPLETED': return 'Đã xuất hóa đơn'
+    case 'CANCELED': return 'Đã hủy'
+    default: return 'Không xác định'
   }
 }
 

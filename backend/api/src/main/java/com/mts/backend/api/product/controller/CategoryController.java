@@ -4,6 +4,7 @@ import com.mts.backend.api.common.IController;
 import com.mts.backend.api.product.request.CreateCategoryRequest;
 import com.mts.backend.application.product.CategoryCommandBus;
 import com.mts.backend.application.product.command.CreateCategoryCommand;
+import com.mts.backend.application.product.command.DeleteCatByIdCommand;
 import com.mts.backend.application.product.command.UpdateCategoryCommand;
 import com.mts.backend.application.product.query.CatByIdQuery;
 import com.mts.backend.application.product.query.DefaultCategoryQuery;
@@ -95,5 +96,15 @@ public class CategoryController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
 
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") Integer id) {
+        DeleteCatByIdCommand command = DeleteCatByIdCommand.builder()
+                .id(CategoryId.of(id))
+                .build();
+        var result = categoryCommandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

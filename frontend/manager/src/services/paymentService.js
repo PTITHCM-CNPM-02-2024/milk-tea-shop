@@ -1,14 +1,26 @@
 import api from './api'
 
 export const paymentService = {
-  // Lấy danh sách thanh toán
-  getAllPayments(page = 0, size = 10) {
-    return api.get(`/payments?page=${page}&size=${size}`)
-  },
-
-  // Lấy chi tiết thanh toán
+  // Lấy chi tiết thanh toán theo ID
   getPaymentById(paymentId) {
     return api.get(`/payments/${paymentId}`)
+  },
+  
+  // Lấy danh sách thanh toán
+  getPayments(page = 0, size = 10) {
+    return api.get('/payments', {
+      params: { page, size }
+    })
+  },
+  
+  // Lấy danh sách thanh toán (tên method cũ cho khả năng tương thích)
+  getAllPayments(page = 0, size = 10) {
+    return this.getPayments(page, size)
+  },
+  
+  // Lấy danh sách thanh toán theo đơn hàng
+  getPaymentsByOrderId(orderId) {
+    return api.get(`/orders/${orderId}/payments`)
   },
 
   // Thêm thanh toán cho đơn hàng

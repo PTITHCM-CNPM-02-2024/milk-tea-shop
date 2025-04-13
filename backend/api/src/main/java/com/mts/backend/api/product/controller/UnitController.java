@@ -6,6 +6,7 @@ import com.mts.backend.api.product.request.UpdateUnitRequest;
 import com.mts.backend.application.product.UnitCommandBus;
 import com.mts.backend.application.product.UnitQueryBus;
 import com.mts.backend.application.product.command.CreateUnitCommand;
+import com.mts.backend.application.product.command.DeleteUnitByIdCommand;
 import com.mts.backend.application.product.command.UpdateUnitCommand;
 import com.mts.backend.application.product.query.DefaultUnitQuery;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
@@ -65,6 +66,17 @@ public class UnitController implements IController {
         
         var result = unitQueryBus.dispatch(query);
             
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUnit(@PathVariable("id") Integer id) {
+        DeleteUnitByIdCommand command = DeleteUnitByIdCommand.builder()
+                .id(UnitOfMeasureId.of(id))
+                .build();
+
+        var result = unitCommandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

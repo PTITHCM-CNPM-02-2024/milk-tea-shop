@@ -37,7 +37,7 @@ public interface JpaPaymentRepository extends JpaRepository<PaymentEntity, Long>
     @Query("select p from PaymentEntity p")
     Page<PaymentEntity> findAllFetch(Pageable pageable);
     
-    @EntityGraph(attributePaths = {"paymentMethod", "orderEntity"})
+    @EntityGraph(attributePaths = {"paymentMethod", "orderEntity.customerEntity", "orderEntity.employeeEntity"})
     @Query("select p from PaymentEntity p where p.id = :id")
     Optional<PaymentEntity> findByIdFetch(@Param("id") Long id);
     

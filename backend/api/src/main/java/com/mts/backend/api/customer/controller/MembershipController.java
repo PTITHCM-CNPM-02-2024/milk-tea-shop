@@ -6,6 +6,7 @@ import com.mts.backend.api.customer.request.UpdateMembershipTypeRequest;
 import com.mts.backend.application.customer.MembershipTypeCommandBus;
 import com.mts.backend.application.customer.MembershipTypeQueryBus;
 import com.mts.backend.application.customer.command.CreateMembershipCommand;
+import com.mts.backend.application.customer.command.DeleteMemberByIdCommand;
 import com.mts.backend.application.customer.command.UpdateMemberCommand;
 import com.mts.backend.application.customer.query.DefaultMemberQuery;
 import com.mts.backend.application.customer.query.MemberTypeByIdQuery;
@@ -86,6 +87,17 @@ public class MembershipController implements IController {
         
         var result = queryBus.dispatch(query);
         
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMembership(@PathVariable("id") Integer id) {
+        DeleteMemberByIdCommand command = DeleteMemberByIdCommand.builder()
+                .membershipTypeId(MembershipTypeId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

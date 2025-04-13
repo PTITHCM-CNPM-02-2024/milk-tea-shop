@@ -6,6 +6,7 @@ import com.mts.backend.api.product.request.UpdateProductSizeRequest;
 import com.mts.backend.application.product.ProductSizeCommandBus;
 import com.mts.backend.application.product.SizeQueryBus;
 import com.mts.backend.application.product.command.CreateProductSizeCommand;
+import com.mts.backend.application.product.command.DeleteSizeByIdCommand;
 import com.mts.backend.application.product.command.UpdateProductSizeCommand;
 import com.mts.backend.application.product.query.DefaultSizeQuery;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
@@ -69,6 +70,17 @@ public class ProductSizeController implements IController {
                 .build();
 
         var result = sizeQueryBus.dispatch(query);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProductSize(@PathVariable("id") Integer id) {
+        DeleteSizeByIdCommand command = DeleteSizeByIdCommand.builder()
+                .id(ProductSizeId.of(id))
+                .build();
+
+        var result = productSizeCommandBus.dispatch(command);
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }

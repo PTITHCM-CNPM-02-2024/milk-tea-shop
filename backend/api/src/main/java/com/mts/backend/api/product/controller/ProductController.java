@@ -188,6 +188,17 @@ public class ProductController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {
+        DeleteProductByIdCommand command = DeleteProductByIdCommand.builder()
+                .id(ProductId.of(id))
+                .build();
+
+        var result = productCommandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
     
     
 }

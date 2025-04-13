@@ -6,6 +6,7 @@ import com.mts.backend.api.store.request.UpdateServiceTableRequest;
 import com.mts.backend.application.store.ServiceTableCommandBus;
 import com.mts.backend.application.store.ServiceTableQueryBus;
 import com.mts.backend.application.store.command.CreateServiceTableCommand;
+import com.mts.backend.application.store.command.DeleteServiceTableByIdCommand;
 import com.mts.backend.application.store.command.UpdateServiceTableCommand;
 import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
@@ -93,4 +94,15 @@ public class ServiceTableController implements IController {
                 handleError(result);
     }
     
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteServiceTable(@PathVariable("id") Integer id) {
+        DeleteServiceTableByIdCommand command = DeleteServiceTableByIdCommand.builder()
+                .serviceTableId(ServiceTableId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
 }

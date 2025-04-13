@@ -7,6 +7,7 @@ import com.mts.backend.api.store.request.UpdateMaxAndActiveRequest;
 import com.mts.backend.application.store.AreaCommandBus;
 import com.mts.backend.application.store.AreaQueryBus;
 import com.mts.backend.application.store.command.CreateAreaCommand;
+import com.mts.backend.application.store.command.DeleteAreaByIdCommand;
 import com.mts.backend.application.store.command.UpdateAreaCommand;
 import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
@@ -110,6 +111,17 @@ public class AreaController implements IController {
         
         var result = queryBus.dispatch(query);
         
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteArea(@PathVariable("id") Integer id) {
+        DeleteAreaByIdCommand command = DeleteAreaByIdCommand.builder()
+                .areaId(AreaId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

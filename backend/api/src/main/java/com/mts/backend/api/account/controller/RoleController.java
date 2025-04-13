@@ -6,6 +6,7 @@ import com.mts.backend.api.common.IController;
 import com.mts.backend.application.account.RoleCommandBus;
 import com.mts.backend.application.account.RoleQueryBus;
 import com.mts.backend.application.account.command.CreateRoleCommand;
+import com.mts.backend.application.account.command.DeleteRoleByIdCommand;
 import com.mts.backend.application.account.command.UpdateRoleCommand;
 import com.mts.backend.application.account.query.DefaultRoleQuery;
 import com.mts.backend.application.account.query.RoleByIdQuery;
@@ -61,6 +62,13 @@ public class RoleController implements IController {
     public ResponseEntity<?> getRoleById(@PathVariable("id") Integer id) {
         var query = RoleByIdQuery.builder().id(RoleId.of(id)).build();
         var result = roleQueryBus.dispatch(query);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteRoleById(@PathVariable("id") Integer id) {
+        var command = DeleteRoleByIdCommand.builder().roleId(RoleId.of(id)).build();
+        var result = roleCommandBus.dispatch(command);
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

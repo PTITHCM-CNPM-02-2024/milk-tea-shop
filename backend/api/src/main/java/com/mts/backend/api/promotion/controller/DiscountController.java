@@ -6,6 +6,7 @@ import com.mts.backend.api.promotion.request.UpdateDiscountRequest;
 import com.mts.backend.application.promotion.DiscountCommandBus;
 import com.mts.backend.application.promotion.DiscountQueryBus;
 import com.mts.backend.application.promotion.command.CreateDiscountCommand;
+import com.mts.backend.application.promotion.command.DeleteDiscountByIdCommand;
 import com.mts.backend.application.promotion.command.UpdateDiscountCommand;
 import com.mts.backend.application.promotion.query.DefaultDiscountQuery;
 import com.mts.backend.application.promotion.query.DiscountByCouponQuery;
@@ -121,6 +122,17 @@ public class DiscountController implements IController {
         
         var result = queryBus.dispatch(command);
         
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDiscount(@PathVariable("id") Long id) {
+        DeleteDiscountByIdCommand command = DeleteDiscountByIdCommand.builder()
+                .discountId(DiscountId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }
