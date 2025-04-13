@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NoArgsConstructor
@@ -21,6 +23,6 @@ public class StoreDetailResponse {
     private String taxCode;
     private LocalTime openTime;
     private LocalTime closeTime;
-    private String openingDate;
+    private LocalDate openingDate;
     
 }

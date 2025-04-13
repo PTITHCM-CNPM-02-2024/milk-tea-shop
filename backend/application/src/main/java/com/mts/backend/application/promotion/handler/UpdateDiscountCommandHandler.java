@@ -70,7 +70,7 @@ public class UpdateDiscountCommandHandler implements ICommandHandler<UpdateDisco
     protected void verifyUniqueCoupon(DiscountId id, CouponId couponId) {
         Objects.requireNonNull(id, "Coupon id is required");
         
-        if (!couponRepository.existsById(id.getValue())){
+        if (!couponRepository.existsById(couponId.getValue())){
             throw new NotFoundException("Không tìm thấy mã giảm giá");
         }
         

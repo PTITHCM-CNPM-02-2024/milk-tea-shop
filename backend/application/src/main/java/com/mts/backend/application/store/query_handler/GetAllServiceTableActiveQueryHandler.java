@@ -3,10 +3,15 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
+import com.mts.backend.application.store.response.ServiceTableSummaryResponse;
+import com.mts.backend.domain.store.AreaEntity;
+import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,21 +32,23 @@ public class GetAllServiceTableActiveQueryHandler implements IQueryHandler<Servi
     public CommandResult handle(ServiceTableActiveQuery query) {
         Objects.requireNonNull(query, "Service table active query is required");
         
-        var serviceTables = serviceTableRepository.findByActive(query.getActive());
+        var serviceTables = serviceTableRepository.findAllByActiveFetchArea(query.getActive());
 
-        List<ServiceTableDetailResponse> responses = serviceTables.stream()
-                .map(e -> ServiceTableDetailResponse.builder()
-                        .id(e.getId())
-                        .name(e.getTableNumber().getValue())
-                        .area(e.getAreaEntity().map(area -> AreaDetailResponse.builder()
-                                .id(area.getId())
-                                .name(area.getName().getValue())
-                                .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
-                                .isActive(area.getActive())
-                                .description(area.getDescription().orElse(null))
-                                .build()).orElse(null))
-                        .isActive(e.getActive())
-                        .build()).toList();
+        List<ServiceTableSummaryResponse> responses = serviceTables.stream()
+                .map(e -> {
+                    var serviceTableResponse = ServiceTableSummaryResponse.builder()
+                            .id(e.getId())
+                            .isActive(e.getActive())
+                            .name(e.getTableNumber().getValue())
+                            .areaId(e.getAreaEntity().map(AreaEntity::getId).orElse(null))
+                            .build();
+                    
+                    e.getAreaEntity().ifPresent(area -> {
+                        serviceTableResponse.setAreaId(area.getId());
+                    });
+                    
+                    return serviceTableResponse;
+                }).toList();
         
         return CommandResult.success(responses);
     }

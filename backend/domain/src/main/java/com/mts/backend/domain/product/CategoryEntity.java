@@ -6,17 +6,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.lang.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "Category", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "Category_pk", columnNames = {"name"})
+@Table(name = "category", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "category_pk", columnNames = {"name"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
@@ -37,7 +37,15 @@ public class CategoryEntity extends BaseEntity<Integer> {
     @Convert(converter = CategoryName.CategoryNameConverter.class)
     @NotNull
     private CategoryName name;
+
+    @OneToMany(mappedBy = "categoryEntity", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ProductEntity> products = new LinkedHashSet<>();
     
+    public Set<ProductEntity> getProducts() {
+        return Set.copyOf(products);
+    }
+
     public boolean changeName(CategoryName name){
         if(this.name.equals(name)){
             return false;
@@ -56,16 +64,5 @@ public class CategoryEntity extends BaseEntity<Integer> {
         return Optional.ofNullable(description);
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Comment("Mã danh mục sản phẩm cha")
-    @JoinColumn(name = "parent_category_id")
-    @Nullable
-    private CategoryEntity parentCategoryEntity;
-    
-    public Optional<CategoryEntity> getParentCategoryEntity(){
-        return Optional.ofNullable(this.parentCategoryEntity);
-    }
-
-    
 
 }

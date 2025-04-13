@@ -13,7 +13,7 @@ public class AccountDetailResponse {
     private Long id;
     private String username;
     private String description;
-    private boolean isActive;
-    private boolean isLocked;
+    private Boolean isActive;
+    private Boolean isLocked;
     private RoleDetailResponse role;
 }

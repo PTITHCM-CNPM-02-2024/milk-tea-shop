@@ -11,8 +11,8 @@ BEGIN
 
     -- Lấy thông tin tài khoản và vai trò
     SELECT a.username, r.name INTO username, role_name
-    FROM Account a
-             JOIN Role r ON a.role_id = r.role_id
+    FROM account a
+             JOIN role r ON a.role_id = r.role_id
     WHERE a.account_id = p_account_id;
 
     -- Chỉ xử lý cho MANAGER và STAFF
@@ -62,41 +62,41 @@ BEGIN
             DEALLOCATE PREPARE stmt;
 
             -- Quyền thao tác đơn hàng
-            SET @sql_grant_order = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.Order TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_order = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.order TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_order;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             -- Quyền thêm các bảng liên quan đơn hàng
-            SET @sql_grant_order_product = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.OrderProduct TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_order_product = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.order_product TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_order_product;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            SET @sql_grant_order_table = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.OrderTable TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_order_table = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.order_table TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_order_table;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            SET @sql_grant_order_discount = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.OrderDiscount TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_order_discount = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.order_discount TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_order_discount;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             -- Quyền thao tác thanh toán
-            SET @sql_grant_payment = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.Payment TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_payment = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.payment TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_payment;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             -- Quyền thao tác khách hàng
-            SET @sql_grant_customer = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.Customer TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_customer = CONCAT('GRANT INSERT, UPDATE ON milk_tea_shop_prod.customer TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_customer;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             -- Quyền thao tác bàn
-            SET @sql_grant_table = CONCAT('GRANT UPDATE ON milk_tea_shop_prod.ServiceTable TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_table = CONCAT('GRANT UPDATE ON milk_tea_shop_prod.service_table TO \'', mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
             PREPARE stmt FROM @sql_grant_table;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
@@ -127,8 +127,8 @@ BEGIN
 
     -- Lấy thông tin tài khoản và vai trò
     SELECT a.username, r.name INTO username, role_name
-    FROM Account a
-             JOIN Role r ON a.role_id = r.role_id
+    FROM account a
+             JOIN role r ON a.role_id = r.role_id
     WHERE a.account_id = p_account_id;
 
     -- Chỉ xử lý cho MANAGER và STAFF
@@ -180,11 +180,11 @@ BEGIN
 
     -- Lấy trạng thái khóa hiện tại
     SELECT is_locked INTO current_lock_status
-    FROM Account
+    FROM account
     WHERE account_id = p_account_id;
 
     -- Cập nhật trạng thái khóa
-    UPDATE Account
+    UPDATE account
     SET is_locked = p_is_locked,
         updated_at = CURRENT_TIMESTAMP
     WHERE account_id = p_account_id;
@@ -226,19 +226,19 @@ BEGIN
     START TRANSACTION;
 
     -- Lấy role_id của MANAGER
-    SELECT role_id INTO admin_role_id FROM Role WHERE name = 'MANAGER';
+    SELECT role_id INTO admin_role_id FROM role WHERE name = 'MANAGER';
 
     -- Mã hóa mật khẩu (trong thực tế, mã hóa nên được thực hiện ở tầng ứng dụng)
     SET password_hash = p_password; -- Giả định đã mã hóa
 
     -- Tạo tài khoản
-    INSERT INTO Account (role_id, username, password_hash, is_active, is_locked)
+    INSERT INTO account (role_id, username, password_hash, is_active, is_locked)
     VALUES (admin_role_id, p_username, password_hash, 1, 0);
 
     SET admin_account_id = LAST_INSERT_ID();
 
     -- Tạo thông tin Manager
-    INSERT INTO Manager (account_id, last_name, first_name, gender, phone, email)
+    INSERT INTO manager (account_id, last_name, first_name, gender, phone, email)
     VALUES (admin_account_id, p_last_name, p_first_name, p_gender, p_phone, p_email);
 
     -- Cấp quyền cho tài khoản mới
@@ -271,19 +271,19 @@ BEGIN
     START TRANSACTION;
 
     -- Lấy role_id của STAFF
-    SELECT role_id INTO staff_role_id FROM Role WHERE name = 'STAFF';
+    SELECT role_id INTO staff_role_id FROM role WHERE name = 'STAFF';
 
     -- Mã hóa mật khẩu (trong thực tế, mã hóa nên được thực hiện ở tầng ứng dụng)
     SET password_hash = p_password; -- Giả định đã mã hóa
 
     -- Tạo tài khoản
-    INSERT INTO Account (role_id, username, password_hash, is_active, is_locked)
+    INSERT INTO account (role_id, username, password_hash, is_active, is_locked)
     VALUES (staff_role_id, p_username, password_hash, 1, 0);
 
     SET staff_account_id = LAST_INSERT_ID();
 
     -- Tạo thông tin Employee
-    INSERT INTO Employee (account_id, position, last_name, first_name, gender, phone, email)
+    INSERT INTO employee (account_id, position, last_name, first_name, gender, phone, email)
     VALUES (staff_account_id, p_position, p_last_name, p_first_name, p_gender, p_phone, p_email);
 
     -- Cấp quyền cho tài khoản mới
@@ -311,15 +311,15 @@ CALL sp_create_manager_account_with_permissions(
 DELIMITER //
 -- Bảo vệ tài khoản admin mặc định khỏi việc thay đổi username
 CREATE TRIGGER protect_default_admin_update
-    BEFORE UPDATE ON Account
+    BEFORE UPDATE ON account
     FOR EACH ROW
 BEGIN
     DECLARE is_default_admin BOOLEAN;
 
     SELECT EXISTS(
         SELECT 1
-        FROM Manager m
-                 JOIN Account a ON m.account_id = a.account_id
+        FROM manager m
+                 JOIN account a ON m.account_id = a.account_id
         WHERE a.account_id = OLD.account_id
           AND a.username = 'admin'
           AND m.email = 'admin@milkteashop.com'
@@ -333,15 +333,15 @@ END //
 
 -- Bảo vệ tài khoản admin mặc định khỏi việc xóa
 CREATE TRIGGER protect_default_admin_delete
-    BEFORE DELETE ON Account
+    BEFORE DELETE ON account
     FOR EACH ROW
 BEGIN
     DECLARE is_default_admin BOOLEAN;
 
     SELECT EXISTS(
         SELECT 1
-        FROM Manager m
-                 JOIN Account a ON m.account_id = a.account_id
+        FROM manager m
+                 JOIN account a ON m.account_id = a.account_id
         WHERE a.account_id = OLD.account_id
           AND a.username = 'admin'
           AND m.email = 'admin@milkteashop.com'

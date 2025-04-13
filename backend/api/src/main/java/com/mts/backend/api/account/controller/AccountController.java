@@ -8,7 +8,7 @@ import com.mts.backend.application.account.AccountQueryBus;
 import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.query.AccountByIdQuery;
 import com.mts.backend.application.account.query.DefaultAccountQuery;
-import com.mts.backend.application.account.response.AccountDetailResponse;
+import com.mts.backend.application.account.query.UserInfoQueryByIdQuery;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
@@ -28,8 +28,8 @@ public class AccountController implements IController {
         this.accountQueryBus = accountQueryBus;
     }
     
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<?>> createAccount(@RequestBody CreateAccountRequest request) {
+    @PostMapping
+    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
             .username(Username.builder().value(request.getUsername()).build())
             .password(PasswordHash.builder().value(request.getPassword()).build())
@@ -38,13 +38,13 @@ public class AccountController implements IController {
         
         var result = accountCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(),"Tạo tài khoản thành công")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateAccount(@PathVariable("id") Long id,
-                                                        @RequestBody UpdateAccountRequest request) {
+    public ResponseEntity<?> updateAccount(@PathVariable("id") Long id,
+                                           @RequestBody UpdateAccountRequest request) {
         UpdateAccountCommand command = UpdateAccountCommand.builder()
             .id(AccountId.of(id))
             .username(Username.builder().value(request.getUsername()).build())
@@ -52,53 +52,69 @@ public class AccountController implements IController {
         
         var result = accountCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(),"Cập nhật tài khoản thành công")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
-    @PutMapping("/{id}/change-password")
-    public ResponseEntity<ApiResponse<?>> changePassword(@PathVariable("id") Long id,
-                                                         @RequestBody UpdateAccountRequest request) {
+    @PutMapping("/{id}/password")
+    public ResponseEntity<?> changePassword(@PathVariable("id") Long id,
+                                            @RequestParam(value = "oldPassword", required = true) String oldPassword,
+                                            @RequestParam(value = "newPassword", required = true) String newPassword,
+                                            @RequestParam(value = "confirmPassword", required = true) String confirmPassword
+    ) {     
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
             .id(AccountId.of(id))
-            .newPassword(PasswordHash.builder().value(request.getNewPassword()).build())
-            .confirmPassword(PasswordHash.builder().value(request.getConfirmPassword()).build())
+            .oldPassword(PasswordHash.builder().value(oldPassword).build())
+            .newPassword(PasswordHash.builder().value(newPassword).build())
+            .confirmPassword(PasswordHash.builder().value(confirmPassword).build())
             .build();
         
         var result = accountCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(),"Cập nhật mật khẩu thành công")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
-    @PutMapping("/{id}/change-role")
-    public ResponseEntity<ApiResponse<Long>> changeRole(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestParam("value") Integer roleId) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
             .id(AccountId.of(id))
-            .roleId(RoleId.of(request.getRoleId()))
+            .roleId(RoleId.of(roleId))
             .build();
         
         var result = accountCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData(),"Cập nhật role thành công")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getAccount(@PathVariable("id") Long id) {
         AccountByIdQuery query = AccountByIdQuery.builder()
             .id(AccountId.of(id))
             .build();
         
         var result = accountQueryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+        
+    }
+    
+    @GetMapping("{id}/user-info")
+    public ResponseEntity<?> getAccountInfo(@PathVariable("id") Long id) {
+        UserInfoQueryByIdQuery query = UserInfoQueryByIdQuery.builder()
+            .id(AccountId.of(id))
+            .build();
+        
+        var result = accountQueryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                                                 @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getAccounts(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         DefaultAccountQuery query = DefaultAccountQuery.builder()
             .page(page)
             .size(size)
@@ -106,13 +122,12 @@ public class AccountController implements IController {
         
         var result = accountQueryBus.dispatch(query);
         
-        return result.isSuccess() ?
-                ResponseEntity.ok(ApiResponse.success((result.getData()))) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}/lock")
-    public ResponseEntity<ApiResponse<?>> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "locked",
+    public ResponseEntity<?> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "value",
             required = true) Boolean locked) {
         var command = UpdateLockAccountCommand.builder().id(AccountId.of(id))
                 .isLocked(locked)
@@ -120,9 +135,6 @@ public class AccountController implements IController {
         
         var result = accountCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData(),"Cập nhật trạng thái tài khoản thành công")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-    
-    
-    
 }

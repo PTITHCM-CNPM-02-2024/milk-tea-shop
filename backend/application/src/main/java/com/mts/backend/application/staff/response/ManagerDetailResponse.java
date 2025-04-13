@@ -1,11 +1,12 @@
 package com.mts.backend.application.staff.response;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 @EqualsAndHashCode(callSuper = false)
 public class ManagerDetailResponse extends UserDetailResponse{
     private Long accountId;

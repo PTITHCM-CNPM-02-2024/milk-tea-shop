@@ -6,6 +6,8 @@ import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,12 +27,10 @@ public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscou
     public CommandResult handle(DefaultDiscountQuery query) {
         Objects.requireNonNull(query, "Default discount query is required");
 
-        var discounts = discountRepository.findAll();
+        var discounts = discountRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
 
-        List<DiscountDetailResponse> responses = new ArrayList<>();
-
-        discounts.forEach(discount -> {
-            responses.add(DiscountDetailResponse.builder()
+        Page<DiscountDetailResponse> responses = discounts.map(discount -> {
+            return DiscountDetailResponse.builder()
                     .id(discount.getId())
                     .name(discount.getName().getValue())
                     .description(discount.getDescription())
@@ -45,8 +45,9 @@ public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscou
                     .maxUsage(discount.getMaxUse().orElse(null))
                     .maxUsagePerCustomer(discount.getMaxUsesPerCustomer().orElse(null))
                     .isActive(discount.getActive())
-                    .build());
+                    .build();
         });
+        
 
         return CommandResult.success(responses);
     }

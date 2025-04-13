@@ -12,9 +12,5 @@ import org.springframework.context.annotation.Configuration;
                 @ComponentScan(basePackages = "com.mts.backend.infrastructure.aop"),
         }
 )
-//@EntityScan(basePackages = {
-//        "com.mts.backend.infrastructure.persistence",
-//        "com.mts.backend.infrastructure.persistence.entity"})
-//@EnableJpaRepositories
 public class InfrastructureModuleConfig {
 }

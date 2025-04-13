@@ -10,6 +10,7 @@ import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
     
     
     @Override
+    @Transactional
     public CommandResult handle(UpdateMemberCommand command) {
         Objects.requireNonNull(command, "Update member command is required");
         
@@ -46,8 +48,6 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
         membershipType.changeValidUntil(command.getValidUntil());
         
         membershipType.setActive(command.isActive());
-        
-        
         
         return CommandResult.success(membershipType.getId());
         

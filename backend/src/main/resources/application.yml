@@ -74,6 +74,10 @@ jwt-config:
     prefix: Bearer
     token-type: JWT
     issuer: mts-backend
+
+firebase-config:
+  bucket: ${FIREBASE_BUCKET_NAME}
+  
     
 # Database configuration
 

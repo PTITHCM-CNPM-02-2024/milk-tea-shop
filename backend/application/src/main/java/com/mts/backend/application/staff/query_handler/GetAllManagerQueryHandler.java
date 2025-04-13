@@ -5,11 +5,10 @@ import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -25,18 +24,16 @@ public class GetAllManagerQueryHandler implements IQueryHandler<DefaultManagerQu
         Objects.requireNonNull(query);
         
         var managers = managerRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
-        List<ManagerDetailResponse> responses = new ArrayList<>();
-        
-        managers.forEach(manager -> {
-            var response = ManagerDetailResponse.builder().build();
-            response.setId(manager.getId());
-            response.setFirstName(manager.getFirstName().getValue());
-            response.setLastName(manager.getLastName().getValue());
-            response.setEmail(manager.getEmail().getValue());
-            response.setPhone(manager.getPhone().getValue());
-            response.setGender(manager.getGender().toString());
-            response.setAccountId(manager.getAccountEntity().getId());
-            responses.add(response);
+        Page<ManagerDetailResponse> responses = managers.map(manager -> {
+            return ManagerDetailResponse.builder()
+                    .id(manager.getId())
+                    .firstName(manager.getFirstName().getValue())
+                    .lastName(manager.getLastName().getValue())
+                    .email(manager.getEmail().getValue())
+                    .phone(manager.getPhone().getValue())
+                    .gender(manager.getGender().toString())
+                    .accountId(manager.getAccountEntity().getId())
+                    .build();
         });
         
         return CommandResult.success(responses);

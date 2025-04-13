@@ -7,11 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 public class AccountByIdQuery implements IQuery<CommandResult> {
     
     private AccountId id;

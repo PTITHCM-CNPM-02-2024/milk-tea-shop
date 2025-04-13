@@ -43,6 +43,7 @@ public class GetDiscountByIdQueryHandler implements IQueryHandler<DiscountByIdQu
                 .maxUsage(discount.getMaxUse().orElse(null))
                 .maxUsagePerCustomer(discount.getMaxUsesPerCustomer().orElse(null))
                 .isActive(discount.getActive())
+                .currentUsage(discount.getCurrentUses())
                 .build();
         return CommandResult.success(response);
 

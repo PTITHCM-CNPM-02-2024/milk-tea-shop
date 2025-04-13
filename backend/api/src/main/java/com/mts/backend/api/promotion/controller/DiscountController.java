@@ -20,6 +20,8 @@ import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/api/v1/discounts")
 public class DiscountController implements IController {
@@ -32,10 +34,10 @@ public class DiscountController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createDiscount(@RequestBody CreateDiscountRequest request) {
+    public ResponseEntity<?> createDiscount(@RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
                 .name(DiscountName.builder().value(request.getName()).build())
-                .description(request.getDescription())
+                .description(Objects.isNull(request.getDescription()) ? null : request.getDescription())
                 .couponId(CouponId.of(request.getCouponId()))
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
@@ -46,25 +48,25 @@ public class DiscountController implements IController {
                         .value(request.getMinimumOrderValue())
                         .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
-                .validFrom(request.getValidFrom())
+                .validFrom(Objects.isNull(request.getValidFrom()) ? null : request.getValidFrom())
                 .validUntil(request.getValidUntil())
-                .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
-                .maxUsage(request.getMaxUsage())
+                .maxUsagePerCustomer(Objects.isNull(request.getMaxUsagePerCustomer()) ? null : request.getMaxUsagePerCustomer())
+                .maxUsage(Objects.isNull(request.getMaxUsage()) ? null : request.getMaxUsage())
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
+    public ResponseEntity<?> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
         
         var command = UpdateDiscountCommand.builder()
                 .id(DiscountId.of(id))
                 .name(DiscountName.builder().value(request.getName()).build())
-                .description(request.getDescription())
+                .description(Objects.isNull(request.getDescription()) ? null : request.getDescription())
                 .couponId(CouponId.of(request.getCouponId()))
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
@@ -75,21 +77,21 @@ public class DiscountController implements IController {
                         .value(request.getMinimumOrderValue())
                         .build())
                 .minimumRequiredProduct(request.getMinimumRequiredProduct())
-                .validFrom(request.getValidFrom())
+                .validFrom(Objects.isNull(request.getValidFrom()) ? null : request.getValidFrom())
                 .validUntil(request.getValidUntil())
                 .maxUsagePerCustomer(request.getMaxUsagePerCustomer())
-                .maxUsage(request.getMaxUsage())
+                .maxUsage(Objects.isNull(request.getMaxUsage()) ? null : request.getMaxUsage())
                 .active(request.getActive())
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllDiscount(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllDiscount(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultDiscountQuery.builder()
                 .page(page)
                 .size(size)
@@ -97,31 +99,28 @@ public class DiscountController implements IController {
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getDiscountById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getDiscountById(@PathVariable("id") Long id) {
         var command = DiscountByIdQuery.builder()
                 .id(DiscountId.of(id))
                 .build();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/coupon/{code}")
-    public ResponseEntity<ApiResponse<?>> getDiscountByCouponCode(@PathVariable("code") String code) {
+    public ResponseEntity<?> getDiscountByCouponCode(@PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
                 .couponId(CouponCode.builder().value(code).build())
                 .build();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
-    
-    
-    
 }

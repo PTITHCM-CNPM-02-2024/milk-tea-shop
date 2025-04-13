@@ -1,22 +1,17 @@
 package com.mts.backend.application.customer.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.mts.backend.application.staff.response.UserDetailResponse;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
+
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Data
-@Builder
-public class CustomerDetailResponse {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String gender;
-    private String phone;
-    private int rewardPoint;
+public class CustomerDetailResponse extends UserDetailResponse {
+    private Integer rewardPoint;
     private Integer membershipId;
     private Long accountId;
 }

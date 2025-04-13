@@ -2,6 +2,7 @@ package com.mts.backend.domain.order;
 
 import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.domain.store.ServiceTableEntity;
+import com.mts.backend.shared.exception.DomainException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,11 +18,11 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "OrderTable", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "order_table", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "order_id", columnList = "order_id"),
         @Index(name = "table_id", columnList = "table_id")
 }, uniqueConstraints = {
-        @UniqueConstraint(name = "OrderTable_pk", columnNames = {"order_id", "table_id"})
+        @UniqueConstraint(name = "order_table_pk", columnNames = {"order_id", "table_id"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
@@ -46,8 +48,8 @@ public class OrderTableEntity extends BaseEntity<Long> {
 
     @Comment("Thời gian rời bàn")
     @Column(name = "check_out")
+    @Nullable
     private LocalDateTime checkOut;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @Comment("Mã bàn")
     @JoinColumn(name = "table_id", nullable = false)
@@ -63,6 +65,23 @@ public class OrderTableEntity extends BaseEntity<Long> {
     }
 
     public OrderTableEntity() {
+    }
+
+    public void setCheckIn(LocalDateTime checkIn) {
+        if (this.checkIn == null) this.checkIn = checkIn;
+    }
+    
+    public void setCheckOut(LocalDateTime checkOut) {
+        Objects.requireNonNull(checkOut, "checkOut must not be null");
+        
+        if (checkOut.isBefore(this.checkIn)) {
+            throw new DomainException("Thời gian rời bàn không được nhỏ hơn thời gian vào bàn");
+        }
+        
+        if (this.checkOut == null) {
+            this.checkOut = checkOut;
+        }
+        
     }
 
     @Override

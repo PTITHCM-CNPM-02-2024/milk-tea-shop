@@ -22,9 +22,9 @@ import java.util.Optional;
 @Getter
 @Setter
 @Entity
-@Table(name = "MembershipType", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "MembershipType_pk", columnNames = {"type"}),
-        @UniqueConstraint(name = "MembershipType_pk_2", columnNames = {"required_point"})
+@Table(name = "membership_type", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "membership_type_pk", columnNames = {"type"}),
+        @UniqueConstraint(name = "membership_type_pk_2", columnNames = {"required_point"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),

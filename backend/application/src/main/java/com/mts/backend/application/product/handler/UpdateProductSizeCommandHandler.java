@@ -24,13 +24,6 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
     private final JpaProductSizeRepository sizeRepository;
 
     private final JpaUnitOfMeasureRepository unitRepository;
-    
-    private final static List<ProductSizeId> EXCLUDE_IDS = List.of(
-            ProductSizeId.of(1),
-            ProductSizeId.of(2),
-            ProductSizeId.of(3),
-            ProductSizeId.of(4)
-            );
 
     public UpdateProductSizeCommandHandler(
             JpaProductSizeRepository sizeRepository,
@@ -48,9 +41,6 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
     public CommandResult handle(UpdateProductSizeCommand command) {
         Objects.requireNonNull(command, "UpdateProductSizeCommand is required");
         
-        if (EXCLUDE_IDS.contains(command.getId())) {
-            throw new NotFoundException("Kích thước không thể thay đổi");
-        }
         
 
         var size = mustBeExistSize(command.getId());

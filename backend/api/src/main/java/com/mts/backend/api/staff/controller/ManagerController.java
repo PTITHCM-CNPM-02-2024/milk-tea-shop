@@ -31,7 +31,7 @@ public class ManagerController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createManager(@RequestBody CreateManagerRequest request) {
+    public ResponseEntity<?> createManager(@RequestBody CreateManagerRequest request) {
         var command = CreateManagerCommand.builder()
                 .email(Email.builder().value(request.getEmail()).build())
                 .firstName(FirstName.builder().value(request.getFirstName()).build())
@@ -44,11 +44,11 @@ public class ManagerController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Long>> updateManager(@PathVariable("id") Long id, @RequestBody UpdateManagerRequest request) {
+    public ResponseEntity<?> updateManager(@PathVariable("id") Long id, @RequestBody UpdateManagerRequest request) {
         var command = UpdateManagerCommand.builder()
                 .id(ManagerId.of(id))
                 .email(Email.builder().value(request.getEmail()).build())
@@ -60,21 +60,21 @@ public class ManagerController implements IController {
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getManager(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getManager(@PathVariable("id") Long id) {
         var query = ManagerByIdQuery.builder()
                 .id(ManagerId.of(id)).build();
 
         var result = queryBus.dispatch(query);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((ManagerDetailResponse) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getManagers(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") int page,
                                                       @RequestParam(value = "size", defaultValue = "10") int size) {
         var request = DefaultManagerQuery.builder()
                 .page(page)
@@ -83,6 +83,6 @@ public class ManagerController implements IController {
 
         var result = queryBus.dispatch(request);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

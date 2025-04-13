@@ -29,38 +29,38 @@ public class RoleController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Integer>> createRole(@RequestBody CreateRoleRequest request) {
+    public ResponseEntity<?> createRole(@RequestBody CreateRoleRequest request) {
         var command = CreateRoleCommand.builder()
                 .name(RoleName.builder().value(request.getName()).build())
                 .description(request.getDescription())
                 .build();
         var result = roleCommandBus.dispatch(command);
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllRoles(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllRoles(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var query = DefaultRoleQuery.builder().page(page).size(size).build();
         var result = roleQueryBus.dispatch(query);
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateRole(@PathVariable("id") Integer id, @RequestBody UpdateRoleRequest request) {
+    public ResponseEntity<?> updateRole(@PathVariable("id") Integer id, @RequestBody UpdateRoleRequest request) {
         var command = UpdateRoleCommand.builder()
                 .id(RoleId.of(id))
                 .roleName(RoleName.builder().value(request.getName()).build())
                 .description(request.getDescription())
                 .build();
         var result = roleCommandBus.dispatch(command);
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RoleDetailResponse> getRoleById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getRoleById(@PathVariable("id") Integer id) {
         var query = RoleByIdQuery.builder().id(RoleId.of(id)).build();
         var result = roleQueryBus.dispatch(query);
-        return result.isSuccess() ? ResponseEntity.ok((RoleDetailResponse) result.getData()) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

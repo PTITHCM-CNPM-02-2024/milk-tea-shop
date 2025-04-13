@@ -23,7 +23,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "Product", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "product", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "category_id", columnList = "category_id")
 })
 @AttributeOverrides({
@@ -116,7 +116,7 @@ public class ProductEntity extends BaseEntity<Integer> {
         Objects.requireNonNull(price, "Product price is required");
         
         if (productPrices.contains(price)) {
-            throw new DuplicateException("Giá sản phẩm đã tồn tại");
+            return price;  
         }
         
         var productPrice = findBySizeId(price.getSize().getId());
@@ -182,11 +182,21 @@ public class ProductEntity extends BaseEntity<Integer> {
                 .findFirst();
     }
     
-    public Optional<ProductPriceEntity> getProductPriceEntity(Long productPriceId) {
+    private Optional<ProductPriceEntity> getProductPriceEntity(Long productPriceId) {
         Objects.requireNonNull(productPriceId, "Product price id is required");
         return productPrices.stream()
                 .filter(productPrice -> productPrice.getId().equals(productPriceId))
                 .findFirst();
+    }
+    
+    public Optional<ProductPriceEntity> getProductPriceEntity(ProductPriceId productPriceId) {
+        Objects.requireNonNull(productPriceId, "Product price id is required");
+        return getProductPriceEntity(productPriceId.getValue());
+    }
+    
+    public Optional<ProductPriceEntity> getProductPriceEntity(ProductSizeId productSizeId) {
+        Objects.requireNonNull(productSizeId, "Product size id is required");
+        return getProductPriceEntity(productSizeId.getValue());
     }
     
     public Optional<ProductPriceEntity> getProductPriceEntity(Integer productSizeId) {
@@ -198,6 +208,13 @@ public class ProductEntity extends BaseEntity<Integer> {
     
     public boolean isOrdered() {
         return available.booleanValue() && !productPrices.isEmpty();
+    }
+    
+    public Money getMinPrice(){
+        return productPrices.stream()
+                .map(ProductPriceEntity::getPrice)
+                .min(Money::compareTo)
+                .orElse(Money.ZERO);
     }
 
     @Override

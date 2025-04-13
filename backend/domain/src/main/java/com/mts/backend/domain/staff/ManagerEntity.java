@@ -16,7 +16,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "Manager", schema = "milk_tea_shop_prod", uniqueConstraints = {
+@Table(name = "manager", schema = "milk_tea_shop_prod", uniqueConstraints = {
         @UniqueConstraint(name = "account_id", columnNames = {"account_id"})
 })
 @AttributeOverrides({

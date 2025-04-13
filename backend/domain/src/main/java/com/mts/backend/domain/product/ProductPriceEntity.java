@@ -14,7 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "ProductPrice", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "product_price", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "product_id", columnList = "product_id"),
         @Index(name = "size_id", columnList = "size_id")
 }, uniqueConstraints = {

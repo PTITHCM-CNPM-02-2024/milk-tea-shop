@@ -7,6 +7,7 @@ import com.mts.backend.domain.store.jpa.JpaAreaRepository;
 import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
@@ -36,8 +37,21 @@ public class UpdateAreaCommandHandler implements ICommandHandler<UpdateAreaComma
             verifyUniqueName(command.getAreaId(), command.getName());
         }
         
+        if(command.getMaxTable().isPresent() && area.getServiceTables().size() > command.getMaxTable().get().getValue()){
+            throw new DomainException("Số bàn tối đa không được nhỏ hơn số bàn hiện tại");
+        }
+        
+        if (!command.getActive()){
+            area.getServiceTables().forEach(table -> {
+                table.setActive(false); 
+            });
+        }
+        
+        area.setActive(command.getActive());
+        
         area.changeDescription(command.getDescription());
         
+        areaRepository.saveAndFlush(area);
         
         return CommandResult.success(area.getId());
         

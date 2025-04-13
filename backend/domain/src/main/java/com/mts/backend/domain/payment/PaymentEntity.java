@@ -13,6 +13,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
@@ -22,12 +23,19 @@ import java.util.Optional;
 @Getter
 @Setter
 @Entity
-@Table(name = "Payment", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "payment", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "payment_method_id", columnList = "payment_method_id")
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
+})
+
+@NamedEntityGraphs({
+        @NamedEntityGraph(name ="graph.payment.fetchPmt",
+                attributeNodes = {
+                        @NamedAttributeNode("paymentMethod"),
+                })
 })
 @Builder
 public class PaymentEntity extends BaseEntity<Long> {
@@ -61,16 +69,16 @@ public class PaymentEntity extends BaseEntity<Long> {
     @Comment("Thời gian thanh toán")
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "payment_time")
-    @Nullable
+    @NotNull
     private Instant paymentTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã phương thức thanh toán")
     @JoinColumn(name = "payment_method_id")
     @NotNull
     private PaymentMethodEntity paymentMethod;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã đơn hàng")
     @JoinColumn(name = "order_id", nullable = false)
     @NotNull

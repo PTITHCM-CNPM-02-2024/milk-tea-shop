@@ -4,8 +4,10 @@ import com.mts.backend.application.order.command.CheckOutOrderCommand;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
+import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -35,9 +37,7 @@ public class CheckOutOrderCommandHandler implements ICommandHandler<CheckOutOrde
         
         order.checkOut();
         
-        var orderSaved = orderRepository.save(order);
-        
-        return CommandResult.success(orderSaved.getId());
+        return CommandResult.success(order.getId());
         
         
     }

@@ -3,6 +3,8 @@ package com.mts.backend.domain.product.jpa;
 import com.mts.backend.domain.product.ProductSizeEntity;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
 import jakarta.transaction.Transactional;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,11 +37,12 @@ public interface JpaProductSizeRepository extends JpaRepository<ProductSizeEntit
     @Query("select p from ProductSizeEntity p where p.name = ?1 and p.unit.id = ?2")
     Optional<ProductSizeEntity> findByNameAndUnit(@NonNull ProductSizeName name, @NonNull Integer id);
 
-    @EntityGraph(attributePaths = {"unit"})
-    @Query("select p from ProductSizeEntity p")
-    List<ProductSizeEntity> findAllWithJoinFetch(Pageable pageable);
 
     @Query("select p from ProductSizeEntity p")
-    @EntityGraph(value = "ProductSizeEntity.withUnit", type = EntityGraph.EntityGraphType.FETCH)
+    @EntityGraph(value = "ProductSizeEntity.unit", type = EntityGraph.EntityGraphType.FETCH)
     List<ProductSizeEntity> findAllWithJoinFetch();
+
+    @Query("select p from ProductSizeEntity p")
+    @EntityGraph(value = "ProductSizeEntity.unit", type = EntityGraph.EntityGraphType.FETCH)
+    Page<ProductSizeEntity> findAllWithJoinFetch(Pageable pageable);
 }
