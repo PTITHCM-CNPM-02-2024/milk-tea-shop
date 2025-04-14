@@ -93,7 +93,7 @@ export const useCartStore = defineStore('cart', () => {
   }
   
   // Chuẩn bị dữ liệu sản phẩm để gửi lên server
-  function prepareProductsForServer(employeeId) {
+  function prepareProductsForServer(employeeId = 1) {
     if (items.value.length === 0) {
       return [];
     }
@@ -123,7 +123,7 @@ export const useCartStore = defineStore('cart', () => {
     return [...mainProducts, ...toppingProducts];
   }
   
-  async function calculateOrderFromServer(employeeId) {
+  async function calculateOrderFromServer(employeeId = 1) {
     if (items.value.length === 0) {
       calculatedSubtotal.value = 0;
       calculatedDiscount.value = 0;

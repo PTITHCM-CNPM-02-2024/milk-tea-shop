@@ -46,7 +46,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     @NotNull
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @Comment("Liên kết với mã giảm giá (coupon), NULL nếu không yêu cầu mã giảm giá")
     @JoinColumn(name = "coupon_id", nullable = false)
     private CouponEntity couponEntity;

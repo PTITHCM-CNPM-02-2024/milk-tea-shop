@@ -37,7 +37,7 @@ public class UpdateDiscountCommandHandler implements ICommandHandler<UpdateDisco
                 .maxDiscountAmount(command.getMaxDiscountAmount())
                 .build();
         
-        if (discount.getCouponEntity().getId().equals(checkCouponId.getValue())) {
+        if (!discount.getCouponEntity().getId().equals(checkCouponId.getValue())) {
             verifyUniqueCoupon(command.getId(), checkCouponId);
             discount.setCouponEntity(couponRepository.getReferenceById(checkCouponId.getValue()));
         }

@@ -85,10 +85,9 @@ create table membership_type
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
        CHECK (LENGTH(TRIM(type)) > 0 AND LENGTH(TRIM(type)) <= 50),
-   CHECK (discount_unit = 'PERCENTAGE' AND discount_value >= 0 AND discount_value <= 100 OR
-          discount_unit = 'FIXED' AND discount_value >= 1000),
+   CHECK ((discount_unit = 'PERCENTAGE' AND discount_value >= 0 AND discount_value <= 100) OR
+          (discount_unit = 'FIXED' AND (discount_value >= 1000 OR discount_value = 0)) ),
    CHECK (required_point >= 0),
-   CHECK (valid_until IS NULL OR valid_until > CURRENT_TIMESTAMP),
     unique key membership_type_pk (type),
     unique key membership_type_pk_2 (required_point)
 );
@@ -231,21 +230,6 @@ create table manager
         ON DELETE RESTRICT
 );
 
-create table `order`
-(
-    order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,
-    customer_id    int unsigned                                  null comment 'Mã khách hàng',
-    employee_id    int unsigned                                  not null comment 'Mã nhân viên',
-    order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
-    total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
-    final_amount   decimal(11, 3)                                null comment 'Thành tiền',
-    status         enum ('PROCESSING', 'CANCELLED', 'COMPLETED') null comment 'Trạng thái đơn hàng',
-    customize_note varchar(1000)                                 null comment 'Ghi chú tùy chỉnh',
-    point          int unsigned default '1'                      null,
-    created_at     datetime     default CURRENT_TIMESTAMP        null,
-    updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
-    index order_employee_idx (employee_id)
-);
     create table `order`
 (
     order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,

@@ -6,6 +6,7 @@ import com.mts.backend.api.staff.request.UpdateEmployeeRequest;
 import com.mts.backend.application.staff.EmployeeCommandBus;
 import com.mts.backend.application.staff.EmployeeQueryBus;
 import com.mts.backend.application.staff.command.CreateEmployeeCommand;
+import com.mts.backend.application.staff.command.DeleteEmpByIdCommand;
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
 import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
@@ -96,6 +97,17 @@ public class EmployeeController implements IController {
         var query = CheckoutTableByEmpIdQuery.builder().employeeId(EmployeeId.of(id)).page(page).size(size).build();
         
         var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) {
+        DeleteEmpByIdCommand command = DeleteEmpByIdCommand.builder()
+                .id(EmployeeId.of(id))
+                .build();
+        
+        var result = commandBus.dispatch(command);
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }

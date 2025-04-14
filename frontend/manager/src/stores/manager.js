@@ -7,9 +7,9 @@ export const useManagerStore = defineStore('manager', () => {
   const manager = ref(null)
   const loading = ref(false)
   const error = ref(null)
-  
+
   // Mặc định ID của manager là 2 (theo yêu cầu)
-  const defaultManagerId = 2
+  const defaultManagerId = 1
 
   // Lấy thông tin chi tiết manager
   async function fetchManagerProfile() {

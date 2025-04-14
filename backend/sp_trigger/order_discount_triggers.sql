@@ -2,15 +2,15 @@ DELIMITER //
 
 -- Before Insert Trigger
 CREATE TRIGGER before_order_discount_insert
-BEFORE INSERT ON OrderDiscount
+BEFORE INSERT ON order_discount
 FOR EACH ROW
 BEGIN
     -- kiểm tra order phải ở trạng thái processing
     DECLARE order_status ENUM('PROCESSING', 'CANCELLED', 'COMPLETED');
-    SELECT status INTO order_status FROM `Order` WHERE order_id = NEW.order_id;
+    SELECT status INTO order_status FROM `order` WHERE order_id = NEW.order_id;
     IF order_status <> 'PROCESSING' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Không thể thêm giảm giá cho đơn hàng không ở trạng thái processing';
+        SET MESSAGE_TEXT = 'Không thể thêm giảm giá cho đơn hàng đã hoàn thành hoặc đã hủy';
     END IF;
 
     -- Kiểm tra discount_amount không âm
@@ -22,7 +22,7 @@ END //
 
 -- Before Update Trigger
 CREATE TRIGGER before_order_discount_update
-BEFORE UPDATE ON OrderDiscount
+BEFORE UPDATE ON order_discount
 FOR EACH ROW
 BEGIN
     -- Lấy trạng thái của đơn hàng
@@ -34,7 +34,7 @@ BEGIN
     END IF;
     
     SELECT status INTO order_status 
-    FROM `Order` 
+    FROM `order` 
     WHERE order_id = NEW.order_id;
     
     -- Kiểm tra xem order ở trạng thái khác PROCESSING thì không được cập nhật
@@ -52,21 +52,12 @@ END //
 
 -- Before Delete Trigger cho OrderDiscount
 CREATE TRIGGER before_order_discount_delete
-BEFORE DELETE ON OrderDiscount
+BEFORE DELETE ON order_discount
 FOR EACH ROW
 BEGIN
-    -- Lấy trạng thái của đơn hàng
-    DECLARE order_status ENUM('PROCESSING', 'CANCELLED', 'COMPLETED');
     
-    SELECT status INTO order_status 
-    FROM `Order` 
-    WHERE order_id = OLD.order_id;
-    
-    -- Kiểm tra xem order ở trạng thái khác PROCESSING thì không được xóa
-    IF order_status != 'PROCESSING' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Không thể xóa giảm giá cho đơn hàng không ở trạng thái PROCESSING';
-    END IF;
 END //
 
 DELIMITER ; 
+
+

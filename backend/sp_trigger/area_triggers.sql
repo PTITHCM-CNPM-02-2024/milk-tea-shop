@@ -4,7 +4,7 @@ DELIMITER //
 
 -- Kiểm tra trước khi thêm khu vực
 CREATE TRIGGER before_area_insert
-BEFORE INSERT ON Area
+BEFORE INSERT ON area
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên khu vực
@@ -22,7 +22,7 @@ END //
 
 -- Kiểm tra trước khi cập nhật khu vực
 CREATE TRIGGER before_area_update
-BEFORE UPDATE ON Area
+BEFORE UPDATE ON area
 FOR EACH ROW
 BEGIN
     DECLARE current_tables INT;
@@ -46,7 +46,7 @@ BEGIN
 
     -- Kiểm tra số bàn tối đa phải lớn hơn hoặc bằng số bàn hiện có
     IF NEW.max_tables IS NOT NULL THEN
-        SELECT COUNT(*) INTO current_tables FROM ServiceTable WHERE area_id = NEW.area_id;
+        SELECT COUNT(*) INTO current_tables FROM service_table WHERE area_id = NEW.area_id;
 
         IF NEW.max_tables < current_tables THEN
             SIGNAL SQLSTATE '45000'
@@ -56,7 +56,7 @@ BEGIN
 
     IF OLD.is_active <> NEW.is_active AND NEW.is_active = 0 THEN
         -- Nếu là 0 cần kiểm tra order status = processing
-        SELECT COUNT(*) INTO order_count FROM `Order` WHERE area_id = NEW.area_id AND status = 'PROCESSING';
+        SELECT COUNT(*) INTO order_count FROM `order` WHERE area_id = NEW.area_id AND status = 'PROCESSING';
             
             IF order_count > 0 THEN
                 SIGNAL SQLSTATE '45000'
@@ -67,9 +67,11 @@ END //
 
 -- Kiểm tra trước khi xóa khu vực
 CREATE TRIGGER before_area_delete
-BEFORE DELETE ON Area
+BEFORE DELETE ON area
 FOR EACH ROW
 BEGIN
 END //
-
+    
 DELIMITER ;
+-- -------------------------------------------------------------------
+

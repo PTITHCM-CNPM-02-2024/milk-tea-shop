@@ -73,7 +73,7 @@ public class CouponController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-    @GetMapping("/{i:\\d+}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getCouponById(@PathVariable("id") Long id) {
         var command = CouponByIdQuery.builder()
                 .id(CouponId.of(id))

@@ -74,7 +74,7 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         
         var createdCustomer = customerRepository.save(cus);
         
-        return CommandResult.success("createdCustomer.getId()");
+        return CommandResult.success(createdCustomer.getId());
         
     }
     
