@@ -73,7 +73,7 @@ CREATE TRIGGER protect_default_size_update
     ON product_size
     FOR EACH ROW
 BEGIN
-    IF OLD.name IN ('S', 'M', 'L', 'NA') THEN
+    IF OLD.name IN ('S', 'M', 'L', 'NA') AND OLD.unit_id IN (SELECT unit_id FROM unit_of_measure WHERE symbol IN ('mL', 'cái')) THEN
         IF NEW.name != OLD.name OR NEW.unit_id != OLD.unit_id THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Không thể thay đổi kích thước mặc định';
@@ -86,9 +86,9 @@ CREATE TRIGGER protect_default_size_delete
     ON product_size
     FOR EACH ROW
 BEGIN
-    IF OLD.name IN ('S', 'M', 'L', 'NA') THEN
+    IF OLD.name IN ('S', 'M', 'L', 'NA') AND OLD.unit_id IN (SELECT unit_id FROM unit_of_measure WHERE symbol IN ('mL', 'cái')) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Không thể xóa kích thước mặc định';
+            SET MESSAGE_TEXT = 'Không thể thay đổi kích thước mặc định';
     END IF;
 END //
 

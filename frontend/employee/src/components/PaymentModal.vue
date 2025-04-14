@@ -17,7 +17,7 @@
           </div>
           <!-- Phần coupon - thêm mới -->
           <div class="coupon-section">
-            <div v-if="!appliedCoupon" class="coupon-form">
+            <div class="coupon-form">
               <div class="coupon-input-group">
                 <input
                     type="text"
@@ -42,22 +42,25 @@
               </div>
             </div>
 
-            <div v-else class="applied-coupon">
-              <div class="coupon-info">
-                <div class="coupon-header">
-                  <span class="coupon-name">{{ appliedCoupon.name }}</span>
-                  <button @click="removeCoupon" class="remove-coupon-btn">
-                    <v-icon small>mdi-close</v-icon>
-                  </button>
-                </div>
-                <div class="coupon-detail">
-                  <span class="coupon-code">Mã: {{ appliedCoupon.couponCode }}</span>
-                  <span class="coupon-value">
-                    {{ formatDiscount(appliedCoupon.discountUnit, appliedCoupon.discountValue) }}
-                  </span>
-                </div>
-                <div v-if="appliedCoupon.description" class="coupon-description">
-                  {{ appliedCoupon.description }}
+            <!-- Danh sách coupon đã áp dụng -->
+            <div v-if="appliedCoupons.length > 0" class="applied-coupons-list">
+              <div v-for="(coupon, index) in appliedCoupons" :key="index" class="applied-coupon">
+                <div class="coupon-info">
+                  <div class="coupon-header">
+                    <span class="coupon-name">{{ coupon.name }}</span>
+                    <button @click="() => removeCoupon(coupon)" class="remove-coupon-btn">
+                      <v-icon small>mdi-close</v-icon>
+                    </button>
+                  </div>
+                  <div class="coupon-detail">
+                    <span class="coupon-code">Mã: {{ coupon.couponCode }}</span>
+                    <span class="coupon-value">
+                      {{ formatDiscount(coupon.discountUnit, coupon.discountValue) }}
+                    </span>
+                  </div>
+                  <div v-if="coupon.description" class="coupon-description">
+                    {{ coupon.description }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -158,7 +161,7 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed, onMounted, watch} from 'vue';
 import PaymentService from "@/services/payment.service.js";
 import OrderService from "@/services/order.service.js";
 
@@ -190,6 +193,10 @@ const props = defineProps({
   employeeId: {
     type: Number,
     required: true
+  },
+  appliedCoupons: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -210,7 +217,7 @@ const paymentMethods = ref([
 const couponCode = ref('');
 const couponError = ref('');
 const isApplyingCoupon = ref(false);
-const appliedCoupon = ref(null);
+const appliedCoupons = ref([]);
 
 // Tải phương thức thanh toán từ API
 async function loadPaymentMethods() {
@@ -345,7 +352,7 @@ async function applyCoupon() {
       }
 
       // Áp dụng coupon
-      appliedCoupon.value = couponData;
+      appliedCoupons.value.push(couponData);
       
       // Emit event để App.vue cập nhật và tính toán lại giá
       emit('apply-coupon', couponData);
@@ -371,20 +378,33 @@ async function applyCoupon() {
 }
 
 // Xóa mã giảm giá
-function removeCoupon() {
-  appliedCoupon.value = null;
-  
-  // Emit event để App.vue cập nhật và tính toán lại giá
-  emit('remove-coupon');
-  
-  // Sau khi emit, giá trị subtotal, discount và total sẽ được cập nhật từ App.vue
+function removeCoupon(coupon) {
+  const index = appliedCoupons.value.findIndex(c => c.couponCode === coupon.couponCode);
+  if (index !== -1) {
+    appliedCoupons.value.splice(index, 1);
+    
+    // Emit event để App.vue cập nhật và tính toán lại giá
+    emit('remove-coupon', coupon);
+  }
 }
 
 // Khởi tạo
 onMounted(() => {
   loadPaymentMethods();
   cashAmount.value = props.total;
+  
+  // Khởi tạo appliedCoupons từ props
+  if (props.appliedCoupons && props.appliedCoupons.length > 0) {
+    appliedCoupons.value = [...props.appliedCoupons];
+  }
 });
+
+// Theo dõi thay đổi của prop appliedCoupons
+watch(() => props.appliedCoupons, (newCoupons) => {
+  if (newCoupons && Array.isArray(newCoupons)) {
+    appliedCoupons.value = [...newCoupons];
+  }
+}, { deep: true });
 </script>
 
 <style scoped>
@@ -807,11 +827,19 @@ onMounted(() => {
   margin-top: 4px;
 }
 
+.applied-coupons-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .applied-coupon {
   border: 1px solid #2196F3;
   border-radius: 4px;
   background-color: #E3F2FD;
   padding: 12px;
+  margin-bottom: 8px;
 }
 
 .coupon-header {

@@ -6,6 +6,7 @@ import com.mts.backend.api.payment.request.UpdatePaymentMethodRequest;
 import com.mts.backend.application.payment.PaymentMethodCommandBus;
 import com.mts.backend.application.payment.PaymentMethodQueryBus;
 import com.mts.backend.application.payment.command.CreatePaymentMethodCommand;
+import com.mts.backend.application.payment.command.DeletePmtByIdCommand;
 import com.mts.backend.application.payment.command.UpdatePaymentMethodCommand;
 import com.mts.backend.application.payment.query.DefaultPaymentMethodQuery;
 import com.mts.backend.application.payment.query.PaymentMethodByIdQuery;
@@ -84,4 +85,14 @@ public class PaymentMethodController implements IController {
                 .build();
         var result = queryBus.dispatch(command);
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
-    }}
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePaymentMethod(@PathVariable("id") Integer id) {
+        var command = DeletePmtByIdCommand.builder()
+                .paymentMethodId(PaymentMethodId.of(id))
+                .build();
+        var result = commandBus.dispatch(command);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+}

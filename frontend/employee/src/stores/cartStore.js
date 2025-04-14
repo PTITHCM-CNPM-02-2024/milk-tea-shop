@@ -7,7 +7,7 @@ export const useCartStore = defineStore('cart', () => {
   const items = ref([]);
   const selectedCustomer = ref(null);
   const selectedTables = ref([]);
-  const selectedCoupon = ref(null);
+  const selectedCoupons = ref([]);
   const calculatedSubtotal = ref(0);
   const calculatedDiscount = ref(0);
   const calculatedTotal = ref(0);
@@ -52,7 +52,7 @@ export const useCartStore = defineStore('cart', () => {
     items.value = [];
     selectedCustomer.value = null;
     selectedTables.value = [];
-    selectedCoupon.value = null;
+    selectedCoupons.value = [];
     calculatedSubtotal.value = 0;
     calculatedDiscount.value = 0;
     calculatedTotal.value = 0;
@@ -83,12 +83,22 @@ export const useCartStore = defineStore('cart', () => {
   }
   
   function applyCoupon(coupon) {
-    selectedCoupon.value = coupon;
-    calculateOrderFromServer();
+    const existingIndex = selectedCoupons.value.findIndex(c => c.id === coupon.id);
+    if (existingIndex === -1) {
+      selectedCoupons.value.push(coupon);
+      calculateOrderFromServer();
+    }
   }
   
-  function removeCoupon() {
-    selectedCoupon.value = null;
+  function removeCoupon(coupon) {
+    if (!coupon) {
+      selectedCoupons.value = [];
+    } else {
+      const index = selectedCoupons.value.findIndex(c => c.id === coupon.id);
+      if (index !== -1) {
+        selectedCoupons.value.splice(index, 1);
+      }
+    }
     calculateOrderFromServer();
   }
   
@@ -140,7 +150,7 @@ export const useCartStore = defineStore('cart', () => {
         customerId: selectedCustomer.value ? selectedCustomer.value.id : null,
         note: 'Đơn hàng từ app',
         products: prepareProductsForServer(employeeId),
-        discounts: selectedCoupon.value ? [{ discountId: selectedCoupon.value.id }] : []
+        discounts: selectedCoupons.value.map(coupon => ({ discountId: coupon.id }))
       };
       
       // Gọi API tính toán
@@ -179,13 +189,15 @@ export const useCartStore = defineStore('cart', () => {
     
     // Tính discount (giảm giá)
     let discountValue = 0;
-    if (selectedCoupon.value) {
-      if (selectedCoupon.value.type === 'PERCENTAGE') {
-        discountValue += (subtotalValue * selectedCoupon.value.value) / 100;
+    
+    // Tính tổng giảm giá từ tất cả coupons
+    selectedCoupons.value.forEach(coupon => {
+      if (coupon.discountUnit === 'PERCENTAGE') {
+        discountValue += (subtotalValue * coupon.discountValue) / 100;
       } else {
-        discountValue += Math.min(selectedCoupon.value.value, subtotalValue);
+        discountValue += Math.min(coupon.discountValue, subtotalValue);
       }
-    }
+    });
     
     calculatedDiscount.value = discountValue;
     
@@ -203,7 +215,7 @@ export const useCartStore = defineStore('cart', () => {
         tables: selectedTables.value.map(table => ({
           serviceTableId: table.id
         })),
-        discounts: selectedCoupon.value ? [{ discountId: selectedCoupon.value.id }] : []
+        discounts: selectedCoupons.value.map(coupon => ({ discountId: coupon.id }))
       };
       
       // Tạo đơn hàng
@@ -220,7 +232,7 @@ export const useCartStore = defineStore('cart', () => {
     items,
     selectedCustomer,
     selectedTables,
-    selectedCoupon,
+    selectedCoupons,
     isCalculating,
     
     // Computed

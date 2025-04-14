@@ -87,6 +87,7 @@
           :discount="cartStore.discount"
           :total="cartStore.total"
           :employeeId="employeeId"
+          :applied-coupons="cartStore.selectedCoupons"
           @complete-order="completeOrder"
           @cancel="showPaymentModal = false"
           @apply-coupon="applyCoupon"
@@ -255,11 +256,13 @@ function openPaymentModal() {
 }
 
 function applyCoupon(couponData) {
+  // Áp dụng coupon mới vào danh sách
   cartStore.applyCoupon(couponData);
 }
 
-function removeCoupon() {
-  cartStore.removeCoupon();
+function removeCoupon(coupon) {
+  // Xóa một coupon cụ thể khỏi danh sách
+  cartStore.removeCoupon(coupon);
 }
 
 // Hoàn tất thanh toán đơn hàng

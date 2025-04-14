@@ -39,7 +39,7 @@ export const usePaymentStore = defineStore('payment', {
         this.loading = true
         this.error = null
         const response = await paymentService.getAllPayments(page, size)
-        
+
         if (response && response.data && response.data.content) {
           this.payments = response.data.content
           this.pagination = {
@@ -54,7 +54,7 @@ export const usePaymentStore = defineStore('payment', {
         }
       } catch (error) {
         this.payments = []
-        this.error = error.message || 'Đã xảy ra lỗi khi tải dữ liệu thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu thanh toán'
         console.error('Error fetching payments:', error)
       } finally {
         this.loading = false
@@ -67,7 +67,7 @@ export const usePaymentStore = defineStore('payment', {
         this.reportLoading = true
         this.error = null
         const response = await paymentService.getPaymentReport(month, year)
-        
+
         if (response && response.data) {
           this.paymentReport = response.data
         } else {
@@ -87,7 +87,7 @@ export const usePaymentStore = defineStore('payment', {
           averageAmount: 0,
           paymentDetailResponses: []
         }
-        this.error = error.message || 'Đã xảy ra lỗi khi tải báo cáo thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải báo cáo thanh toán'
         console.error('Error fetching payment report:', error)
       } finally {
         this.reportLoading = false
@@ -100,7 +100,7 @@ export const usePaymentStore = defineStore('payment', {
         this.paymentLoading = true
         this.error = null
         const response = await paymentService.getPaymentById(paymentId)
-        
+
         if (response && response.data) {
           this.currentPayment = response.data
         } else {
@@ -110,7 +110,7 @@ export const usePaymentStore = defineStore('payment', {
         }
       } catch (error) {
         this.currentPayment = null
-        this.error = error.message || 'Đã xảy ra lỗi khi tải chi tiết thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải chi tiết thanh toán'
         console.error('Error fetching payment details:', error)
       } finally {
         this.paymentLoading = false
@@ -125,7 +125,7 @@ export const usePaymentStore = defineStore('payment', {
         const response = await paymentService.addPaymentToOrder(orderId, paymentData)
         return response.data
       } catch (error) {
-        this.error = error.message || 'Đã xảy ra lỗi khi thêm thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi thêm thanh toán'
         console.error('Error adding payment to order:', error)
         throw error
       } finally {
@@ -139,7 +139,7 @@ export const usePaymentStore = defineStore('payment', {
         this.loading = true
         this.error = null
         const response = await paymentService.getAllPaymentMethods()
-        
+
         if (response && response.data) {
           this.paymentMethods = response.data
         } else {
@@ -149,7 +149,7 @@ export const usePaymentStore = defineStore('payment', {
         }
       } catch (error) {
         this.paymentMethods = []
-        this.error = error.message || 'Đã xảy ra lỗi khi tải phương thức thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải phương thức thanh toán'
         console.error('Error fetching payment methods:', error)
       } finally {
         this.loading = false
@@ -162,7 +162,7 @@ export const usePaymentStore = defineStore('payment', {
         this.loading = true
         this.error = null
         const response = await paymentService.getPaymentMethodById(id)
-        
+
         if (response && response.data) {
           return response.data
         } else {
@@ -171,7 +171,7 @@ export const usePaymentStore = defineStore('payment', {
           return null
         }
       } catch (error) {
-        this.error = error.message || 'Đã xảy ra lỗi khi tải chi tiết phương thức thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải chi tiết phương thức thanh toán'
         console.error('Error fetching payment method details:', error)
         return null
       } finally {
@@ -179,7 +179,7 @@ export const usePaymentStore = defineStore('payment', {
       }
     },
 
-    // Thêm phương thức thanh toán 
+    // Thêm phương thức thanh toán
     async createPaymentMethod(data) {
       try {
         this.loading = true
@@ -188,7 +188,7 @@ export const usePaymentStore = defineStore('payment', {
         await this.fetchPaymentMethods() // Tải lại danh sách sau khi thêm
         return response.data
       } catch (error) {
-        this.error = error.message || 'Đã xảy ra lỗi khi thêm phương thức thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi thêm phương thức thanh toán'
         console.error('Error creating payment method:', error)
         throw error
       } finally {
@@ -205,7 +205,7 @@ export const usePaymentStore = defineStore('payment', {
         await this.fetchPaymentMethods() // Tải lại danh sách sau khi cập nhật
         return response.data
       } catch (error) {
-        this.error = error.message || 'Đã xảy ra lỗi khi cập nhật phương thức thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật phương thức thanh toán'
         console.error('Error updating payment method:', error)
         throw error
       } finally {
@@ -221,7 +221,7 @@ export const usePaymentStore = defineStore('payment', {
         await paymentService.deletePaymentMethod(id)
         await this.fetchPaymentMethods() // Tải lại danh sách sau khi xóa
       } catch (error) {
-        this.error = error.message || 'Đã xảy ra lỗi khi xóa phương thức thanh toán'
+        this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa phương thức thanh toán'
         console.error('Error deleting payment method:', error)
         throw error
       } finally {
@@ -229,4 +229,4 @@ export const usePaymentStore = defineStore('payment', {
       }
     }
   }
-}) 
+})
