@@ -19,6 +19,7 @@ import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,6 +35,7 @@ public class AreaController implements IController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
                 .name(AreaName.builder().value(request.getName()).build())
@@ -47,6 +49,7 @@ public class AreaController implements IController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateArea(@PathVariable("id") Integer id,
                                                      @RequestBody UpdateAreaRequest request) {
         
@@ -65,6 +68,7 @@ public class AreaController implements IController {
     
     
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllArea(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
@@ -80,6 +84,7 @@ public class AreaController implements IController {
     }
     
     @GetMapping("/active/{active}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllAreaActive(@PathVariable("active") Boolean active) {
         var query = AreaActiveQuery.builder().active(active).build();
         
@@ -89,6 +94,7 @@ public class AreaController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAreaById(@PathVariable("id") Integer id) {
         var query = AreaByIdQuery.builder().id(AreaId.of(id)).build();
         
@@ -99,6 +105,7 @@ public class AreaController implements IController {
     
     
     @GetMapping("/{id}/tables")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAreaTables(@PathVariable("id") Integer id,
                                            @RequestParam(value = "page", defaultValue = "0") Integer page,
                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
@@ -115,6 +122,7 @@ public class AreaController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteArea(@PathVariable("id") Integer id) {
         DeleteAreaByIdCommand command = DeleteAreaByIdCommand.builder()
                 .areaId(AreaId.of(id))

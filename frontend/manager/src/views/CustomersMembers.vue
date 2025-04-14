@@ -555,19 +555,60 @@
                             </div>
                           </v-list-item-subtitle>
                         </v-list-item>
+
+                        <v-list-item>
+                          <template v-slot:prepend>
+                            <v-icon color="primary" class="mr-2">mdi-account-check</v-icon>
+                          </template>
+                          <v-list-item-title>Trạng thái hoạt động</v-list-item-title>
+                          <v-list-item-subtitle>
+                            <v-chip 
+                              size="small" 
+                              :color="accountDetail.isActive ? 'success' : 'warning'" 
+                              class="mt-1"
+                            >
+                              {{ accountDetail.isActive ? 'Đang hoạt động' : 'Vô hiệu hóa' }}
+                            </v-chip>
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                        
+                        <v-list-item>
+                          <template v-slot:prepend>
+                            <v-icon color="primary" class="mr-2">mdi-lock</v-icon>
+                          </template>
+                          <v-list-item-title>Trạng thái khóa</v-list-item-title>
+                          <v-list-item-subtitle>
+                            <v-chip 
+                              size="small" 
+                              :color="accountDetail.isLocked ? 'error' : 'success'" 
+                              class="mt-1"
+                            >
+                              {{ accountDetail.isLocked ? 'Đã khóa' : 'Không khóa' }}
+                            </v-chip>
+                          </v-list-item-subtitle>
+                        </v-list-item>
                       </v-list>
                     </v-col>
                   </v-row>
 
-                  <div class="d-flex gap-2 mt-4">
+                  <div class="d-flex gap-2 mt-4 flex-column">
                     <v-btn
                       color="deep-purple"
                       variant="outlined"
                       @click="activeCustomerTab = 'role'; initRoleChange()"
-                      block
+                      class="mb-3"
                     >
                       <v-icon start>mdi-shield-edit</v-icon>
                       Đổi vai trò
+                    </v-btn>
+
+                    <v-btn
+                      :color="accountDetail.isLocked ? 'success' : 'error'"
+                      variant="outlined"
+                      @click="toggleAccountLockStatus"
+                    >
+                      <v-icon start>{{ accountDetail.isLocked ? 'mdi-lock-open' : 'mdi-lock' }}</v-icon>
+                      {{ accountDetail.isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản' }}
                     </v-btn>
                   </div>
                 </template>
@@ -981,23 +1022,23 @@ const membershipOptions = computed(() => {
 // Computed property cho khách hàng đã lọc
 const filteredCustomers = computed(() => {
   let result = [...customerStore.customers]
-  
+
   // Lọc theo từ khóa tìm kiếm
   if (customerSearchQuery.value) {
     const query = customerSearchQuery.value.toLowerCase()
-    result = result.filter(customer => 
-      (customer.firstName || '').toLowerCase().includes(query) || 
-      (customer.lastName || '').toLowerCase().includes(query) || 
-      (customer.email || '').toLowerCase().includes(query) || 
+    result = result.filter(customer =>
+      (customer.firstName || '').toLowerCase().includes(query) ||
+      (customer.lastName || '').toLowerCase().includes(query) ||
+      (customer.email || '').toLowerCase().includes(query) ||
       (customer.phone || '').includes(query)
     )
   }
-  
+
   // Lọc theo loại thành viên
   if (selectedMembership.value) {
     result = result.filter(customer => customer.membershipId === selectedMembership.value)
   }
-  
+
   return result
 })
 
@@ -1395,6 +1436,52 @@ const initRoleChange = () => {
 
   roleChange.value = {
     roleId: accountDetail.value.role.id
+  }
+}
+
+// Thêm phương thức kích hoạt/vô hiệu hóa tài khoản
+// Kích hoạt/Vô hiệu hóa tài khoản
+const toggleAccountActiveStatus = async () => {
+  loading.value = true
+  try {
+    await accountService.toggleAccountActive(accountDetail.value.id, !accountDetail.value.isActive)
+    
+    // Cập nhật trạng thái hoạt động trong UI
+    accountDetail.value.isActive = !accountDetail.value.isActive
+    
+    showSnackbar(
+      accountDetail.value.isActive 
+        ? 'Tài khoản đã được kích hoạt thành công' 
+        : 'Tài khoản đã được vô hiệu hóa thành công', 
+      'success'
+    )
+  } catch (error) {
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Thêm phương thức khóa/mở khóa tài khoản
+// Khóa/Mở khóa tài khoản
+const toggleAccountLockStatus = async () => {
+  loading.value = true
+  try {
+    await customerStore.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
+
+    // Cập nhật trạng thái khóa trong UI
+    accountDetail.value.isLocked = !accountDetail.value.isLocked
+
+    showSnackbar(
+      accountDetail.value.isLocked
+        ? 'Tài khoản đã được khóa thành công'
+        : 'Tài khoản đã được mở khóa thành công',
+      'success'
+    )
+  } catch (error) {
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+  } finally {
+    loading.value = false
   }
 }
 

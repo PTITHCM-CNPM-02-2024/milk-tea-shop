@@ -16,6 +16,7 @@ import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ public class MembershipController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createMembership(@RequestBody CreateMembershipTypeRequest request) {
         var command = CreateMembershipCommand.
                 builder()
@@ -51,6 +53,7 @@ public class MembershipController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateMembership(@PathVariable("id") Integer id, @RequestBody UpdateMembershipTypeRequest request){
         var command = UpdateMemberCommand.builder()
                 .memberId(MembershipTypeId.of(id))
@@ -69,6 +72,7 @@ public class MembershipController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMembership(@PathVariable("id") Integer id){
         var query = MemberTypeByIdQuery.builder()
                 .id(MembershipTypeId.of(id))
@@ -80,6 +84,7 @@ public class MembershipController implements IController {
     }
     
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getMemberships(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                             @RequestParam(value = "size", defaultValue = "10") Integer size){
         var query = DefaultMemberQuery.builder()
@@ -91,6 +96,7 @@ public class MembershipController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteMembership(@PathVariable("id") Integer id) {
         DeleteMemberByIdCommand command = DeleteMemberByIdCommand.builder()
                 .membershipTypeId(MembershipTypeId.of(id))

@@ -46,7 +46,7 @@ export const accountService = {
 
   // Khóa/Mở khóa tài khoản
   toggleAccountLock(id, isLocked) {
-    return api.put(`/accounts/${id}/lock`, { locked: isLocked })
+    return api.put(`/accounts/${id}/lock?value=${isLocked}`)
   },
 
   // Kích hoạt/Vô hiệu hóa tài khoản

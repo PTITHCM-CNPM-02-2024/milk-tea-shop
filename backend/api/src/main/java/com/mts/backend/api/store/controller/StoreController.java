@@ -14,6 +14,7 @@ import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.value_object.Address;
 import com.mts.backend.domain.store.value_object.StoreName;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ public class StoreController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
                 .name(StoreName.builder().value(request.getName()).build())
@@ -52,6 +54,7 @@ public class StoreController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,  @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
                 .id(StoreId.of(id))

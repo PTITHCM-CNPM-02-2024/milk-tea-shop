@@ -15,6 +15,7 @@ import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,7 @@ public class CouponController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createCoupon(@RequestBody CreateCouponRequest request) {
         var command = CreateCouponCommand.builder()
                 .coupon(CouponCode.builder()
@@ -45,6 +47,7 @@ public class CouponController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateCoupon(@PathVariable("id") Long id, @RequestBody UpdateCouponRequest request) {
         
         var command = UpdateCouponCommand.builder()
@@ -61,6 +64,7 @@ public class CouponController implements IController {
     }
     
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllCoupon(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                           @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultCouponQuery.builder().
@@ -74,6 +78,7 @@ public class CouponController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCouponById(@PathVariable("id") Long id) {
         var command = CouponByIdQuery.builder()
                 .id(CouponId.of(id))
@@ -85,6 +90,7 @@ public class CouponController implements IController {
     }
 
     @GetMapping("/unused")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getUnusedCoupon(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = UnusedCouponQuery.builder().page(page).size(size).build();
@@ -93,6 +99,7 @@ public class CouponController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteCoupon(@PathVariable("id") Long id) {
         DeleteCouponByIdCommand command = DeleteCouponByIdCommand.builder()
                 .couponId(CouponId.of(id))

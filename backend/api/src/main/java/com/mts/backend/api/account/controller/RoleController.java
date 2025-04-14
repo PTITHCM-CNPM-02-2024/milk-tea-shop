@@ -31,7 +31,7 @@ public class RoleController implements IController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createRole(@RequestBody CreateRoleRequest request) {
         var command = CreateRoleCommand.builder()
                 .name(RoleName.builder().value(request.getName()).build())
@@ -42,7 +42,7 @@ public class RoleController implements IController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getAllRoles(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var query = DefaultRoleQuery.builder().page(page).size(size).build();
@@ -51,7 +51,7 @@ public class RoleController implements IController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateRole(@PathVariable("id") Integer id, @RequestBody UpdateRoleRequest request) {
         var command = UpdateRoleCommand.builder()
                 .id(RoleId.of(id))
@@ -71,7 +71,7 @@ public class RoleController implements IController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteRoleById(@PathVariable("id") Integer id) {
         var command = DeleteRoleByIdCommand.builder().roleId(RoleId.of(id)).build();
         var result = roleCommandBus.dispatch(command);

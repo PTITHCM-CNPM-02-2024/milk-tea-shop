@@ -28,15 +28,16 @@
 
           <v-form ref="form" v-model="valid" @submit.prevent="login">
             <v-alert
-              v-if="error"
-              type="error"
+              v-if="showLoginAlert"
+              :type="alertType"
+              :icon="alertIcon"
               variant="tonal"
               density="compact"
               closable
               class="mb-4"
-              @click:close="error = null"
+              @click:close="showLoginAlert = false"
             >
-              {{ error }}
+              {{ alertMessage }}
             </v-alert>
 
             <v-text-field
@@ -95,7 +96,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '@/services/authService'
+import AuthService from '../services/auth.service.js'
+import { useSnackbar } from '../helpers/useSnackbar'
 
 const router = useRouter()
 const username = ref('')
@@ -106,52 +108,97 @@ const error = ref(null)
 const showPassword = ref(false)
 const form = ref(null)
 
+// Alert (để hiển thị thông báo lỗi đăng nhập)
+const showLoginAlert = ref(false)
+const alertType = ref('error')
+const alertIcon = ref('mdi-alert-circle')
+const alertMessage = ref('')
+
+// Snackbar (để hiển thị thông báo khác)
+const { showSuccess, showError, showInfo } = useSnackbar()
+
+// Hiển thị thông báo lỗi
+function showLoginError(message) {
+  alertMessage.value = message
+  alertType.value = 'error'
+  alertIcon.value = 'mdi-alert-circle'
+  showLoginAlert.value = true
+  setTimeout(() => {
+    showLoginAlert.value = false
+  }, 5000)
+}
+
 // Xử lý đăng nhập
 const login = async () => {
   if (!form.value || !form.value.validate()) return
   
   loading.value = true
   error.value = null
+  showLoginAlert.value = false
   
   try {
     // Gọi API đăng nhập
-    const response = await authService.login(username.value, password.value)
+    const response = await AuthService.login(username.value, password.value)
     
-    // Lưu token vào localStorage
-    const { token, id } = response.data
-    authService.saveToken(token)
-    
-    // Lấy thông tin quản lý từ id tài khoản
-    const managerResponse = await authService.getManagerByAccountId(id)
-    
-    // Lưu thông tin người dùng
-    const userInfo = {
-      accountId: id,
-      managerId: managerResponse.data.id,
-      username: username.value
-    }
-    authService.saveUserInfo(userInfo)
-    
-    // Chuyển hướng đến trang dashboard
-    router.push('/')
-  } catch (err) {
-    // Xử lý lỗi đăng nhập
-    if (err.response && err.response.data) {
-      error.value = err.response.data
-    } else if (err.response && err.response.status === 401) {
-      error.value = 'Tên đăng nhập hoặc mật khẩu không chính xác'
+    if (response && response.data) {
+      // Lấy ID tài khoản
+      const accountId = AuthService.getAccountId()
+      
+      if (!accountId) {
+        throw new Error('Không nhận được thông tin tài khoản')
+      }
+      
+      // Lấy thông tin nhân viên
+      const employeeResponse = await AuthService.getEmployeeByAccountId(accountId)
+      
+      if (employeeResponse && employeeResponse.data && employeeResponse.data.id) {
+        // Lưu ID nhân viên
+        const employeeId = employeeResponse.data.id
+        AuthService.setEmployeeId(employeeId)
+        
+        // Hiển thị thông báo thành công
+        showSuccess('Đăng nhập thành công!')
+        
+        // Chuyển hướng đến trang chính
+        router.push('/')
+      } else {
+        throw new Error('Không thể lấy thông tin nhân viên')
+      }
     } else {
-      error.value = 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.'
-      console.error('Login error:', err)
+      throw new Error('Đăng nhập thất bại')
+    }
+  } catch (err) {
+    console.error('Lỗi đăng nhập:', err)
+    
+    // Xử lý các loại lỗi đăng nhập
+    if (err.response) {
+      // Lỗi từ phản hồi server
+      const status = err.response.status
+      
+      if (status === 401) {
+        showLoginError('Tên đăng nhập hoặc mật khẩu không chính xác')
+      } else if (status === 403) {
+        showLoginError('Tài khoản của bạn không có quyền truy cập')
+      } else if (err.response.data && err.response.data.message) {
+        showLoginError(err.response.data.message)
+      } else {
+        showLoginError(`Lỗi máy chủ (${status})`)
+      }
+    } else if (err.request) {
+      // Không nhận được phản hồi từ server
+      showLoginError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.')
+    } else {
+      // Lỗi khác
+      showLoginError(err.message || 'Đã xảy ra lỗi khi đăng nhập')
     }
   } finally {
     loading.value = false
   }
 }
 
-// Kiểm tra nếu đã đăng nhập thì chuyển hướng đến dashboard
+// Kiểm tra nếu đã đăng nhập thì chuyển hướng
 onMounted(() => {
-  if (authService.isAuthenticated()) {
+  if (AuthService.isAuthenticated()) {
     router.push('/')
   }
 })
@@ -160,7 +207,7 @@ onMounted(() => {
 <style scoped>
 .login-container {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -295,4 +342,4 @@ onMounted(() => {
     opacity: 1;
   }
 }
-</style>
+</style> 

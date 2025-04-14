@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { customerService } from '@/services/customerService'
+import { accountService } from '@/services/accountService'
 
 export const useCustomerStore = defineStore('customer', () => {
   // State
@@ -183,6 +184,22 @@ export const useCustomerStore = defineStore('customer', () => {
     }
   }
 
+  // Khóa/Mở khóa tài khoản khách hàng
+  async function toggleAccountLock(accountId, isLocked) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await accountService.toggleAccountLock(accountId, isLocked)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // State
     customers,
@@ -208,6 +225,7 @@ export const useCustomerStore = defineStore('customer', () => {
     fetchMembershipTypes,
     createMembershipType,
     updateMembershipType,
-    deleteMembershipType
+    deleteMembershipType,
+    toggleAccountLock
   }
 })

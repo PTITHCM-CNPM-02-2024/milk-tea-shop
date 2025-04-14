@@ -19,6 +19,7 @@ import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
@@ -35,6 +36,7 @@ public class DiscountController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createDiscount(@RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
                 .name(DiscountName.builder().value(request.getName()).build())
@@ -62,6 +64,7 @@ public class DiscountController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
         
         var command = UpdateDiscountCommand.builder()
@@ -91,6 +94,7 @@ public class DiscountController implements IController {
     }
     
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllDiscount(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultDiscountQuery.builder()
@@ -104,6 +108,7 @@ public class DiscountController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getDiscountById(@PathVariable("id") Long id) {
         var command = DiscountByIdQuery.builder()
                 .id(DiscountId.of(id))
@@ -115,6 +120,7 @@ public class DiscountController implements IController {
     }
     
     @GetMapping("/coupon/{code}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getDiscountByCouponCode(@PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
                 .couponId(CouponCode.builder().value(code).build())
@@ -126,6 +132,7 @@ public class DiscountController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteDiscount(@PathVariable("id") Long id) {
         DeleteDiscountByIdCommand command = DeleteDiscountByIdCommand.builder()
                 .discountId(DiscountId.of(id))

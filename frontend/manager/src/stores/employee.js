@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { employeeService } from '@/services/employeeService'
+import { accountService } from '@/services/accountService'
 
 export const useEmployeeStore = defineStore('employee', () => {
   // State
@@ -105,6 +106,22 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
   
+  // Khóa/Mở khóa tài khoản nhân viên
+  async function toggleAccountLock(accountId, isLocked) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await accountService.toggleAccountLock(accountId, isLocked)
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+  
   return {
     // State
     employees,
@@ -122,6 +139,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     fetchEmployeeById,
     createEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    toggleAccountLock
   }
 }) 

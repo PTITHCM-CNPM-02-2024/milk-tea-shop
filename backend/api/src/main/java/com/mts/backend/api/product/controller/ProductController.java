@@ -14,6 +14,7 @@ import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.value_object.ProductName;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
@@ -30,6 +31,7 @@ public class ProductController implements IController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createProduct(@RequestBody CreateProductRequest createProductRequest) {
         CreateProductCommand createProductCommand = CreateProductCommand.builder()
                 .name(ProductName.builder().value(createProductRequest.getName()).build())
@@ -54,6 +56,7 @@ public class ProductController implements IController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateProductInform(@PathVariable("id") Integer id, @RequestBody UpdateProductInformRequest updateProductInformRequest) {
         UpdateProductInformCommand updateProductInformCommand = UpdateProductInformCommand.builder()
                 .productId(ProductId.of(id))
@@ -72,6 +75,7 @@ public class ProductController implements IController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getProductDetail(@RequestParam(value = "page",
             defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
         DefaultProductQuery getProductDetailCommand = DefaultProductQuery.builder()
@@ -85,6 +89,7 @@ public class ProductController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getProductDetailById(@PathVariable("id") Integer id) {
         ProdByIdQuery getProductDetailCommand = ProdByIdQuery.builder()
                 .id(ProductId.of(id))
@@ -96,6 +101,7 @@ public class ProductController implements IController {
     }
 
     @PostMapping("/{id}/prices")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createProductPrice(@PathVariable("id") Integer id,
                                                              @RequestBody AddProductPriceRequest addProductPriceRequest) {
 
@@ -118,6 +124,7 @@ public class ProductController implements IController {
     }
 
     @PutMapping("/{id}/prices")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateProductPrice(@PathVariable("id") Integer id,
                                                              @RequestBody AddProductPriceRequest addProductPriceRequest) {
         UpdateProductPriceCommand updateProductPriceCommand = UpdateProductPriceCommand.builder()
@@ -139,6 +146,7 @@ public class ProductController implements IController {
     }
 
     @DeleteMapping("/{id}/prices/{sizeId}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteProductPrice(@PathVariable("id") Integer id,
                                                              @PathVariable("sizeId") Integer sizeId) {
         DeletePriceBySizeIdCommand deleteProductPriceCommand = DeletePriceBySizeIdCommand.builder()
@@ -152,6 +160,7 @@ public class ProductController implements IController {
     }
     
     @GetMapping("/available-order/{available}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAvailableOrderProductDetail(@PathVariable("available") Boolean available){
 
         ProductForSaleQuery getProductDetailCommand = ProductForSaleQuery.builder()
@@ -164,6 +173,7 @@ public class ProductController implements IController {
     }
     
     @GetMapping("/topping")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getToppingProductDetail(@RequestParam(value = "page",
             defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
         ToppingForSaleQuery getProductDetailCommand = ToppingForSaleQuery.builder()
@@ -190,6 +200,7 @@ public class ProductController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {
         DeleteProductByIdCommand command = DeleteProductByIdCommand.builder()
                 .id(ProductId.of(id))

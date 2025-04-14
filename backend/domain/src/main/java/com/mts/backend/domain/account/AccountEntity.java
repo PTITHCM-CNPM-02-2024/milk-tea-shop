@@ -159,9 +159,6 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public boolean changeLock(boolean locked) {
-        if (this.locked.equals(locked)) {
-            return false;
-        }
 
         if (locked) {
             lock();

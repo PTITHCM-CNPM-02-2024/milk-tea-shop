@@ -20,6 +20,7 @@ import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,6 +35,7 @@ public class EmployeeController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createEmployee(@RequestBody CreateEmployeeRequest request) {
         var command = CreateEmployeeCommand.builder()
                 .email(Email.builder().value(request.getEmail()).build())
@@ -53,6 +55,7 @@ public class EmployeeController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateEmployee(@PathVariable("id") Long id, @RequestBody UpdateEmployeeRequest request) {
         var command = UpdateEmployeeCommand.builder()
                 .id(EmployeeId.of(id))
@@ -70,6 +73,7 @@ public class EmployeeController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getEmployee(@PathVariable("id") Long id) {
         var query = EmployeeByIdQuery.builder().id(EmployeeId.of(id)).build();
         
@@ -79,6 +83,7 @@ public class EmployeeController implements IController {
     }
     
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getEmployees(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
@@ -93,6 +98,7 @@ public class EmployeeController implements IController {
     }
     
     @GetMapping("/{id}/orders/order-tables")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getOrderTablesByEmployeeId(@PathVariable("id") Long id,
                                                        @RequestParam(value = "page", defaultValue = "0") Integer page,
                                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
@@ -104,6 +110,7 @@ public class EmployeeController implements IController {
     }
     
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) {
         DeleteEmpByIdCommand command = DeleteEmpByIdCommand.builder()
                 .id(EmployeeId.of(id))
@@ -115,6 +122,7 @@ public class EmployeeController implements IController {
     }
 
     @GetMapping("/account/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getEmployeeByAccountId(@PathVariable("id") Long id) {
         var query = GetEmpByAccountIdQuery.builder().accountId(AccountId.of(id)).build();
         

@@ -47,6 +47,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/**")
                         .hasAnyRole("MANAGER", "STAFF", "CUSTOMER", "GUEST")
+                        .requestMatchers("/api/v1/managers/**")
+                        .hasRole("MANAGER")
                         .anyRequest()
                         .authenticated())
                 .userDetailsService(jwtUserDetailService)

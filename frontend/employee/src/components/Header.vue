@@ -88,7 +88,7 @@
           <div class="d-flex align-center" v-bind="props" style="cursor: pointer">
             <div class="me-2 text-right d-none d-sm-block">
               <div class="text-body-2 font-weight-medium">{{ employeeName }}</div>
-              <div class="text-caption">Nhân viên bán hàng</div>
+              <div class="text-caption">ID: {{ employeeId }} - Nhân viên bán hàng</div>
             </div>
             <v-avatar color="secondary" size="36">
               <v-icon color="white">mdi-account</v-icon>
@@ -99,7 +99,7 @@
         <v-list>
           <v-list-item prepend-icon="mdi-account-outline" title="Hồ sơ" to="/profile"></v-list-item>
           <v-divider></v-divider>
-          <v-list-item prepend-icon="mdi-logout" title="Đăng xuất" color="error"></v-list-item>
+          <v-list-item prepend-icon="mdi-logout" title="Đăng xuất" color="error" @click="showLogoutDialog = true"></v-list-item>
         </v-list>
       </v-menu>
 

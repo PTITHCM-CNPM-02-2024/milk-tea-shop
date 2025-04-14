@@ -23,6 +23,7 @@ import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class CustomerController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> createCustomer(@RequestBody CreateCustomerRequest request) {
             CreateCustomerCommand command = CreateCustomerCommand.builder()
                 .firstName(Objects.isNull(request.getFirstName()) ? null : FirstName.builder().value(request.getFirstName()).build())
@@ -63,6 +65,7 @@ public class CustomerController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF', 'CUSTOMER')")
     public ResponseEntity<?> updateCustomer(@PathVariable("id") Long id, @RequestBody UpdateCustomerRequest request){
         UpdateCustomerCommand command = UpdateCustomerCommand.builder()
                 .id(CustomerId.of(id))
@@ -81,6 +84,7 @@ public class CustomerController implements IController {
     }
     
     @PutMapping("/{id}/membership")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateMembership(@PathVariable("id") Long id, @RequestParam("value") Integer value){
         UpdateMemberForCustomer command = UpdateMemberForCustomer.builder()
                 .customerId(CustomerId.of(id))
@@ -93,6 +97,7 @@ public class CustomerController implements IController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCustomer(@PathVariable("id") Long id){
         var query = CustomerByIdQuery.builder().
                 id(CustomerId.of(id))
@@ -105,6 +110,7 @@ public class CustomerController implements IController {
     
     
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getCustomers(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                           @RequestParam(value = "size", defaultValue = "10") Integer size){
         var request = DefaultCustomerQuery.builder().
@@ -118,6 +124,7 @@ public class CustomerController implements IController {
     }
     
     @GetMapping("/search/phone")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getCustomerByPhone(@RequestParam("phone") String phone){
         var request = CustomerByPhoneQuery.builder().phone(PhoneNumber.builder().value(phone).build()).build();
         
@@ -127,6 +134,7 @@ public class CustomerController implements IController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hhasRole('MANAGER')")
     public ResponseEntity<?> deleteCustomer(@PathVariable("id") Long id) {
         DeleteCusByIdCommand command = DeleteCusByIdCommand.builder()
                 .customerId(CustomerId.of(id))
@@ -138,6 +146,7 @@ public class CustomerController implements IController {
     }
 
     @GetMapping("/account/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAccount(@PathVariable("id") Long id) {
         var query = GetCusByAccountIdQuery.builder()
                 .accountId(AccountId.of(id))
