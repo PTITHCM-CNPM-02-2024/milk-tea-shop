@@ -56,13 +56,17 @@
         <!-- Bảng nhân viên -->
         <v-data-table
           :headers="headers"
-          :items="employeeStore.employees"
+          :items="filteredEmployees"
           :loading="employeeStore.loading"
           loading-text="Đang tải dữ liệu..."
           no-data-text="Không có dữ liệu"
           item-value="id"
           hover
           class="elevation-0"
+          :items-per-page="10"
+          :page="page"
+          @update:page="page = $event"
+          :items-per-page-options="[5, 10, 15, 20]"
         >
           <!-- ID column -->
           <template v-slot:item.id="{ item }">
@@ -118,9 +122,9 @@
         <!-- Phân trang -->
         <div class="d-flex justify-center py-4">
           <v-pagination
-            v-if="employeeStore.totalEmployees > 0"
+            v-if="totalFilteredPages > 0"
             v-model="page"
-            :length="employeeStore.totalPages"
+            :length="totalFilteredPages"
             :total-visible="7"
             @update:model-value="handlePageChange"
           ></v-pagination>
@@ -601,10 +605,34 @@ const roleOptions = computed(() => {
   }))
 })
 
+// Computed property cho nhân viên đã lọc
+const filteredEmployees = computed(() => {
+  let result = [...employeeStore.employees]
+  
+  // Lọc theo từ khóa tìm kiếm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(employee => 
+      employee.firstName?.toLowerCase().includes(query) || 
+      employee.lastName?.toLowerCase().includes(query) || 
+      employee.email?.toLowerCase().includes(query) || 
+      employee.phone?.includes(query) ||
+      employee.position?.toLowerCase().includes(query)
+    )
+  }
+  
+  return result
+})
+
+// Computed property cho tổng số trang dựa trên kết quả đã lọc
+const totalFilteredPages = computed(() => {
+  return Math.ceil(filteredEmployees.value.length / 10) // 10 là số mục mỗi trang
+})
+
 // Methods
 // Lấy danh sách nhân viên
 const loadEmployees = () => {
-  employeeStore.fetchEmployees(page.value - 1, 10)
+  employeeStore.fetchEmployees(0, 100) // Lấy tất cả nhân viên để lọc ở client
 }
 
 // Lấy danh sách vai trò
@@ -749,13 +777,11 @@ const deleteEmployee = async () => {
 // Xử lý thay đổi trang
 const handlePageChange = (newPage) => {
   page.value = newPage
-  loadEmployees()
 }
 
 // Debounce search
 const debounceSearch = debounce(() => {
-  page.value = 1
-  loadEmployees()
+  page.value = 1 // Reset về trang đầu khi tìm kiếm
 }, 300)
 
 // Hiển thị snackbar

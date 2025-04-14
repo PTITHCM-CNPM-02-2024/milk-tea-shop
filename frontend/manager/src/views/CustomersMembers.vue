@@ -85,13 +85,17 @@
             <!-- Bảng khách hàng -->
             <v-data-table
               :headers="customerHeaders"
-              :items="customerStore.customers"
+              :items="filteredCustomers"
               :loading="customerStore.loading"
               loading-text="Đang tải dữ liệu..."
               no-data-text="Không có dữ liệu"
               item-value="id"
               hover
               class="elevation-0"
+              :items-per-page="10"
+              :page="customerPage"
+              @update:page="customerPage = $event"
+              :items-per-page-options="[5, 10, 15, 20]"
             >
               <!-- Tên khách hàng -->
               <template v-slot:item.fullName="{ item }">
@@ -167,7 +171,7 @@
               <v-pagination
                 v-if="customerStore.totalCustomers > 0"
                 v-model="customerPage"
-                :length="customerStore.totalCustomerPages"
+                :length="totalFilteredCustomerPages"
                 :total-visible="7"
                 @update:model-value="handleCustomerPageChange"
               ></v-pagination>
@@ -974,6 +978,34 @@ const membershipOptions = computed(() => {
   }))
 })
 
+// Computed property cho khách hàng đã lọc
+const filteredCustomers = computed(() => {
+  let result = [...customerStore.customers]
+  
+  // Lọc theo từ khóa tìm kiếm
+  if (customerSearchQuery.value) {
+    const query = customerSearchQuery.value.toLowerCase()
+    result = result.filter(customer => 
+      (customer.firstName || '').toLowerCase().includes(query) || 
+      (customer.lastName || '').toLowerCase().includes(query) || 
+      (customer.email || '').toLowerCase().includes(query) || 
+      (customer.phone || '').includes(query)
+    )
+  }
+  
+  // Lọc theo loại thành viên
+  if (selectedMembership.value) {
+    result = result.filter(customer => customer.membershipId === selectedMembership.value)
+  }
+  
+  return result
+})
+
+// Computed property cho tổng số trang dựa trên kết quả đã lọc
+const totalFilteredCustomerPages = computed(() => {
+  return Math.ceil(filteredCustomers.value.length / 10) // 10 là số mục mỗi trang
+})
+
 const genderOptions = computed(() => [
   { title: 'Nam', value: 'MALE' },
   { title: 'Nữ', value: 'FEMALE' }
@@ -996,12 +1028,7 @@ const formattedValidUntil = computed(() => {
 // Methods
 // Load data
 const loadCustomers = () => {
-  const filters = {}
-  if (selectedMembership.value) {
-    filters.membershipId = selectedMembership.value
-  }
-
-  customerStore.fetchCustomers(customerPage.value - 1, 10)
+  customerStore.fetchCustomers(0, 1000) // Lấy tất cả khách hàng để xử lý lọc ở client
 }
 
 const loadMemberships = () => {
@@ -1287,13 +1314,11 @@ const deleteItem = async () => {
 // Handle pagination
 const handleCustomerPageChange = (newPage) => {
   customerPage.value = newPage
-  loadCustomers()
 }
 
 // Debounce search
 const debounceCustomerSearch = debounce(() => {
   customerPage.value = 1 // Reset về trang đầu tiên khi tìm kiếm
-  loadCustomers()
 }, 300)
 
 // Show snackbar

@@ -29,16 +29,77 @@
             variant="outlined"
             style="max-width: 300px;"
           ></v-text-field>
+          
+          <v-select
+            v-model="selectedStatus"
+            :items="statusOptions"
+            label="Trạng thái"
+            density="compact"
+            hide-details
+            variant="outlined"
+            style="max-width: 200px;"
+            class="mr-4"
+          ></v-select>
+          
           <v-spacer></v-spacer>
+          
+          <!-- Nút xuất báo cáo -->
+          <v-btn
+            prepend-icon="mdi-file-export"
+            color="primary"
+            @click="exportReport"
+          >
+            Xuất báo cáo
+          </v-btn>
         </div>
+
+        <!-- Menu lựa chọn định dạng báo cáo -->
+        <v-dialog v-model="exportDialog" max-width="400">
+          <v-card>
+            <v-card-title class="text-h5 font-weight-bold pa-4">
+              Xuất báo cáo đơn hàng
+            </v-card-title>
+            
+            <v-divider></v-divider>
+            
+            <v-card-text class="pa-4">
+              <p class="mb-4">Chọn loại báo cáo muốn xuất:</p>
+              
+              <v-radio-group v-model="exportType">
+                <v-radio value="all" label="Tất cả đơn hàng"></v-radio>
+                <v-radio value="filtered" label="Đơn hàng đang hiển thị"></v-radio>
+              </v-radio-group>
+              
+              <v-radio-group v-model="exportFormat" class="mt-4">
+                <v-radio value="excel" label="Excel (.xlsx)"></v-radio>
+                <v-radio value="csv" label="CSV (.csv)"></v-radio>
+              </v-radio-group>
+            </v-card-text>
+            
+            <v-card-actions class="pa-4">
+              <v-spacer></v-spacer>
+              <v-btn variant="text" @click="exportDialog = false">Hủy</v-btn>
+              <v-btn 
+                color="primary" 
+                @click="generateReport" 
+                :loading="exportLoading"
+              >
+                Xuất báo cáo
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
         <!-- Danh sách đơn hàng -->
         <v-data-table
           :headers="orderHeaders"
-          :items="orderStore.orders || []"
+          :items="filteredOrders"
           :loading="orderStore.loading"
           hover
           class="mt-2 bg-surface rounded"
+          :items-per-page="10"
+          :page="currentPage"
+          @update:page="currentPage = $event"
         >
           <template v-slot:no-data>
             <div class="text-center py-6">Không có dữ liệu đơn hàng</div>
@@ -77,7 +138,7 @@
             <div class="d-flex align-center justify-center py-2">
               <v-pagination
                 v-model="currentPage"
-                :length="Math.ceil(orderStore.pagination.total / orderStore.pagination.size) || 1"
+                :length="Math.ceil(filteredOrders.length / 10) || 1"
                 total-visible="7"
                 @update:modelValue="onPageChange"
               ></v-pagination>
@@ -436,7 +497,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useOrderStore } from '@/stores/order'
 
 const orderStore = useOrderStore()
@@ -447,6 +508,11 @@ const selectedOrderId = ref(null)
 const paymentDetailsDialog = ref(false)
 const selectedPayment = ref(null)
 const paymentLoading = ref(false)
+const exportDialog = ref(false)
+const exportType = ref('all')
+const exportFormat = ref('excel')
+const exportLoading = ref(false)
+const selectedStatus = ref(null)
 
 const orderHeaders = [
   { title: 'Mã đơn hàng', key: 'orderId', align: 'start' },
@@ -456,6 +522,36 @@ const orderHeaders = [
   { title: 'Trạng thái', key: 'orderStatus' },
   { title: 'Thao tác', key: 'actions', sortable: false, align: 'center', width: '100px' }
 ]
+
+// Danh sách trạng thái đơn hàng
+const statusOptions = [
+  { title: 'Tất cả', value: null },
+  { title: 'Đang xử lý', value: 'PROCESSING' },
+  { title: 'Đã xuất hóa đơn', value: 'COMPLETED' },
+  { title: 'Đã hủy', value: 'CANCELED' }
+]
+
+// Computed để lọc đơn hàng theo từ khóa tìm kiếm và trạng thái
+const filteredOrders = computed(() => {
+  let result = [...orderStore.orders]
+  
+  // Lọc theo từ khóa tìm kiếm
+  if (searchOrder.value) {
+    const query = searchOrder.value.toLowerCase()
+    result = result.filter(order => 
+      order.orderId.toString().includes(query) || 
+      (order.customerName && order.customerName.toLowerCase().includes(query)) ||
+      (order.employeeName && order.employeeName.toLowerCase().includes(query))
+    )
+  }
+  
+  // Lọc theo trạng thái
+  if (selectedStatus.value) {
+    result = result.filter(order => order.orderStatus === selectedStatus.value)
+  }
+  
+  return result
+})
 
 // Format tiền tệ
 const formatCurrency = (value) => {
@@ -471,7 +567,7 @@ const formatDateTime = (date) => {
 
 // Xử lý khi thay đổi trang
 const onPageChange = (page) => {
-  orderStore.fetchOrders(page - 1)
+  currentPage.value = page
 }
 
 // Lấy màu sắc trạng thái đơn hàng
@@ -561,9 +657,39 @@ const viewOrderFromPayment = (orderId) => {
   viewOrderDetails(orderId)
 }
 
+// Xuất báo cáo
+const exportReport = () => {
+  exportDialog.value = true
+}
+
+// Tạo báo cáo
+const generateReport = async () => {
+  try {
+    exportLoading.value = true
+    
+    // Sử dụng danh sách đơn hàng đã lọc nếu chọn xuất báo cáo đơn hàng đang hiển thị
+    let reportData = exportType.value === 'filtered' ? filteredOrders.value : null
+    
+    await orderStore.generateReport(exportType.value, exportFormat.value, reportData)
+    
+    // Sau khi tạo báo cáo thành công, đóng dialog
+    exportDialog.value = false
+  } catch (error) {
+    console.error('Lỗi khi tạo báo cáo:', error)
+    alert('Lỗi khi tạo báo cáo: ' + error.message)
+  } finally {
+    exportLoading.value = false
+  }
+}
+
 // Khởi tạo dữ liệu
 onMounted(async () => {
   await orderStore.fetchOrders()
+})
+
+// Watch tìm kiếm và lọc
+watch([searchOrder, selectedStatus], () => {
+  currentPage.value = 1 // Reset về trang đầu khi tìm kiếm hoặc lọc
 })
 </script>
 

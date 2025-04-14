@@ -2,9 +2,15 @@ import api from './api'
 
 export const accountService = {
   // Lấy danh sách tài khoản với phân trang
-  getAccounts(page = 0, size = 10) {
+  getAccounts(page = 0, size = 10, searchQuery = '', roleId = null, status = null) {
     return api.get('/accounts', {
-      params: { page, size }
+      params: { 
+        page, 
+        size,
+        search: searchQuery,
+        roleId: roleId,
+        status: status
+      }
     })
   },
 

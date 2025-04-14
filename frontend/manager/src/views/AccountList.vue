@@ -78,19 +78,22 @@
     <!-- Bảng danh sách tài khoản -->
     <v-data-table
       :headers="headers"
-      :items="accountStore.accounts"
+      :items="filteredAccounts"
       :loading="accountStore.loading"
       loading-text="Đang tải dữ liệu..."
       no-data-text="Không có dữ liệu"
       item-value="id"
       hover
       :items-per-page="accountStore.pageSize"
+      :page="page"
+      @update:page="page = $event" 
+      :items-per-page-options="[5, 10, 15, 20]"
       density="comfortable"
       class="elevation-0"
     >
       <!-- Cột STT -->
       <template v-slot:item.index="{ item, index }">
-        {{ accountStore.currentPage * accountStore.pageSize + index + 1 }}
+        {{ (page - 1) * accountStore.pageSize + index + 1 }}
       </template>
 
       <!-- Cột Username -->
@@ -141,9 +144,8 @@
     <div class="d-flex justify-center mt-4 pb-4">
       <v-pagination
         v-model="page"
-        :length="accountStore.totalPages"
+        :length="Math.ceil(filteredAccounts.length / accountStore.pageSize)"
         total-visible="7"
-        @update:model-value="handlePageChange"
       ></v-pagination>
     </div>
 
@@ -296,6 +298,38 @@ const hasFilters = computed(() => {
   return searchQuery.value || selectedRole.value || selectedStatus.value
 })
 
+// Computed property cho danh sách tài khoản đã lọc
+const filteredAccounts = computed(() => {
+  let result = [...accountStore.accounts]
+  
+  // Lọc theo từ khóa tìm kiếm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(account => 
+      account.username?.toLowerCase().includes(query) || 
+      account.description?.toLowerCase().includes(query)
+    )
+  }
+  
+  // Lọc theo vai trò
+  if (selectedRole.value) {
+    result = result.filter(account => account.role?.id === selectedRole.value)
+  }
+  
+  // Lọc theo trạng thái
+  if (selectedStatus.value) {
+    if (selectedStatus.value === 'active') {
+      result = result.filter(account => account.isActive === true && account.isLocked === false)
+    } else if (selectedStatus.value === 'inactive') {
+      result = result.filter(account => account.isActive === false)
+    } else if (selectedStatus.value === 'locked') {
+      result = result.filter(account => account.isLocked === true)
+    }
+  }
+  
+  return result
+})
+
 // Lấy màu tương ứng với vai trò
 function getRoleColor(roleName) {
   switch (roleName) {
@@ -332,7 +366,7 @@ let searchTimeout = null
 function debounceSearch() {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
-    loadAccounts()
+    // Không cần gọi API, chỉ cập nhật UI
   }, 500)
 }
 
@@ -341,7 +375,6 @@ function resetFilters() {
   searchQuery.value = ''
   selectedRole.value = null
   selectedStatus.value = null
-  loadAccounts()
 }
 
 // Xem chi tiết tài khoản

@@ -273,7 +273,7 @@ function completePayment() {
     // Chuẩn bị dữ liệu thanh toán
     const paymentData = {
       methodId: selectedMethod.value,
-      amount: props.total, // Luôn dùng giá trị total từ props
+      amount: cashAmount.value, // Sử dụng số tiền khách đưa thay vì tổng tiền từ server
       cashReceived: selectedMethod.value === 1 ? cashAmount.value : undefined,
       cashReturned: selectedMethod.value === 1 ? cashAmount.value - props.total : undefined,
       note: note.value

@@ -1095,9 +1095,9 @@ BEGIN
     IF NEW.status IS NULL THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Trạng thái đơn hàng không được để trống';
-    ELSEIF NEW.status <> 'PROCESSING' THEN
+    ELSEIF (OLD.status = 'COMPLETED' OR OLD.status = 'CANCELLED') AND NEW.status <> OLD.status THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Trạng thái đơn hàng không được chỉnh sửa';
+            SET MESSAGE_TEXT = 'Không thể thay đổi trạng thái của đơn hàng đã hoàn thành hoặc đã hủy';
     END IF;
 
     -- Kiểm tra tổng tiền
@@ -1124,7 +1124,6 @@ BEGIN
             SET MESSAGE_TEXT = 'Điểm không được âm';
     END IF;
 END //
-
 
 -- không cho phép xóa đơn hàng, cần xóa từ nhân viên    
 CREATE TRIGGER before_order_delete
@@ -1167,15 +1166,6 @@ CREATE TRIGGER before_payment_method_delete
     BEFORE DELETE ON payment_method
     FOR EACH ROW
 BEGIN
-    -- kiểm tra xem phương thức thanh toán có đang được sử dụng không
-    DECLARE is_used BOOLEAN;
-    SELECT EXISTS(
-        SELECT 1 FROM `payment` AS p WHERE p.payment_method_id = OLD.payment_method_id
-    ) INTO is_used;
-    IF is_used THEN
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Không thể xóa phương thức thanh toán đang được sử dụng';
-    END IF;
 END //
 
 DELIMITER ;
@@ -1196,13 +1186,13 @@ BEGIN
     END IF;
 
     -- Kiểm tra số tiền đã trả
-    IF NEW.amount_paid IS NOT NULL AND (NEW.amount_paid <> 0 OR NEW.amount_paid < 1000) THEN
+    IF NEW.amount_paid IS NOT NULL AND NEW.amount_paid <> 0 AND NEW.amount_paid < 1000 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Số tiền đã trả phải là 0 hoặc lớn hơn 1000';
     END IF;
 
     -- Kiểm tra tiền thừa
-    IF NEW.change_amount IS NOT NULL AND (NEW.change_amount <> 0 OR NEW.change_amount < 1000) THEN
+    IF NEW.change_amount IS NOT NULL AND NEW.change_amount <> 0 AND NEW.change_amount < 1000 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tiền thừa phải là 0 hoặc lớn hơn 1000';
     END IF;
@@ -1236,19 +1226,16 @@ BEGIN
     END IF;
 
     -- Kiểm tra số tiền đã trả
-    IF NEW.amount_paid IS NOT NULL AND (NEW.amount_paid <> 0 OR NEW.amount_paid < 1000) THEN
+    IF NEW.amount_paid IS NOT NULL AND NEW.amount_paid <> 0 AND NEW.amount_paid < 1000 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Số tiền đã trả phải là 0 hoặc lớn hơn 1000';
     END IF;
 
     -- Kiểm tra tiền thừa
-    IF NEW.change_amount IS NOT NULL AND (NEW.change_amount <> 0 OR NEW.change_amount < 1000) THEN
+    IF NEW.change_amount IS NOT NULL AND NEW.change_amount <> 0 AND NEW.change_amount < 1000 THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Tiền thừa phải là 0 hoặc lớn hơn 1000';
     END IF;
-
-
-
 END //
 
 DELIMITER ;
