@@ -1,12 +1,13 @@
 <template>
   <v-app>
     <Header 
+      v-if="!isLoginRoute"
       :employeeId="employeeId" 
       :employeeName="employeeName"
       :accountId="accountId"
     />
     
-    <v-main>
+    <v-main :class="{ 'login-main': isLoginRoute }">
       <router-view 
         :employeeId="employeeId"
         :employeeName="employeeName"
@@ -33,9 +34,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import Header from './components/Header.vue';
 import { useSnackbar } from './helpers/useSnackbar';
+
+// Route
+const route = useRoute();
+
+// Kiểm tra có phải là trang đăng nhập không
+const isLoginRoute = computed(() => {
+  return route.path === '/login';
+});
 
 // Snackbar
 const { snackbar } = useSnackbar();
@@ -50,6 +60,10 @@ const employeeName = ref('Phạm Văn A');
 .main-container {
   height: calc(100vh - 64px);
   overflow: hidden;
+}
+
+.login-main {
+  height: 100vh;
 }
 
 .main-content {

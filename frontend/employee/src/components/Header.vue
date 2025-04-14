@@ -102,13 +102,43 @@
           <v-list-item prepend-icon="mdi-logout" title="Đăng xuất" color="error"></v-list-item>
         </v-list>
       </v-menu>
+
+      <!-- Thêm nút đăng xuất ở cuối header -->
+      <v-btn
+        icon
+        variant="text"
+        @click="showLogoutDialog = true"
+        title="Đăng xuất"
+      >
+        <v-icon>mdi-logout</v-icon>
+      </v-btn>
     </v-app-bar>
+
+    <!-- Dialog xác nhận đăng xuất -->
+    <v-dialog v-model="showLogoutDialog" max-width="400">
+      <v-card>
+        <v-card-title class="text-h6">Xác nhận đăng xuất</v-card-title>
+        <v-card-text>
+          Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="showLogoutDialog = false">
+            Hủy
+          </v-btn>
+          <v-btn color="red-darken-1" variant="text" @click="logout" :loading="isLoggingOut">
+            Đăng xuất
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import AuthService from '../services/auth.service';
 
 const props = defineProps({
   employeeId: {
@@ -130,6 +160,10 @@ const router = useRouter();
 const drawer = ref(false);
 const currentDateTime = ref('');
 let timer = null;
+
+// State cho đăng xuất
+const showLogoutDialog = ref(false);
+const isLoggingOut = ref(false);
 
 // Tính toán đường dẫn hiện tại để active menu
 const currentRoute = computed(() => {
@@ -168,6 +202,24 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer);
 });
+
+// Hàm đăng xuất
+async function logout() {
+  isLoggingOut.value = true;
+  
+  try {
+    await AuthService.logout();
+    router.push('/login');
+  } catch (error) {
+    console.error('Lỗi khi đăng xuất:', error);
+    // Xóa thông tin đăng nhập để đảm bảo người dùng vẫn được đăng xuất
+    AuthService.clearAuth();
+    router.push('/login');
+  } finally {
+    showLogoutDialog.value = false;
+    isLoggingOut.value = false;
+  }
+}
 </script>
 
 <style scoped>

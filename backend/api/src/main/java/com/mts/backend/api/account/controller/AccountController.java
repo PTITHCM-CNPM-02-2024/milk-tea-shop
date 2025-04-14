@@ -15,6 +15,7 @@ import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,6 +44,7 @@ public class AccountController implements IController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateAccount(@PathVariable("id") Long id,
                                            @RequestBody UpdateAccountRequest request) {
         UpdateAccountCommand command = UpdateAccountCommand.builder()
