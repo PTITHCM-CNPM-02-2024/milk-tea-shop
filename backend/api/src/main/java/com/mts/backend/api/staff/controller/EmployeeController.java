@@ -11,6 +11,8 @@ import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
 import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
+import com.mts.backend.application.staff.query.GetEmpByAccountIdQuery;
+import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
@@ -108,6 +110,15 @@ public class EmployeeController implements IController {
                 .build();
         
         var result = commandBus.dispatch(command);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/account/{id}")
+    public ResponseEntity<?> getEmployeeByAccountId(@PathVariable("id") Long id) {
+        var query = GetEmpByAccountIdQuery.builder().accountId(AccountId.of(id)).build();
+        
+        var result = queryBus.dispatch(query);
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }

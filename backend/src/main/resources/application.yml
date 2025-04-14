@@ -88,6 +88,7 @@ logging:
     org.springframework: INFO
     com.myapp: DEBUG
     org.hibernate: DEBUG
+    org.springframework.security: DEBUG
     
 # Testing Environment
 ---

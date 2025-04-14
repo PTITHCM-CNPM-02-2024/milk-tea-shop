@@ -14,21 +14,24 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
-@Profile("prod")
+@Profile("dev")
 public class AuthenticationCommandHandler implements ICommandHandler<AuthenticationCommand, CommandResult> {
     private final AuthenticationManager authenticationManager;
     private final JpaAccountRepository accountRepository;
     private final IJwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
     
-    public AuthenticationCommandHandler(AuthenticationManager authenticationManager, JpaAccountRepository accountRepository, IJwtService jwtService) {
+    public AuthenticationCommandHandler (AuthenticationManager authenticationManager, JpaAccountRepository accountRepository, IJwtService jwtService, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.accountRepository = accountRepository;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**

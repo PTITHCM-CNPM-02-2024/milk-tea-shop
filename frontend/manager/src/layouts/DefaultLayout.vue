@@ -260,18 +260,57 @@
             <v-badge dot color="error" floating></v-badge>
           </v-btn>
 
-          <!-- User Profile -->
-          <v-menu location="bottom end" offset="5">
+          <!-- User Dropdown Menu -->
+          <v-menu
+            location="bottom end"
+            offset="10"
+            transition="slide-y-transition"
+          >
             <template v-slot:activator="{ props }">
-              <v-avatar v-bind="props" class="cursor-pointer" size="38">
-                <v-img src="https://cdn.vuetifyjs.com/images/john.jpg"></v-img>
+              <v-avatar
+                color="primary"
+                size="40"
+                v-bind="props"
+                class="cursor-pointer"
+              >
+                <span class="text-subtitle-1 font-weight-medium text-white">US</span>
               </v-avatar>
             </template>
-            <v-list width="200" density="compact">
-              <v-list-item prepend-icon="mdi-account-outline" title="Profile" to="/profile"></v-list-item>
-              <v-divider class="my-2"></v-divider>
-              <v-list-item prepend-icon="mdi-logout" title="Logout"></v-list-item>
-            </v-list>
+            <v-card min-width="230">
+              <v-list density="compact">
+                <v-list-item
+                  prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
+                  :title="userInfo.username || 'Admin'"
+                  subtitle="Admin"
+                >
+                  <template v-slot:append>
+                    <v-btn
+                      icon
+                      variant="text"
+                      color="medium-emphasis"
+                      size="small"
+                    >
+                      <v-icon>mdi-dots-vertical</v-icon>
+                    </v-btn>
+                  </template>
+                </v-list-item>
+              </v-list>
+              <v-divider></v-divider>
+              <v-list density="compact" nav class="py-0">
+                <v-list-item
+                  value="profile"
+                  prepend-icon="mdi-account-outline"
+                  title="Hồ sơ cá nhân"
+                  to="/profile"
+                ></v-list-item>
+                <v-list-item
+                  value="logout"
+                  prepend-icon="mdi-logout"
+                  title="Đăng xuất"
+                  @click="logout"
+                ></v-list-item>
+              </v-list>
+            </v-card>
           </v-menu>
         </v-container>
       </v-app-bar>
@@ -287,22 +326,26 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useTheme, useDisplay } from 'vuetify'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { authService } from '@/services/authService'
 
 // Setup
 const theme = useTheme()
 const route = useRoute()
 const display = useDisplay()
 const appStore = useAppStore()
+const router = useRouter()
 
 // Reactive state
 const drawer = ref(true)
 const rail = ref(false)
 const darkMode = ref(false)
+const isMobile = ref(false)
+const menuItems = ref([])
+const userInfo = ref(authService.getUserInfo() || {})
 
 // Computed
-const isMobile = computed(() => display.smAndDown.value)
 const pageTitle = computed(() => route.meta.title || 'Dashboard')
 
 // Initialize state from store
@@ -310,6 +353,7 @@ onMounted(() => {
   darkMode.value = appStore.darkMode
   rail.value = appStore.sidebarMini
   drawer.value = appStore.sidebarVisible
+  isMobile.value = display.smAndDown.value
 
   // Adjust sidebar on mobile
   if (isMobile.value) {
@@ -340,6 +384,25 @@ function toggleRail() {
 
 function toggleDarkMode() {
   darkMode.value = !darkMode.value
+}
+
+async function logout() {
+  try {
+    // Gọi API đăng xuất
+    await authService.logout()
+    
+    // Xóa dữ liệu người dùng và token
+    authService.clearAuthData()
+    
+    // Chuyển hướng đến trang đăng nhập
+    router.push('/login')
+  } catch (error) {
+    console.error('Lỗi khi đăng xuất:', error)
+    
+    // Ngay cả khi API lỗi, vẫn xóa dữ liệu và chuyển hướng
+    authService.clearAuthData()
+    router.push('/login')
+  }
 }
 </script>
 

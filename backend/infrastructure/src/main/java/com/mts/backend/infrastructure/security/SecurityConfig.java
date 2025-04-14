@@ -26,7 +26,7 @@ import java.util.List;
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
-@Profile("prod")
+@Profile("dev")
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUserDetailService jwtUserDetailService;
@@ -41,9 +41,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**",
         "/actuator/**","/swagger-ui/**")
                         .permitAll()
+                        .requestMatchers("/api/v1/**")
+                        .hasAnyRole("MANAGER", "STAFF", "CUSTOMER", "GUEST")
                         .anyRequest()
                         .authenticated())
                 .userDetailsService(jwtUserDetailService)
@@ -67,7 +70,7 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

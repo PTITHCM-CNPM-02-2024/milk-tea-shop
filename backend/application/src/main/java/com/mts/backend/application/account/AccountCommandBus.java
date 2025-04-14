@@ -4,6 +4,7 @@ import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.handler.*;
 import com.mts.backend.application.account.response.LogoutCommandHandler;
 import com.mts.backend.shared.command.AbstractCommandBus;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +21,6 @@ public class AccountCommandBus extends AbstractCommandBus {
         register(UpdateAccountCommand.class, updateAccountCommandHandler);
         register(UpdateAccountRoleCommand.class, updateAccountRoleCommandHandler);
         register(UpdateLockAccountCommand.class, lockAccountCommandHandler);
-        //register(AuthenticationCommand.class, authenticationCommandHandler);
-        //register(LogoutCommand.class, logoutCommandHandler);
         
     }
 }
