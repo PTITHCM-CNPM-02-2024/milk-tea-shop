@@ -12,6 +12,7 @@ import com.mts.backend.application.customer.command.UpdateMemberForCustomer;
 import com.mts.backend.application.customer.query.CustomerByIdQuery;
 import com.mts.backend.application.customer.query.CustomerByPhoneQuery;
 import com.mts.backend.application.customer.query.DefaultCustomerQuery;
+import com.mts.backend.application.customer.query.GetCusByAccountIdQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
@@ -133,6 +134,17 @@ public class CustomerController implements IController {
 
         var result = customerCommandBus.dispatch(command);
 
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/account/{id}")
+    public ResponseEntity<?> getAccount(@PathVariable("id") Long id) {
+        var query = GetCusByAccountIdQuery.builder()
+                .accountId(AccountId.of(id))
+                .build();
+                
+        var result = customerQueryBus.dispatch(query);
+        
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

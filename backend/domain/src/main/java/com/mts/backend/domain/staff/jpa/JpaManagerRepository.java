@@ -19,9 +19,11 @@ import java.util.Optional;
 
 @Repository
 public interface JpaManagerRepository extends JpaRepository<ManagerEntity, Long> {
+    @EntityGraph(attributePaths = {"accountEntity"})
     @Query("select m from ManagerEntity m where m.accountEntity.id = :id")
     Optional<ManagerEntity> findByAccountEntity_Id(@Param("id") @NonNull Long id);
-
+    @Query("select m from ManagerEntity m where m.accountEntity.id = :id")
+    Optional<ManagerEntity> findByAccountEntity_IdFetch(@Param("id") @NonNull Long id);
     @Query("select m from ManagerEntity m where m.email = :email")
     Optional<ManagerEntity> findByEmail(@Param("email") @NonNull Email email);
     

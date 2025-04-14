@@ -8,6 +8,7 @@ import com.mts.backend.application.staff.ManagerQueryBus;
 import com.mts.backend.application.staff.command.CreateManagerCommand;
 import com.mts.backend.application.staff.command.UpdateManagerCommand;
 import com.mts.backend.application.staff.query.DefaultManagerQuery;
+import com.mts.backend.application.staff.query.GetManagerByAccountIdQuery;
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
 import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
@@ -82,6 +83,15 @@ public class ManagerController implements IController {
                 .build();
 
         var result = queryBus.dispatch(request);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/account/{id}")
+    public ResponseEntity<?> getManagerByAccountId(@PathVariable("id") Long id) {
+        var query = GetManagerByAccountIdQuery.builder().accountId(AccountId.of(id)).build();
+        
+        var result = queryBus.dispatch(query);
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }

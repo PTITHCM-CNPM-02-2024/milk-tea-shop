@@ -54,6 +54,6 @@ public class AuthenticationCommandHandler implements ICommandHandler<Authenticat
         
         String token = jwtService.generateToken(userPrincipal);
         
-        return CommandResult.success(new AuthenticationResponse(token));
+        return CommandResult.success(new AuthenticationResponse(token, userPrincipal.getId().getValue()));
     }
 }
