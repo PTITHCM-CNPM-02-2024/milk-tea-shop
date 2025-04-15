@@ -3,6 +3,7 @@ package com.mts.backend.api.staff.controller;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.staff.request.CreateManagerRequest;
 import com.mts.backend.api.staff.request.UpdateManagerRequest;
+import com.mts.backend.application.report.ReportQueryBus;
 import com.mts.backend.application.staff.ManagerCommandBus;
 import com.mts.backend.application.staff.ManagerQueryBus;
 import com.mts.backend.application.staff.command.CreateManagerCommand;
@@ -10,15 +11,12 @@ import com.mts.backend.application.staff.command.UpdateManagerCommand;
 import com.mts.backend.application.staff.query.DefaultManagerQuery;
 import com.mts.backend.application.staff.query.GetManagerByAccountIdQuery;
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
-import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.ManagerId;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
