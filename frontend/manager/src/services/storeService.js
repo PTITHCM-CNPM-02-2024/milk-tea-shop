@@ -7,7 +7,8 @@ export const storeService = {
   },
 
   // Cập nhật thông tin cửa hàng
-  updateStoreInfo(storeData) {
-    return api.put('/store', storeData)
+  updateStoreInfo(id, storeData) {
+    console.log(id, storeData)
+    return api.put(`/store/${id}`, storeData)
   }
 } 

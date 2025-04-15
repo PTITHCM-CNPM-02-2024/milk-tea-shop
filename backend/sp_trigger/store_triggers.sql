@@ -2,7 +2,7 @@ DELIMITER //
 
 -- Before Insert Trigger
 CREATE TRIGGER before_store_insert
-BEFORE INSERT ON Store
+BEFORE INSERT ON store
 FOR EACH ROW
 BEGIN
     -- Kiểm tra giờ mở cửa phải trước giờ đóng cửa
@@ -26,7 +26,7 @@ END //
 
 -- Before Update Trigger
 CREATE TRIGGER before_store_update
-BEFORE UPDATE ON Store
+BEFORE UPDATE ON store
 FOR EACH ROW
 BEGIN
     -- Kiểm tra giờ mở cửa phải trước giờ đóng cửa

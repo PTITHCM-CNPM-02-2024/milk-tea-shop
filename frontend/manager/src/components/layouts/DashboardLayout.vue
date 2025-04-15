@@ -189,7 +189,7 @@
 
         <!-- Discounts & Promotions -->
           <v-list-item
-            title="Chương trình & Mã giảm giá"
+            title="Khuyến mãi & Mã giảm giá"
             value="discounts"
             rounded="lg"
             prepend-icon="mdi-sale"
@@ -268,8 +268,7 @@
               </v-avatar>
             </template>
             <v-list width="200" density="compact">
-              <v-list-item prepend-icon="mdi-account-outline" title="Profile"></v-list-item>
-              <v-list-item prepend-icon="mdi-cog-outline" title="Settings"></v-list-item>
+              <v-list-item prepend-icon="mdi-account-outline" title="Profile" to="/profile"></v-list-item>
               <v-divider class="my-2"></v-divider>
               <v-list-item prepend-icon="mdi-logout" title="Logout"></v-list-item>
             </v-list>

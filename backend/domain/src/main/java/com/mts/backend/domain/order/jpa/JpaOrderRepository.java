@@ -1,5 +1,6 @@
 package com.mts.backend.domain.order.jpa;
 
+import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.product.ProductPriceEntity;
@@ -12,6 +13,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +69,98 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderDiscounts.discount.couponEntity", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.productPriceEntity.productEntity", "orderTables.table", "payments.paymentMethod"})
     @Query("select o from OrderEntity o where o.id = :id")
     Optional<OrderEntity> findByIdFetch(@Param("id") Long id);
+    
+    @Query("""
+            SELECT  SUM(o.finalAmount) 
+            from OrderEntity o 
+           """)
+    BigDecimal getTotalOrderValue();
+    
+    @Query("""
+            SELECT  AVG(o.finalAmount) 
+            from OrderEntity o 
+           """)
+    BigDecimal getAvgOrderValue();
+
+    @Query("""
+            SELECT  MIN(o.finalAmount) 
+            from OrderEntity o 
+           """)
+    Money getMinOrderValue();
+    
+    @Query("""
+            SELECT  MAX(o.finalAmount) 
+            from OrderEntity o 
+           """)
+    Money getMaxOrderValue();
+    @Query("""
+    SELECT c.name AS categoryName, o.finalAmount AS finalAmount, o.id AS orderId
+    FROM OrderEntity o
+    JOIN o.orderProducts op
+    JOIN op.productPriceEntity pp
+    JOIN pp.productEntity p
+    JOIN p.categoryEntity c
+    WHERE o.orderTime BETWEEN :startDate AND :endDate
+    AND c.id = :categoryId
+    ORDER BY o.id
+    """)
+    List<Object[]> findFinalAmountsByCategoryAndDateRange(
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate,
+            @Param("categoryId") Integer categoryId
+    );
+
+    @Query("""
+    SELECT c.name AS categoryName, SUM(op.quantity * pp.price) AS totalRevenue
+    FROM OrderEntity o
+    JOIN o.orderProducts op
+    JOIN op.productPriceEntity pp
+    JOIN pp.productEntity p
+    RIGHT JOIN p.categoryEntity c
+    WHERE o.orderTime BETWEEN :startDate AND :endDate
+    GROUP BY c.name
+    ORDER BY totalRevenue DESC
+    """)
+    List<Object[]> findFinalAmountsByCategoryAndDateRange(
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate);
+
+
+    @Query("""
+    SELECT CAST(o.orderTime AS date) as get_date, SUM(o.finalAmount) as totalRevenue
+    FROM OrderEntity o
+    WHERE o.orderTime BETWEEN :fromDate AND :toDate
+    AND o.status = 'COMPLETED'
+    GROUP BY CAST(o.orderTime AS date)
+    ORDER BY get_date
+    """)
+    List<Object[]> findRevenueByTimeRange(
+            @Param("fromDate") Instant fromDate,
+            @Param("toDate") Instant toDate
+    );
+
+    @Query("""
+    SELECT
+        p.id AS maSanPham, 
+        p.name AS tenSanPham, 
+        COALESCE(c.name, 'Không có danh mục') AS danhMuc,
+        SUM(op.quantity) AS soLuongBan,
+        SUM(op.quantity * pp.price) AS doanhThu
+    FROM OrderEntity o
+    JOIN o.orderProducts op
+    JOIN op.productPriceEntity pp
+    JOIN pp.productEntity p
+    LEFT JOIN p.categoryEntity c
+    WHERE o.status = 'COMPLETED'
+    AND o.orderTime BETWEEN :fromDate AND :toDate
+    GROUP BY p.id, p.name, c.name
+    ORDER BY SUM(op.quantity) DESC
+    """)
+    List<Object[]> findTopSaleByProduct(
+            @Param("fromDate") Instant fromDate,
+            @Param("toDate") Instant toDate,
+            Pageable pageable
+    );
+    
+
 }

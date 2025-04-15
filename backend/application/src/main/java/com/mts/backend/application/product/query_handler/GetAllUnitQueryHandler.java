@@ -34,6 +34,7 @@ public class GetAllUnitQueryHandler implements IQueryHandler<DefaultUnitQuery, C
                     .id(unit.getId())
                     .symbol(unit.getSymbol().getValue())
                     .name(unit.getName().getValue())
+                    .description(unit.getDescription().orElse(null))
                     .build();
         });
         

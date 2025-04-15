@@ -13,11 +13,22 @@ export const areaTableService = {
   },
 
   createArea(areaData) {
-    return api.post('/areas', areaData)
+    const request = {
+      name: areaData.name,
+      isActive: areaData.isActive,
+      maxTable: areaData.maxTable
+    }
+    return api.post('/areas', request)
   },
 
   updateArea(id, areaData) {
-    return api.put(`/areas/${id}`, areaData)
+    const request = {
+      name: areaData.name,
+      description: areaData.description,
+      isActive: areaData.isActive,
+      maxTable: areaData.maxTable
+    }
+    return api.put(`/areas/${id}`, request)
   },
 
   deleteArea(id) {
@@ -42,11 +53,23 @@ export const areaTableService = {
   },
 
   createTable(tableData) {
-    return api.post('/service-tables', tableData)
+    const request = {
+      name: tableData.name,
+      areaId: tableData.areaId,
+      description: tableData.description || null,
+      isActive: true // Mặc định bàn mới là active
+    }
+    return api.post('/service-tables', request)
   },
 
   updateTable(id, tableData) {
-    return api.put(`/service-tables/${id}`, tableData)
+    const request = {
+      id: tableData.id,
+      name: tableData.name,
+      isActive: tableData.isActive,
+      areaId: tableData.areaId
+    }
+    return api.put(`/service-tables/${id}`, request)
   },
 
   deleteTable(id) {

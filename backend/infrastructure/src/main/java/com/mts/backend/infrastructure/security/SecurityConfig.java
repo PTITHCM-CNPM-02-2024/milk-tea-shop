@@ -26,10 +26,12 @@ import java.util.List;
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
-@Profile("prod")
+@Profile("dev")
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUserDetailService jwtUserDetailService;
+    
+    private final List<String> ALLOWED_ORIGINS = List.of("http://localhost:9090", "http://localhost:9091", "https://yourdomain.com");
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, JwtUserDetailService jwtUserDetailService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -39,9 +41,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**",
-        "/actuator/**","/swagger-ui/**")
+        "/actuator/**","/swagger-ui/**","/api/v1/reports/**")
                         .permitAll()
+                        .requestMatchers("/api/v1/**")
+                        .hasAnyRole("MANAGER", "STAFF", "CUSTOMER", "GUEST")
+                        .requestMatchers("/api/v1/managers/**")
+                        .hasRole("MANAGER")
                         .anyRequest()
                         .authenticated())
                 .userDetailsService(jwtUserDetailService)
@@ -59,7 +66,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://yourdomain.com"));
+        configuration.setAllowedOrigins(ALLOWED_ORIGINS);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);

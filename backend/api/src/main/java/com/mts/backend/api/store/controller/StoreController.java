@@ -14,10 +14,13 @@ import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.value_object.Address;
 import com.mts.backend.domain.store.value_object.StoreName;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/v1/store")
@@ -32,6 +35,7 @@ public class StoreController implements IController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
                 .name(StoreName.builder().value(request.getName()).build())
@@ -40,8 +44,8 @@ public class StoreController implements IController {
                 .email(Email.builder().value(request.getEmail()).build())
                 .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
-                .openTime(LocalDateTime.parse(request.getOpenTime()).toLocalTime())
-                .closeTime(LocalDateTime.parse(request.getCloseTime()).toLocalTime())
+                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm")))
+                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm")))
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -50,18 +54,18 @@ public class StoreController implements IController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,
-                                                      @RequestBody UpdateStoreRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,  @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
                 .id(StoreId.of(id))
                 .name(StoreName.builder().value(request.getName()).build())
                 .address(Address.builder().value(request.getAddress()).build())
-                .phone(PhoneNumber.builder().value(request.getAddress()).build())
-                .email(Email.builder().value(request.getName()).build())
+                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .email(Email.builder().value(request.getEmail()).build())
                 .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
-                .openTime(LocalDateTime.parse(request.getOpenTime()).toLocalTime())
-                .closeTime(LocalDateTime.parse(request.getCloseTime()).toLocalTime())
+                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm")))
+                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm")))    
                 .build();
         
         var result = commandBus.dispatch(command);

@@ -3,7 +3,9 @@ import { useTheme } from 'vuetify'
 import { onMounted, ref, watch, computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useDisplay } from 'vuetify'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import BlankLayout from '@/layouts/BlankLayout.vue'
 // import Login from './components/MainLayout/Login.vue'
 // import { HomeIcon, Cog6ToothIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/vue/24/outline'
 // import Posdasboard from './components/MainLayout/SideBar.vue'
@@ -49,10 +51,18 @@ const toggleRail = () => {
 
 // Lấy tên route hiện tại để hiển thị trên header
 const currentRouteName = computed(() => route.meta.title || route.name || 'Dashboard')
+
+// Xác định layout nào sẽ được sử dụng
+const layout = computed(() => {
+  const layoutName = route.meta.layout || 'default'
+  return layoutName === 'blank' ? BlankLayout : DefaultLayout
+})
 </script>
 
 <template>
-  <router-view />
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
 <style>

@@ -1,31 +1,28 @@
 <template>
-  <dashboard-layout>
-    <v-card>
-      <v-tabs
-        v-model="activeTab"
-        color="primary"
-        align-tabs="start"
-        class="border-b"
-      >
-        <v-tab :value="0" to="/account/list">
-          <v-icon start>mdi-account-multiple</v-icon>
-          Danh sách tài khoản
-        </v-tab>
-        <v-tab :value="1" to="/account/roles">
-          <v-icon start>mdi-shield-account</v-icon>
-          Vai trò người dùng
-        </v-tab>
-      </v-tabs>
+  <v-card>
+    <v-tabs
+      v-model="activeTab"
+      color="primary"
+      align-tabs="start"
+      class="border-b"
+    >
+      <v-tab :value="0" to="/account/list">
+        <v-icon start>mdi-account-multiple</v-icon>
+        Danh sách tài khoản
+      </v-tab>
+      <v-tab :value="1" to="/account/roles">
+        <v-icon start>mdi-shield-account</v-icon>
+        Vai trò người dùng
+      </v-tab>
+    </v-tabs>
 
-      <router-view></router-view>
-    </v-card>
-  </dashboard-layout>
+    <router-view></router-view>
+  </v-card>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import DashboardLayout from '@/components/layouts/DashboardLayout.vue'
 
 const route = useRoute()
 const activeTab = ref(0)

@@ -16,6 +16,7 @@ import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class OrderController implements IController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> createOrder(@RequestBody OrderBaseRequest request) {
 
         var command = CreateOrderCommand.builder()
@@ -83,6 +85,7 @@ public class OrderController implements IController {
 
 
     @PutMapping("{orderId}/cancel")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> cancelOrder(@PathVariable("orderId") Long orderId) {
         var command = CancelledOrderCommand.builder()
                 .id(OrderId.of(orderId))
@@ -95,6 +98,7 @@ public class OrderController implements IController {
     }
     
     @PostMapping("/utilities/calculate")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> calculateOrder(@RequestBody OrderBaseRequest request) {
 
         var command = CalculateOrderCommand.builder()
@@ -127,6 +131,7 @@ public class OrderController implements IController {
     }
     
     @PutMapping("{orderId}/checkout")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> checkoutOrder(@PathVariable("orderId") Long orderId) {
         var command = CheckOutOrderCommand.builder()
                 .orderId(OrderId.of(orderId))
@@ -139,6 +144,7 @@ public class OrderController implements IController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<?> getAllOrders(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultOrderQuery.builder()
@@ -153,6 +159,7 @@ public class OrderController implements IController {
     
 
     @GetMapping("/{orderId}")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<?> getOrderById(@PathVariable("orderId") Long orderId) {
         var command = OrderByIdQuery.builder()
                 .orderId(OrderId.of(orderId))

@@ -22,6 +22,10 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
   @Query("select c from CustomerEntity c where c.accountEntity.id = :id")
   Optional<CustomerEntity> findByAccountEntity_Id(@Param("id") Long id);
 
+  @EntityGraph(attributePaths = {"membershipTypeEntity", "accountEntity"})
+  @Query("select c from CustomerEntity c where c.accountEntity.id = :id")
+  Optional<CustomerEntity> findByAccountEntity_IdFetch(@Param("id") Long id);
+
   @Query("select (count(c) > 0) from CustomerEntity c where c.accountEntity.id = :id")
   boolean existsByAccountEntity_Id(@Param("id") @NonNull Long id);
 

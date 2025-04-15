@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,4 +19,5 @@ public class AccountDetailResponse {
     private Boolean isActive;
     private Boolean isLocked;
     private RoleDetailResponse role;
+    private Instant lastLogin;
 }

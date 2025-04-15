@@ -3,16 +3,29 @@ import Dashboard from '@/views/Dashboard.vue'
 import AccountManagementLayout from '@/views/AccountManagementLayout.vue'
 import AccountList from '@/views/AccountList.vue'
 import RoleManagement from '@/views/RoleManagement.vue'
+import Login from '@/views/Login.vue'
+import { authService } from '@/services/authService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: Login,
+      meta: {
+        title: 'Đăng nhập',
+        layout: 'blank',
+        requiresGuest: true
+      }
+    },
+    {
       path: '/',
       name: 'dashboard',
       component: Dashboard,
       meta: {
-        title: 'Dashboard'
+        title: 'Dashboard',
+        requiresAuth: true
       }
     },
     {
@@ -77,6 +90,8 @@ const router = createRouter({
     {
       path: '/users',
       component: () => import('@/views/UserManagementLayout.vue'),
+      meta: {
+      },
       children: [
         {
           path: '',
@@ -151,8 +166,48 @@ const router = createRouter({
         title: 'Quản lý khuyến mãi',
         requiresAuth: true
       }
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/Profile/ProfileView.vue'),
+      meta: {
+        title: 'Hồ sơ cá nhân',
+        requiresAuth: true,
+        layout: 'default'
+      }
     }
   ]
+})
+
+// Navigation Guards
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = authService.isAuthenticated()
+  
+  // Cập nhật tiêu đề trang
+  document.title = to.meta.title ? `${to.meta.title} - Milk Tea Shop` : 'Milk Tea Shop'
+  
+  // Kiểm tra route yêu cầu đăng nhập
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      // Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
+      next({ name: 'login' })
+    } else {
+      next()
+    }
+  } 
+  // Kiểm tra route dành cho khách (chưa đăng nhập)
+  else if (to.matched.some(record => record.meta.requiresGuest)) {
+    if (isAuthenticated) {
+      // Chuyển hướng đến trang dashboard nếu đã đăng nhập
+      next({ name: 'dashboard' })
+    } else {
+      next()
+    }
+  } else {
+    // Route không có yêu cầu xác thực, cho phép truy cập
+    next()
+  }
 })
 
 export default router

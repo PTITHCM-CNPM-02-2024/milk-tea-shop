@@ -4,6 +4,7 @@ import com.mts.backend.api.common.IController;
 import com.mts.backend.api.product.request.CreateCategoryRequest;
 import com.mts.backend.application.product.CategoryCommandBus;
 import com.mts.backend.application.product.command.CreateCategoryCommand;
+import com.mts.backend.application.product.command.DeleteCatByIdCommand;
 import com.mts.backend.application.product.command.UpdateCategoryCommand;
 import com.mts.backend.application.product.query.CatByIdQuery;
 import com.mts.backend.application.product.query.DefaultCategoryQuery;
@@ -12,6 +13,8 @@ import com.mts.backend.application.product.CategoryQueryBus;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.value_object.CategoryName;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
@@ -30,6 +33,7 @@ public class CategoryController implements IController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) {
         CreateCategoryCommand createCategoryCommand = CreateCategoryCommand.builder()
                 .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
@@ -42,6 +46,7 @@ public class CategoryController implements IController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateCategory(@PathVariable("id") Integer id,
                                             @RequestBody CreateCategoryRequest createCategoryRequest) {
         UpdateCategoryCommand createCategoryCommand = UpdateCategoryCommand.builder()
@@ -55,6 +60,7 @@ public class CategoryController implements IController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllCategory(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
@@ -70,6 +76,7 @@ public class CategoryController implements IController {
     
     
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCategoryById(@PathVariable("id") Integer id) {
         Objects.requireNonNull(id, "Category ID must not be null");
 
@@ -80,6 +87,7 @@ public class CategoryController implements IController {
     
     
     @GetMapping("/{id}/products")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCategoryProducts(@PathVariable("id") Integer id,
                                                  @RequestParam(value = "availableOrdered", required = false) Boolean availableOrdered,
                                                  @RequestParam(value = "page", defaultValue = "0") Integer page,
@@ -95,5 +103,16 @@ public class CategoryController implements IController {
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
 
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") Integer id) {
+        DeleteCatByIdCommand command = DeleteCatByIdCommand.builder()
+                .id(CategoryId.of(id))
+                .build();
+        var result = categoryCommandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

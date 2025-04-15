@@ -43,7 +43,7 @@ public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuer
     private ManagerEntity mustExistManager(ManagerId id){
         Objects.requireNonNull(id, "Manager id is required");
         
-        return managerRepository.findByIdWithJoinFetch(id)
+        return managerRepository.findByIdWithJoinFetch(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Quản lý không tồn tại"));
     }
     

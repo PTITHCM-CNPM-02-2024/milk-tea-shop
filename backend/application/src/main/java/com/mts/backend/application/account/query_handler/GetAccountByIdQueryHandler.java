@@ -37,6 +37,9 @@ public class GetAccountByIdQueryHandler implements IQueryHandler<AccountByIdQuer
                         .name(account.getRoleEntity().getName().getValue())
                         .description(account.getRoleEntity().getDescription().orElse(null))
                         .build())
+                .lastLogin(account.getLastLogin().orElse(null))
+                .isActive(account.getActive().orElse(null))
+                .isLocked(account.getLocked())
                 .build();
 
         return CommandResult.success(accountDetailResponse);

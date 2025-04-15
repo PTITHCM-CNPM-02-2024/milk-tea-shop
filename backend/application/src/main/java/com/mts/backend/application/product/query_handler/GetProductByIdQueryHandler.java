@@ -31,6 +31,7 @@ public class GetProductByIdQueryHandler implements IQueryHandler<ProdByIdQuery, 
                 .name(result.getName().getValue())
                 .image_url(result.getImagePath())
                 .signature(result.getSignature())
+                .available(result.getAvailable())
                 .category(result.getCategoryEntity().map(category -> CategoryDetailResponse.builder()
                         .id(category.getId())
                         .name(category.getName().getValue())

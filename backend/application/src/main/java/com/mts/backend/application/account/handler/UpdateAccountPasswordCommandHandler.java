@@ -41,7 +41,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
             throw new DomainException("Mật khẩu mới và xác nhận mật khẩu không khớp");
         }
         
-        if (passwordEncoder.matches(command.getOldPassword().getValue(), account.getPasswordHash().getValue())) {
+        if (!passwordEncoder.matches(command.getOldPassword().getValue(), account.getPasswordHash().getValue())) {
             throw new DomainException("Mật khẩu cũ không chính xác");
         }
         

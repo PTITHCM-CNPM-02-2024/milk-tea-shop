@@ -7,6 +7,20 @@ const apiClient = axios.create({
   },
 });
 
+// Thêm interceptor cho request để thêm token xác thực
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Thêm xử lý interceptor nếu cần thiết
 // Ví dụ: Xử lý token authentication, error handling, etc.
 // Thêm interceptor để xử lý response format
@@ -40,7 +54,20 @@ apiClient.interceptors.response.use(
       
       if (error.response) {
         // Khi có phản hồi từ server nhưng là lỗi
-        if (error.response.data) {
+        if (error.response.status === 401) {
+          // Trường hợp token hết hạn hoặc không hợp lệ
+          localStorage.removeItem('token');
+          localStorage.removeItem('accountId');
+          localStorage.removeItem('employeeId');
+          
+          // Thông báo cho người dùng
+          errorMessage = 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.';
+          
+          // Chuyển đến trang đăng nhập
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+        } else if (error.response.data) {
           if (typeof error.response.data === 'string') {
             // Nếu phản hồi lỗi là chuỗi
             errorMessage = error.response.data;

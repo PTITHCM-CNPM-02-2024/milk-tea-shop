@@ -11,9 +11,9 @@
       
       <v-btn 
         color="primary" 
-        prepend-icon="mdi-ruler-square-compass" 
         @click="openAddDialog"
       >
+        <v-icon start>mdi-ruler-square-compass</v-icon>
         Thêm mới
       </v-btn>
     </div>
@@ -87,21 +87,23 @@
               <div class="d-flex gap-2">
                 <!-- Nút chỉnh sửa -->
                 <v-btn
-                  icon="mdi-pencil"
                   size="small"
                   color="primary"
                   variant="text"
                   @click="openEditSizeDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
                 
                 <!-- Nút xóa -->
                 <v-btn
-                  icon="mdi-delete"
                   size="small"
                   color="error"
                   variant="text"
                   @click="openDeleteSizeDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
               </div>
             </template>
           </v-data-table>
@@ -171,21 +173,23 @@
               <div class="d-flex gap-2">
                 <!-- Nút chỉnh sửa -->
                 <v-btn
-                  icon="mdi-pencil"
                   size="small"
                   color="primary"
                   variant="text"
                   @click="openEditUnitDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
                 
                 <!-- Nút xóa -->
                 <v-btn
-                  icon="mdi-delete"
                   size="small"
                   color="error"
                   variant="text"
                   @click="openDeleteUnitDialog(item)"
-                ></v-btn>
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
               </div>
             </template>
           </v-data-table>
@@ -223,6 +227,15 @@
               :rules="[v => !!v || 'Vui lòng nhập tên kích thước']"
               class="mb-3"
             ></v-text-field>
+            
+            <v-textarea
+              v-model="editedSize.description"
+              label="Mô tả"
+              variant="outlined"
+              rows="3"
+              auto-grow
+              class="mb-3"
+            ></v-textarea>
             
             <v-select
               v-model="editedSize.unitId"
@@ -281,6 +294,15 @@
               :rules="[v => !!v || 'Vui lòng nhập tên đơn vị tính']"
               class="mb-3"
             ></v-text-field>
+            
+            <v-textarea
+              v-model="editedUnit.description"
+              label="Mô tả"
+              variant="outlined"
+              rows="3"
+              auto-grow
+              class="mb-3"
+            ></v-textarea>
             
             <v-text-field
               v-model="editedUnit.symbol"
@@ -346,7 +368,9 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000">
       {{ snackbar.message }}
       <template v-slot:actions>
-        <v-btn variant="text" icon="mdi-close" @click="snackbar.show = false"></v-btn>
+        <v-btn variant="text" @click="snackbar.show = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </template>
     </v-snackbar>
   </div>
@@ -374,6 +398,7 @@ const editMode = ref(false)
 const editedSize = ref({
   id: null,
   name: '',
+  description: '',
   unitId: null,
   quantity: 0
 })
@@ -381,6 +406,7 @@ const editedSize = ref({
 const editedUnit = ref({
   id: null,
   name: '',
+  description: '',
   symbol: ''
 })
 
@@ -397,6 +423,7 @@ const unitForm = ref(null)
 const sizeHeaders = [
   { title: 'STT', key: 'index', width: '80px', sortable: false },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
+  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Đơn vị tính', key: 'unitId', align: 'start', sortable: false },
   { title: 'Số lượng', key: 'quantity', align: 'start', sortable: true, width: '100px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '120px' }
@@ -406,6 +433,7 @@ const sizeHeaders = [
 const unitHeaders = [
   { title: 'STT', key: 'index', width: '80px', sortable: false },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
+  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Ký hiệu', key: 'symbol', align: 'start', sortable: true, width: '100px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '120px' }
 ]
@@ -479,6 +507,7 @@ function openAddDialog() {
     editedSize.value = {
       id: null,
       name: '',
+      description: '',
       unitId: null,
       quantity: 0
     }
@@ -487,6 +516,7 @@ function openAddDialog() {
     editedUnit.value = {
       id: null,
       name: '',
+      description: '',
       symbol: ''
     }
     unitDialog.value = true
@@ -502,6 +532,7 @@ function openEditSizeDialog(item) {
 
 // Mở dialog chỉnh sửa đơn vị tính
 function openEditUnitDialog(item) {
+  console.log(item) 
   editMode.value = true
   editedUnit.value = { ...item }
   unitDialog.value = true

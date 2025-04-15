@@ -37,6 +37,7 @@ public class GetAllSizeQueryHandler implements IQueryHandler<DefaultSizeQuery, C
                     .name(size.getName().getValue())
                     .unitId(size.getUnit().getId())
                     .quantity(size.getQuantity().getValue())
+                    .description(size.getDescription().orElse(null))
                     .build();
         });
         

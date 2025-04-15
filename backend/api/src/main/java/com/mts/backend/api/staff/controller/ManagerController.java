@@ -3,19 +3,19 @@ package com.mts.backend.api.staff.controller;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.staff.request.CreateManagerRequest;
 import com.mts.backend.api.staff.request.UpdateManagerRequest;
+import com.mts.backend.application.report.ReportQueryBus;
 import com.mts.backend.application.staff.ManagerCommandBus;
 import com.mts.backend.application.staff.ManagerQueryBus;
 import com.mts.backend.application.staff.command.CreateManagerCommand;
 import com.mts.backend.application.staff.command.UpdateManagerCommand;
 import com.mts.backend.application.staff.query.DefaultManagerQuery;
+import com.mts.backend.application.staff.query.GetManagerByAccountIdQuery;
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
-import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.ManagerId;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,14 +74,23 @@ public class ManagerController implements IController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var request = DefaultManagerQuery.builder()
                 .page(page)
                 .size(size)
                 .build();
 
         var result = queryBus.dispatch(request);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/account/{id}")
+    public ResponseEntity<?> getManagerByAccountId(@PathVariable("id") Long id) {
+        var query = GetManagerByAccountIdQuery.builder().accountId(AccountId.of(id)).build();
+        
+        var result = queryBus.dispatch(query);
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }

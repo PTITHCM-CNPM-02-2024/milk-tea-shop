@@ -3,7 +3,7 @@ DELIMITER //
 
 -- Kiểm tra trước khi thêm phương thức thanh toán
 CREATE TRIGGER before_payment_method_insert
-BEFORE INSERT ON PaymentMethod
+BEFORE INSERT ON payment_method
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên phương thức thanh toán
@@ -15,7 +15,7 @@ END //
 
 -- Kiểm tra trước khi cập nhật phương thức thanh toán
 CREATE TRIGGER before_payment_method_update
-BEFORE UPDATE ON PaymentMethod
+BEFORE UPDATE ON payment_method
 FOR EACH ROW
 BEGIN
     -- Kiểm tra tên phương thức thanh toán
@@ -27,9 +27,18 @@ END //
 
 -- Kiểm tra trước khi xóa phương thức thanh toán
 CREATE TRIGGER before_payment_method_delete
-BEFORE DELETE ON PaymentMethod
+BEFORE DELETE ON payment_method
 FOR EACH ROW
 BEGIN
+    -- kiểm tra xem phương thức thanh toán có đang được sử dụng không
+    DECLARE is_used BOOLEAN;
+    SELECT EXISTS(
+        SELECT 1 FROM `payment` AS p WHERE p.payment_method_id = OLD.payment_method_id
+    ) INTO is_used;
+    IF is_used THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Không thể xóa phương thức thanh toán đang được sử dụng';
+    END IF;
 END //
 
 DELIMITER ;

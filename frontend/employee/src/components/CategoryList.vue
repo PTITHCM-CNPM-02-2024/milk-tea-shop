@@ -143,53 +143,6 @@ function getCategoryImage(category) {
   return null;
 }
 
-// Lấy giá thấp nhất cho một danh mục
-function getCategoryMinPrice(category) {
-  // Ưu tiên sử dụng allProducts (tất cả sản phẩm) nếu có
-  const productsSource = props.allProducts && props.allProducts.length > 0 ? props.allProducts : props.products;
-  
-  if (!productsSource || productsSource.length === 0) return null;
-  
-  const categoryId = typeof category === 'object' ? category.id : category;
-  
-  // Xử lý các trường hợp đặc biệt
-  if (categoryId === 'all' || categoryId === 'null' || categoryId === null) {
-    return null;
-  }
-  
-  // Tìm tất cả sản phẩm thuộc danh mục này (dựa vào catId)
-  const productsInCategory = productsSource.filter(product => {
-    return product.catId === categoryId || 
-           (product.catId && categoryId && product.catId.toString() === categoryId.toString());
-  });
-  
-  if (productsInCategory.length === 0) return null;
-  
-  // Tìm giá thấp nhất từ tất cả sản phẩm trong danh mục
-  const minPrice = Math.min(...productsInCategory.map(product => {
-    // Ưu tiên sử dụng minPrice nếu có
-    if (product.minPrice !== undefined && product.minPrice !== null) {
-      return parseFloat(product.minPrice);
-    }
-    
-    // Nếu không có minPrice, kiểm tra mảng prices
-    if (product.prices && Array.isArray(product.prices) && product.prices.length > 0) {
-      const prices = product.prices.map(p => parseFloat(p.price || 0));
-      return Math.min(...prices);
-    }
-    
-    return Infinity;
-  }));
-  
-  return minPrice !== Infinity ? minPrice : null;
-}
-
-// Format số thành định dạng tiền tệ VND
-function formatPrice(price) {
-  if (price === null || price === undefined) return '';
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-}
-
 function getCategoryIcon(category) {
   // Trả về icon phù hợp dựa vào tên category (dùng làm backup khi không có ảnh)
   const name = getCategoryDisplayName(category).toLowerCase();

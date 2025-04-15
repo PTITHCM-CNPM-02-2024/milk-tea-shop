@@ -42,7 +42,12 @@ public class CouponEntity extends BaseEntity<Long> {
     @Comment("Mô tả")
     @Column(name = "description", length = 1000)
     private String description;
-    
+
+    @Setter
+    @Getter
+    @OneToOne(mappedBy = "couponEntity")
+    private DiscountEntity discount;
+
     public boolean changeDescription(String description){
         if (Objects.equals(this.description, description)){
             return false;

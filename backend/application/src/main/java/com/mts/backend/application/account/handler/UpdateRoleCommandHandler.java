@@ -35,6 +35,8 @@ public class UpdateRoleCommandHandler implements ICommandHandler<UpdateRoleComma
             verifyUniqueRoleName(command.getId(), role.getName());
         }
         
+        role.changeDescription(command.getDescription().orElse(null));
+        
         
         return CommandResult.success(role.getId());
     }

@@ -8,7 +8,7 @@
           Quản lý thông tin nhân viên và phân quyền truy cập
         </p>
       </div>
-      
+
       <v-btn
         color="primary"
         prepend-icon="mdi-account-plus"
@@ -18,7 +18,7 @@
         Thêm nhân viên
       </v-btn>
     </div>
-    
+
     <!-- Alert hiển thị lỗi nếu có -->
     <v-alert
       v-if="employeeStore.error"
@@ -29,13 +29,13 @@
     >
       {{ employeeStore.error }}
     </v-alert>
-    
+
     <!-- Card danh sách nhân viên -->
     <v-card class="mx-4">
       <v-card-title class="d-flex align-center py-3">
         <span class="text-h6">Danh sách nhân viên</span>
         <v-spacer></v-spacer>
-        
+
         <!-- Tìm kiếm -->
         <v-text-field
           v-model="searchQuery"
@@ -49,26 +49,30 @@
           @update:model-value="debounceSearch"
         ></v-text-field>
       </v-card-title>
-      
+
       <v-divider></v-divider>
-      
+
       <v-card-text class="pa-0">
         <!-- Bảng nhân viên -->
         <v-data-table
           :headers="headers"
-          :items="employeeStore.employees"
+          :items="filteredEmployees"
           :loading="employeeStore.loading"
           loading-text="Đang tải dữ liệu..."
           no-data-text="Không có dữ liệu"
           item-value="id"
           hover
           class="elevation-0"
+          :items-per-page="10"
+          :page="page"
+          @update:page="page = $event"
+          :items-per-page-options="[5, 10, 15, 20]"
         >
           <!-- ID column -->
           <template v-slot:item.id="{ item }">
             <span class="text-caption">#{{ item.id }}</span>
           </template>
-          
+
           <!-- Tên nhân viên -->
           <template v-slot:item.fullName="{ item }">
             <div class="d-flex align-center">
@@ -81,7 +85,7 @@
               </div>
             </div>
           </template>
-          
+
           <!-- Giới tính -->
           <template v-slot:item.gender="{ item }">
             <v-chip
@@ -93,50 +97,50 @@
               {{ getGenderText(item.gender) }}
             </v-chip>
           </template>
-          
+
           <!-- Hành động -->
           <template v-slot:item.actions="{ item }">
             <div class="d-flex gap-2">
-              <v-btn 
+              <v-btn
                 icon="mdi-pencil"
-                size="small" 
-                color="primary" 
-                variant="text" 
+                size="small"
+                color="primary"
+                variant="text"
                 @click="openEditDialog(item)"
               ></v-btn>
-              <v-btn 
+              <v-btn
                 icon="mdi-delete"
-                size="small" 
-                color="error" 
-                variant="text" 
+                size="small"
+                color="error"
+                variant="text"
                 @click="openDeleteDialog(item)"
               ></v-btn>
             </div>
           </template>
         </v-data-table>
-        
+
         <!-- Phân trang -->
         <div class="d-flex justify-center py-4">
           <v-pagination
-            v-if="employeeStore.totalEmployees > 0"
+            v-if="totalFilteredPages > 0"
             v-model="page"
-            :length="employeeStore.totalPages"
+            :length="totalFilteredPages"
             :total-visible="7"
             @update:model-value="handlePageChange"
           ></v-pagination>
         </div>
       </v-card-text>
     </v-card>
-    
+
     <!-- Dialog quản lý nhân viên -->
     <v-dialog v-model="employeeDialog" max-width="1000px" persistent>
       <v-card>
         <v-card-title class="text-h5 font-weight-bold pa-4">
           {{ editMode ? 'Chỉnh sửa thông tin nhân viên' : 'Thêm nhân viên mới' }}
         </v-card-title>
-        
+
         <v-divider></v-divider>
-        
+
         <v-card-text class="pa-0">
           <v-tabs v-model="activeTab" bg-color="primary">
             <v-tab value="info">
@@ -156,7 +160,7 @@
               Phân quyền
             </v-tab>
           </v-tabs>
-          
+
           <v-window v-model="activeTab">
             <!-- Tab thông tin nhân viên -->
             <v-window-item value="info">
@@ -171,7 +175,7 @@
                         :rules="[v => !!v || 'Vui lòng nhập họ']"
                       ></v-text-field>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.lastName"
@@ -180,7 +184,7 @@
                         :rules="[v => !!v || 'Vui lòng nhập tên']"
                       ></v-text-field>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.email"
@@ -192,7 +196,7 @@
                         ]"
                       ></v-text-field>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.phone"
@@ -204,7 +208,7 @@
                         ]"
                       ></v-text-field>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <v-select
                         v-model="editedEmployee.gender"
@@ -214,7 +218,7 @@
                         :rules="[v => !!v || 'Vui lòng chọn giới tính']"
                       ></v-select>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.position"
@@ -223,7 +227,7 @@
                         :rules="[v => !!v || 'Vui lòng nhập chức vụ']"
                       ></v-text-field>
                     </v-col>
-                    
+
                     <template v-if="!editMode">
                       <v-col cols="12" md="6">
                         <v-text-field
@@ -233,7 +237,7 @@
                           :rules="[v => !!v || 'Vui lòng nhập tên đăng nhập']"
                         ></v-text-field>
                       </v-col>
-                      
+
                       <v-col cols="12" md="6">
                         <v-text-field
                           v-model="editedEmployee.password"
@@ -243,7 +247,7 @@
                           :rules="[v => !!v || 'Vui lòng nhập mật khẩu']"
                         ></v-text-field>
                       </v-col>
-                      
+
                       <v-col cols="12">
                         <v-select
                           v-model="editedEmployee.roleId"
@@ -258,7 +262,7 @@
                 </v-form>
               </v-container>
             </v-window-item>
-            
+
             <!-- Tab thông tin tài khoản -->
             <v-window-item value="account">
               <v-container class="pa-4">
@@ -269,7 +273,7 @@
                         {{ getInitials(employeeDetail.firstName, employeeDetail.lastName) }}
                       </span>
                     </v-avatar>
-                    
+
                     <div>
                       <h2 class="text-h5 mb-1">{{ employeeDetail.firstName }} {{ employeeDetail.lastName }}</h2>
                       <div class="d-flex align-center">
@@ -286,13 +290,13 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <v-divider class="mb-4"></v-divider>
-                  
+
                   <v-row>
                     <v-col cols="12" md="6">
                       <h3 class="text-subtitle-1 font-weight-bold mb-3">Thông tin cá nhân</h3>
-                      
+
                       <v-list density="compact">
                         <v-list-item>
                           <template v-slot:prepend>
@@ -301,7 +305,7 @@
                           <v-list-item-title>Email</v-list-item-title>
                           <v-list-item-subtitle>{{ employeeDetail.email }}</v-list-item-subtitle>
                         </v-list-item>
-                        
+
                         <v-list-item>
                           <template v-slot:prepend>
                             <v-icon color="primary" class="mr-2">mdi-phone</v-icon>
@@ -309,7 +313,7 @@
                           <v-list-item-title>Số điện thoại</v-list-item-title>
                           <v-list-item-subtitle>{{ employeeDetail.phone }}</v-list-item-subtitle>
                         </v-list-item>
-                        
+
                         <v-list-item>
                           <template v-slot:prepend>
                             <v-icon color="primary" class="mr-2">mdi-briefcase</v-icon>
@@ -319,10 +323,10 @@
                         </v-list-item>
                       </v-list>
                     </v-col>
-                    
+
                     <v-col cols="12" md="6">
                       <h3 class="text-subtitle-1 font-weight-bold mb-3">Thông tin tài khoản</h3>
-                      
+
                       <v-list density="compact">
                         <v-list-item>
                           <template v-slot:prepend>
@@ -331,7 +335,7 @@
                           <v-list-item-title>Tài khoản</v-list-item-title>
                           <v-list-item-subtitle>{{ accountDetail.username }}</v-list-item-subtitle>
                         </v-list-item>
-                        
+
                         <v-list-item>
                           <template v-slot:prepend>
                             <v-icon color="primary" class="mr-2">mdi-shield-account</v-icon>
@@ -346,29 +350,70 @@
                             </div>
                           </v-list-item-subtitle>
                         </v-list-item>
+
+                        <v-list-item>
+                          <template v-slot:prepend>
+                            <v-icon color="primary" class="mr-2">mdi-account-check</v-icon>
+                          </template>
+                          <v-list-item-title>Trạng thái hoạt động</v-list-item-title>
+                          <v-list-item-subtitle>
+                            <v-chip 
+                              size="small" 
+                              :color="accountDetail.isActive ? 'success' : 'warning'" 
+                              class="mt-1"
+                            >
+                              {{ accountDetail.isActive ? 'Đang hoạt động' : 'Vô hiệu hóa' }}
+                            </v-chip>
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                        
+                        <v-list-item>
+                          <template v-slot:prepend>
+                            <v-icon color="primary" class="mr-2">mdi-lock</v-icon>
+                          </template>
+                          <v-list-item-title>Trạng thái khóa</v-list-item-title>
+                          <v-list-item-subtitle>
+                            <v-chip 
+                              size="small" 
+                              :color="accountDetail.isLocked ? 'error' : 'success'" 
+                              class="mt-1"
+                            >
+                              {{ accountDetail.isLocked ? 'Đã khóa' : 'Không khóa' }}
+                            </v-chip>
+                          </v-list-item-subtitle>
+                        </v-list-item>
                       </v-list>
                     </v-col>
                   </v-row>
 
-                  <div class="d-flex gap-2 mt-4">
-                    <v-btn 
-                      color="indigo" 
-                      variant="outlined" 
+                  <div class="d-flex gap-2 mt-4 flex-column">
+                    <v-btn
+                      color="indigo"
+                      variant="outlined"
                       @click="activeTab = 'role'; initRoleChange()"
-                      block
+                      class="mb-3"
                     >
                       <v-icon start>mdi-shield-edit</v-icon>
                       Đổi vai trò
                     </v-btn>
+
+                    <v-btn
+                      :color="accountDetail.isLocked ? 'success' : 'error'"
+                      variant="outlined"
+                      @click="toggleAccountLockStatus"
+                    >
+                      <v-icon start>{{ accountDetail.isLocked ? 'mdi-lock-open' : 'mdi-lock' }}</v-icon>
+                      {{ accountDetail.isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản' }}
+                    </v-btn>
                   </div>
                 </div>
-                
+
                 <v-alert v-else type="info" variant="tonal" class="mb-3">
                   Nhân viên chưa có tài khoản trong hệ thống
                 </v-alert>
               </v-container>
             </v-window-item>
-            
+
             <!-- Tab đổi mật khẩu -->
             <v-window-item value="password">
               <v-container class="pa-4">
@@ -380,7 +425,7 @@
                     variant="outlined"
                     :rules="[v => !!v || 'Vui lòng nhập mật khẩu cũ']"
                   ></v-text-field>
-                  
+
                   <v-text-field
                     v-model="passwordChange.newPassword"
                     label="Mật khẩu mới"
@@ -391,7 +436,7 @@
                       v => (v && v.length >= 6) || 'Mật khẩu phải có ít nhất 6 ký tự'
                     ]"
                   ></v-text-field>
-                  
+
                   <v-text-field
                     v-model="passwordChange.confirmPassword"
                     label="Xác nhận mật khẩu mới"
@@ -402,7 +447,7 @@
                       v => v === passwordChange.newPassword || 'Mật khẩu xác nhận không khớp'
                     ]"
                   ></v-text-field>
-                  
+
                   <div class="d-flex justify-end mt-4">
                     <v-btn
                       color="primary"
@@ -415,7 +460,7 @@
                 </v-form>
               </v-container>
             </v-window-item>
-            
+
             <!-- Tab đổi vai trò -->
             <v-window-item value="role">
               <v-container class="pa-4">
@@ -427,7 +472,7 @@
                     :items="roleOptions"
                     :rules="[v => !!v || 'Vui lòng chọn vai trò']"
                   ></v-select>
-                  
+
                   <div class="d-flex justify-end mt-4">
                     <v-btn
                       color="primary"
@@ -442,15 +487,15 @@
             </v-window-item>
           </v-window>
         </v-card-text>
-        
+
         <v-divider></v-divider>
-        
+
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="closeEmployeeDialog">Hủy</v-btn>
-          <v-btn 
-            color="primary" 
-            @click="activeTab === 'info' ? saveEmployee() : null" 
+          <v-btn
+            color="primary"
+            @click="activeTab === 'info' ? saveEmployee() : null"
             :loading="loading"
             v-if="activeTab === 'info'"
           >
@@ -459,27 +504,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
+
     <!-- Dialog xác nhận xóa -->
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
         <v-card-title class="text-h5 font-weight-medium pa-4">
           Xác nhận xóa
         </v-card-title>
-        
+
         <v-card-text class="pa-4">
           Bạn có chắc chắn muốn xóa nhân viên <strong>{{ editedEmployee.firstName }} {{ editedEmployee.lastName }}</strong> khỏi hệ thống?
           <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
-        
+
         <v-divider></v-divider>
-        
+
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
-          <v-btn 
-            color="error" 
-            @click="deleteEmployee" 
+          <v-btn
+            color="error"
+            @click="deleteEmployee"
             :loading="loading"
           >
             Xóa
@@ -487,7 +532,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
+
     <!-- Snackbar thông báo -->
     <v-snackbar
       v-model="snackbar.show"
@@ -601,10 +646,34 @@ const roleOptions = computed(() => {
   }))
 })
 
+// Computed property cho nhân viên đã lọc
+const filteredEmployees = computed(() => {
+  let result = [...employeeStore.employees]
+
+  // Lọc theo từ khóa tìm kiếm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(employee =>
+      employee.firstName?.toLowerCase().includes(query) ||
+      employee.lastName?.toLowerCase().includes(query) ||
+      employee.email?.toLowerCase().includes(query) ||
+      employee.phone?.includes(query) ||
+      employee.position?.toLowerCase().includes(query)
+    )
+  }
+
+  return result
+})
+
+// Computed property cho tổng số trang dựa trên kết quả đã lọc
+const totalFilteredPages = computed(() => {
+  return Math.ceil(filteredEmployees.value.length / 10) // 10 là số mục mỗi trang
+})
+
 // Methods
 // Lấy danh sách nhân viên
 const loadEmployees = () => {
-  employeeStore.fetchEmployees(page.value - 1, 10)
+  employeeStore.fetchEmployees(0, 100) // Lấy tất cả nhân viên để lọc ở client
 }
 
 // Lấy danh sách vai trò
@@ -641,12 +710,12 @@ const openEditDialog = async (employee) => {
   loading.value = true
   editMode.value = true
   activeTab.value = 'info'
-  
+
   try {
     // Lấy thông tin chi tiết nhân viên
     const response = await employeeStore.fetchEmployeeById(employee.id)
     employeeDetail.value = response
-    
+
     // Set dữ liệu cho form
     editedEmployee.value = {
       id: employeeDetail.value.id,
@@ -657,7 +726,7 @@ const openEditDialog = async (employee) => {
       gender: employeeDetail.value.gender,
       position: employeeDetail.value.position
     }
-    
+
     // Nếu nhân viên có tài khoản liên kết, lấy thông tin tài khoản
     if (employeeDetail.value.accountId) {
       try {
@@ -671,7 +740,7 @@ const openEditDialog = async (employee) => {
     } else {
       accountDetail.value = null
     }
-    
+
     employeeDialog.value = true
   } catch (error) {
     console.error('Lỗi khi lấy thông tin nhân viên:', error)
@@ -704,20 +773,20 @@ const closeDeleteDialog = () => {
 // Lưu nhân viên
 const saveEmployee = async () => {
   if (!form.value) return
-  
+
   const { valid } = await form.value.validate()
   if (!valid) return
-  
+
   try {
     const employeeData = { ...editedEmployee.value }
-    
+
     if (editMode.value) {
       // Xóa các trường không cần thiết khi cập nhật
       delete employeeData.username
       delete employeeData.password
       delete employeeData.roleId
       delete employeeData.accountId
-      
+
       await employeeStore.updateEmployee(employeeData.id, employeeData)
       showSnackbar('Cập nhật thông tin nhân viên thành công', 'success')
     } else {
@@ -725,7 +794,7 @@ const saveEmployee = async () => {
       await employeeStore.createEmployee(employeeData)
       showSnackbar('Thêm nhân viên mới thành công', 'success')
     }
-    
+
     closeEmployeeDialog()
     loadEmployees()
   } catch (error) {
@@ -749,13 +818,11 @@ const deleteEmployee = async () => {
 // Xử lý thay đổi trang
 const handlePageChange = (newPage) => {
   page.value = newPage
-  loadEmployees()
 }
 
 // Debounce search
 const debounceSearch = debounce(() => {
-  page.value = 1
-  loadEmployees()
+  page.value = 1 // Reset về trang đầu khi tìm kiếm
 }, 300)
 
 // Hiển thị snackbar
@@ -768,19 +835,20 @@ const showSnackbar = (text, color = 'success') => {
 // Lưu thay đổi mật khẩu
 const savePasswordChange = async () => {
   if (!passwordForm.value) return
-  
+
   const { valid } = await passwordForm.value.validate()
   if (!valid) return
-  
+
   loading.value = true
   try {
     await accountService.changePassword(
-      employeeDetail.value.accountId, 
-      passwordChange.value.oldPassword, 
-      passwordChange.value.newPassword
+      employeeDetail.value.accountId,
+      passwordChange.value.oldPassword,
+      passwordChange.value.newPassword,
+      passwordChange.value.confirmPassword
     )
     showSnackbar('Đổi mật khẩu thành công', 'success')
-    
+
     // Reset form và chuyển về tab thông tin tài khoản
     passwordChange.value = {
       oldPassword: '',
@@ -798,21 +866,21 @@ const savePasswordChange = async () => {
 // Lưu thay đổi vai trò
 const saveRoleChange = async () => {
   if (!roleForm.value) return
-  
+
   const { valid } = await roleForm.value.validate()
   if (!valid) return
-  
+
   loading.value = true
   try {
     await accountService.changeRole(
-      employeeDetail.value.accountId, 
+      employeeDetail.value.accountId,
       roleChange.value.roleId
     )
-    
+
     // Cập nhật lại thông tin hiển thị
     const accountResponse = await accountService.getAccountById(employeeDetail.value.accountId)
     accountDetail.value = accountResponse.data
-    
+
     showSnackbar('Thay đổi vai trò thành công', 'success')
     activeTab.value = 'account'
   } catch (error) {
@@ -828,9 +896,33 @@ const initRoleChange = () => {
   if (roleStore.roles.length === 0) {
     loadRoles()
   }
-  
+
   roleChange.value = {
     roleId: accountDetail.value.role.id
+  }
+}
+
+
+// Khởi tạo thêm phương thức khóa/mở khóa tài khoản
+// Khóa/Mở khóa tài khoản
+const toggleAccountLockStatus = async () => {
+  loading.value = true
+  try {
+    await employeeStore.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
+
+    // Cập nhật trạng thái khóa trong UI
+    accountDetail.value.isLocked = !accountDetail.value.isLocked
+
+    showSnackbar(
+      accountDetail.value.isLocked
+        ? 'Tài khoản đã được khóa thành công'
+        : 'Tài khoản đã được mở khóa thành công',
+      'success'
+    )
+  } catch (error) {
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -845,4 +937,4 @@ onMounted(() => {
 .max-width-300 {
   max-width: 300px;
 }
-</style> 
+</style>

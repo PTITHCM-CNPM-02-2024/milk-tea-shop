@@ -3,7 +3,7 @@ DELIMITER //
 
 -- Kiểm tra trước khi thêm tài khoản
 CREATE TRIGGER before_account_insert
-BEFORE INSERT ON Account
+BEFORE INSERT ON account
 FOR EACH ROW
 BEGIN
     -- Kiểm tra username có chứa ký tự đặc biệt
@@ -31,7 +31,7 @@ END //
 
 -- Kiểm tra trước khi cập nhật tài khoản
 CREATE TRIGGER before_account_update
-BEFORE UPDATE ON Account
+BEFORE UPDATE ON account
 FOR EACH ROW
 BEGIN
     IF LENGTH(TRIM(NEW.username)) = 0 THEN
@@ -54,22 +54,22 @@ END //
 
 -- Kiểm tra trước khi xóa tài khoản
 CREATE TRIGGER before_account_delete
-BEFORE DELETE ON Account
+    BEFORE DELETE ON account
 FOR EACH ROW
 BEGIN
     DECLARE has_relations BOOLEAN;
     
     SELECT EXISTS(
-        SELECT 1 FROM Customer WHERE account_id = OLD.account_id
+        SELECT 1 FROM customer WHERE account_id = OLD.account_id
         UNION ALL
-        SELECT 1 FROM Employee WHERE account_id = OLD.account_id
+        SELECT 1 FROM employee WHERE account_id = OLD.account_id
         UNION ALL
-        SELECT 1 FROM Manager WHERE account_id = OLD.account_id
+        SELECT 1 FROM manager WHERE account_id = OLD.account_id
     ) INTO has_relations;
     
     IF has_relations THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Không thể xóa tài khoản đã được liên kết';
+        SET MESSAGE_TEXT = 'Không thể xóa tài khoản đã được liên kết, vui lòng xóa người dùng của tài khoản này trước';
     END IF;
 END //
 

@@ -52,7 +52,7 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTableEnt
   
   @EntityGraph(attributePaths = {"areaEntity"})
     @Query("select s from ServiceTableEntity s where s.id = :id")
-  Optional<ServiceTableEntity> findByIdWithArea(Integer serviceTableId);
+  Optional<ServiceTableEntity> findByIdWithArea(@Param("id")  @NonNull Integer id);
 
   @Query("select (count(s) > 0) from ServiceTableEntity s where s.id <> :id and s.tableNumber = :tableNumber")
   boolean existsByIdNotAndTableNumber(@Param("id") @NonNull Integer id, @Param("tableNumber") @NonNull TableNumber tableNumber);

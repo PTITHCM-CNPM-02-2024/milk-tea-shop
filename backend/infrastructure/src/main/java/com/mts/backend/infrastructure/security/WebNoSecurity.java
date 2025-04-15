@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-@Profile("dev")
+@Profile("test")
 public class WebNoSecurity {
     // This class is used to disable security for the application
 

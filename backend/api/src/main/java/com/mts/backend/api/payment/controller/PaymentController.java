@@ -17,6 +17,7 @@ import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +33,7 @@ public class PaymentController implements IController {
     }
     
     @PostMapping("/initiate")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> initiatePayment(@RequestBody CreatePaymentRequest request) {
         
         var command = CreatePaymentCommand.builder()
@@ -45,6 +47,7 @@ public class PaymentController implements IController {
     }
     
     @PostMapping("/{paymentId}/{methodId}/complete")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> completePayment(@PathVariable("paymentId") Long paymentId,
                                              @PathVariable("methodId") Integer methodId,
                                              @RequestBody PaymentTransactionRequest request) {
@@ -63,6 +66,7 @@ public class PaymentController implements IController {
     }
 
     @GetMapping("/{paymentId}")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'CUSTOMER')")
     public ResponseEntity<?> getPaymentById(@PathVariable("paymentId") Long paymentId) {
         var command = PaymentByIdQuery.builder()
                 .paymentId(PaymentId.of(paymentId))
@@ -74,6 +78,7 @@ public class PaymentController implements IController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'CUSTOMER')")
     public ResponseEntity<?> getAllPayments(@RequestParam(value = "page", defaultValue = "0") int page,
                                             @RequestParam(value = "size", defaultValue = "10") int size) {
         var command = DefaultPaymentQuery.builder()
@@ -87,6 +92,7 @@ public class PaymentController implements IController {
     }
 
     @GetMapping("/report")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getPaymentReportByMonth(@RequestParam(value = "year") Integer year,
                                                     @RequestParam(value = "month") Integer month) {
         var command = PaymentReportByMonthQuery.builder()

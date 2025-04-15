@@ -53,5 +53,7 @@ public interface JpaEmployeeRepository extends JpaRepository<EmployeeEntity, Lon
     @Query("select e from EmployeeEntity e where e.accountEntity.id = :id")
     Optional<EmployeeEntity> findByAccountEntity_Id(@Param("id") Long id);
     
-    
+    @EntityGraph(attributePaths = {"accountEntity"})
+    @Query("select e from EmployeeEntity e where e.accountEntity.id = :id")
+    Optional<EmployeeEntity> findByAccountEntity_IdFetch(@Param("id") Long id);
 }

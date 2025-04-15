@@ -53,6 +53,7 @@ CreateProductInformCommandHandler implements ICommandHandler<CreateProductComman
                 categoryEntity(categoryEn).
                 available(command.getAvailable().orElse(true)).
                 signature(command.getSignature().orElse(null)).
+                imagePath(command.getImagePath().orElse(null)).
                 build();
 
         command.getProductPrices().forEach(p -> {

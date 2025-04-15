@@ -6,6 +6,7 @@ import com.mts.backend.api.common.IController;
 import com.mts.backend.application.account.RoleCommandBus;
 import com.mts.backend.application.account.RoleQueryBus;
 import com.mts.backend.application.account.command.CreateRoleCommand;
+import com.mts.backend.application.account.command.DeleteRoleByIdCommand;
 import com.mts.backend.application.account.command.UpdateRoleCommand;
 import com.mts.backend.application.account.query.DefaultRoleQuery;
 import com.mts.backend.application.account.query.RoleByIdQuery;
@@ -14,6 +15,7 @@ import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.RoleName;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,6 +31,7 @@ public class RoleController implements IController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createRole(@RequestBody CreateRoleRequest request) {
         var command = CreateRoleCommand.builder()
                 .name(RoleName.builder().value(request.getName()).build())
@@ -39,6 +42,7 @@ public class RoleController implements IController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getAllRoles(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var query = DefaultRoleQuery.builder().page(page).size(size).build();
@@ -47,6 +51,7 @@ public class RoleController implements IController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> updateRole(@PathVariable("id") Integer id, @RequestBody UpdateRoleRequest request) {
         var command = UpdateRoleCommand.builder()
                 .id(RoleId.of(id))
@@ -58,9 +63,18 @@ public class RoleController implements IController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getRoleById(@PathVariable("id") Integer id) {
         var query = RoleByIdQuery.builder().id(RoleId.of(id)).build();
         var result = roleQueryBus.dispatch(query);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteRoleById(@PathVariable("id") Integer id) {
+        var command = DeleteRoleByIdCommand.builder().roleId(RoleId.of(id)).build();
+        var result = roleCommandBus.dispatch(command);
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

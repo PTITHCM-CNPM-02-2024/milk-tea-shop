@@ -52,9 +52,8 @@ public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManage
         
         manager.changeGender(command.getGender());
         
-        var updatedManager = managerRepository.save(manager);
         
-        return CommandResult.success(updatedManager.getId());
+        return CommandResult.success(manager.getId());
     }
 
     private ManagerEntity mustExistManager(ManagerId id) {

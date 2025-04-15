@@ -13,4 +13,5 @@ public class UpdateProductInformRequest {
     private Integer categoryId;
     private Boolean available;
     private Boolean signature;
+    private String imagePath;
 }

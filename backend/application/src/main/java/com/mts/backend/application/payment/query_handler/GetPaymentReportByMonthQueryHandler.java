@@ -44,7 +44,9 @@ public class GetPaymentReportByMonthQueryHandler implements IQueryHandler<Paymen
                 PaymentStatus.PAID
         );
         
-        var averageAmount = totalAmount.divide(BigDecimal.valueOf(totalPayment), RoundingMode.HALF_UP);
+        var averageAmount = totalPayment > 0 ?
+                totalAmount.divide(BigDecimal.valueOf(totalPayment),  RoundingMode.HALF_UP) :
+                BigDecimal.ZERO;
 
         PaymentReportResponse paymentReportResponse = PaymentReportResponse.builder()
                 .totalPayment(totalPayment)

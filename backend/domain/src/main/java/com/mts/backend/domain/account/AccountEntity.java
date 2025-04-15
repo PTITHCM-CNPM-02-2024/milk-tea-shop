@@ -120,10 +120,11 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public void login(){
-        
-        if (this.getActive().isPresent() && this.getActive().get()) {
-            throw new DomainException("Tài khoản đã đăng nhập");
+
+        if(this.getActive().isPresent() && this.getActive().get()){
+            return;
         }
+        
         if (this.getLocked()){
             throw new DomainException("Tài khoản đã bị khóa không thể đăng nhập");
         }
@@ -158,9 +159,6 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public boolean changeLock(boolean locked) {
-        if (this.locked.equals(locked)) {
-            return false;
-        }
 
         if (locked) {
             lock();

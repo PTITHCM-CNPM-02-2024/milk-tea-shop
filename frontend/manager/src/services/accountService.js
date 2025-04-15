@@ -2,9 +2,15 @@ import api from './api'
 
 export const accountService = {
   // Lấy danh sách tài khoản với phân trang
-  getAccounts(page = 0, size = 10) {
+  getAccounts(page = 0, size = 10, searchQuery = '', roleId = null, status = null) {
     return api.get('/accounts', {
-      params: { page, size }
+      params: { 
+        page, 
+        size,
+        search: searchQuery,
+        roleId: roleId,
+        status: status
+      }
     })
   },
 
@@ -23,6 +29,11 @@ export const accountService = {
     return api.put(`/accounts/${id}`, accountData)
   },
 
+  // Cập nhật tên đăng nhập
+  updateUsername(id, data) {
+    return api.put(`/accounts/${id}/username`, data)
+  },
+
   // Xóa tài khoản
   deleteAccount(id) {
     return api.delete(`/accounts/${id}`)
@@ -35,20 +46,21 @@ export const accountService = {
 
   // Khóa/Mở khóa tài khoản
   toggleAccountLock(id, isLocked) {
-    return api.patch(`/accounts/${id}/lock`, { isLocked })
+    return api.put(`/accounts/${id}/lock?value=${isLocked}`)
   },
 
   // Kích hoạt/Vô hiệu hóa tài khoản
   toggleAccountActive(id, isActive) {
-    return api.patch(`/accounts/${id}/activate`, { isActive })
+    return api.put(`/accounts/${id}/active`, { active: isActive })
   },
 
   // Thay đổi mật khẩu tài khoản
-  changePassword(id, oldPassword, newPassword) {
+  changePassword(id, oldPassword, newPassword, confirmPassword) {
     return api.put(`/accounts/${id}/password`, null, {
       params: {
         oldPassword,
-        newPassword
+        newPassword,
+        confirmPassword
       }
     })
   },

@@ -152,7 +152,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="checkoutSelectedOrder">
-            Thanh toán
+            Trả bàn
           </v-btn>
         </v-card-actions>
       </v-card>
