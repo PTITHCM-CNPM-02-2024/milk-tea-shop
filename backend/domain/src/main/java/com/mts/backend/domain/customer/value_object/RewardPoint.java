@@ -13,9 +13,9 @@ import java.util.Objects;
 @Builder
 public class RewardPoint implements Comparable<RewardPoint>  {
     
-   int value;
+   Integer value;
     
-    private RewardPoint(int value){
+    private RewardPoint(Integer value){
         List<String> errors = new ArrayList<>();
 
         if(value < 0){

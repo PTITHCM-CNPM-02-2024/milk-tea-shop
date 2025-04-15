@@ -7,16 +7,19 @@ import com.mts.backend.api.store.request.UpdateMaxAndActiveRequest;
 import com.mts.backend.application.store.AreaCommandBus;
 import com.mts.backend.application.store.AreaQueryBus;
 import com.mts.backend.application.store.command.CreateAreaCommand;
+import com.mts.backend.application.store.command.DeleteAreaByIdCommand;
 import com.mts.backend.application.store.command.UpdateAreaCommand;
 import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
+import com.mts.backend.application.store.query.ServiceTableByAreaIdQuery;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,78 +35,101 @@ public class AreaController implements IController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createArea(@RequestBody CreateAreaRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
                 .name(AreaName.builder().value(request.getName()).build())
                 .isActive(request.getIsActive())
-                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
+                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
                 .build();
 
         var result = commandBus.dispatch(command);
 
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateArea(@PathVariable("id") Integer id,
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> updateArea(@PathVariable("id") Integer id,
                                                      @RequestBody UpdateAreaRequest request) {
         
         var command = UpdateAreaCommand.builder()
                 .areaId(AreaId.of(id))
                 .name(AreaName.builder().value(request.getName()).build())
+                .description(request.getDescription().orElse(null))
+                .active(request.getIsActive())
+                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
                 .build();
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-    @PutMapping("/{id}/max-and-active")
-    public ResponseEntity<ApiResponse<?>> updateAreaMaxAndActive(@PathVariable("id") Integer id,
-                                                                 @RequestBody UpdateMaxAndActiveRequest request) {
-        
-        var command = UpdateAreaMaxAndActiveCommand.builder()
-                .areaId(AreaId.of(id))
-                .maxTable(request.getMaxTable() != null ? MaxTable.builder().value(request.getMaxTable()).build() : null)
-                .isActive(request.getIsActive())
-                .build();
-        
-        var result = commandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
-    }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                     @RequestParam(value = "size", defaultValue = "40") Integer size) {
-        var query = DefaultAreaQuery.builder().page(page).size(size).build();
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllArea(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var query = DefaultAreaQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<?>> getAllActiveArea(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                           @RequestParam(value = "size", defaultValue = "40") Integer size,
-                                                           @RequestParam(value = "active", defaultValue = "true") Boolean active) {
-        var query = AreaActiveQuery.builder().page(page).size(size).active(active).build();
+    @GetMapping("/active/{active}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllAreaActive(@PathVariable("active") Boolean active) {
+        var query = AreaActiveQuery.builder().active(active).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :
-                handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getAreaById(@PathVariable("id") Integer id) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAreaById(@PathVariable("id") Integer id) {
         var query = AreaByIdQuery.builder().id(AreaId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+    
+    
+    @GetMapping("/{id}/tables")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAreaTables(@PathVariable("id") Integer id,
+                                           @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                           @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        
+        var query = ServiceTableByAreaIdQuery.builder()
+                .areaId(AreaId.of(id))
+                .page(page)
+                .size(size)
+                .build();
+        
+        var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteArea(@PathVariable("id") Integer id) {
+        DeleteAreaByIdCommand command = DeleteAreaByIdCommand.builder()
+                .areaId(AreaId.of(id))
+                .build();
 
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
 }

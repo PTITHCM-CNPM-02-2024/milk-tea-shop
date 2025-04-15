@@ -5,6 +5,7 @@ import com.mts.backend.domain.customer.MembershipTypeEntity;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTypeEntity, MembershipTypeId> {
+public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTypeEntity, Integer> {
   @Query("select (count(m) > 0) from MembershipTypeEntity m where m.requiredPoint = :requiredPoint")
   boolean existsByRequiredPoint(@Param("requiredPoint") @NonNull Integer requiredPoint);
 
@@ -33,4 +34,9 @@ public interface JpaMembershipTypeRepository extends JpaRepository<MembershipTyp
   
   @Query("select (count(m) > 0) from MembershipTypeEntity m where m.id <> ?1 and m.type = ?2")
   boolean existsByIdNotAndType(@NotNull Integer id, @NotNull MemberTypeName type);
+  
+  @EntityGraph(attributePaths = {"memberDiscountValue"})
+  @Query("""
+        select m from MembershipTypeEntity m where m.id = :id""")
+  Optional<MembershipTypeEntity> findByIdFetch(@Param("id") Integer id);
 }

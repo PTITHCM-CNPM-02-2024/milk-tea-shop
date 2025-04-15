@@ -17,11 +17,8 @@ import java.util.Objects;
 @Service
 public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuery, CommandResult> {
     private final JpaManagerRepository managerRepository;
-    private final JpaAccountRepository accountRepository;
-    
     public GetManagerByIdQueryHandler(JpaManagerRepository managerRepository, JpaAccountRepository accountRepository) {
         this.managerRepository = managerRepository;
-        this.accountRepository = accountRepository;
     }
     
     @Override
@@ -30,15 +27,15 @@ public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuer
         Objects.requireNonNull(query, "Manager by id query is required");
         var manager = mustExistManager((query.getId()));
         
-        var response = ManagerDetailResponse.builder().build();
-        
-        response.setId(manager.getId());
-        response.setFirstName(manager.getFirstName().getValue());
-        response.setLastName(manager.getLastName().getValue());
-        response.setEmail(manager.getEmail().getValue());
-        response.setPhone(manager.getPhone().getValue());
-        response.setGender(manager.getGender().toString());
-        response.setAccountId(manager.getAccountEntity().getId());
+        var response = ManagerDetailResponse.builder()
+                .id(manager.getId())
+                .firstName(manager.getFirstName().getValue())
+                .lastName(manager.getLastName().getValue())
+                .email(manager.getEmail().getValue())
+                .phone(manager.getPhone().getValue())
+                .gender(manager.getGender().toString())
+                .accountId(manager.getAccountEntity().getId())
+                .build();
         
         return CommandResult.success(response);
     }
@@ -46,7 +43,7 @@ public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuer
     private ManagerEntity mustExistManager(ManagerId id){
         Objects.requireNonNull(id, "Manager id is required");
         
-        return managerRepository.findByIdWithJoinFetch(id)
+        return managerRepository.findByIdWithJoinFetch(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Quản lý không tồn tại"));
     }
     

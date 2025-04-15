@@ -6,6 +6,7 @@ import com.mts.backend.domain.order.identifier.OrderDiscountId;
 import com.mts.backend.domain.order.identifier.OrderProductId;
 import com.mts.backend.domain.order.identifier.OrderTableId;
 import com.mts.backend.domain.order.value_object.OrderStatus;
+import com.mts.backend.domain.payment.PaymentEntity;
 import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.domain.product.ProductPriceEntity;
 import com.mts.backend.domain.product.identifier.ProductPriceId;
@@ -19,7 +20,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.type.SqlTypes;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -33,7 +37,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "`Order`", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "`order`", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "employee_id", columnList = "employee_id")
 })
 @AttributeOverrides({
@@ -41,13 +45,23 @@ import java.util.Set;
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
 @NamedEntityGraphs(
-        @NamedEntityGraph(name = "OrderEntity.detail",
+        {@NamedEntityGraph(name = "graph.order.fetchAll",
                 attributeNodes = {
                         @NamedAttributeNode("orderDiscounts"),
                         @NamedAttributeNode("orderProducts"),
-                        @NamedAttributeNode("orderTables")
+                        @NamedAttributeNode("orderTables"),
+                        @NamedAttributeNode("customerEntity"),
+                        @NamedAttributeNode("employeeEntity"),
+                        @NamedAttributeNode("payments"),
+                }
+        ),
+        @NamedEntityGraph(name = "graph.order.fetchEmpCus",
+                attributeNodes = {
+                        @NamedAttributeNode("employeeEntity"),
+                        @NamedAttributeNode("customerEntity")
                 }
         )
+        }
 )
 @NoArgsConstructor
 @AllArgsConstructor
@@ -112,14 +126,19 @@ public class OrderEntity extends BaseEntity<Long> {
     @Min(value = 1)
     private Long point;
 
+    @OneToMany(mappedBy = "orderEntity", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            orphanRemoval = true)
+    @Builder.Default
+    private Set<PaymentEntity> payments = new LinkedHashSet<>();
+
     public Optional<CustomerEntity> getCustomerEntity() {
         return Optional.ofNullable(customerEntity);
     }
 
     public void setCustomerEntity(CustomerEntity customerEntity) {
         orderCanBeModified();
-        recalculateTotalAmount();
         this.customerEntity = customerEntity;
+        recalculateTotalAmount();
     }
 
     public Optional<Money> getTotalAmount() {
@@ -381,6 +400,10 @@ public class OrderEntity extends BaseEntity<Long> {
     }
 
     public void checkOut() {
+        
+        if (this.status != OrderStatus.COMPLETED) {
+            throw new DomainException("Đơn hàng chưa hoàn thành, không thể lưu thời gian rời bàn");
+        }
         for (OrderTableEntity orderTable : orderTables) {
             orderTable.setCheckOut(LocalDateTime.now());
         }
@@ -395,6 +418,14 @@ public class OrderEntity extends BaseEntity<Long> {
         for (OrderTableEntity orderTable : orderTables) {
             orderTable.setCheckOut(null);
         }
+    }
+    
+    @Transient
+    public Optional<Money> getDiscountAmount() {
+        if (getTotalAmount().isPresent() && getFinalAmount().isPresent()) {
+            return Optional.of(getTotalAmount().get().subtract(getFinalAmount().get()));
+        }
+        return Optional.empty();
     }
 
 }

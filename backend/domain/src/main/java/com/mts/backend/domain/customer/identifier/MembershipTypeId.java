@@ -10,7 +10,7 @@ public class MembershipTypeId implements Serializable {
 int value;
     
     private MembershipTypeId(int value) {
-        if (value <= 0) {
+        if (value < 0) {
             throw new IllegalArgumentException("Id must be greater than 0");
         }
         if (value > IdentifiableProvider.TINYINT_UNSIGNED_MAX){

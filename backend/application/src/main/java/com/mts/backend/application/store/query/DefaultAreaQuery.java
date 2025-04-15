@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @NoArgsConstructor
 @Data
 @Builder
@@ -14,4 +16,5 @@ import lombok.NoArgsConstructor;
 public class  DefaultAreaQuery  implements IQuery<CommandResult> {
     private Integer page;
     private Integer size;
+
 }

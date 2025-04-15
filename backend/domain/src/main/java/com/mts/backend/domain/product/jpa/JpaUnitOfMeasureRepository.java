@@ -25,7 +25,7 @@ public interface JpaUnitOfMeasureRepository extends JpaRepository<UnitOfMeasureE
   @Query("select u from UnitOfMeasureEntity u where u.name = ?1")
   Optional<UnitOfMeasureEntity> findByName(@NonNull UnitName name);
 
-  @Query("select u from UnitOfMeasureEntity u where upper(u.symbol) = upper(?1)")
+  @Query("select u from UnitOfMeasureEntity u where u.symbol = ?1")
   Optional<UnitOfMeasureEntity> findBySymbol(@NonNull UnitSymbol symbol);
 
   @Modifying

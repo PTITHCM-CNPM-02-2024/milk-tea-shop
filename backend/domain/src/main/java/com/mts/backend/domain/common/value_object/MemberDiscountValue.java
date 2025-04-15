@@ -6,19 +6,18 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-@Value
 @Builder
 @Embeddable
 @NoArgsConstructor(force = true)
+@Data
+@EqualsAndHashCode
 public class MemberDiscountValue {
     @NotNull
     BigDecimal value;

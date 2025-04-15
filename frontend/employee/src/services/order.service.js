@@ -1,4 +1,5 @@
 import apiClient from './api';
+import axios from 'axios';
 
 export default {
   // Tạo đơn hàng mới
@@ -29,5 +30,31 @@ export default {
   // Lấy khuyến mãi theo mã giảm giá
   getDiscountByCoupon(couponCode) {
     return apiClient.get(`/discounts/coupon/${couponCode}`);
+  },
+
+    // Tính toán đơn hàng
+    calculateOrder(orderData) {
+    console.log(orderData);
+      return apiClient.post('/orders/utilities/calculate', orderData);
+  },
+
+  // Lấy danh sách đơn hàng và bàn theo ID nhân viên
+  getOrderTables(employeeId) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`);
+  },
+  
+  // API checkout bàn (cần bổ sung khi có thông tin API cụ thể)
+  checkoutTable(orderId) {
+    return apiClient.put(`/orders/${orderId}/checkout`);
+  },
+  
+  // Lấy danh sách đơn hàng đang sử dụng bàn
+  getActiveTableOrders(employeeId, page = 0, size = 10) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`, {
+      params: {
+        page,
+        size
+      }
+    });
   }
 };

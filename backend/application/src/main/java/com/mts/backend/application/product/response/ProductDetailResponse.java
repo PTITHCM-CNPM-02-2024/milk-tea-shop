@@ -1,9 +1,7 @@
 package com.mts.backend.application.product.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,22 +9,13 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Data
-public class ProductDetailResponse {
-    
-    private Integer id;
-    
-    private String name;
-    
-    private String description;
-    
-    private CategoryDetailResponse category;
-    
-    private Boolean signature;
-    
-    private String image_url;
-    
+@EqualsAndHashCode(callSuper = false)
+public class ProductDetailResponse extends ProductSummaryResponse {
+
+    private CategorySummaryResponse category;
+
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -38,6 +27,7 @@ public class ProductDetailResponse {
         private BigDecimal price;
         private String currency;
         private Integer quantity;
+        private Integer unitId;
         private String unitName;
         private String unitSymbol;
     }

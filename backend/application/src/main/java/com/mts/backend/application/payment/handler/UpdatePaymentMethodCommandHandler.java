@@ -9,6 +9,7 @@ import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class UpdatePaymentMethodCommandHandler implements ICommandHandler<Update
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(UpdatePaymentMethodCommand command) {
         Objects.requireNonNull(command, "UpdatePaymentMethodCommand is required");
         
@@ -47,14 +49,13 @@ public class UpdatePaymentMethodCommandHandler implements ICommandHandler<Update
         PaymentMethodName name = command.getName();
         
         if (paymentMethod.changeName(name)) {
-            verifyUniqueName(name);
+            verifyUniqueName(command.getPaymentMethodId(), name);
         }
         
         paymentMethod.setPaymentDescription(command.getDescription().orElse(null));
         
-        var pmSaved = paymentMethodRepository.save(paymentMethod);
         
-        return CommandResult.success(pmSaved.getId());
+        return CommandResult.success(paymentMethod.getId());
     }
     
     private PaymentMethodEntity mustExistPaymentMethod(PaymentMethodId id){
@@ -67,10 +68,11 @@ public class UpdatePaymentMethodCommandHandler implements ICommandHandler<Update
     
     
     
-    private void verifyUniqueName(PaymentMethodName name){
+    private void verifyUniqueName(PaymentMethodId id, PaymentMethodName name){
+        Objects.requireNonNull(id, "PaymentMethodId is required");
         Objects.requireNonNull(name, "PaymentMethodName is required");
         
-        if (paymentMethodRepository.existsByPaymentName(name)) {
+        if (paymentMethodRepository.existsByIdNotAndPaymentName(id.getValue(), name)) {
             throw new DuplicateException("Tên phương thức thanh toán đã tồn tại");
         }
     }

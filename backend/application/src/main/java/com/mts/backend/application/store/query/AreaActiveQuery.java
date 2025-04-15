@@ -12,7 +12,5 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class AreaActiveQuery implements IQuery<CommandResult> {
-    private Integer page;
-    private Integer size;
     private Boolean active;
 }

@@ -3,6 +3,8 @@ package com.mts.backend.application.customer.handler;
 import com.mts.backend.application.customer.command.CreateCustomerCommand;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
+import com.mts.backend.domain.account.jpa.JpaRoleRepository;
+import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.customer.CustomerEntity;
 import com.mts.backend.domain.customer.MembershipTypeEntity;
@@ -14,9 +16,11 @@ import com.mts.backend.domain.customer.value_object.RewardPoint;
 import com.mts.backend.domain.account.AccountEntity;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -26,14 +30,19 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
     private final JpaCustomerRepository customerRepository;
     private final JpaAccountRepository accountRepository;
     private final JpaMembershipTypeRepository membershipTypeRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JpaRoleRepository roleRepository;
     
     public CreateCustomerCommandHandler(
             JpaCustomerRepository customerRepository,
             JpaAccountRepository accountRepository,
-            JpaMembershipTypeRepository membershipTypeRepository) {
+            JpaMembershipTypeRepository membershipTypeRepository,
+            PasswordEncoder passwordEncoder, JpaRoleRepository roleRepository) {
         this.customerRepository = customerRepository;
         this.accountRepository = accountRepository;
         this.membershipTypeRepository = membershipTypeRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
     
     @Override
@@ -46,16 +55,16 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         
         command.getEmail().ifPresent(this::mustUniqueEmail);
         
-        AccountEntity acEn     = verifyAccount(command.getAccountId().orElse(null));  
-        
         MembershipTypeEntity msEn = verifyMemberShip(command.getMembershipId().orElse(null));
+        
+        AccountEntity acEn = create(command);
 
         CustomerEntity cus = CustomerEntity.builder()
                 .id(CustomerId.create().getValue())
                 .firstName(command.getFirstName().orElse(null))
                 .lastName(command.getLastName().orElse(null))
                 .email(command.getEmail().orElse(null))
-                .gender(command.getGender().orElse(null))
+                .gender(command.getGender().orElse(Gender.OTHER))
                 .phone(command.getPhone())
                 .membershipTypeEntity(msEn)
                 .accountEntity(acEn)
@@ -69,21 +78,33 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         
     }
     
-    private AccountEntity verifyAccount(AccountId id){
-        if (id == null){
+    private AccountEntity create(CreateCustomerCommand command){
+        
+        if (command.getUsername().isEmpty() && command.getPasswordHash().isEmpty()){
             return null;
         }
         
-        if (customerRepository.existsByAccountEntity_Id(id.getValue())){
-            throw new DuplicateException("Tài khoản" + id.getValue() + " đã tồn tại");
+        if(!roleRepository.existsById(command.getRoleId().getValue())){
+            throw new DomainException("Role không tồn tại");
         }
         
-        if (!accountRepository.existsById(id.getValue())){
-            throw new NotFoundException("Tài khoản không tồn tại");
-        }
+        var passwordHash = passwordEncoder.encode(command.getPasswordHash().get().getValue());
         
-        return accountRepository.getReferenceById(id.getValue());
+        var account = AccountEntity.builder()
+                .id(AccountId.create().getValue())
+                .username(command.getUsername().get())
+                .passwordHash(PasswordHash.builder().value(passwordHash).build())
+                .tokenVersion(0L)
+                .active(false)
+                .locked(false)
+                .roleEntity(roleRepository.getReferenceById(command.getRoleId().getValue()))
+                .build();
         
+        var accountEntity = accountRepository.saveAndFlush(account);
+        
+        accountRepository.grantPermissionsByRole(accountEntity.getId());
+        
+        return accountEntity;
     }
     
     private MembershipTypeEntity verifyMemberShip(MembershipTypeId id){
@@ -92,11 +113,11 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
                     "Không tồn tại một membership type nào"));
         }
         
-        if (!membershipTypeRepository.existsById(id)){
+        if (!membershipTypeRepository.existsById(id.getValue())){
             throw new NotFoundException("Membership type không tồn tại");
         }
         
-        return membershipTypeRepository.getReferenceById(id) ;
+        return membershipTypeRepository.getReferenceById(id.getValue());
     }
     
     private void verifyUniquePhoneNumber(PhoneNumber phoneNumber){

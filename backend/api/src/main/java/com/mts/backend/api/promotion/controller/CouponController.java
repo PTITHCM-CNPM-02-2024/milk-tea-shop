@@ -6,13 +6,16 @@ import com.mts.backend.api.promotion.request.UpdateCouponRequest;
 import com.mts.backend.application.promotion.CouponCommandBus;
 import com.mts.backend.application.promotion.CouponQueryBus;
 import com.mts.backend.application.promotion.command.CreateCouponCommand;
+import com.mts.backend.application.promotion.command.DeleteCouponByIdCommand;
 import com.mts.backend.application.promotion.command.UpdateCouponCommand;
 import com.mts.backend.application.promotion.query.CouponByIdQuery;
 import com.mts.backend.application.promotion.query.DefaultCouponQuery;
+import com.mts.backend.application.promotion.query.UnusedCouponQuery;
 import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,7 +31,8 @@ public class CouponController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createCoupon(@RequestBody CreateCouponRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> createCoupon(@RequestBody CreateCouponRequest request) {
         var command = CreateCouponCommand.builder()
                 .coupon(CouponCode.builder()
                         .value(request.getCoupon())
@@ -38,12 +42,13 @@ public class CouponController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) :handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
         
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateCoupon(@PathVariable("id") Long id, @RequestBody UpdateCouponRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> updateCoupon(@PathVariable("id") Long id, @RequestBody UpdateCouponRequest request) {
         
         var command = UpdateCouponCommand.builder()
                 .id(CouponId.of(id))
@@ -55,12 +60,13 @@ public class CouponController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllCoupon(@RequestParam(defaultValue = "0") int page,
-                                                       @RequestParam(defaultValue = "10") int size) {
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllCoupon(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultCouponQuery.builder().
                 page(page)
                 .size(size)
@@ -68,17 +74,39 @@ public class CouponController implements IController {
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getCouponById(@PathVariable("id") Long id) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getCouponById(@PathVariable("id") Long id) {
         var command = CouponByIdQuery.builder()
                 .id(CouponId.of(id))
                 .build();
         
         var result = queryBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/unused")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getUnusedCoupon(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var command = UnusedCouponQuery.builder().page(page).size(size).build();
+        var result = queryBus.dispatch(command);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteCoupon(@PathVariable("id") Long id) {
+        DeleteCouponByIdCommand command = DeleteCouponByIdCommand.builder()
+                .couponId(CouponId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

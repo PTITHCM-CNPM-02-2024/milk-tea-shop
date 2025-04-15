@@ -7,6 +7,7 @@ import com.mts.backend.domain.promotion.validator.IValidDateRange;
 import com.mts.backend.domain.promotion.validator.IValidMaxUseDiscount;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
 import com.mts.backend.domain.promotion.value_object.PromotionDiscountValue;
+import com.mts.backend.shared.exception.DomainException;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
@@ -23,11 +24,13 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name = "Discount", schema = "milk_tea_shop_prod")
+@Table(name = "discount", schema = "milk_tea_shop_prod")
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
@@ -43,7 +46,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     @NotNull
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @Comment("Liên kết với mã giảm giá (coupon), NULL nếu không yêu cầu mã giảm giá")
     @JoinColumn(name = "coupon_id", nullable = false)
     private CouponEntity couponEntity;
@@ -56,9 +59,7 @@ public class DiscountEntity extends BaseEntity<Long> {
     private Integer minRequiredProduct;
     
     
-   @IValidDateRange
-    @IValidMaxUseDiscount
-    public DiscountEntity(Long id, CouponEntity couponEntity, @org.springframework.lang.Nullable @Positive(message = "Số lượng sản phẩm tối thiểu phải lớn hơn 0") Integer minRequiredProduct, PromotionDiscountValue promotionDiscountValue, @Nullable  LocalDateTime validFrom, @NotNull(message = "Thời gian kết thúc hiệu lực không được để trống") @Future(message = "Thời gian kết thúc hiệu lực phải lớn hơn thời gian hiện tại") LocalDateTime validUntil, Long currentUses, @Nullable @Positive(message = "Số lần sử dụng tối đa phải lớn hơn 0") Long maxUse, @org.springframework.lang.Nullable @Positive(message = "Số lần sử dụng tối đa mỗi khách hàng phải lớn hơn 0") Integer maxUsesPerCustomer, Boolean active, @NotNull DiscountName name, String description, Money minRequiredOrderValue) {
+    public DiscountEntity(Long id, CouponEntity couponEntity, @org.springframework.lang.Nullable @Positive(message = "Số lượng sản phẩm tối thiểu phải lớn hơn 0") Integer minRequiredProduct, PromotionDiscountValue promotionDiscountValue, @Nullable  LocalDateTime validFrom, @NotNull(message = "Thời gian kết thúc hiệu lực không được để trống") LocalDateTime validUntil, Long currentUses, @Nullable @Positive(message = "Số lần sử dụng tối đa phải lớn hơn 0") Long maxUse, @org.springframework.lang.Nullable @Positive(message = "Số lần sử dụng tối đa mỗi khách hàng phải lớn hơn 0") Integer maxUsesPerCustomer, Boolean active, @NotNull DiscountName name, String description, Money minRequiredOrderValue) {
         this.id = id;
         this.couponEntity = couponEntity;
         this.minRequiredProduct = minRequiredProduct;
@@ -121,14 +122,6 @@ public class DiscountEntity extends BaseEntity<Long> {
     public Optional<LocalDateTime> getValidFrom() {
         return Optional.ofNullable(validFrom);
     }
-    @IValidDateRange
-    public boolean changeValidFrom(LocalDateTime validFrom) {
-        if (Objects.equals(this.validFrom, validFrom)) {
-            return false;
-        }
-        this.validFrom = validFrom;
-        return true;
-    }
 
 
     @Getter
@@ -136,27 +129,69 @@ public class DiscountEntity extends BaseEntity<Long> {
     @Column(name = "valid_until", nullable = false)
     @NotNull(message = "Thời gian kết thúc hiệu lực không được để trống")
     private LocalDateTime validUntil;
-
-    @IValidDateRange
-    public boolean changeValidUntil(LocalDateTime validUntil) {
-        if (Objects.equals(this.validUntil, validUntil)) {
-            return false;
-        }
-
-        this.validUntil = validUntil;
-        return true;
-    }
-
+    
 
     @Comment("Số lần đã sử dụng chương trình giảm giá này")
     @ColumnDefault("'0'")
     @Column(name = "current_uses", columnDefinition = "int UNSIGNED")
-    @NotNull
+    @NotNull(message = "Số lần sử dụng không được để trống")
     private Long currentUses;
     
     public long increaseCurrentUses() {
-        currentUses  = currentUses + 1;
+        // Kiểm tra xem có thể tăng thêm không
+        if (this.getMaxUse().isPresent() && currentUses >= this.getMaxUse().get()) {
+            throw new DomainException("Chương trình giảm giá đã đạt đến số lần sử dụng tối đa");
+        }
+
+        // Tăng số lần sử dụng
+        currentUses = currentUses + 1;
+
+        // Nếu sau khi tăng, đạt đến số lần sử dụng tối đa, tự động vô hiệu hóa
+        if (maxUse != null && currentUses >= maxUse) {
+            active = false;
+        }
+        
         return currentUses;
+    }
+
+    /**
+     * Kiểm tra xem chương trình giảm giá còn lượt sử dụng không
+     * @return true nếu còn lượt sử dụng, false nếu đã hết
+     */
+    public boolean hasRemainingUses() {
+        if (maxUse == null) {
+            return true; // Không giới hạn số lần sử dụng
+        }
+        return currentUses < maxUse;
+    }
+
+    /**
+     * Lấy số lượt sử dụng còn lại
+     * @return Optional chứa số lượt sử dụng còn lại, hoặc Empty nếu không có giới hạn
+     */
+    @Transient
+    public Optional<Long> getRemainingUses() {
+        if (maxUse == null) {
+            return Optional.empty(); // Không giới hạn
+        }
+        long remaining = Math.max(0, maxUse - currentUses);
+        return Optional.of(remaining);
+    }
+
+    /**
+     * Kiểm tra xem khuyến mãi có đang trong thời gian hiệu lực không
+     * @return true nếu đang trong thời gian hiệu lực, false nếu không
+     */
+    public boolean isInValidTimeRange() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Nếu chưa đến thời gian bắt đầu
+        if (this.getValidFrom().isPresent() && now.isBefore(validFrom)) {
+            return false;
+        }
+
+        // Nếu đã quá thời gian kết thúc
+        return !now.isAfter(validUntil);
     }
 
     @Comment("Số lần sử dụng tối đa cho chương trình giảm giá, NULL nếu không giới hạn")
@@ -179,23 +214,77 @@ public class DiscountEntity extends BaseEntity<Long> {
     public Optional<Long> getMaxUse() {
         return Optional.ofNullable(maxUse);
     }
-    @IValidMaxUseDiscount
     public boolean changeMaxUsesPerCustomer(Integer maxUsesPerCustomer) {
         if (Objects.equals(this.maxUsesPerCustomer, maxUsesPerCustomer)) {
             return false;
         }
 
         this.maxUsesPerCustomer = maxUsesPerCustomer;
+        validateMaxUses();
         return true;
     }
-    //@IValidMaxUseDiscount
+    
     public boolean changeMaxUse(Long maxUse) {
         if (Objects.equals(this.maxUse, maxUse)) {
             return false;
         }
 
+        // Kiểm tra maxUse không được nhỏ hơn currentUses
+        if (maxUse != null && maxUse < currentUses) {
+            throw new DomainException("Số lượng sử dụng tối đa không được nhỏ hơn số lượng đã sử dụng hiện tại");
+        }
+
         this.maxUse = maxUse;
+        validateMaxUses();
         return true;
+    }
+
+    /**
+     * Kiểm tra các ràng buộc giữa maxUse và maxUsesPerCustomer
+     */
+    private void validateMaxUses() {
+        // Kiểm tra nếu cả hai giá trị đều tồn tại
+        if (maxUse != null && maxUsesPerCustomer != null) {
+            // Số lần sử dụng tối đa phải lớn hơn hoặc bằng số lần sử dụng tối đa mỗi khách hàng
+            if (maxUse < maxUsesPerCustomer) {
+                throw new DomainException("Số lượng sử dụng tối đa không được nhỏ hơn số lượng sử dụng tối đa mỗi khách hàng");
+            }
+        }
+    }
+    
+    /**
+     * Kiểm tra tất cả các ràng buộc khi cập nhật thông tin khuyến mãi
+     * @throws DomainException nếu có lỗi xảy ra
+     */
+    public void validateOnUpdate() {
+        List<String> errors = new ArrayList<>();
+        
+        // Kiểm tra thời gian
+        if (validFrom != null && validUntil != null) {
+            if (!validFrom.isBefore(validUntil)) {
+                errors.add("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc");
+            }
+        }
+        
+        // Kiểm tra giới hạn sử dụng
+        if (maxUse != null) {
+            if (maxUse < currentUses) {
+                errors.add("Số lượng sử dụng tối đa không được nhỏ hơn số lượng đã sử dụng hiện tại (" + currentUses + ")");
+            }
+            
+            if (maxUsesPerCustomer != null && maxUse < maxUsesPerCustomer) {
+                errors.add("Số lượng sử dụng tối đa không được nhỏ hơn số lượng sử dụng tối đa mỗi khách hàng");
+            }
+        }
+        
+        // Kiểm tra giá trị sản phẩm tối thiểu
+        if (minRequiredProduct != null && minRequiredProduct <= 0) {
+            errors.add("Số lượng sản phẩm tối thiểu phải lớn hơn 0");
+        }
+        
+        if (!errors.isEmpty()) {
+            throw new DomainException(String.join(", ", errors));
+        }
     }
 
     @Comment("Trạng thái kích hoạt: 1 - đang hoạt động, 0 - không hoạt động")
@@ -248,6 +337,86 @@ public class DiscountEntity extends BaseEntity<Long> {
         this.minRequiredOrderValue = minRequiredOrderValue;
         return true;
     }
+
+    /**
+     * Cập nhật trạng thái active dựa trên thời gian hiệu lực hiện tại
+     * @return true nếu trạng thái thay đổi, false nếu không thay đổi
+     */
+    public boolean updateActiveStatusBasedOnTime() {
+        boolean shouldBeActive = isInValidTimeRange();
+
+        // Chỉ cập nhật nếu trạng thái active hiện tại khác với trạng thái mong muốn
+        if (this.active != shouldBeActive) {
+            this.active = shouldBeActive;
+            return true;
+        }
+
+        return false;
+    }
+
+    // Cập nhật phương thức changeValidFrom để xử lý trạng thái active
+    @IValidDateRange(message = "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc")
+    public boolean changeValidFrom(LocalDateTime validFrom) {
+        if (Objects.equals(this.validFrom, validFrom)) {
+            return false;
+        }
+        
+        this.validFrom = validFrom;
+        
+        // Kiểm tra ràng buộc thời gian
+        if (validFrom != null && validUntil != null && !validFrom.isBefore(validUntil)) {
+            throw new DomainException("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc");
+        }
+
+        // Cập nhật trạng thái active dựa trên thời gian mới
+        updateActiveStatusBasedOnTime();
+
+        return true;
+    }
+
+    // Cập nhật phương thức changeValidUntil để xử lý trạng thái active
+    public boolean changeValidUntil(LocalDateTime validUntil) {
+        Objects.requireNonNull(validUntil, "Thời gian kết thúc không được để trống");
+        if (this.validUntil.equals(validUntil)) {
+            return false;
+        }
+
+        // Kiểm tra validUntil so với validFrom
+        if (validFrom != null && !validFrom.isBefore(validUntil)) {
+            throw new DomainException("Thời gian kết thúc phải sau thời gian bắt đầu");
+        }
+
+        this.validUntil = validUntil;
+
+        // Cập nhật trạng thái active dựa trên thời gian mới
+        updateActiveStatusBasedOnTime();
+
+        return true;
+    }
+
+    /**
+     * Kiểm tra xem khuyến mãi có thể áp dụng được không
+     * @return true nếu khuyến mãi có thể áp dụng, false nếu không
+     */
+    public boolean isApplicable() {
+        // Kiểm tra trạng thái kích hoạt
+        if (!active) {
+            return false;
+        }
+
+        // Kiểm tra thời gian hiệu lực
+        if (!isInValidTimeRange()) {
+            return false;
+        }
+
+        // Kiểm tra số lần sử dụng tối đa
+        if (!hasRemainingUses()) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     @Override
     public final boolean equals(Object o) {

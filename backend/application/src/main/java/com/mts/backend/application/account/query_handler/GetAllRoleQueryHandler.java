@@ -5,6 +5,7 @@ import com.mts.backend.application.account.response.RoleDetailResponse;
 import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,15 @@ public class GetAllRoleQueryHandler implements IQueryHandler<DefaultRoleQuery, C
     public CommandResult handle(DefaultRoleQuery query) {
         Objects.requireNonNull(query, "GetAllRoleQuery must not be null");
         
-        var roles = roleRepository.findAll(PageRequest.of(query.getPage(), query.getSize())).getContent();
+        var roles = roleRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
-        List<RoleDetailResponse> roleDetailResponses = roles.stream()
-                .map(role -> RoleDetailResponse.builder()
-                        .id(role.getId())
-                        .name(role.getName().getValue())
-                        .description(role.getDescription().orElse(""))
-                        .build())
-                .toList();
+        Page<RoleDetailResponse> roleDetailResponses = roles.map(role -> {
+            return RoleDetailResponse.builder()
+                    .id(role.getId())
+                    .name(role.getName().getValue())
+                    .description(role.getDescription().orElse(null))
+                    .build();
+        });
         
         return CommandResult.success(roleDetailResponses);
     }

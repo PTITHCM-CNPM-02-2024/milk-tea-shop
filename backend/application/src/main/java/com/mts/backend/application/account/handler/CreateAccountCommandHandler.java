@@ -55,7 +55,10 @@ public class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
                 .build();
         
         
-        var savedAccount = accountRepository.save(account);
+        var savedAccount = accountRepository.saveAndFlush(account);
+        
+        accountRepository.grantPermissionsByRole(savedAccount.getId());
+        
         
         return CommandResult.success(savedAccount.getId());
     }

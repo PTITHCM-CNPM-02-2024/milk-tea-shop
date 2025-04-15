@@ -22,29 +22,29 @@ public class ChangeAreaMaxAndActiveListener implements ApplicationListener<Chang
     @Override
     @Transactional
     public void onApplicationEvent(ChangeAreaMaxAndActiveEvent event) {
-        var eventCommand = Objects.requireNonNull(event.getData(), "Event command is required");
-        
-        if (!(event.getSource() instanceof  UpdateAreaMaxAndActiveCommandHandler)){
-            return;
-        }
-        
-        var listTable = serviceTableRepository.findByAreaEntity_Id(eventCommand.getId().getValue());
-        
-        if (listTable.isEmpty()){
-            return;
-        }
-        
-        if (event.getData().getMaxTable().isPresent() && event.getData().getMaxTable().get().getValue() < listTable.size()){
-            throw new DomainException("Tổng số bàn hiện tại:" + listTable.size() + " lớn hơn số bàn tối đa:" + event.getData().getMaxTable().get().getValue());
-        }
-        
-        listTable.forEach(table -> {
-            table.changeIsActive(eventCommand.isActive());
-        });
-        
-        serviceTableRepository.saveAll(listTable);
-        
-        
+//        var eventCommand = Objects.requireNonNull(event.getData(), "Event command is required");
+//        
+//        if (!(event.getSource() instanceof  UpdateAreaMaxAndActiveCommandHandler)){
+//            return;
+//        }
+//        
+//        //var listTable = serviceTableRepository.findByAreaEntity_Id(eventCommand.getId().getValue());
+//        
+//        if (listTable.isEmpty()){
+//            return;
+//        }
+//        
+//        if (event.getData().getMaxTable().isPresent() && event.getData().getMaxTable().get().getValue() < listTable.size()){
+//            throw new DomainException("Tổng số bàn hiện tại:" + listTable.size() + " lớn hơn số bàn tối đa:" + event.getData().getMaxTable().get().getValue());
+//        }
+//        
+//        listTable.forEach(table -> {
+//            table.changeIsActive(eventCommand.isActive());
+//        });
+//        
+//        serviceTableRepository.saveAll(listTable);
+//        
+//        
     }
 
     /**

@@ -10,9 +10,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Data
 public class OrderProductResponse {
-    private Long orderProductId;
-    private Long prodId;
-    private Long priceId;
+    private Integer prodId;
+    private Integer sizeId;
     private Integer quantity;
     private String option;
     

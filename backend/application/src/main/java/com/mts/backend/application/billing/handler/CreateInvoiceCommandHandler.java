@@ -5,12 +5,15 @@ import com.mts.backend.application.order.response.OrderDiscountDetailResponse;
 import com.mts.backend.application.order.response.OrderProductDetailResponse;
 import com.mts.backend.application.order.response.OrderTableDetailResponse;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
+import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.OrderDiscountEntity;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.NotFoundException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +33,13 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
 
     private static final String TEMPLATE_PATH = "templates/invoice_template.html";
-    private static final String COMPANY_NAME = "Công ty TNHH MTS";
-    private static final String COMPANY_ADDRESS = "Số 1, Man Thiện, P. Hiệp Phú, Q.9, TP.HCM";
-    private static final String COMPANY_PHONE = "0901234567";
-    private static final String COMPANY_EMAIL = "mts@gmail.com";
+    
+    private final JpaStoreRepository storeRepository;
 
-    public CreateInvoiceCommandHandler(){
+    public CreateInvoiceCommandHandler(JpaStoreRepository storeRepository){
+        this.storeRepository = storeRepository;
     }
+    
 
     @Override
     public CommandResult handle(CreateInvoiceCommand command) {
@@ -67,6 +70,15 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
     }
 
     private String fillCompanyInfo(String template) {
+        
+        var store = storeRepository.findAll().stream().findFirst()
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cửa hàng"));
+        
+        final String COMPANY_NAME = store.getName().getValue();
+        final String COMPANY_ADDRESS = store.getAddress().getValue();
+        final String COMPANY_PHONE = store.getPhone().getValue();
+        final String COMPANY_EMAIL = store.getEmail().getValue();
+        
         template = template.replace("{{companyName}}", COMPANY_NAME);
         template = template.replace("{{companyAddress}}", COMPANY_ADDRESS);
         template = template.replace("{{companyPhone}}", COMPANY_PHONE);
@@ -82,6 +94,8 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         template = template.replace("{{invoiceDate}}", formatter.format(order.getOrderTime()));
         template = template.replace("{{notes}}", order.getCustomizeNote().orElse(""));
         template = template.replace("{{currentDate}}", LocalDateTime.now().format(formatter));
+        template = template.replace("{{currentUser}}",
+                "Nhân viên: %s".formatted(order.getEmployeeEntity().getFirstName().getValue()));
 
         return template;
     }
@@ -106,11 +120,13 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
     private String fillDiscountInfo(String template, OrderEntity order) {
         var discounts = getDiscounts(order);
-
+        
         if (discounts.isEmpty()) {
-            template = template.replaceAll("\\{\\{#if hasCouponPromotion\\}\\}([\\s\\S]*?)\\{\\{/if\\}\\}", "");
+            // Sửa biểu thức chính quy để bắt chính xác các ký tự xuống dòng và khoảng trắng
+            template = template.replaceAll("(?s)\\{\\{#if\\s+hasCouponPromotion\\}\\}.*?\\{\\{/if\\}\\}", "");
             return template;
         }
+
 
         String discountNames = discounts.stream()
                 .map(OrderDiscountDetailResponse::getName)
@@ -180,7 +196,8 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         DecimalFormat currency = new DecimalFormat("#,###");
         var paymentDetail = getPayment(payment);
 
-        template = template.replace("{{paymentMethod}}", paymentDetail.getPaymentMethod());
+        template = template.replace("{{paymentMethod}}", paymentDetail.getPaymentMethod()
+                .getName());
         template = template.replace("{{amountPaid}}", currency.format(paymentDetail.getAmountPaid()));
         template = template.replace("{{changeAmount}}", currency.format(paymentDetail.getChange()));
 
@@ -240,7 +257,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         var paymentMethod = payment.getPaymentMethod();
 
         return PaymentDetailResponse.builder()
-                .paymentMethod(paymentMethod.getPaymentName().getValue())
+                .paymentMethod(new PaymentMethodDetailResponse(
+                        paymentMethod.getId(),
+                        paymentMethod.getPaymentName().getValue(),
+                        paymentMethod.getPaymentDescription().orElse(null)))
                 .amountPaid(payment.getAmountPaid()
                         .map(Money::getValue)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy số tiền đã thanh toán")))

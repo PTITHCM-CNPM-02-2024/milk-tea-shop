@@ -15,6 +15,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.sql.Types.TIMESTAMP;
@@ -22,7 +23,7 @@ import static java.sql.Types.TIMESTAMP;
 @Getter
 @Setter
 @Entity
-@Table(name = "Account", schema = "milk_tea_shop_prod", indexes = {
+@Table(name = "account", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "role_id", columnList = "role_id")
 }, uniqueConstraints = {
         @UniqueConstraint(name = "username", columnNames = {"username"})
@@ -119,10 +120,11 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public void login(){
-        
-        if (this.getActive().isPresent() && this.getActive().get()) {
-            throw new DomainException("Tài khoản đã đăng nhập");
+
+        if(this.getActive().isPresent() && this.getActive().get()){
+            return;
         }
+        
         if (this.getLocked()){
             throw new DomainException("Tài khoản đã bị khóa không thể đăng nhập");
         }
@@ -140,6 +142,7 @@ public class AccountEntity extends BaseEntity<Long> {
             throw new DomainException("Tài khoản đã bị khóa không thể đăng xuất");
         }
         
+        this.incrementTokenVersion();
         this.active = false;
     }
     
@@ -150,12 +153,28 @@ public class AccountEntity extends BaseEntity<Long> {
     }
     
     public void unlock() {
-        this.active = true;
+        this.active = null;
         this.incrementTokenVersion();
         this.locked = false;
     }
+    
+    public boolean changeLock(boolean locked) {
+
+        if (locked) {
+            lock();
+        } else {
+            unlock();
+        }
+
+        return true;
+    }
+
     @Transient
     public Long incrementTokenVersion() {
-        return ++tokenVersion;
+        if (this.tokenVersion == null) {
+            this.tokenVersion = 0L;
+        }
+        this.tokenVersion++;
+        return this.tokenVersion;
     }
 }

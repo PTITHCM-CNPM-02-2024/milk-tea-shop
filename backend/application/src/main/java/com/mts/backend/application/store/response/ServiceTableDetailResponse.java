@@ -1,17 +1,13 @@
 package com.mts.backend.application.store.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
-public class ServiceTableDetailResponse {
-    private Integer id;
-    private String name;
-    private Integer areaId;
-    private Boolean isActive;
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
+public class ServiceTableDetailResponse extends ServiceTableSummaryResponse {
+    private AreaSummaryResponse area;
 }

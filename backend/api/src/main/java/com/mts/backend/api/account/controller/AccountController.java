@@ -5,113 +5,147 @@ import com.mts.backend.api.account.request.UpdateAccountRequest;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.application.account.AccountCommandBus;
 import com.mts.backend.application.account.AccountQueryBus;
-import com.mts.backend.application.account.command.CreateAccountCommand;
-import com.mts.backend.application.account.command.UpdateAccountCommand;
-import com.mts.backend.application.account.command.UpdateAccountPasswordCommand;
-import com.mts.backend.application.account.command.UpdateAccountRoleCommand;
+import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.query.AccountByIdQuery;
 import com.mts.backend.application.account.query.DefaultAccountQuery;
-import com.mts.backend.application.account.response.AccountDetailResponse;
+import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
 public class AccountController implements IController {
     private final AccountCommandBus accountCommandBus;
     private final AccountQueryBus accountQueryBus;
-    
+
     public AccountController(AccountCommandBus accountCommandBus, AccountQueryBus accountQueryBus) {
         this.accountCommandBus = accountCommandBus;
         this.accountQueryBus = accountQueryBus;
     }
-    
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Long>> createAccount(@RequestBody CreateAccountRequest request) {
+
+    @PostMapping
+    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
-            .username(Username.builder().value(request.getUsername()).build())
-            .password(PasswordHash.builder().value(request.getPassword()).build())
-            .roleId(RoleId.of(request.getRoleId()))
-            .build();
-        
+                .username(Username.builder().value(request.getUsername()).build())
+                .password(PasswordHash.builder().value(request.getPassword()).build())
+                .roleId(RoleId.of(request.getRoleId()))
+                .build();
+
         var result = accountCommandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData(),"Tạo tài khoản thành công")) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
+
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Long>> updateAccount(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateAccount(@PathVariable("id") Long id,
+                                           @RequestBody UpdateAccountRequest request,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails instanceof UserPrincipal userPrincipal && userPrincipal.getId() != null) {
+            if (!Objects.equals(userPrincipal.getId(), AccountId.of(id))) {
+                throw new AccessDeniedException("Bạn không có quyền truy cập vào tài khoản này");
+            }
+        }
+
         UpdateAccountCommand command = UpdateAccountCommand.builder()
-            .id(AccountId.of(id))
-            .username(Username.builder().value(request.getUsername()).build())
-            .build();
-        
+                .id(AccountId.of(id))
+                .username(Username.builder().value(request.getUsername()).build())
+                .build();
+
         var result = accountCommandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData(),"Cập nhật tài khoản thành công")) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
-    @PutMapping("/{id}/change-password")
-    public ResponseEntity<ApiResponse<Long>> changePassword(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
+
+    @PutMapping("/{id}/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> changePassword(@PathVariable("id") Long id,
+                                            @RequestParam(value = "oldPassword", required = true) String oldPassword,
+                                            @RequestParam(value = "newPassword", required = true) String newPassword,
+                                            @RequestParam(value = "confirmPassword", required = true) String confirmPassword,
+                                            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails instanceof UserPrincipal userPrincipal && userPrincipal.getId() != null) {
+            if (!Objects.equals(userPrincipal.getId(), AccountId.of(id))) {
+                throw new AccessDeniedException("Bạn không có quyền truy cập vào tài khoản này");
+            }
+        }
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
-            .id(AccountId.of(id))
-            .newPassword(PasswordHash.builder().value(request.getNewPassword()).build())
-            .confirmPassword(PasswordHash.builder().value(request.getConfirmPassword()).build())
-            .build();
-        
+                .id(AccountId.of(id))
+                .oldPassword(PasswordHash.builder().value(oldPassword).build())
+                .newPassword(PasswordHash.builder().value(newPassword).build())
+                .confirmPassword(PasswordHash.builder().value(confirmPassword).build())
+                .build();
+
         var result = accountCommandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData(),"Cập nhật mật khẩu thành công")) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
-    @PutMapping("/{id}/change-role")
-    public ResponseEntity<ApiResponse<Long>> changeRole(@PathVariable("id") Long id, @RequestBody UpdateAccountRequest request) {
+
+    @PutMapping("/{id}/role")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestParam("value") Integer roleId) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
-            .id(AccountId.of(id))
-            .roleId(RoleId.of(request.getRoleId()))
-            .build();
-        
+                .id(AccountId.of(id))
+                .roleId(RoleId.of(roleId))
+                .build();
+
         var result = accountCommandBus.dispatch(command);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Long)result.getData(),"Cập nhật role thành công")) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
+
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AccountDetailResponse>> getAccount(@PathVariable("id") Long id) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAccount(@PathVariable("id") Long id) {
         AccountByIdQuery query = AccountByIdQuery.builder()
-            .id(AccountId.of(id))
-            .build();
-        
+                .id(AccountId.of(id))
+                .build();
+
         var result = accountQueryBus.dispatch(query);
-        
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((AccountDetailResponse)result.getData())) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
+
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                                                 @RequestParam(value = "size", defaultValue = "10") int size) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> getAccounts(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         DefaultAccountQuery query = DefaultAccountQuery.builder()
-            .page(page)
-            .size(size)
-            .build();
-        
+                .page(page)
+                .size(size)
+                .build();
+
         var result = accountQueryBus.dispatch(query);
-        
-        return result.isSuccess() ?
-                ResponseEntity.ok(ApiResponse.success((result.getData()))) : handleError(result);
-        
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+
     }
-    
-    
-    
+
+    @PutMapping("/{id}/lock")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "value",
+            required = true) Boolean locked) {
+        var command = UpdateLockAccountCommand.builder().id(AccountId.of(id))
+                .isLocked(locked)
+                .build();
+
+        var result = accountCommandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
 }

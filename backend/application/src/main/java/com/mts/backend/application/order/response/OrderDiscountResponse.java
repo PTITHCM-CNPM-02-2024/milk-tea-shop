@@ -10,6 +10,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Data
 public class OrderDiscountResponse {
-    private Long orderDiscountId;
     private Long discountId;
 }

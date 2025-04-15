@@ -8,11 +8,13 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.springframework.lang.Nullable;
 
+import java.util.Optional;
+
 @Getter
 @Setter
 @Entity
-@Table(name = "PaymentMethod", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "PaymentMethod_pk", columnNames = {"payment_name"})
+@Table(name = "payment_method", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "payment_method_pk", columnNames = {"payment_name"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
@@ -38,6 +40,10 @@ public class PaymentMethodEntity extends BaseEntity<Integer> {
     @Column(name = "payment_description")
     @Nullable
     private String paymentDescription;
+    
+    public Optional<String> getPaymentDescription() {
+        return Optional.ofNullable(paymentDescription);
+    }
 
     public boolean changeName(PaymentMethodName name) {
         if (paymentName.equals(name)) {

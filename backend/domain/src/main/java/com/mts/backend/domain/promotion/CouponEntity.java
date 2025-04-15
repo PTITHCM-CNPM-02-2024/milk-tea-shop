@@ -13,8 +13,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name = "Coupon", schema = "milk_tea_shop_prod", uniqueConstraints = {
-        @UniqueConstraint(name = "coupon", columnNames = {"coupon"})
+@Table(name = "coupon", schema = "milk_tea_shop_prod", uniqueConstraints = {
+        @UniqueConstraint(name = "coupon_uk", columnNames = {"coupon"})
 })
 @AttributeOverrides({
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
@@ -42,7 +42,12 @@ public class CouponEntity extends BaseEntity<Long> {
     @Comment("Mô tả")
     @Column(name = "description", length = 1000)
     private String description;
-    
+
+    @Setter
+    @Getter
+    @OneToOne(mappedBy = "couponEntity")
+    private DiscountEntity discount;
+
     public boolean changeDescription(String description){
         if (Objects.equals(this.description, description)){
             return false;

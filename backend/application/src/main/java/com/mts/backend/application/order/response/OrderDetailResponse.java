@@ -1,10 +1,12 @@
 package com.mts.backend.application.order.response;
 
+import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +24,15 @@ public class OrderDetailResponse {
     private String employeePhone;
     private String orderStatus;
     private Instant orderTime;
+    private BigDecimal totalAmount;
+    private BigDecimal finalAmount;
+    private BigDecimal discountAmount;
     @Builder.Default
     private List<OrderProductDetailResponse> orderProducts = new ArrayList<>();
     @Builder.Default
     private List<OrderTableDetailResponse> orderTables = new ArrayList<>();
     @Builder.Default
     private List<OrderDiscountDetailResponse> orderDiscounts = new ArrayList<>();
+    @Builder.Default
+    private List<PaymentDetailResponse> orderPayments = new ArrayList<>();
 }

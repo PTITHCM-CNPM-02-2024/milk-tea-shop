@@ -17,11 +17,8 @@ import java.util.Objects;
 @Service
 public class GetEmployeeByIdQueryHandler implements IQueryHandler<EmployeeByIdQuery, CommandResult> {
     private final JpaEmployeeRepository employeeRepository;
-    private final JpaAccountRepository accountRepository;
-
     public GetEmployeeByIdQueryHandler(JpaEmployeeRepository employeeRepository, JpaAccountRepository accountRepository) {
         this.employeeRepository = employeeRepository;
-        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -30,16 +27,16 @@ public class GetEmployeeByIdQueryHandler implements IQueryHandler<EmployeeByIdQu
         Objects.requireNonNull(query, "Employee by id query is required");
         var employee = mustExistEmployee(query.getId());
 
-        EmployeeDetailResponse response = EmployeeDetailResponse.builder().build();
-        
-        response.setId(employee.getId());
-        response.setFirstName(employee.getFirstName().getValue());
-        response.setLastName(employee.getLastName().getValue());
-        response.setEmail(employee.getEmail().getValue());
-        response.setPhone(employee.getPhone().getValue());
-        response.setGender(employee.getGender().toString());
-        response.setPosition(employee.getPosition().getValue());
-        response.setAccountId(employee.getAccountEntity().getId());
+        var response = EmployeeDetailResponse.builder()
+                .id(employee.getId())
+                .firstName(employee.getFirstName().getValue())
+                .lastName(employee.getLastName().getValue())
+                .email(employee.getEmail().getValue())
+                .phone(employee.getPhone().getValue())
+                .gender(employee.getGender().toString())
+                .position(employee.getPosition().getValue())
+                .accountId(employee.getAccountEntity().getId())
+                .build();
         
         return CommandResult.success(response);
     }

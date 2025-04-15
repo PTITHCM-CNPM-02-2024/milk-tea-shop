@@ -6,6 +6,7 @@ import com.mts.backend.api.product.request.UpdateUnitRequest;
 import com.mts.backend.application.product.UnitCommandBus;
 import com.mts.backend.application.product.UnitQueryBus;
 import com.mts.backend.application.product.command.CreateUnitCommand;
+import com.mts.backend.application.product.command.DeleteUnitByIdCommand;
 import com.mts.backend.application.product.command.UpdateUnitCommand;
 import com.mts.backend.application.product.query.DefaultUnitQuery;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
@@ -13,6 +14,7 @@ import com.mts.backend.domain.product.value_object.UnitName;
 import com.mts.backend.domain.product.value_object.UnitSymbol;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,7 +30,8 @@ public class UnitController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> createUnit(@RequestBody CreateUnitRequest createUnitRequest){
         CreateUnitCommand command =
                 CreateUnitCommand.builder().name(UnitName.builder().value(createUnitRequest.getName()).build())
                         .description(createUnitRequest.getDescription())
@@ -37,11 +40,12 @@ public class UnitController implements IController {
         
         var result = unitCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Integer>> updateUnit(@PathVariable("id") Integer id, @RequestBody UpdateUnitRequest updateUnitRequest){
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> updateUnit(@PathVariable("id") Integer id, @RequestBody UpdateUnitRequest updateUnitRequest){
         UpdateUnitCommand command =
                 UpdateUnitCommand.builder().id(UnitOfMeasureId.of(id))
                         .name(UnitName.builder().value(updateUnitRequest.getName()).build())
@@ -51,15 +55,33 @@ public class UnitController implements IController {
         
         var result = unitCommandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer) result.getData(), "Thông tin đơn vị đã được cập nhật")) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllUnit(){
-        DefaultUnitQuery query = DefaultUnitQuery.builder().build();
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAllUnit(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        DefaultUnitQuery query = DefaultUnitQuery.builder()
+                .page(page)
+                .size(size)
+                .build();
         
         var result = unitQueryBus.dispatch(query);
             
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteUnit(@PathVariable("id") Integer id) {
+        DeleteUnitByIdCommand command = DeleteUnitByIdCommand.builder()
+                .id(UnitOfMeasureId.of(id))
+                .build();
+
+        var result = unitCommandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

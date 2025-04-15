@@ -6,6 +6,7 @@ import com.mts.backend.api.store.request.UpdateServiceTableRequest;
 import com.mts.backend.application.store.ServiceTableCommandBus;
 import com.mts.backend.application.store.ServiceTableQueryBus;
 import com.mts.backend.application.store.command.CreateServiceTableCommand;
+import com.mts.backend.application.store.command.DeleteServiceTableByIdCommand;
 import com.mts.backend.application.store.command.UpdateServiceTableCommand;
 import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
@@ -16,6 +17,7 @@ import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.value_object.TableNumber;
 import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
@@ -32,7 +34,8 @@ public class ServiceTableController implements IController {
     }
     
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createServiceTable(@RequestBody CreateServiceTableRequest request) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> createServiceTable(@RequestBody CreateServiceTableRequest request) {
         var command = CreateServiceTableCommand.builder()
                 .name(TableNumber.builder().value(request.getName()).build())
                 .areaId(AreaId.of(request.getAreaId()))
@@ -41,11 +44,12 @@ public class ServiceTableController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success(result.getData())) : handleError(result);
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> updateServiceTable(@PathVariable("id") Integer id,
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> updateServiceTable(@PathVariable("id") Integer id,
                                                              @RequestBody UpdateServiceTableRequest request) {
         var command = UpdateServiceTableCommand.builder()
                 .id(ServiceTableId.of(request.getId()))
@@ -56,41 +60,56 @@ public class ServiceTableController implements IController {
         
         var result = commandBus.dispatch(command);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((Integer)result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getServiceTableById(@PathVariable("id") Integer id) {
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getServiceTableById(@PathVariable("id") Integer id) {
         var query = ServiceTableByIdQuery.builder().id(ServiceTableId.of(id)).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success((ServiceTableDetailResponse) result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<?>> getAllServiceTableActive(@RequestParam(value = "active", defaultValue = 
-            "true") Boolean active, @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        var query = ServiceTableActiveQuery.builder().active(active).size(size).build();
+    @GetMapping("/active/{active}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllServiceTableActive(@PathVariable("active") Boolean active) {
+        var query = ServiceTableActiveQuery.builder()
+                .active(active)
+                .build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllServiceTable(@RequestParam(value = "page", defaultValue = "0") Integer page,
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllServiceTable(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                              @RequestParam(value = "size", defaultValue = "40") Integer size) {
         var query = DefaultServiceTableQuery.builder().page(page).size(size).build();
         
         var result = queryBus.dispatch(query);
         
-        return result.isSuccess() ? ResponseEntity.ok(ApiResponse.success( result.getData())) :
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) :
                 handleError(result);
     }
     
-    
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> deleteServiceTable(@PathVariable("id") Integer id) {
+        DeleteServiceTableByIdCommand command = DeleteServiceTableByIdCommand.builder()
+                .serviceTableId(ServiceTableId.of(id))
+                .build();
+
+        var result = commandBus.dispatch(command);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
 }

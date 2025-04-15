@@ -10,7 +10,7 @@
       </div>
       
       <div class="modal-body">
-        <div v-if="loading" class="loading text-center py-4">
+        <div v-if="tableStore.loading" class="loading text-center py-4">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Đang tải...</span>
           </div>
@@ -20,10 +20,10 @@
         <div v-else>
           <div class="area-tabs">
             <button
-              v-for="area in areas"
+              v-for="area in tableStore.allAreas"
               :key="area.id"
-              :class="['area-tab', selectedArea === area.id ? 'active' : '']"
-              @click="selectedArea = area.id"
+              :class="['area-tab', tableStore.selectedArea === area.id ? 'active' : '']"
+              @click="tableStore.selectArea(area.id)"
             >
               {{ area.name }}
             </button>
@@ -31,21 +31,24 @@
           
           <div class="table-grid mt-3">
             <div
-              v-for="table in filteredTables"
+              v-for="table in tableStore.filteredTables"
               :key="table.id"
               :class="['table-item', isTableSelected(table.id) ? 'selected' : '', !table.isActive ? 'inactive' : '']"
               @click="toggleTableSelection(table)"
             >
               <div class="table-icon">
-                <i class="fas fa-chair"></i>
+                <v-icon>{{ table.isActive ? 'mdi-table-chair' : 'mdi-table-off' }}</v-icon>
               </div>
               <div class="table-name">{{ table.name }}</div>
+              <div v-if="table.area && table.area.id" class="table-area-info">
+                {{ getAreaName(table.area.id) }}
+              </div>
               <div v-if="!table.isActive" class="table-status">Không hoạt động</div>
             </div>
           </div>
           
-          <div v-if="filteredTables.length === 0" class="no-tables text-center py-4">
-            <i class="fas fa-chair fa-3x text-muted mb-3"></i>
+          <div v-if="tableStore.filteredTables.length === 0" class="no-tables text-center py-4">
+            <v-icon size="x-large" color="grey" class="mb-3">mdi-table-chair</v-icon>
             <p>Không có bàn trong khu vực này</p>
           </div>
           
@@ -59,7 +62,7 @@
               >
                 {{ table.name }}
                 <button class="remove-table-btn" @click.stop="removeTable(table.id)">
-                  <i class="fas fa-times"></i>
+                  <v-icon small>mdi-close</v-icon>
                 </button>
               </span>
             </div>
@@ -68,9 +71,9 @@
       </div>
       
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" @click="$emit('cancel')">Hủy</button>
+        <button class="cancel-btn" @click="$emit('cancel')">Hủy</button>
         <button
-          class="btn btn-primary"
+          class="confirm-btn"
           :disabled="selectedTables.length === 0"
           @click="confirmSelection"
         >
@@ -83,59 +86,42 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import TableService from '../services/table.service';
+import { useTableStore } from '../stores/tableStore';
 
+const tableStore = useTableStore();
 const emit = defineEmits(['select-tables', 'cancel']);
 
-const areas = ref([]);
-const tables = ref([]);
-const selectedArea = ref(null);
-const selectedTables = ref([]);
-const loading = ref(true);
-
-const filteredTables = computed(() => {
-  if (!selectedArea.value) return [];
-  return tables.value.filter(table => table.areaId === selectedArea.value);
+const props = defineProps({
+  initialTables: {
+    type: Array,
+    default: () => []
+  }
 });
 
+// Danh sách bàn đã chọn
+const selectedTables = ref((props.initialTables && props.initialTables.length > 0) 
+  ? props.initialTables.map(table => table.id) 
+  : []);
+
+// Lấy thông tin chi tiết của các bàn được chọn
 const selectedTableObjects = computed(() => {
   return selectedTables.value.map(id => {
-    return tables.value.find(table => table.id === id);
-  }).filter(table => table); // Remove undefined values
+    return tableStore.tables.find(table => table.id === id);
+  }).filter(table => table); // Loại bỏ các giá trị undefined
 });
 
-async function loadAreas() {
-  try {
-    const response = await TableService.getActiveAreas();
-    areas.value = response.data;
-    if (areas.value.length > 0) {
-      selectedArea.value = areas.value[0].id;
-    }
-  } catch (error) {
-    console.error('Error loading areas:', error);
-    alert('Không thể tải danh sách khu vực');
-  }
-}
-
-async function loadTables() {
-  loading.value = true;
-  try {
-    const response = await TableService.getActiveServiceTables();
-    tables.value = response.data;
-  } catch (error) {
-    console.error('Error loading tables:', error);
-    alert('Không thể tải danh sách bàn');
-  } finally {
-    loading.value = false;
-  }
-}
-
+// Kiểm tra xem bàn có được chọn hay không
 function isTableSelected(tableId) {
   return selectedTables.value.includes(tableId);
 }
 
+// Thêm/xóa bàn khỏi danh sách đã chọn
 function toggleTableSelection(table) {
-  if (!table.isActive) return;
+  // Chỉ cho phép chọn bàn đang hoạt động
+  if (!table.isActive) {
+    alert('Bàn này hiện không hoạt động');
+    return;
+  }
   
   const index = selectedTables.value.indexOf(table.id);
   if (index === -1) {
@@ -145,6 +131,7 @@ function toggleTableSelection(table) {
   }
 }
 
+// Xóa bàn khỏi danh sách đã chọn
 function removeTable(tableId) {
   const index = selectedTables.value.indexOf(tableId);
   if (index !== -1) {
@@ -152,12 +139,34 @@ function removeTable(tableId) {
   }
 }
 
+// Xác nhận lựa chọn bàn
 function confirmSelection() {
   emit('select-tables', selectedTableObjects.value);
 }
 
-onMounted(() => {
-  Promise.all([loadAreas(), loadTables()]);
+// Lấy tên khu vực từ ID
+function getAreaName(areaId) {
+  const area = tableStore.areas.find(a => a.id === areaId);
+  return area ? area.name : 'Không xác định';
+}
+
+// Tải dữ liệu khi component được tạo
+onMounted(async () => {
+  // Tải khu vực và bàn từ store
+  await Promise.all([tableStore.fetchAreas(), tableStore.fetchTables()]);
+  
+  // Debug: In ra cấu trúc dữ liệu của bàn đầu tiên nếu có
+  if (tableStore.tables.length > 0) {
+    console.log('Cấu trúc dữ liệu bàn:', tableStore.tables[0]);
+    console.log('Danh sách bàn không có khu vực:', tableStore.tables.filter(t => !t.areaId).length);
+    
+    // Kiểm tra các khu vực trong danh sách bàn
+    const areaIds = [...new Set(tableStore.tables.filter(t => t.areaId).map(t => t.areaId))];
+    console.log('Khu vực từ bàn:', areaIds);
+    
+    // Kiểm tra khớp với danh sách khu vực
+    console.log('Danh sách khu vực:', tableStore.areas.map(a => a.id));
+  }
 });
 </script>
 
@@ -197,7 +206,7 @@ onMounted(() => {
 
 .modal-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--light-gray);
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -232,27 +241,28 @@ onMounted(() => {
 .area-tab {
   padding: 0.5rem 1rem;
   background-color: #f8f9fa;
-  border: 1px solid var(--light-gray);
+  border: 1px solid #e0e0e0;
   border-radius: 0.25rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .area-tab.active {
-  background-color: var(--primary-color);
+  background-color: #2196F3;
   color: white;
-  border-color: var(--primary-color);
+  border-color: #2196F3;
 }
 
 .table-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .table-item {
   background-color: white;
-  border: 1px solid var(--light-gray);
+  border: 1px solid #e0e0e0;
   border-radius: 0.5rem;
   padding: 1rem 0.5rem;
   display: flex;
@@ -260,38 +270,61 @@ onMounted(() => {
   align-items: center;
   cursor: pointer;
   transition: all 0.2s;
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.table-item:hover:not(.inactive) {
+  border-color: #2196F3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .table-item.selected {
-  background-color: rgba(142, 68, 173, 0.1);
-  border-color: var(--primary-color);
+  background-color: #E3F2FD;
+  border-color: #2196F3;
 }
 
 .table-item.inactive {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: #f5f5f5;
+  border: 1px dashed #ccc;
 }
 
 .table-icon {
   font-size: 1.5rem;
-  color: #6c757d;
+  color: #2196F3;
   margin-bottom: 0.5rem;
 }
 
 .table-name {
   font-size: 0.9rem;
   text-align: center;
+  font-weight: 500;
+}
+
+.table-area-info {
+  font-size: 0.7rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
 }
 
 .table-status {
   font-size: 0.7rem;
-  color: var(--danger-color);
+  color: #F44336;
   margin-top: 0.25rem;
 }
 
 .selected-tables {
-  border-top: 1px solid var(--light-gray);
+  border-top: 1px solid #e0e0e0;
   padding-top: 0.75rem;
+  margin-top: 1rem;
+}
+
+.selected-tables h6 {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .selected-table-list {
@@ -302,7 +335,7 @@ onMounted(() => {
 }
 
 .selected-table-badge {
-  background-color: var(--primary-color);
+  background-color: #2196F3;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
@@ -324,9 +357,43 @@ onMounted(() => {
 
 .modal-footer {
   padding: 1rem;
-  border-top: 1px solid var(--light-gray);
+  border-top: 1px solid #e0e0e0;
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.confirm-btn {
+  background-color: #2196F3;
+  border: none;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #1976D2;
+}
+
+.confirm-btn:disabled {
+  background-color: #90CAF9;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

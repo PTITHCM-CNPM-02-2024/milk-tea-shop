@@ -3,9 +3,11 @@ package com.mts.backend.domain.common.value_object;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import lombok.Builder;
 import lombok.Value;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.Objects;
 
 @Value
 @Builder
-public class Money  implements Comparable<Money> {
+public class Money  implements Comparable<Money>, Serializable {
     BigDecimal value;
     private static final int DEFAULT_SCALE = 3;
     
@@ -110,7 +112,7 @@ public class Money  implements Comparable<Money> {
     public int compareTo(Money o) {
         return value.compareTo(o.value);
     }
-    
+    @Converter(autoApply = true)
     public static final class MoneyConverter implements AttributeConverter<Money, BigDecimal>{
         @Override
         public BigDecimal convertToDatabaseColumn(Money attribute) {
