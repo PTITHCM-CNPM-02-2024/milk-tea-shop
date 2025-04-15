@@ -22,7 +22,7 @@
             />
             <h2 class="text-h4 font-weight-bold">Đăng nhập</h2>
             <p class="text-subtitle-1 text-medium-emphasis mt-1">
-              Đăng nhập vào tài khoản quản lý của bạn
+              Đăng nhập vào tài khoản bán hàng của bạn
             </p>
           </div>
 

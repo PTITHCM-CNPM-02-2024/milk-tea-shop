@@ -189,7 +189,7 @@
 
         <!-- Discounts & Promotions -->
           <v-list-item
-            title="Chương trình & Mã giảm giá"
+            title="Khuyến mãi & Mã giảm giá"
             value="discounts"
             rounded="lg"
             prepend-icon="mdi-sale"

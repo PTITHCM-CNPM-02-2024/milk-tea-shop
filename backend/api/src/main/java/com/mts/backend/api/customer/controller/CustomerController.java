@@ -134,7 +134,7 @@ public class CustomerController implements IController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hhasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> deleteCustomer(@PathVariable("id") Long id) {
         DeleteCusByIdCommand command = DeleteCusByIdCommand.builder()
                 .customerId(CustomerId.of(id))

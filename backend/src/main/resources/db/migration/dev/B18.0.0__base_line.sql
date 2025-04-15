@@ -295,7 +295,7 @@ create table store
     opening_date date                               not null comment 'Ngày khai trương',
     tax_code     varchar(20)                        not null comment 'Mã số thuế',
     created_at   datetime default CURRENT_TIMESTAMP null,
-    updated_at   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    updated_at   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
 );
 
 create table unit_of_measure

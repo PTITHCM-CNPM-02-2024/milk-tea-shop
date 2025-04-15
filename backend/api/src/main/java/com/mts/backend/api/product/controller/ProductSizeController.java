@@ -64,7 +64,7 @@ public class ProductSizeController implements IController {
     }
 
     @GetMapping
-    @PreAuthorize("hhasAnyRole('MANAGER', 'STAFF')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllProductSize(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
