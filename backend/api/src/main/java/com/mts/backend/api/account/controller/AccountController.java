@@ -13,6 +13,11 @@ import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
+@Tag(name = "Account Controller", description = "Account")
 @RestController
 @RequestMapping("/api/v1/accounts")
 public class AccountController implements IController {
@@ -33,8 +39,13 @@ public class AccountController implements IController {
         this.accountQueryBus = accountQueryBus;
     }
 
+    @Operation(summary = "Tạo tài khoản mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
-    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request) {
+    public ResponseEntity<?> createAccount(@Parameter(description = "Thông tin tài khoản", required = true) @RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
                 .username(Username.builder().value(request.getUsername()).build())
                 .password(PasswordHash.builder().value(request.getPassword()).build())
@@ -47,10 +58,16 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Cập nhật tài khoản")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "403", description = "Không có quyền truy cập"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy tài khoản")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateAccount(@PathVariable("id") Long id,
-                                           @RequestBody UpdateAccountRequest request,
+    public ResponseEntity<?> updateAccount(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id,
+                                           @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateAccountRequest request,
                                            @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails instanceof UserPrincipal userPrincipal && userPrincipal.getId() != null) {
             if (!Objects.equals(userPrincipal.getId(), AccountId.of(id))) {
@@ -69,12 +86,17 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Đổi mật khẩu tài khoản")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "403", description = "Không có quyền truy cập")
+    })
     @PutMapping("/{id}/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePassword(@PathVariable("id") Long id,
-                                            @RequestParam(value = "oldPassword", required = true) String oldPassword,
-                                            @RequestParam(value = "newPassword", required = true) String newPassword,
-                                            @RequestParam(value = "confirmPassword", required = true) String confirmPassword,
+    public ResponseEntity<?> changePassword(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id,
+                                            @Parameter(description = "Mật khẩu cũ", required = true) @RequestParam(value = "oldPassword", required = true) String oldPassword,
+                                            @Parameter(description = "Mật khẩu mới", required = true) @RequestParam(value = "newPassword", required = true) String newPassword,
+                                            @Parameter(description = "Xác nhận mật khẩu", required = true) @RequestParam(value = "confirmPassword", required = true) String confirmPassword,
                                             @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails instanceof UserPrincipal userPrincipal && userPrincipal.getId() != null) {
             if (!Objects.equals(userPrincipal.getId(), AccountId.of(id))) {
@@ -94,9 +116,13 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Đổi vai trò tài khoản")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> changeRole(@PathVariable("id") Long id, @RequestParam("value") Integer roleId) {
+    public ResponseEntity<?> changeRole(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id, @Parameter(description = "ID vai trò", required = true) @RequestParam("value") Integer roleId) {
         UpdateAccountRoleCommand command = UpdateAccountRoleCommand.builder()
                 .id(AccountId.of(id))
                 .roleId(RoleId.of(roleId))
@@ -108,9 +134,14 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Lấy tài khoản theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy tài khoản")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getAccount(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id) {
         AccountByIdQuery query = AccountByIdQuery.builder()
                 .id(AccountId.of(id))
                 .build();
@@ -121,10 +152,14 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Lấy danh sách tài khoản")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> getAccounts(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAccounts(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                         @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size) {
         DefaultAccountQuery query = DefaultAccountQuery.builder()
                 .page(page)
                 .size(size)
@@ -136,10 +171,13 @@ public class AccountController implements IController {
 
     }
 
+    @Operation(summary = "Khóa/mở khóa tài khoản")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @PutMapping("/{id}/lock")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> lockAccount(@PathVariable("id") Long id, @RequestParam(value = "value",
-            required = true) Boolean locked) {
+    public ResponseEntity<?> lockAccount(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id, @Parameter(description = "Trạng thái khóa", required = true) @RequestParam(value = "value", required = true) Boolean locked) {
         var command = UpdateLockAccountCommand.builder().id(AccountId.of(id))
                 .isLocked(locked)
                 .build();

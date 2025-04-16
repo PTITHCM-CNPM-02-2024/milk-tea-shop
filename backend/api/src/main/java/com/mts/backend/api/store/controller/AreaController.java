@@ -3,13 +3,11 @@ package com.mts.backend.api.store.controller;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.store.request.CreateAreaRequest;
 import com.mts.backend.api.store.request.UpdateAreaRequest;
-import com.mts.backend.api.store.request.UpdateMaxAndActiveRequest;
 import com.mts.backend.application.store.AreaCommandBus;
 import com.mts.backend.application.store.AreaQueryBus;
 import com.mts.backend.application.store.command.CreateAreaCommand;
 import com.mts.backend.application.store.command.DeleteAreaByIdCommand;
 import com.mts.backend.application.store.command.UpdateAreaCommand;
-import com.mts.backend.application.store.command.UpdateAreaMaxAndActiveCommand;
 import com.mts.backend.application.store.query.AreaActiveQuery;
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.query.DefaultAreaQuery;
@@ -17,13 +15,18 @@ import com.mts.backend.application.store.query.ServiceTableByAreaIdQuery;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.value_object.AreaName;
 import com.mts.backend.domain.store.value_object.MaxTable;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/api/v1/areas")
+@Tag(name = "Area Controller", description = "Area")
 public class AreaController implements IController {
 
     private final AreaCommandBus commandBus;

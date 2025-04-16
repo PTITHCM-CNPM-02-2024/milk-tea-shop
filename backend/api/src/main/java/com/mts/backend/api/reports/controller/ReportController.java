@@ -16,8 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RequestMapping("/api/v1/reports")
 @RestController
+@Tag(name = "Report Controller", description = "Report")
 public class ReportController implements IController {
     private final ReportQueryBus reportQueryBus;
     

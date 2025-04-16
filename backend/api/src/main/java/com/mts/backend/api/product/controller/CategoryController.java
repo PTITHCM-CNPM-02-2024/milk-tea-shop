@@ -19,6 +19,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+
+@Tag(name = "Category Controller", description = "Category")
 @RestController
 @RequestMapping("/api/v1/categories")
 public class CategoryController implements IController {
@@ -32,9 +39,14 @@ public class CategoryController implements IController {
         this.categoryQueryBus = categoryQueryBus;
     }
 
+    @Operation(summary = "Tạo danh mục mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) {
+    public ResponseEntity<?> createCategory(@Parameter(description = "Thông tin danh mục", required = true) @RequestBody CreateCategoryRequest createCategoryRequest) {
         CreateCategoryCommand createCategoryCommand = CreateCategoryCommand.builder()
                 .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
                 .description(createCategoryRequest.getDescription())
@@ -45,10 +57,15 @@ public class CategoryController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Cập nhật danh mục")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy danh mục")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updateCategory(@PathVariable("id") Integer id,
-                                            @RequestBody CreateCategoryRequest createCategoryRequest) {
+    public ResponseEntity<?> updateCategory(@Parameter(description = "ID danh mục", required = true) @PathVariable("id") Integer id,
+                                            @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody CreateCategoryRequest createCategoryRequest) {
         UpdateCategoryCommand createCategoryCommand = UpdateCategoryCommand.builder()
                 .id(CategoryId.of(id))
                 .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
@@ -59,10 +76,14 @@ public class CategoryController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy danh sách danh mục")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAllCategory(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAllCategory(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
         DefaultCategoryQuery defaultCategoryQuery = DefaultCategoryQuery.builder()
                 .page(page)
@@ -75,9 +96,14 @@ public class CategoryController implements IController {
     }
     
     
+    @Operation(summary = "Lấy danh mục theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy danh mục")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCategoryById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getCategoryById(@Parameter(description = "ID danh mục", required = true) @PathVariable("id") Integer id) {
         Objects.requireNonNull(id, "Category ID must not be null");
 
         var result = categoryQueryBus.dispatch(CatByIdQuery.builder().id(CategoryId.of(id)).build());
@@ -86,12 +112,16 @@ public class CategoryController implements IController {
     }
     
     
+    @Operation(summary = "Lấy sản phẩm theo danh mục")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/{id}/products")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getCategoryProducts(@PathVariable("id") Integer id,
-                                                 @RequestParam(value = "availableOrdered", required = false) Boolean availableOrdered,
-                                                 @RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                 @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getCategoryProducts(@Parameter(description = "ID danh mục", required = true) @PathVariable("id") Integer id,
+                                                 @Parameter(description = "Có thể đặt hàng", required = false) @RequestParam(value = "availableOrdered", required = false) Boolean availableOrdered,
+                                                 @Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                 @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size) {
         ProdByCatIdQuery query = ProdByCatIdQuery.builder()
                 .id(CategoryId.of(id))
                 .availableOrder(availableOrdered)
@@ -105,9 +135,14 @@ public class CategoryController implements IController {
 
     }
 
+    @Operation(summary = "Xóa danh mục")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy danh mục")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteCategory(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteCategory(@Parameter(description = "ID danh mục", required = true) @PathVariable("id") Integer id) {
         DeleteCatByIdCommand command = DeleteCatByIdCommand.builder()
                 .id(CategoryId.of(id))
                 .build();
