@@ -7,6 +7,7 @@ import com.mts.backend.application.report.query.CatRevenueReportQuery;
 import com.mts.backend.application.report.query.OrderRevenueByTimeQuery;
 import com.mts.backend.application.report.query.TopSaleProductQuery;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,8 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RequestMapping("/api/v1/reports")
 @RestController
+@Tag(name = "Report Controller", description = "Report")
 public class ReportController implements IController {
     private final ReportQueryBus reportQueryBus;
     
@@ -25,6 +33,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/overview")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getOverviewReport() {
         
         var overviewReportQuery = new BasicReportQuery();
@@ -34,6 +43,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/cat-revenue")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getCatRevenueReport(@RequestParam(value = "from", required = false) String from,
                                                  @RequestParam(value = "to", required = false) String to ){
         
@@ -47,6 +57,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/order-revenue")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getOrderRevenueReport(@RequestParam(value = "from", required = false) String from,
                                                     @RequestParam(value = "to", required = false) String to ) {
 
@@ -61,6 +72,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/top-products")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getTopProductsReport(@RequestParam(value = "from", required = false) String from,
                                                    @RequestParam(value = "to", required = false) String to,
                                                   @RequestParam(value = "limit", defaultValue = "10") Integer limit) {

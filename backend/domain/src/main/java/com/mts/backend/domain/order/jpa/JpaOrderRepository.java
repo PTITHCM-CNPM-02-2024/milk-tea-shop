@@ -19,6 +19,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
+    @Query("select o from OrderEntity o where o.employeeEntity.id = :id order by o.finalAmount DESC")
+    Page<OrderEntity> findByEmployeeEntity_IdOrderByFinalAmountDesc(@Param("id") @NonNull Long id, Pageable pageable);
+
+    @Query("""
+            select o from OrderEntity o
+            where o.employeeEntity.id = :id and (o.orderTime between :orderTimeStart and :orderTimeEnd) order by o.finalAmount DESC""")
+    Page<OrderEntity> findByEmployeeEntity_IdAndOrderTimeBetween(@Param("id") @NonNull Long id, @Param("orderTimeStart") Instant orderTimeStart, @Param("orderTimeEnd") Instant orderTimeEnd, Pageable pageable);
+
     @EntityGraph(attributePaths = {"customerEntity.membershipTypeEntity.memberDiscountValue", "employeeEntity", "orderDiscounts.discount.couponEntity", "orderProducts.productPriceEntity.productEntity.categoryEntity", "orderProducts.productPriceEntity.size", "orderTables.table"})
     @Query("select o from OrderEntity o where o.id = :id")
     Optional<OrderEntity> findOrderWithDetails(@Param("id") @NonNull Long id);
@@ -75,6 +83,38 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
             from OrderEntity o 
            """)
     BigDecimal getTotalOrderValue();
+    
+    @Query("""
+            SELECT  SUM(o.finalAmount)
+            from OrderEntity o
+            where o.orderTime BETWEEN :startDate AND :endDate AND o.employeeEntity.id = :employeeId
+           """)
+    BigDecimal getSumRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+                                            @Param("endDate") Instant endDate);
+
+    @Query("""
+            SELECT  AVG(o.finalAmount)
+            from OrderEntity o
+            where o.orderTime BETWEEN :startDate AND :endDate AND o.employeeEntity.id = :employeeId
+           """)
+    BigDecimal getAvgRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+                                    @Param("endDate") Instant endDate);
+
+    @Query("""
+            SELECT  MAX(o.finalAmount)
+            from OrderEntity o
+            where o.orderTime BETWEEN :startDate AND :endDate AND o.employeeEntity.id = :employeeId
+           """)
+    Money getMaxRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+                                    @Param("endDate") Instant endDate);
+
+    @Query("""
+            SELECT  MIN(o.finalAmount)
+            from OrderEntity o
+            where o.orderTime BETWEEN :startDate AND :endDate AND o.employeeEntity.id = :employeeId
+           """)
+    Money getMinRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+                               @Param("endDate") Instant endDate);
     
     @Query("""
             SELECT  AVG(o.finalAmount) 
@@ -135,6 +175,19 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     ORDER BY get_date
     """)
     List<Object[]> findRevenueByTimeRange(
+            @Param("fromDate") Instant fromDate,
+            @Param("toDate") Instant toDate
+    );
+
+    @Query("""
+    SELECT CAST(o.orderTime AS date) as get_date, SUM(o.finalAmount) as totalRevenue
+    FROM OrderEntity o
+    WHERE o.orderTime BETWEEN :fromDate AND :toDate AND o.employeeEntity.id = :employeeId
+    GROUP BY CAST(o.orderTime AS date)
+    ORDER BY get_date
+    """)
+    List<Object[]> findRevenueByTimeRange(
+            @Param("employeeId") Long employeeId,
             @Param("fromDate") Instant fromDate,
             @Param("toDate") Instant toDate
     );

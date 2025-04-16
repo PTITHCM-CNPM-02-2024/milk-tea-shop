@@ -24,7 +24,7 @@
         />
 
         <ProductGrid
-            :products="productStore.products"
+            :products="filteredProducts"
             :loading="productStore.loading"
             @add-to-cart="openCustomizationModal"
         />
@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import CategoryList from '../components/CategoryList.vue';
 import ProductGrid from '../components/ProductGrid.vue';
 import Cart from '../components/Cart.vue';
@@ -148,6 +148,83 @@ const alertType = ref('info');
 const alertMessage = ref('');
 const alertIcon = ref('mdi-information');
 
+// Lấy employeeId và searchQuery từ props
+const props = defineProps({
+  employeeId: {
+    type: Number,
+    required: true
+  },
+  employeeName: {
+    type: String,
+    required: true
+  },
+  searchQuery: {
+    type: String,
+    default: ''
+  }
+});
+
+// State cho tìm kiếm sản phẩm - sử dụng từ props
+const searchQuery = computed(() => props.searchQuery || '');
+
+// Lọc sản phẩm dựa trên từ khóa tìm kiếm
+const filteredProducts = computed(() => {
+  console.log('Tìm kiếm với từ khóa:', searchQuery.value);
+  
+  if (!searchQuery.value || !searchQuery.value.trim()) {
+    // Nếu không có từ khóa tìm kiếm, trả về danh sách sản phẩm hiện tại
+    return productStore.products;
+  }
+  
+  // Chuyển từ khóa tìm kiếm về chữ thường
+  const query = searchQuery.value.toLowerCase().trim();
+  
+  // Lọc sản phẩm dựa trên các tiêu chí
+  return productStore.products.filter(product => {
+    // Tìm trong tên sản phẩm
+    if (product.name && product.name.toLowerCase().includes(query)) {
+      return true;
+    }
+    
+    // Tìm trong mô tả sản phẩm
+    if (product.description && product.description.toLowerCase().includes(query)) {
+      return true;
+    }
+    
+    // Tìm trong tên danh mục
+    if (product.category && typeof product.category === 'object' && 
+        product.category.name && product.category.name.toLowerCase().includes(query)) {
+      return true;
+    }
+    
+    // Tìm theo mã sản phẩm hoặc ID
+    if ((product.code && product.code.toLowerCase().includes(query)) || 
+        (product.id && product.id.toString().includes(query))) {
+      return true;
+    }
+    
+    return false;
+  });
+});
+
+// Theo dõi thay đổi từ khóa tìm kiếm từ props
+watch(() => props.searchQuery, (newQuery) => {
+  // Nếu có từ khóa tìm kiếm và đang ở danh mục cụ thể, chuyển về "Tất cả"
+  if (newQuery && categoryStore.selectedCategory !== 'all') {
+    categoryStore.selectCategory('all');
+    // Load tất cả sản phẩm nếu đang lọc theo danh mục
+    productStore.handleCategoryChange('all');
+  }
+  
+  // Hiển thị thông báo nếu tìm kiếm không có kết quả
+  if (newQuery && filteredProducts.value.length === 0) {
+    setAlert('info', `Không tìm thấy sản phẩm phù hợp với "${newQuery}"`);
+  } else if (showAlert.value && alertType.value === 'info') {
+    // Ẩn alert info nếu đã có kết quả tìm kiếm
+    showAlert.value = false;
+  }
+}, { immediate: true });
+
 // Đặt thông tin alert
 function setAlert(type, message) {
   alertType.value = type;
@@ -170,18 +247,6 @@ function setAlert(type, message) {
   
   showAlert.value = true;
 }
-
-// Lấy employeeId từ props
-const props = defineProps({
-  employeeId: {
-    type: Number,
-    required: true
-  },
-  employeeName: {
-    type: String,
-    required: true
-  }
-});
 
 // Modal states
 const showCustomizationModal = ref(false);
@@ -452,14 +517,14 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  border-right: 1px solid rgba(var(--v-border-opacity, 1), 0.12);
 }
 
 .right-panel {
   flex: 3;
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: var(--v-theme-surface);
   min-width: 360px;
 }
 </style> 

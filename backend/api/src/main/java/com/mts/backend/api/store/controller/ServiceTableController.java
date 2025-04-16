@@ -11,19 +11,24 @@ import com.mts.backend.application.store.command.UpdateServiceTableCommand;
 import com.mts.backend.application.store.query.DefaultServiceTableQuery;
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
-import com.mts.backend.application.store.response.ServiceTableDetailResponse;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.value_object.TableNumber;
-import com.mts.backend.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RestController
 @RequestMapping("/api/v1/service-tables")
+@Tag(name = "Service Table Controller", description = "Service Table")
 public class ServiceTableController implements IController {
     private final ServiceTableCommandBus commandBus;
     private final ServiceTableQueryBus queryBus;

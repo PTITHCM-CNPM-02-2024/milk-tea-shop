@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <v-navigation-drawer
       v-model="drawer"
-      :rail="rail"
+      :rail="false"
       app
       :elevation="2"
       :color="darkMode ? '#2F3349' : '#FFFFFF'"
@@ -13,28 +13,11 @@
       <!-- Logo và Brand -->
       <div class="d-flex align-center justify-space-between py-3 px-4">
         <div class="d-flex align-center">
-          <v-avatar color="primary" class="mr-3" size="32" v-if="!rail">
+          <v-avatar color="primary" size="32" class="mr-3">
             <span class="text-h6 font-weight-bold">M</span>
           </v-avatar>
-          <v-avatar color="primary" size="32" v-else>
-            <span class="text-h6 font-weight-bold">M</span>
-          </v-avatar>
-          <span class="text-h6 font-weight-bold primary--text" v-if="!rail">MATERIO</span>
+          <span class="text-h6 font-weight-bold primary--text">MATERIO</span>
         </div>
-        <v-btn
-          v-if="!rail && !isMobile"
-          icon="mdi-chevron-left"
-          size="small"
-          variant="text"
-          @click="toggleRail"
-        ></v-btn>
-        <v-btn
-          v-if="rail && !isMobile"
-          icon="mdi-chevron-right"
-          size="small"
-          variant="text"
-          @click="toggleRail"
-        ></v-btn>
       </div>
 
       <v-divider></v-divider>
@@ -59,7 +42,7 @@
             value="account-list"
             rounded="lg"
             prepend-icon="mdi-account-multiple"
-            class="ms-2"
+            class="sub-menu-item"
             to="/account/list"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -69,7 +52,7 @@
             value="account-roles"
             rounded="lg"
             prepend-icon="mdi-shield-account"
-            class="ms-2"
+            class="sub-menu-item"
             to="/account/roles"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -93,17 +76,17 @@
             value="employees"
             rounded="lg"
             prepend-icon="mdi-account-tie"
-            class="ms-2"
+            class="sub-menu-item"
             to="/users/employees"
             active-class="gradient-background text-white"
           ></v-list-item>
 
           <v-list-item
-            title="Khách hàng & CT Thành viên"
+            title="Khách hàng & Thành viên"
             value="customers-membership"
             rounded="lg"
             prepend-icon="mdi-account-star"
-            class="ms-2"
+            class="sub-menu-item menu-item-long"
             to="/users/customers"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -127,17 +110,17 @@
             value="product-and-categories"
             rounded="lg"
             prepend-icon="mdi-package-variant-closed"
-            class="ms-2"
+            class="sub-menu-item menu-item-long"
             to="/products/list"
             active-class="gradient-background text-white"
           ></v-list-item>
 
           <v-list-item
-            title="Kích thước & Đơn vị tính"
+            title="Kích thước & Đơn vị"
             value="size-units"
             rounded="lg"
             prepend-icon="mdi-ruler"
-            class="ms-2"
+            class="sub-menu-item menu-item-long"
             to="/products/size-units"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -152,7 +135,7 @@
               title="Đơn hàng & Thanh toán"
               value="orders-payments"
               rounded="lg"
-              class="mb-1"
+              class="mb-1 menu-item-long"
             ></v-list-item>
           </template>
 
@@ -161,7 +144,7 @@
             value="orders"
             rounded="lg"
             prepend-icon="mdi-clipboard-text-outline"
-            class="ms-2"
+            class="sub-menu-item"
             to="/orders"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -171,7 +154,7 @@
             value="payments"
             rounded="lg"
             prepend-icon="mdi-credit-card-outline"
-            class="ms-2"
+            class="sub-menu-item menu-item-long"
             to="/payments"
             active-class="gradient-background text-white"
           ></v-list-item>
@@ -194,7 +177,7 @@
             rounded="lg"
             prepend-icon="mdi-sale"
             to="/discounts"
-            class="mb-1"
+            class="mb-1 menu-item-long"
           ></v-list-item>
 
 
@@ -339,7 +322,6 @@ const router = useRouter()
 
 // Reactive state
 const drawer = ref(true)
-const rail = ref(false)
 const darkMode = ref(false)
 const isMobile = ref(false)
 const menuItems = ref([])
@@ -351,7 +333,6 @@ const pageTitle = computed(() => route.meta.title || 'Dashboard')
 // Initialize state from store
 onMounted(() => {
   darkMode.value = appStore.darkMode
-  rail.value = appStore.sidebarMini
   drawer.value = appStore.sidebarVisible
   isMobile.value = display.smAndDown.value
 
@@ -375,12 +356,6 @@ watch(darkMode, (newVal) => {
   theme.global.name.value = newVal ? 'dark' : 'light'
   appStore.setDarkMode(newVal)
 })
-
-// Methods
-function toggleRail() {
-  rail.value = !rail.value
-  appStore.setSidebarMini(rail.value)
-}
 
 function toggleDarkMode() {
   darkMode.value = !darkMode.value
@@ -428,5 +403,25 @@ async function logout() {
 /* Hiệu ứng hover cho menu */
 :deep(.v-list-item:hover:not(.v-list-item--active)) {
   background-color: rgba(115, 103, 240, 0.08) !important;
+}
+
+/* Xử lý menu item dài */
+:deep(.menu-item-long .v-list-item-title) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+  line-height: 1.2;
+  padding: 4px 0;
+}
+
+/* Cải thiện hiển thị sub-menu */
+:deep(.sub-menu-item) {
+  margin-left: 4px !important;
+  padding-left: 8px !important;
+}
+
+:deep(.v-list-group__items .v-list-item) {
+  min-height: 40px !important;
 }
 </style>

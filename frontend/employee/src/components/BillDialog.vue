@@ -30,7 +30,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useTheme } from 'vuetify';
 
 const props = defineProps({
   billHtml: {
@@ -38,6 +39,10 @@ const props = defineProps({
     default: ''
   }
 });
+
+// Sử dụng theme để điều chỉnh màu sắc khi in
+const theme = useTheme();
+const isDarkTheme = computed(() => theme.global.current.value.dark);
 
 const emit = defineEmits(['close']);
 
@@ -57,6 +62,8 @@ function print() {
       font-size: 12px;
       margin: 0;
       padding: 8px;
+      background-color: white;
+      color: black;
     }
     table {
       width: 100%;
@@ -122,16 +129,37 @@ function print() {
     }
   };
 }
+
+// Thêm class cho dark theme vào body khi component được tạo
+onMounted(() => {
+  // Đảm bảo nội dung bill luôn có màu sắc phù hợp khi xem
+  const billContainer = document.getElementById('bill-content');
+  if (billContainer) {
+    // Thêm class tương ứng vào container
+    // Không cần làm gì vì v-html sẽ tự render lại khi billHtml thay đổi
+  }
+});
 </script>
 
-<style scoped>
+<style>
 .bill-container {
   font-family: 'Arial', sans-serif;
   min-height: 300px;
   max-height: 600px;
   overflow-y: auto;
-  background-color: white;
+  background-color: var(--v-theme-surface);
+  color: var(--v-theme-on-surface);
   padding: 0.5rem;
-  border: 1px solid #eee;
+  border: 1px solid rgba(var(--v-border-opacity, 1), 0.1);
+  border-radius: 4px;
+}
+
+/* Đảm bảo nội dung hóa đơn luôn hiển thị rõ ràng bất kể theme */
+.bill-container table {
+  color: var(--v-theme-on-surface);
+}
+
+.bill-container hr {
+  border-color: rgba(var(--v-border-opacity, 1), 0.2);
 }
 </style>

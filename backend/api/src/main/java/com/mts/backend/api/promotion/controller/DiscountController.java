@@ -17,13 +17,19 @@ import com.mts.backend.domain.promotion.identifier.CouponId;
 import com.mts.backend.domain.promotion.identifier.DiscountId;
 import com.mts.backend.domain.promotion.value_object.CouponCode;
 import com.mts.backend.domain.promotion.value_object.DiscountName;
-import com.mts.backend.shared.response.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
+@Tag(name = "Discount Controller", description = "Discount")
 @RestController
 @RequestMapping("/api/v1/discounts")
 public class DiscountController implements IController {
@@ -35,9 +41,14 @@ public class DiscountController implements IController {
         this.queryBus = queryBus;
     }
     
+    @Operation(summary = "Tạo khuyến mãi mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createDiscount(@RequestBody CreateDiscountRequest request) {
+    public ResponseEntity<?> createDiscount(@Parameter(description = "Thông tin khuyến mãi", required = true) @RequestBody CreateDiscountRequest request) {
         var command = CreateDiscountCommand.builder()
                 .name(DiscountName.builder().value(request.getName()).build())
                 .description(Objects.isNull(request.getDescription()) ? null : request.getDescription())
@@ -63,9 +74,14 @@ public class DiscountController implements IController {
         
     }
     
+    @Operation(summary = "Cập nhật khuyến mãi")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy khuyến mãi")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updateDiscount(@PathVariable("id") Long id, @RequestBody UpdateDiscountRequest request) {
+    public ResponseEntity<?> updateDiscount(@Parameter(description = "ID khuyến mãi", required = true) @PathVariable("id") Long id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateDiscountRequest request) {
         
         var command = UpdateDiscountCommand.builder()
                 .id(DiscountId.of(id))
@@ -93,10 +109,14 @@ public class DiscountController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Lấy danh sách khuyến mãi")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
-    public ResponseEntity<?> getAllDiscount(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity<?> getAllDiscount(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                            @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var command = DefaultDiscountQuery.builder()
                 .page(page)
                 .size(size)
@@ -107,9 +127,14 @@ public class DiscountController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Lấy khuyến mãi theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy khuyến mãi")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getDiscountById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getDiscountById(@Parameter(description = "ID khuyến mãi", required = true) @PathVariable("id") Long id) {
         var command = DiscountByIdQuery.builder()
                 .id(DiscountId.of(id))
                 .build();
@@ -119,9 +144,13 @@ public class DiscountController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Lấy khuyến mãi theo mã coupon")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/coupon/{code}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getDiscountByCouponCode(@PathVariable("code") String code) {
+    public ResponseEntity<?> getDiscountByCouponCode(@Parameter(description = "Mã coupon", required = true) @PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
                 .couponId(CouponCode.builder().value(code).build())
                 .build();
@@ -131,9 +160,14 @@ public class DiscountController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Xóa khuyến mãi")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy khuyến mãi")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteDiscount(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteDiscount(@Parameter(description = "ID khuyến mãi", required = true) @PathVariable("id") Long id) {
         DeleteDiscountByIdCommand command = DeleteDiscountByIdCommand.builder()
                 .discountId(DiscountId.of(id))
                 .build();

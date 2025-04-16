@@ -19,8 +19,15 @@ import com.mts.backend.domain.staff.identifier.ManagerId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+
 @RestController
 @RequestMapping("/api/v1/managers")
+@Tag(name = "Manager Controller", description = "Manager")
 public class ManagerController implements IController {
     private final ManagerCommandBus commandBus;
     private final ManagerQueryBus queryBus;

@@ -44,6 +44,7 @@ dependencies {
         api("io.jsonwebtoken:jjwt-api:0.12.6")
         api("org.apache.httpcomponents.client5:httpclient5:5.4.3")
         api("com.google.firebase:firebase-bom:33.8.0")
+        api("io.swagger.core.v3:swagger-annotations:2.2.30")
     }
 }
 

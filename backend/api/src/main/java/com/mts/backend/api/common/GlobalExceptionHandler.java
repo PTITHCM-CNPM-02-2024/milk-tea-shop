@@ -4,8 +4,6 @@ import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
-import com.mts.backend.shared.response.ApiResponse;
-import jakarta.transaction.TransactionalException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -31,7 +29,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<?> handleDomainException(DomainException e) {
-        return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
     
     @ExceptionHandler(DomainBusinessLogicException.class)

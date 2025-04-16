@@ -13,11 +13,16 @@ import com.mts.backend.domain.product.identifier.ProductSizeId;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.value_object.ProductSizeName;
 import com.mts.backend.domain.product.value_object.QuantityOfProductSize;
-import com.mts.backend.shared.response.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
 
+@Tag(name = "Product Size Controller", description = "Product Size")
 @RestController
 @RequestMapping("/api/v1/product-sizes")
 public class ProductSizeController implements IController {
@@ -30,9 +35,14 @@ public class ProductSizeController implements IController {
         this.sizeQueryBus = sizeQueryBus;
     }
 
+    @Operation(summary = "Tạo size sản phẩm mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createProductSize(@RequestBody CreateProductSizeRequest request) {
+    public ResponseEntity<?> createProductSize(@Parameter(description = "Thông tin size sản phẩm", required = true) @RequestBody CreateProductSizeRequest request) {
 
         CreateProductSizeCommand command = CreateProductSizeCommand.builder()
                 .name(ProductSizeName.builder().value(request.getName()).build())
@@ -47,9 +57,14 @@ public class ProductSizeController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Cập nhật size sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy size sản phẩm")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updateProductSize(@PathVariable("id") Integer id, @RequestBody UpdateProductSizeRequest request) {
+    public ResponseEntity<?> updateProductSize(@Parameter(description = "ID size sản phẩm", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateProductSizeRequest request) {
         UpdateProductSizeCommand command = UpdateProductSizeCommand.builder().
                 id(ProductSizeId.of(id))
                 .name(ProductSizeName.builder().value(request.getName()).build())
@@ -63,11 +78,15 @@ public class ProductSizeController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy danh sách size sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllProductSize(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+            @Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size) {
         DefaultSizeQuery query = DefaultSizeQuery.builder()
                 .page(page)
                 .size(size)
@@ -78,9 +97,14 @@ public class ProductSizeController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Xóa size sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy size sản phẩm")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteProductSize(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteProductSize(@Parameter(description = "ID size sản phẩm", required = true) @PathVariable("id") Integer id) {
         DeleteSizeByIdCommand command = DeleteSizeByIdCommand.builder()
                 .id(ProductSizeId.of(id))
                 .build();

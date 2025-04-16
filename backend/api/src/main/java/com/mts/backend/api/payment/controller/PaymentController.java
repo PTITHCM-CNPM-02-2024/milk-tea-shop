@@ -14,12 +14,17 @@ import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
-import com.mts.backend.shared.response.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
 
+@Tag(name = "Payment Controller", description = "Payment")
 @RestController
 @RequestMapping("/api/v1/payments")
 public class PaymentController implements IController {
@@ -32,9 +37,14 @@ public class PaymentController implements IController {
         this.paymentQueryBus = paymentQueryBus;
     }
     
+    @Operation(summary = "Khởi tạo thanh toán mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping("/initiate")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<?> initiatePayment(@RequestBody CreatePaymentRequest request) {
+    public ResponseEntity<?> initiatePayment(@Parameter(description = "Thông tin thanh toán", required = true) @RequestBody CreatePaymentRequest request) {
         
         var command = CreatePaymentCommand.builder()
                 .orderId(OrderId.of(request.getOrderId()))
@@ -46,11 +56,17 @@ public class PaymentController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Hoàn tất thanh toán")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy thanh toán")
+    })
     @PostMapping("/{paymentId}/{methodId}/complete")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<?> completePayment(@PathVariable("paymentId") Long paymentId,
-                                             @PathVariable("methodId") Integer methodId,
-                                             @RequestBody PaymentTransactionRequest request) {
+    public ResponseEntity<?> completePayment(
+        @Parameter(description = "ID thanh toán", required = true) @PathVariable("paymentId") Long paymentId,
+        @Parameter(description = "ID phương thức", required = true) @PathVariable("methodId") Integer methodId,
+        @Parameter(description = "Thông tin giao dịch", required = true) @RequestBody PaymentTransactionRequest request) {
         
     var command = PaymentTransactionCommand.builder()
             .paymentId(PaymentId.of(paymentId))
@@ -65,9 +81,14 @@ public class PaymentController implements IController {
             .body(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy thông tin thanh toán theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy thanh toán")
+    })
     @GetMapping("/{paymentId}")
     @PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'CUSTOMER')")
-    public ResponseEntity<?> getPaymentById(@PathVariable("paymentId") Long paymentId) {
+    public ResponseEntity<?> getPaymentById(@Parameter(description = "ID thanh toán", required = true) @PathVariable("paymentId") Long paymentId) {
         var command = PaymentByIdQuery.builder()
                 .paymentId(PaymentId.of(paymentId))
                 .build();
@@ -77,10 +98,15 @@ public class PaymentController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy danh sách thanh toán")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'CUSTOMER')")
-    public ResponseEntity<?> getAllPayments(@RequestParam(value = "page", defaultValue = "0") int page,
-                                            @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllPayments(
+        @Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") int page,
+        @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") int size) {
         var command = DefaultPaymentQuery.builder()
                 .page(page)
                 .size(size)
@@ -91,10 +117,15 @@ public class PaymentController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Báo cáo thanh toán theo tháng")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/report")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> getPaymentReportByMonth(@RequestParam(value = "year") Integer year,
-                                                    @RequestParam(value = "month") Integer month) {
+    public ResponseEntity<?> getPaymentReportByMonth(
+        @Parameter(description = "Năm", required = true) @RequestParam(value = "year") Integer year,
+        @Parameter(description = "Tháng", required = true) @RequestParam(value = "month") Integer month) {
         var command = PaymentReportByMonthQuery.builder()
                 .year(year)
                 .month(month)

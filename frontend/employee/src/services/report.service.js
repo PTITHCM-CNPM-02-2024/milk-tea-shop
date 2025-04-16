@@ -1,41 +1,55 @@
 import apiClient from './api';
 
 export default {
-  // Lấy tổng quan báo cáo
-  getReportSummary(params) {
-    return apiClient.get('/reports/summary', { params });
-  },
-
-  // Lấy báo cáo doanh thu theo thời gian
-  getRevenueByTime(params) {
-    return apiClient.get('/reports/revenue/time', { params });
-  },
-
-  // Lấy báo cáo top sản phẩm bán chạy
-  getTopProducts(params) {
-    return apiClient.get('/reports/products/top', { params });
-  },
-
-  // Lấy báo cáo doanh thu theo danh mục
-  getRevenueByCategory(params) {
-    return apiClient.get('/reports/revenue/category', { params });
-  },
-
-  // Lấy báo cáo chi tiết đơn hàng
-  getOrderDetails(params) {
-    return apiClient.get('/reports/orders', { params });
-  },
-
-  // Lấy báo cáo hoạt động theo nhân viên
-  getEmployeeActivity(params) {
-    return apiClient.get('/reports/employees/activity', { params });
-  },
-
-  // Xuất báo cáo ra file
-  exportReport(reportType, params) {
-    return apiClient.get(`/reports/export/${reportType}`, {
-      params,
-      responseType: 'blob'
+  // Lấy tổng quan báo cáo theo nhân viên
+  getEmployeeOrderOverview(employeeId, fromDate, toDate) {
+    return apiClient.get(`/employees/${employeeId}/reports/order-overview`, {
+      params: {
+        fromDate,
+        toDate
+      }
     });
+  },
+
+  // Lấy doanh thu theo thời gian cho nhân viên
+  getEmployeeOrderRevenue(employeeId, fromDate, toDate) {
+    return apiClient.get(`/employees/${employeeId}/reports/order-revenue`, {
+      params: {
+        fromDate,
+        toDate
+      }
+    });
+  },
+
+  // Lấy danh sách đơn hàng theo nhân viên
+  getEmployeeOrders(employeeId, fromDate, toDate, page = 0, size = 10) {
+    return apiClient.get(`/employees/${employeeId}/reports/orders`, {
+      params: {
+        fromDate,
+        toDate,
+        page,
+        size
+      }
+    });
+  },
+
+  // Định dạng ngày giờ cho API
+  formatDateTime(date) {
+    if (!date) return null;
+    if (typeof date === 'string') {
+      // Kiểm tra xem chuỗi đã có thời gian chưa
+      if (date.includes('T')) {
+        return date;
+      }
+      // Nếu chỉ có ngày, thêm thời gian là 00:00:00
+      return `${date}T00:00:00`;
+    }
+    
+    // Nếu là đối tượng Date, convert sang chuỗi ISO
+    if (date instanceof Date) {
+      return date.toISOString().split('.')[0]; // loại bỏ phần mili giây
+    }
+    
+    return null;
   }
 }; 

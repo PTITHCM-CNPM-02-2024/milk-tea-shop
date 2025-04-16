@@ -66,7 +66,35 @@
         <v-app-bar-title>POS Trà Sữa</v-app-bar-title>
       </div>
 
+      <!-- Thanh tìm kiếm sản phẩm -->
+      <div class="search-container ml-4 d-none d-md-flex">
+        <v-text-field
+          v-model="searchQuery"
+          density="compact"
+          variant="solo"
+          hide-details
+          placeholder="Tìm kiếm sản phẩm..."
+          prepend-inner-icon="mdi-magnify"
+          class="search-input"
+          single-line
+          rounded
+          clearable
+          @input="handleSearch"
+          @click:clear="clearSearch"
+        ></v-text-field>
+      </div>
+
       <v-spacer></v-spacer>
+
+      <!-- Nút tìm kiếm cho màn hình nhỏ -->
+      <v-btn icon class="d-flex d-md-none me-2" variant="text" @click="showSearchBar = !showSearchBar">
+        <v-icon>{{ showSearchBar ? 'mdi-close' : 'mdi-magnify' }}</v-icon>
+      </v-btn>
+
+      <!-- Nút chuyển đổi theme -->
+      <v-btn icon class="me-2" variant="text" @click="toggleTheme" :title="isDarkTheme ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'">
+        <v-icon>{{ isDarkTheme ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+      </v-btn>
 
       <!-- Nút thông báo -->
       <v-btn icon class="me-2" variant="text">
@@ -114,6 +142,25 @@
       </v-btn>
     </v-app-bar>
 
+    <!-- Thanh tìm kiếm cho màn hình nhỏ -->
+    <div v-if="showSearchBar" class="mobile-search-bar">
+      <v-text-field
+        v-model="searchQuery"
+        density="compact"
+        variant="solo"
+        hide-details
+        placeholder="Tìm kiếm sản phẩm..."
+        prepend-inner-icon="mdi-magnify"
+        append-icon="mdi-close"
+        class="search-input"
+        single-line
+        rounded
+        autofocus
+        @input="handleSearch"
+        @click:append="showSearchBar = false"
+      ></v-text-field>
+    </div>
+
     <!-- Dialog xác nhận đăng xuất -->
     <v-dialog v-model="showLogoutDialog" max-width="400">
       <v-card>
@@ -136,8 +183,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useTheme } from 'vuetify';
 import AuthService from '../services/auth.service';
 
 const props = defineProps({
@@ -155,11 +203,49 @@ const props = defineProps({
   }
 });
 
+// Emit event để thông báo thay đổi theme và tìm kiếm cho component cha
+const emit = defineEmits(['updateTheme', 'searchProducts']);
+
 const route = useRoute();
 const router = useRouter();
 const drawer = ref(false);
 const currentDateTime = ref('');
 let timer = null;
+
+// State cho thanh tìm kiếm
+const searchQuery = ref('');
+const showSearchBar = ref(false);
+
+// Xử lý tìm kiếm
+function handleSearch() {
+  emit('searchProducts', searchQuery.value);
+}
+
+// Xử lý xóa tìm kiếm
+function clearSearch() {
+  searchQuery.value = '';
+  emit('searchProducts', '');
+}
+
+// Thêm watcher cho searchQuery để xử lý khi giá trị thay đổi
+watch(searchQuery, (newValue) => {
+  emit('searchProducts', newValue);
+});
+
+// Theme
+const theme = useTheme();
+const isDarkTheme = computed(() => theme.global.current.value.dark);
+
+// Hàm chuyển đổi theme
+function toggleTheme() {
+  theme.global.name.value = isDarkTheme.value ? 'lightTheme' : 'darkTheme';
+  
+  // Lưu theme vào localStorage để duy trì sau khi refresh
+  localStorage.setItem('theme', theme.global.name.value);
+  
+  // Emit event lên component cha
+  emit('updateTheme', theme.global.name.value);
+}
 
 // State cho đăng xuất
 const showLogoutDialog = ref(false);
@@ -197,6 +283,12 @@ function updateDateTime() {
 onMounted(() => {
   updateDateTime();
   timer = setInterval(updateDateTime, 60000);
+  
+  // Khôi phục theme từ localStorage nếu đã lưu
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    theme.global.name.value = savedTheme;
+  }
 });
 
 onBeforeUnmount(() => {
@@ -224,20 +316,80 @@ async function logout() {
 
 <style scoped>
 .app-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(var(--v-border-opacity, 1), 0.12);
 }
 
 .sidebar-drawer {
   z-index: 1001;
 }
 
+.search-container {
+  width: 300px;
+  max-width: 100%;
+}
+
+.search-input {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 25px;
+}
+
+.search-input :deep(.v-field__field) {
+  color: var(--v-theme-accent) !important;
+}
+
+.search-input :deep(.v-field__input) {
+  min-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  color: var(--v-theme-accent) !important;
+}
+
+.search-input :deep(.v-field__input input) {
+  color: var(--v-theme-accent) !important;
+}
+
+.search-input :deep(.v-field__input input::placeholder) {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.search-input :deep(.v-field__prepend-inner .v-icon) {
+  opacity: 0.8;
+  color: var(--v-theme-accent) !important;
+}
+
+.search-input :deep(.v-field__append-inner .v-icon) {
+  opacity: 0.8;
+  color: var(--v-theme-accent) !important;
+}
+
+.mobile-search-bar {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  background-color: var(--v-theme-primary);
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 /* Tạo hiệu ứng active cho các menu item */
 :deep(.v-list-item--active) {
-  background-color: rgba(var(--v-theme-primary), 0.1);
+  background-color: rgba(var(--v-theme-primary-rgb, 25, 118, 210), 0.1);
 }
 
 :deep(.v-list-item--active .v-list-item-title) {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-primary-rgb, 25, 118, 210));
   font-weight: bold;
 }
 </style>

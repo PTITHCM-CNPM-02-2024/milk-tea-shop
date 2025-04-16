@@ -18,7 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 
+@Tag(name = "Payment Method Controller", description = "Payment Method")
 @RestController
 @RequestMapping("/api/v1/payment-methods")
 public class PaymentMethodController implements IController {
@@ -31,9 +37,14 @@ public class PaymentMethodController implements IController {
         this.queryBus = queryBus;
     }
     
+    @Operation(summary = "Tạo phương thức thanh toán mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createPaymentMethod(@RequestBody CreatePaymentMethodRequest request) {
+    public ResponseEntity<?> createPaymentMethod(@Parameter(description = "Thông tin phương thức thanh toán", required = true) @RequestBody CreatePaymentMethodRequest request) {
         CreatePaymentMethodCommand command = CreatePaymentMethodCommand.builder()
                 .name(PaymentMethodName.builder().value(request.getName()).build())
                 .description(request.getDescription().orElse(null))
@@ -44,11 +55,15 @@ public class PaymentMethodController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-    
+    @Operation(summary = "Cập nhật phương thức thanh toán")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy phương thức thanh toán")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updatePaymentMethod(@PathVariable("id") Integer id,
-                                                              @RequestBody UpdatePaymentMethodRequest request){
+    public ResponseEntity<?> updatePaymentMethod(@Parameter(description = "ID phương thức thanh toán", required = true) @PathVariable("id") Integer id,
+                                                              @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdatePaymentMethodRequest request){
         UpdatePaymentMethodCommand command = UpdatePaymentMethodCommand.builder()
                 .paymentMethodId(PaymentMethodId.of(id))
                 .name(PaymentMethodName.builder().value(request.getName()).build())
@@ -61,8 +76,12 @@ public class PaymentMethodController implements IController {
         
     }
     
+    @Operation(summary = "Lấy danh sách phương thức thanh toán")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllPaymentMethod() {
         
         var command = new DefaultPaymentMethodQuery();
@@ -72,9 +91,14 @@ public class PaymentMethodController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy phương thức thanh toán theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy phương thức thanh toán")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getPaymentMethodById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getPaymentMethodById(@Parameter(description = "ID phương thức thanh toán", required = true) @PathVariable("id") Integer id) {
         var command = PaymentMethodByIdQuery.builder()
                 .paymentMethodId(PaymentMethodId.of(id))
                 .build();
@@ -82,10 +106,14 @@ public class PaymentMethodController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
-
+    @Operation(summary = "Xóa phương thức thanh toán")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy phương thức thanh toán")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deletePaymentMethod(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deletePaymentMethod(@Parameter(description = "ID phương thức thanh toán", required = true) @PathVariable("id") Integer id) {
         var command = DeletePmtByIdCommand.builder()
                 .paymentMethodId(PaymentMethodId.of(id))
                 .build();

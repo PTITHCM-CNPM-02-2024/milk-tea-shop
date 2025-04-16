@@ -16,9 +16,15 @@ import com.mts.backend.domain.product.value_object.ProductName;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.Objects;
 
+@Tag(name = "Product Controller", description = "Product")
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController implements IController {
@@ -30,9 +36,14 @@ public class ProductController implements IController {
         this.productQueryBus = productQueryBus;
     }
 
+    @Operation(summary = "Tạo sản phẩm mới")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu đầu vào")
+    })
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createProduct(@RequestBody CreateProductRequest createProductRequest) {
+    public ResponseEntity<?> createProduct(@Parameter(description = "Thông tin sản phẩm", required = true) @RequestBody CreateProductRequest createProductRequest) {
         CreateProductCommand createProductCommand = CreateProductCommand.builder()
                 .name(ProductName.builder().value(createProductRequest.getName()).build())
                 .description(createProductRequest.getDescription())
@@ -55,9 +66,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Cập nhật thông tin sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy sản phẩm")
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updateProductInform(@PathVariable("id") Integer id, @RequestBody UpdateProductInformRequest updateProductInformRequest) {
+    public ResponseEntity<?> updateProductInform(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateProductInformRequest updateProductInformRequest) {
         UpdateProductInformCommand updateProductInformCommand = UpdateProductInformCommand.builder()
                 .productId(ProductId.of(id))
                 .name(ProductName.builder().value(updateProductInformRequest.getName()).build())
@@ -74,10 +90,13 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Lấy danh sách sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getProductDetail(@RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
+    public ResponseEntity<?> getProductDetail(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page, @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "100") Integer size) {
         DefaultProductQuery getProductDetailCommand = DefaultProductQuery.builder()
                 .page(page)
                 .size(size)
@@ -88,9 +107,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Lấy chi tiết sản phẩm theo ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy sản phẩm")
+    })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getProductDetailById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getProductDetailById(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id) {
         ProdByIdQuery getProductDetailCommand = ProdByIdQuery.builder()
                 .id(ProductId.of(id))
                 .build();
@@ -100,10 +124,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Thêm giá cho sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @PostMapping("/{id}/prices")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> createProductPrice(@PathVariable("id") Integer id,
-                                                             @RequestBody AddProductPriceRequest addProductPriceRequest) {
+    public ResponseEntity<?> createProductPrice(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id,
+                                                             @Parameter(description = "Thông tin giá", required = true) @RequestBody AddProductPriceRequest addProductPriceRequest) {
 
         AddProductPriceCommand addProductPriceCommand = AddProductPriceCommand.builder()
                 .productId(ProductId.of(id))
@@ -123,10 +151,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok("Giá sản phẩm đã được thay đổi") : handleError(result);
     }
 
+    @Operation(summary = "Cập nhật giá sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @PutMapping("/{id}/prices")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> updateProductPrice(@PathVariable("id") Integer id,
-                                                             @RequestBody AddProductPriceRequest addProductPriceRequest) {
+    public ResponseEntity<?> updateProductPrice(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id,
+                                                             @Parameter(description = "Thông tin giá", required = true) @RequestBody AddProductPriceRequest addProductPriceRequest) {
         UpdateProductPriceCommand updateProductPriceCommand = UpdateProductPriceCommand.builder()
                 .productId(ProductId.of(id))
                 .build();
@@ -145,10 +177,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok("Giá sản phẩm đã được thay đổi") : handleError(result);
     }
 
+    @Operation(summary = "Xóa giá sản phẩm theo size")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @DeleteMapping("/{id}/prices/{sizeId}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteProductPrice(@PathVariable("id") Integer id,
-                                                             @PathVariable("sizeId") Integer sizeId) {
+    public ResponseEntity<?> deleteProductPrice(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id,
+                                                             @Parameter(description = "ID size", required = true) @PathVariable("sizeId") Integer sizeId) {
         DeletePriceBySizeIdCommand deleteProductPriceCommand = DeletePriceBySizeIdCommand.builder()
                 .productId(ProductId.of(id))
                 .sizeId(ProductSizeId.of(sizeId))
@@ -159,9 +195,13 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok("Giá sản phẩm đã được xóa") : handleError(result);
     }
     
+    @Operation(summary = "Lấy sản phẩm có thể đặt hàng")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/available-order/{available}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAvailableOrderProductDetail(@PathVariable("available") Boolean available){
+    public ResponseEntity<?> getAvailableOrderProductDetail(@Parameter(description = "Trạng thái có thể đặt hàng", required = true) @PathVariable("available") Boolean available){
 
         ProductForSaleQuery getProductDetailCommand = ProductForSaleQuery.builder()
                 .availableOrder(available)
@@ -172,10 +212,13 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
     
+    @Operation(summary = "Lấy sản phẩm topping")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/topping")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getToppingProductDetail(@RequestParam(value = "page",
-            defaultValue = "0") Integer page, @RequestParam(value = "size", defaultValue = "100") Integer size) {
+    public ResponseEntity<?> getToppingProductDetail(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page, @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "100") Integer size) {
         ToppingForSaleQuery getProductDetailCommand = ToppingForSaleQuery.builder()
                 .page(page)
                 .size(size)
@@ -186,9 +229,14 @@ public class ProductController implements IController {
         
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
+    
+    @Operation(summary = "Tìm kiếm sản phẩm signature")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công")
+    })
     @GetMapping("/search")
-    public ResponseEntity<?> getSignatureProductDetail(@RequestParam(value = "isAvailableOrder",
-            required = false, defaultValue = "true") Boolean isAvailableOrder, @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
+    public ResponseEntity<?> getSignatureProductDetail(@Parameter(description = "Có thể đặt hàng", required = false) @RequestParam(value = "isAvailableOrder",
+            required = false, defaultValue = "true") Boolean isAvailableOrder, @Parameter(description = "Signature", required = false) @RequestParam(value = "isSignature", defaultValue = "true") Boolean isSignature) {
         SignatureProductForSaleQuery getProductDetailCommand = SignatureProductForSaleQuery.builder()
                 .availableOrder(isAvailableOrder)
                 .isSignature(isSignature)
@@ -199,9 +247,14 @@ public class ProductController implements IController {
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
+    @Operation(summary = "Xóa sản phẩm")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Thành công"),
+        @ApiResponse(responseCode = "404", description = "Không tìm thấy sản phẩm")
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteProduct(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id) {
         DeleteProductByIdCommand command = DeleteProductByIdCommand.builder()
                 .id(ProductId.of(id))
                 .build();
