@@ -39,8 +39,13 @@ export default {
   },
 
   // Lấy danh sách đơn hàng và bàn theo ID nhân viên
-  getOrderTables(employeeId) {
-    return apiClient.get(`/employees/${employeeId}/orders/order-tables`);
+  getOrderTables(employeeId, page = 0, size = 10) {
+    return apiClient.get(`/employees/${employeeId}/orders/order-tables`, {
+      params: {
+        page,
+        size
+      }
+    });
   },
   
   // API checkout bàn (cần bổ sung khi có thông tin API cụ thể)
@@ -48,13 +53,8 @@ export default {
     return apiClient.put(`/orders/${orderId}/checkout`);
   },
   
-  // Lấy danh sách đơn hàng đang sử dụng bàn
-  getActiveTableOrders(employeeId, page = 0, size = 10) {
-    return apiClient.get(`/employees/${employeeId}/orders/order-tables`, {
-      params: {
-        page,
-        size
-      }
-    });
-  }
+  // Lấy chi tiết đơn hàng theo ID
+  getOrderById(orderId) {
+    return apiClient.get(`/orders/${orderId}`);
+  },
 };

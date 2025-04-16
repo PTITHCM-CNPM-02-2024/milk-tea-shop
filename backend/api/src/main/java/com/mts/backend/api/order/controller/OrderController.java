@@ -159,7 +159,7 @@ public class OrderController implements IController {
     
 
     @GetMapping("/{orderId}")
-    @PreAuthorize("hasAnyRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getOrderById(@PathVariable("orderId") Long orderId) {
         var command = OrderByIdQuery.builder()
                 .orderId(OrderId.of(orderId))

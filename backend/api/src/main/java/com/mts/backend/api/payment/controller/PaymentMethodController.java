@@ -62,7 +62,7 @@ public class PaymentMethodController implements IController {
     }
     
     @GetMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getAllPaymentMethod() {
         
         var command = new DefaultPaymentMethodQuery();

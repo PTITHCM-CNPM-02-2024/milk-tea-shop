@@ -8,10 +8,7 @@ import com.mts.backend.application.staff.EmployeeQueryBus;
 import com.mts.backend.application.staff.command.CreateEmployeeCommand;
 import com.mts.backend.application.staff.command.DeleteEmpByIdCommand;
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
-import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
-import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
-import com.mts.backend.application.staff.query.EmployeeByIdQuery;
-import com.mts.backend.application.staff.query.GetEmpByAccountIdQuery;
+import com.mts.backend.application.staff.query.*;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.identifier.RoleId;
 import com.mts.backend.domain.account.value_object.PasswordHash;
@@ -19,6 +16,11 @@ import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -128,6 +130,55 @@ public class EmployeeController implements IController {
         
         var result = queryBus.dispatch(query);
         
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/{id}/reports/order-overview")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getOrderOverviewByEmployeeId(@PathVariable("id") Long id,
+                                                               @RequestParam(value = "fromDate", required = false) String fromDate,
+                                                               @RequestParam(value = "toDate") String toDate) {
+        var query = OrderOverviewByEmpIdQuery.builder().id(EmployeeId.of(id))
+                .fromDate(Objects.isNull(fromDate) ? null : LocalDateTime.parse(fromDate))
+                .toDate(Objects.isNull(toDate) ? null : LocalDateTime.parse(toDate))
+                .build();
+        
+        var result = queryBus.dispatch(query);
+        
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/{id}/reports/order-revenue")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getOrderRevenueByTimeAndEmployeeId(@PathVariable("id") Long id,
+                                                               @RequestParam(value = "fromDate") String fromDate,
+                                                               @RequestParam(value = "toDate") String toDate) {
+        var query = OrderRevenueByTimeAndEmpIdQuery.builder().id(EmployeeId.of(id))
+                .fromDate(Objects.isNull(fromDate) ? null : LocalDateTime.parse(fromDate))
+                .toDate(Objects.isNull(toDate) ? null : LocalDateTime.parse(toDate))
+                .build();
+     
+        var result = queryBus.dispatch(query);
+
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+    }
+
+    @GetMapping("/{id}/reports/orders")
+    @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
+    public ResponseEntity<?> getAllOrderByEmployeeId(@PathVariable("id") Long id,
+                                                    @RequestParam(value = "fromDate", required = false) String fromDate,
+                                                    @RequestParam(value = "toDate", required = false) String toDate,
+                                                    @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                    @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        var query = OrderByEmpIdQuery.builder().employeeId(EmployeeId.of(id))
+                .fromDate(LocalDateTime.parse(fromDate))
+                .toDate(LocalDateTime.parse(toDate))
+                .page(page)
+                .size(size)
+                .build();
+        
+        var result = queryBus.dispatch(query);
+
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 }

@@ -182,17 +182,17 @@ onMounted(() => {
 
 <style scoped>
 .category-container {
-  background: linear-gradient(to right, #f5f7fa, #ffffff);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: linear-gradient(to right, var(--v-theme-background), var(--v-theme-surface));
+  border-bottom: 1px solid rgba(var(--v-border-opacity, 1), 0.1);
   position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px rgba(var(--v-shadow-opacity, 0), 0.1);
   height: 150px; /* Chiều cao cố định cho container */
 }
 
 .category-wrapper {
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #ddd transparent;
+  scrollbar-color: rgba(var(--v-border-opacity, 1), 0.3) transparent;
   height: 100%;
   -webkit-overflow-scrolling: touch;
 }
@@ -206,7 +206,7 @@ onMounted(() => {
 }
 
 .category-wrapper::-webkit-scrollbar-thumb {
-  background-color: #ddd;
+  background-color: rgba(var(--v-border-opacity, 1), 0.3);
   border-radius: 20px;
 }
 
@@ -227,12 +227,12 @@ onMounted(() => {
   height: 120px;
   min-width: 100px;
   flex: 0 0 auto;
-  background-color: white;
+  background-color: var(--v-theme-surface);
   border-radius: 12px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 3px 6px rgba(var(--v-shadow-opacity, 0), 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid #eaeaea;
+  border: 1px solid rgba(var(--v-border-opacity, 1), 0.1);
   padding: 12px 8px;
   user-select: none;
   position: relative;
@@ -240,16 +240,16 @@ onMounted(() => {
 
 .category-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(var(--v-shadow-opacity, 0), 0.15);
   border-color: var(--v-theme-primary);
 }
 
 .category-card-active {
-  background: linear-gradient(135deg, var(--v-theme-primary), #2196F3);
+  background: linear-gradient(135deg, var(--v-theme-primary), var(--v-theme-info));
   color: white !important; /* Đảm bảo màu chữ sáng */
   border: none;
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 8px 16px rgba(var(--v-theme-primary-rgb, 33, 150, 243), 0.3);
 }
 
 .category-card-active .v-icon {
@@ -264,7 +264,7 @@ onMounted(() => {
   height: 70px;
   border-radius: 50%;
   margin-bottom: 8px;
-  background-color: rgba(var(--v-theme-primary), 0.1);
+  background-color: rgba(var(--v-theme-primary-rgb, 33, 150, 243), 0.1);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -293,13 +293,13 @@ onMounted(() => {
   line-height: 1.2;
   max-height: 2.4em;
   white-space: normal;
-  color: #333;
+  color: var(--v-theme-on-surface);
 }
 
 .category-card-active .category-name {
   font-weight: 600;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Thêm text shadow để dễ đọc hơn khi nền là màu */
-  color: salmon;
+  color: white;
 }
 
 /* Thêm tooltip hiển thị tên đầy đủ khi hover */
@@ -322,9 +322,9 @@ onMounted(() => {
 .category-price {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #FF6B00;
+  color: var(--v-theme-warning);
   margin-top: 4px;
-  background-color: rgba(255, 107, 0, 0.1);
+  background-color: rgba(var(--v-theme-warning-rgb, 255, 107, 0), 0.1);
   padding: 2px 6px;
   border-radius: 12px;
 }

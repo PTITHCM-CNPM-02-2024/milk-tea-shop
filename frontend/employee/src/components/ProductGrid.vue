@@ -48,7 +48,7 @@
           <v-card-text class="px-3 py-1">
             <div class="d-flex align-center">
               <div class="mr-2 text-caption text-grey-darken-1">Từ</div>
-              <div class="text-primary font-weight-bold price-display">
+              <div class="price-display">
                 {{ formatPrice(getProductPrice(product)) }}
               </div>
             </div>
@@ -132,8 +132,9 @@ function formatPrice(price) {
 
 .price-display {
   font-size: 1.1rem;
-  color: #FF6B00 !important;
-  background-color: rgba(255, 107, 0, 0.1);
+  font-weight: 500;
+  color: var(--v-theme-warning) !important;
+  background-color: rgba(var(--v-theme-warning-rgb, 255, 107, 0), 0.1);
   padding: 2px 8px;
   border-radius: 12px;
 }

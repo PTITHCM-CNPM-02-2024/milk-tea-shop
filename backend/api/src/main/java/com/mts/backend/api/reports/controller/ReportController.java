@@ -7,6 +7,7 @@ import com.mts.backend.application.report.query.CatRevenueReportQuery;
 import com.mts.backend.application.report.query.OrderRevenueByTimeQuery;
 import com.mts.backend.application.report.query.TopSaleProductQuery;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/overview")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getOverviewReport() {
         
         var overviewReportQuery = new BasicReportQuery();
@@ -34,6 +36,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/cat-revenue")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getCatRevenueReport(@RequestParam(value = "from", required = false) String from,
                                                  @RequestParam(value = "to", required = false) String to ){
         
@@ -47,6 +50,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/order-revenue")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getOrderRevenueReport(@RequestParam(value = "from", required = false) String from,
                                                     @RequestParam(value = "to", required = false) String to ) {
 
@@ -61,6 +65,7 @@ public class ReportController implements IController {
     }
     
     @GetMapping("/top-products")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> getTopProductsReport(@RequestParam(value = "from", required = false) String from,
                                                    @RequestParam(value = "to", required = false) String to,
                                                   @RequestParam(value = "limit", defaultValue = "10") Integer limit) {

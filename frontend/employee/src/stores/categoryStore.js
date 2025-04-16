@@ -20,7 +20,7 @@ export const useCategoryStore = defineStore('category', () => {
     // Lọc bỏ danh mục topping từ danh sách danh mục
     const filteredCategories = categories.value.filter(category => {
       const name = category.name?.toLowerCase() || '';
-      return !name.includes('topping');
+      return name !== 'topping';
     });
     
     // Gộp danh sách (không thêm topping)

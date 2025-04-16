@@ -5,6 +5,8 @@
       :employeeId="employeeId" 
       :employeeName="employeeName"
       :accountId="accountId"
+      @updateTheme="handleThemeUpdate"
+      @searchProducts="handleSearch"
     />
     
     <v-main :class="{ 'login-main': isLoginRoute }">
@@ -12,6 +14,7 @@
         :employeeId="employeeId"
         :employeeName="employeeName"
         :accountId="accountId"
+        :searchQuery="searchQuery"
       />
     </v-main>
 
@@ -42,6 +45,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useTheme } from 'vuetify';
 import Header from './components/Header.vue';
 import { useSnackbar } from './helpers/useSnackbar';
 import AuthService from './services/auth.service';
@@ -49,6 +53,22 @@ import AuthService from './services/auth.service';
 // Route
 const route = useRoute();
 const router = useRouter();
+
+// Theme
+const theme = useTheme();
+
+// State cho tìm kiếm
+const searchQuery = ref('');
+
+// Hàm xử lý tìm kiếm
+const handleSearch = (query) => {
+  searchQuery.value = query;
+};
+
+// Hàm xử lý cập nhật theme
+const handleThemeUpdate = (newTheme) => {
+  theme.global.name.value = newTheme;
+};
 
 // Kiểm tra có phải là trang đăng nhập không
 const isLoginRoute = computed(() => {
@@ -112,6 +132,12 @@ onMounted(() => {
   } else if (!isLoginRoute.value) {
     router.push('/login');
   }
+  
+  // Khôi phục theme từ localStorage nếu có
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    theme.global.name.value = savedTheme;
+  }
 });
 </script>
 
@@ -134,14 +160,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  border-right: 1px solid rgba(var(--v-border-opacity, 1), 0.12);
 }
 
 .right-panel {
   flex: 3;
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: var(--v-theme-surface);
   min-width: 360px;
 }
 

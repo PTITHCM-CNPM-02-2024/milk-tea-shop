@@ -147,11 +147,73 @@
             <v-icon color="grey-lighten-1">mdi-cart-outline</v-icon>
             <p class="text-body-2 text-grey mt-2">Không có thông tin sản phẩm</p>
           </div>
+
+          <v-divider class="my-4"></v-divider>
+          
+          <!-- Thông tin khuyến mãi -->
+          <h3 class="text-h6 my-3">Khuyến mãi áp dụng</h3>
+          <div v-if="selectedOrder.orderDiscounts && selectedOrder.orderDiscounts.length > 0">
+            <v-table density="compact">
+              <thead>
+                <tr>
+                  <th>Tên khuyến mãi</th>
+                  <th>Mã giảm giá</th>
+                  <th>Giá trị</th>
+                  <th>Số tiền giảm</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(discount, i) in selectedOrder.orderDiscounts" :key="i">
+                  <td>{{ discount.name }}</td>
+                  <td>{{ discount.couponCode || 'Không có' }}</td>
+                  <td>{{ discount.discountValue }}</td>
+                  <td>{{ formatCurrency(discount.discountAmount) }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
+          <div v-else class="text-center py-3">
+            <v-icon color="grey-lighten-1">mdi-tag-outline</v-icon>
+            <p class="text-body-2 text-grey mt-2">Không có khuyến mãi nào được áp dụng</p>
+          </div>
+          
+          <v-divider class="my-4"></v-divider>
+          
+          <!-- Thông tin thanh toán -->
+          <h3 class="text-h6 my-3">Thanh toán</h3>
+          <div v-if="selectedOrder.orderPayments && selectedOrder.orderPayments.length > 0">
+            <v-table density="compact">
+              <thead>
+                <tr>
+                  <th>Phương thức</th>
+                  <th>Số tiền thanh toán</th>
+                  <th>Tiền thừa</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(payment, i) in selectedOrder.orderPayments" :key="i">
+                  <td>{{ payment.paymentMethod?.name || 'Không có' }}</td>
+                  <td>{{ formatCurrency(payment.amountPaid) }}</td>
+                  <td>{{ formatCurrency(payment.change) }}</td>
+                  <td>
+                    <v-chip :color="getPaymentStatusColor(payment.status)" size="small">
+                      {{ getPaymentStatusText(payment.status) }}
+                    </v-chip>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
+          <div v-else class="text-center py-3">
+            <v-icon color="grey-lighten-1">mdi-cash-register</v-icon>
+            <p class="text-body-2 text-grey mt-2">Chưa có thông tin thanh toán</p>
+          </div>
         </v-card-text>
         
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="checkoutSelectedOrder">
+          <v-btn color="primary" @click="checkoutSelectedOrder" v-if="selectedOrder.orderStatus === 'PENDING'">
             Trả bàn
           </v-btn>
         </v-card-actions>
@@ -253,7 +315,7 @@ async function loadOrders(page = currentPage.value, size = pageSize.value) {
     }
     
     console.log(`Gọi API với page=${page}, size=${size}`);
-    const response = await OrderService.getActiveTableOrders(props.employeeId, page, size);
+    const response = await OrderService.getOrderTables(props.employeeId, page, size);
     
     if (response && response.data) {
       if (Array.isArray(response.data)) {
@@ -365,9 +427,51 @@ function getStatusText(status) {
   }
 }
 
+function getPaymentStatusColor(status) {
+  switch (status) {
+    case 'PAID':
+      return 'success';
+    case 'CANCELLED':
+      return 'error';
+    case 'PROCESSING':
+      return 'warning';
+    
+  }
+}
+
+function getPaymentStatusText(status) {
+  switch (status) {
+    case 'PAID':
+      return 'Đã thanh toán';
+    case 'CANCELLED':
+      return 'Đã hủy';
+    case 'PROCESSING':
+      return 'Đang xử lý';
+    default:
+      return 'Không xác định';
+  }
+}
+
 function viewOrderDetails(order) {
+  // Hiển thị tạm thời thông tin đơn hàng từ danh sách
   selectedOrder.value = order;
   detailDialog.value = true;
+  
+  // Gọi API để lấy thông tin chi tiết đơn hàng
+  loadOrderDetails(order.orderId);
+}
+
+async function loadOrderDetails(orderId) {
+  try {
+    const response = await OrderService.getOrderById(orderId);
+    if (response && response.data) {
+      // Cập nhật lại thông tin chi tiết đơn hàng
+      selectedOrder.value = response.data;
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải chi tiết đơn hàng:', error);
+    showSnackbar('Không thể tải chi tiết đơn hàng', 'error');
+  }
 }
 
 function checkoutOrder(order) {
