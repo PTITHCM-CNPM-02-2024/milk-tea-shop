@@ -246,7 +246,7 @@ onMounted(() => {
 
 .category-card-active {
   background: linear-gradient(135deg, var(--v-theme-primary), var(--v-theme-info));
-  color: white !important; /* Đảm bảo màu chữ sáng */
+  color: var(--v-theme-accent);
   border: none;
   transform: translateY(-3px);
   box-shadow: 0 8px 16px rgba(var(--v-theme-primary-rgb, 33, 150, 243), 0.3);
@@ -299,7 +299,6 @@ onMounted(() => {
 .category-card-active .category-name {
   font-weight: 600;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Thêm text shadow để dễ đọc hơn khi nền là màu */
-  color: white;
 }
 
 /* Thêm tooltip hiển thị tên đầy đủ khi hover */

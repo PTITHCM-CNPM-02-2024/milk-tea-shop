@@ -148,12 +148,30 @@ const alertType = ref('info');
 const alertMessage = ref('');
 const alertIcon = ref('mdi-information');
 
-// State cho tìm kiếm sản phẩm
-const searchQuery = ref('');
+// Lấy employeeId và searchQuery từ props
+const props = defineProps({
+  employeeId: {
+    type: Number,
+    required: true
+  },
+  employeeName: {
+    type: String,
+    required: true
+  },
+  searchQuery: {
+    type: String,
+    default: ''
+  }
+});
+
+// State cho tìm kiếm sản phẩm - sử dụng từ props
+const searchQuery = computed(() => props.searchQuery || '');
 
 // Lọc sản phẩm dựa trên từ khóa tìm kiếm
 const filteredProducts = computed(() => {
-  if (!searchQuery.value.trim()) {
+  console.log('Tìm kiếm với từ khóa:', searchQuery.value);
+  
+  if (!searchQuery.value || !searchQuery.value.trim()) {
     // Nếu không có từ khóa tìm kiếm, trả về danh sách sản phẩm hiện tại
     return productStore.products;
   }
@@ -189,25 +207,23 @@ const filteredProducts = computed(() => {
   });
 });
 
-// Xử lý sự kiện tìm kiếm từ Header
-function handleSearch(query) {
-  searchQuery.value = query;
-  
+// Theo dõi thay đổi từ khóa tìm kiếm từ props
+watch(() => props.searchQuery, (newQuery) => {
   // Nếu có từ khóa tìm kiếm và đang ở danh mục cụ thể, chuyển về "Tất cả"
-  if (query && categoryStore.selectedCategory !== 'all') {
+  if (newQuery && categoryStore.selectedCategory !== 'all') {
     categoryStore.selectCategory('all');
     // Load tất cả sản phẩm nếu đang lọc theo danh mục
     productStore.handleCategoryChange('all');
   }
   
   // Hiển thị thông báo nếu tìm kiếm không có kết quả
-  if (query && filteredProducts.value.length === 0) {
-    setAlert('info', `Không tìm thấy sản phẩm phù hợp với "${query}"`);
+  if (newQuery && filteredProducts.value.length === 0) {
+    setAlert('info', `Không tìm thấy sản phẩm phù hợp với "${newQuery}"`);
   } else if (showAlert.value && alertType.value === 'info') {
     // Ẩn alert info nếu đã có kết quả tìm kiếm
     showAlert.value = false;
   }
-}
+}, { immediate: true });
 
 // Đặt thông tin alert
 function setAlert(type, message) {
@@ -232,18 +248,6 @@ function setAlert(type, message) {
   showAlert.value = true;
 }
 
-// Lấy employeeId từ props
-const props = defineProps({
-  employeeId: {
-    type: Number,
-    required: true
-  },
-  employeeName: {
-    type: String,
-    required: true
-  }
-});
-
 // Modal states
 const showCustomizationModal = ref(false);
 const showCustomerModal = ref(false);
@@ -265,9 +269,6 @@ function handleCategorySelect(category) {
   // Lọc sản phẩm từ dữ liệu đã tải (không gọi API)
   const categoryId = typeof category === 'object' ? category.id : category;
   productStore.handleCategoryChange(categoryId);
-  
-  // Xóa từ khóa tìm kiếm khi chuyển danh mục
-  searchQuery.value = '';
 }
 
 // Mở modal tùy chỉnh sản phẩm

@@ -62,6 +62,7 @@ const searchQuery = ref('');
 
 // Hàm xử lý tìm kiếm
 const handleSearch = (query) => {
+  console.log("App received search query:", query);
   searchQuery.value = query;
 };
 

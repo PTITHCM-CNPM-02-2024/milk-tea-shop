@@ -334,27 +334,32 @@ async function logout() {
 }
 
 .search-input :deep(.v-field__field) {
-  color: white !important;
+  color: var(--v-theme-accent) !important;
 }
 
 .search-input :deep(.v-field__input) {
   min-height: 36px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  color: var(--v-theme-accent) !important;
+}
+
+.search-input :deep(.v-field__input input) {
+  color: var(--v-theme-accent) !important;
 }
 
 .search-input :deep(.v-field__input input::placeholder) {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.search-input :deep(.v-field__prepend-inner) {
+.search-input :deep(.v-field__prepend-inner .v-icon) {
   opacity: 0.8;
-  color: white;
+  color: var(--v-theme-accent) !important;
 }
 
-.search-input :deep(.v-field__append-inner) {
+.search-input :deep(.v-field__append-inner .v-icon) {
   opacity: 0.8;
-  color: white;
+  color: var(--v-theme-accent) !important;
 }
 
 .mobile-search-bar {

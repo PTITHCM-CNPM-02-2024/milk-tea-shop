@@ -5,19 +5,6 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
-// Hàm chuyển đổi giá trị hex sang RGB
-function hexToRgb(hex) {
-  // Bỏ qua dấu # nếu có
-  hex = hex.replace(/^#/, '');
-  
-  // Chuyển đổi hex sang RGB
-  let bigint = parseInt(hex, 16);
-  let r = (bigint >> 16) & 255;
-  let g = (bigint >> 8) & 255;
-  let b = bigint & 255;
-  
-  return `${r}, ${g}, ${b}`;
-}
 
 // Định nghĩa bảng màu tùy chỉnh cho POS
 const lightTheme = {
