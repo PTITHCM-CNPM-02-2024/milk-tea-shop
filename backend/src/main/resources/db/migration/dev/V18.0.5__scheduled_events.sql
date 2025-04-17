@@ -13,7 +13,6 @@ BEGIN
     SET is_active = 0,
         updated_at = CURRENT_TIMESTAMP
     WHERE is_active = 1 -- Chỉ cập nhật những cái đang active
-      AND valid_until IS NOT NULL
       AND valid_until < CURDATE(); -- Sử dụng '<' để chỉ vô hiệu hóa SAU ngày hết hạn.
                                 -- Nếu muốn vô hiệu hóa VÀO ngày hết hạn, dùng '<='
 
@@ -25,5 +24,13 @@ END //
 
 DELIMITER ;
 
--- Tiếp theo sẽ là tạo Event để chạy SP này hàng ngày
--- và các thành phần cho việc hủy order nếu bạn chọn cách 2. 
+CREATE EVENT event_deactivate_expired_discounts
+ON SCHEDULE EVERY 1 DAY
+STARTS TIMESTAMP(CURRENT_DATE, '01:00:00') -- Bắt đầu vào 1 giờ sáng ngày hiện tại
+DO
+BEGIN
+    -- Gọi stored procedure
+    CALL sp_deactivate_expired_discounts();
+END; -- Kết thúc DO block
+
+-- Các events và procedures khác (ví dụ: hủy order tự động) có thể được thêm ở đây. 

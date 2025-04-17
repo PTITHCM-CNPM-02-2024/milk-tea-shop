@@ -36,8 +36,6 @@ public class AreaEntity extends BaseEntity<Integer> {
     @Comment("Mã khu vực")
     @Column(name = "area_id", nullable = false, columnDefinition = "smallint UNSIGNED")
     @NotNull
-    @Getter
-    @Setter
     private Integer id;
 
     @Comment("Tên khu vực")

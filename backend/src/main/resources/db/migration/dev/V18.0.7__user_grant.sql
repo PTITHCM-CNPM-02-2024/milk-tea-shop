@@ -492,7 +492,7 @@ BEGIN
             SET MESSAGE_TEXT = 'Không thể xóa tài khoản admin mặc định';
     END IF;
 END //
-# 
+
 DELIMITER ;
 
 -- Tạo Manager
@@ -511,7 +511,7 @@ CALL sp_create_manager_account(
      );
 SELECT @new_manager_id AS manager_account_id, @manager_status AS status;
 
-Tạo Staff
+-- Tạo Staff
 SET @new_staff_id = NULL;
 SET @staff_status = '';
 CALL sp_create_staff_account(

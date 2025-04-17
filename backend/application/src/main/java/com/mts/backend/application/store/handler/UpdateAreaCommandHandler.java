@@ -51,8 +51,6 @@ public class UpdateAreaCommandHandler implements ICommandHandler<UpdateAreaComma
         
         area.changeDescription(command.getDescription());
         
-        areaRepository.saveAndFlush(area);
-        
         return CommandResult.success(area.getId());
         
     }

@@ -53,16 +53,6 @@ BEGIN
                 SET MESSAGE_TEXT = 'Số bàn tối đa phải lớn hơn hoặc bằng số bàn hiện có';
         END IF;
     END IF;
-
-    IF OLD.is_active <> NEW.is_active AND NEW.is_active = 0 THEN
-        -- Nếu là 0 cần kiểm tra order status = processing
-        SELECT COUNT(*) INTO order_count FROM `order` WHERE area_id = NEW.area_id AND status = 'PROCESSING';
-
-        IF order_count > 0 THEN
-            SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Không thể deactive khu vực có đơn hàng đang xử lý';
-        END IF;
-    END IF;
 END //
 
 -- Kiểm tra trước khi xóa khu vực
@@ -192,17 +182,17 @@ CREATE TRIGGER before_service_table_delete
     BEFORE DELETE ON service_table
     FOR EACH ROW
 BEGIN
-    DECLARE has_active_order BOOLEAN;
+    SET @has_active_order = (
+        SELECT EXISTS(
+            SELECT 1
+            FROM order_table ot
+                     JOIN `order` o ON ot.order_id = o.order_id
+            WHERE ot.table_id = OLD.table_id
+              AND (o.status = 'PROCESSING' or ot.check_out IS NULL)
+        )
+    );
 
-    SELECT EXISTS(
-        SELECT 1
-        FROM order_table ot
-                 JOIN `order` o ON ot.order_id = o.order_id
-        WHERE ot.table_id = OLD.table_id
-          AND (o.status = 'PROCESSING' or ot.check_out IS NULL)
-    ) INTO has_active_order;
-
-    IF has_active_order THEN
+    IF @has_active_order THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Không thể xóa bàn đang được sử dụng';
     END IF;
@@ -243,15 +233,16 @@ CREATE TRIGGER before_coupon_delete
     FOR EACH ROW
 BEGIN
     -- 1. kiểm tra xem coupon có đang được sử dụng trong discount không, trả về id của discount đang sử dụng coupon đó
-    SET @v_discount_id = (
-        SELECT discount_id
-        FROM discount
-        WHERE coupon_id = OLD.coupon_id
+    SET @v_has_discount = (
+        SELECT EXISTS(
+            SELECT 1
+            FROM discount
+            WHERE coupon_id = OLD.coupon_id
+        )
     );
-    -- 2. nếu coupon đang được sử dụng trong discount thì không được xóa
-    IF @v_discount_id IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = CONCAT('Mã coupon đang được sử dụng trong chương trình giảm giá: 
-', @v_discount_id);
+-- 2. nếu coupon đang được sử dụng trong discount thì không được xóa
+    IF @v_has_discount THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Mã coupon đang được sử dụng trong chương trình giảm giá';
     END IF;
 
 END //
@@ -342,15 +333,16 @@ CREATE TRIGGER before_customer_delete
     FOR EACH ROW
 BEGIN
 
-    SET @v_order_id = (
-        SELECT order_id FROM `order` JOIN order_table ON `order`.order_id = order_table.order_id
+    SET @v_has_processing_order = (
+        SELECT EXISTS(
+            SELECT 1 FROM `order` JOIN order_table ON `order`.order_id = order_table.order_id
             WHERE `order`.customer_id = OLD.customer_id AND (`order`.status = 'PROCESSING' or order_table.check_out IS NULL)
-        LIMIT 1
+        )
     );
 
-    IF @v_order_id IS NOT NULL THEN
+    IF @v_has_processing_order THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = CONCAT('Không thể xóa khách hàng đã có đơn hàng đang chờ xử lý: ', @v_order_id);
+            SET MESSAGE_TEXT = 'Không thể xóa khách hàng đã có đơn hàng đang chờ xử lý';
     END IF;
 END //
 
@@ -538,15 +530,15 @@ BEGIN
     SET @v_has_relations = (
         SELECT EXISTS(
             SELECT 1 FROM `order`
-                          JOIN order_discount ON `order`.order_id = order_discount.order_id
-                          JOIN order_table ot ON `order`.order_id = ot.order_id
-        WHERE order_discount.discount_id = OLD.discount_id AND (`order`.status = 'PROCESSING' or ot.check_out IS NULL)
-    )
+                              JOIN order_discount ON `order`.order_id = order_discount.order_id
+                              JOIN order_table ot ON `order`.order_id = ot.order_id
+            WHERE order_discount.discount_id = OLD.discount_id AND (`order`.status = 'PROCESSING' or ot.check_out IS NULL)
+        )
     );
 
     IF @v_has_relations THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = CONCAT('Không thể xóa chương trình giảm giá đang được sử dụng trong đơn hàng đang chờ xử lý: ', @v_discount_id);
+            SET MESSAGE_TEXT = 'Không thể xóa chương trình giảm giá đang được sử dụng trong đơn hàng đang chờ xử lý';
     END IF;
 
 
@@ -623,13 +615,13 @@ CREATE TRIGGER before_employee_delete
     FOR EACH ROW
 BEGIN
     -- Kiểm tra xem nhân viên có đang có đơn hàng đang chờ xử lý không
-    DECLARE has_relations BOOLEAN;
+    SET @has_relations = (
+        SELECT EXISTS(
+            SELECT 1 FROM `order` WHERE employee_id = OLD.employee_id AND status = 'PROCESSING'
+        )
+    );
 
-    SELECT EXISTS(
-        SELECT 1 FROM `order` WHERE employee_id = OLD.employee_id AND status = 'PROCESSING'
-    ) INTO has_relations;
-
-    IF has_relations THEN
+    IF @has_relations THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Không thể xóa nhân viên đang có đơn hàng đang chờ xử lý';
     END IF;
@@ -642,13 +634,13 @@ CREATE TRIGGER after_employee_delete
     FOR EACH ROW
 BEGIN
     -- kiểm tra tài khoản có đang liên kết với nhân viên không
-    DECLARE has_relations BOOLEAN;
+    SET @has_relations = (
+        SELECT EXISTS(
+            SELECT 1 FROM account WHERE account_id = OLD.account_id
+        )
+    );
 
-    SELECT EXISTS(
-        SELECT 1 FROM account WHERE account_id = OLD.account_id
-    ) INTO has_relations;
-
-    IF has_relations THEN
+    IF @has_relations THEN
         DELETE FROM account WHERE account_id = OLD.account_id;
     END IF;
 END //
@@ -724,13 +716,13 @@ CREATE TRIGGER after_manager_delete
     FOR EACH ROW
 BEGIN
     -- kiểm tra tài khoản có đang liên kết với quản lý không
-    DECLARE has_relations BOOLEAN;
+    SET @has_relations = (
+        SELECT EXISTS(
+            SELECT 1 FROM account WHERE account_id = OLD.account_id
+        )
+    );
 
-    SELECT EXISTS(
-        SELECT 1 FROM account WHERE account_id = OLD.account_id
-    ) INTO has_relations;
-
-    IF has_relations THEN
+    IF @has_relations THEN
         DELETE FROM account WHERE account_id = OLD.account_id;
     END IF;
 END //
@@ -855,7 +847,7 @@ BEGIN
 
 END //
 
-DELIMITER ; 
+DELIMITER ;
 -- ----------------------------------------------------------------------
 DELIMITER //
 
@@ -1274,17 +1266,17 @@ CREATE TRIGGER before_product_price_delete
     BEFORE DELETE ON product_price
     FOR EACH ROW
 BEGIN
-    DECLARE order_product_exists BOOLEAN;
-
-    SELECT EXISTS(
-        SELECT 1 FROM order_product op INNER JOIN `order` o ON op.order_id = o.order_id
-        INNER JOIN order_table ot ON o.order_id = ot.order_id
-        WHERE product_price_id = OLD.product_price_id AND (o.status = 'PROCESSING' or ot.check_out IS NULL)
-    ) INTO order_product_exists;
+    SET @order_product_exists = (
+        SELECT EXISTS(
+            SELECT 1 FROM order_product op INNER JOIN `order` o ON op.order_id = o.order_id
+                                       INNER JOIN order_table ot ON o.order_id = ot.order_id
+            WHERE product_price_id = OLD.product_price_id AND (o.status = 'PROCESSING' or ot.check_out IS NULL)
+        )
+    );
 
     -- Kiểm tra xem giá sản phẩm có được sử dụng trong đơn hàng không
 
-    IF order_product_exists THEN
+    IF @order_product_exists THEN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Không thể xóa giá sản phẩm đang được sử dụng trong đơn hàng';
     END IF;

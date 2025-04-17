@@ -61,7 +61,7 @@ BEGIN
       AND mt.type != 'NEWMEM';
     -- Log kết quả
     SELECT CONCAT('Đã reset ', ROW_COUNT(), ' khách hàng về loại thành viên NEWMEM do hết hạn') AS result;
-    
+
     -- Tự động cập nhật valid_until về sau 1 năm cho các membership đã hết hạn
     UPDATE membership_type mt
     SET mt.valid_until = DATE_ADD(CURRENT_DATE, INTERVAL 1 YEAR)
@@ -120,7 +120,7 @@ CREATE EVENT IF NOT EXISTS event_check_expired_memberships
         -- Thêm thủ tục tái cấp lại thành viên dựa trên điểm hiện tại
         CALL sp_recalculate_customer_memberships();
     END //
-    
+
 DELIMITER ;
 
 

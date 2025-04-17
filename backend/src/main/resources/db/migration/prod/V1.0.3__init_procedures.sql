@@ -411,13 +411,14 @@ CREATE PROCEDURE sp_delete_role(
 BEGIN
     -- Consider dependencies (account.role_id ON DELETE RESTRICT)
     -- Deletion might fail if accounts use this role.
-    SET @v_account_id = (
-        SELECT account_id FROM account WHERE role_id = p_role_id
-        LIMIT 1
+    SET @v_has_account = (
+        SELECT EXISTS(
+            SELECT 1 FROM account WHERE role_id = p_role_id
+        )
     );
 
-    IF @v_account_id IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = CONCAT('Không thể xóa vai trò đang được sử dụng bởi tài khoản: ', @v_account_id);
+    IF @v_has_account THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không thể xóa vai trò đang được sử dụng bởi tài khoản';
     ELSE
         DELETE FROM role WHERE role_id = p_role_id;
         SET p_row_count = ROW_COUNT();
@@ -502,27 +503,30 @@ BEGIN
     -- Deletion might fail if used by employee or manager.
     -- Setting customer.account_id to NULL is handled automatically.
 
-    SET @v_employee_id = (
-        SELECT employee_id FROM employee WHERE account_id = p_account_id
-        LIMIT 1
+    SET @v_has_employee = (
+        SELECT EXISTS(
+            SELECT 1 FROM employee WHERE account_id = p_account_id
+        )
     );
 
-    SET @v_manager_id = (
-        SELECT manager_id FROM manager WHERE account_id = p_account_id
-        LIMIT 1
+    SET @v_has_manager = (
+        SELECT EXISTS(
+            SELECT 1 FROM manager WHERE account_id = p_account_id
+        )
     );
 
-    SET @v_customer_id = (
-        SELECT customer_id FROM customer WHERE account_id = p_account_id
-        LIMIT 1
+    SET @v_has_customer = (
+        SELECT EXISTS(
+            SELECT 1 FROM customer WHERE account_id = p_account_id
+        )
     );
 
-    IF @v_employee_id IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = CONCAT('Không thể xóa tài khoản đang được sử dụng bởi nhân viên: ', @v_employee_id);
-    ELSEIF @v_manager_id IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = CONCAT('Không thể xóa tài khoản đang được sử dụng bởi quản lý: ', @v_manager_id);
-    ELSEIF @v_customer_id IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = CONCAT('Không thể xóa tài khoản đang được sử dụng bởi khách hàng: ', @v_customer_id);
+    IF @v_has_employee THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không thể xóa tài khoản đang được sử dụng bởi nhân viên';
+    ELSEIF @v_has_manager THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không thể xóa tài khoản đang được sử dụng bởi quản lý';
+    ELSEIF @v_has_customer THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không thể xóa tài khoản đang được sử dụng bởi khách hàng';
     ELSE
         DELETE FROM account WHERE account_id = p_account_id;
         SET p_row_count = ROW_COUNT();
@@ -1006,7 +1010,7 @@ CREATE PROCEDURE sp_insert_order_discount(
     OUT p_order_discount_id INT UNSIGNED
 )
 BEGIN
-    
+
     -- 1. chèn vào order_discount
     INSERT INTO order_discount (order_id, discount_id, discount_amount)
     VALUES (p_order_id, p_discount_id, p_discount_amount);
@@ -1084,9 +1088,6 @@ DELIMITER ;
 
 -- 23. Create Full Order Transaction Procedure
 DELIMITER //
-
--- Drop existing procedure if it exists to redefine it
-DROP PROCEDURE IF EXISTS sp_create_full_order;
 CREATE PROCEDURE sp_create_full_order(
     -- Order details
     IN p_customer_id INT UNSIGNED,
@@ -1135,14 +1136,14 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
 
     -- Error handling
     DECLARE exit handler for sqlexception
-    BEGIN
-        ROLLBACK;
-        SET p_new_order_id = NULL;
-        SET p_final_total = NULL;
-        SET p_change = NULL;
-        SET p_status_message = 'Lỗi xảy ra, giao dịch đã được hủy bỏ';
-         -- Consider logging the specific SQL error here for debugging
-    END;
+        BEGIN
+            ROLLBACK;
+            SET p_new_order_id = NULL;
+            SET p_final_total = NULL;
+            SET p_change = NULL;
+            SET p_status_message = 'Lỗi xảy ra, giao dịch đã được hủy bỏ';
+            -- Consider logging the specific SQL error here for debugging
+        END;
 
     -- Input validation (basic)
     IF p_employee_id IS NULL OR p_payment_method_id IS NULL THEN
@@ -1150,8 +1151,8 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
         LEAVE order_proc; -- Sử dụng nhãn 'order_proc' thay vì 'BEGIN'
     END IF;
     IF JSON_VALID(p_order_products) = 0 OR JSON_LENGTH(p_order_products) = 0 THEN
-         SET p_status_message = 'Đơn hàng phải chứa ít nhất một sản phẩm hợp lệ.';
-         LEAVE order_proc; -- Sử dụng nhãn 'order_proc' thay vì 'BEGIN'
+        SET p_status_message = 'Đơn hàng phải chứa ít nhất một sản phẩm hợp lệ.';
+        LEAVE order_proc; -- Sử dụng nhãn 'order_proc' thay vì 'BEGIN'
     END IF;
     -- Add more JSON validation if needed for discounts/tables
 
@@ -1166,31 +1167,31 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
     -- 2. Insert into `order_product` and calculate total_amount -- chèn vào bảng order_product và tính toán total_amount
     SET product_count = JSON_LENGTH(p_order_products);
     WHILE i < product_count DO
-        -- Extract product details from JSON array element -- trích xuất thông tin sản phẩm từ phần tử mảng JSON
-        SET v_product_price_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].product_price_id')));
-        SET v_quantity = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].quantity')));
-        SET v_option = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].option'))); -- Handle potential NULL
+            -- Extract product details from JSON array element -- trích xuất thông tin sản phẩm từ phần tử mảng JSON
+            SET v_product_price_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].product_price_id')));
+            SET v_quantity = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].quantity')));
+            SET v_option = JSON_UNQUOTE(JSON_EXTRACT(p_order_products, CONCAT('$[', i, '].option'))); -- Handle potential NULL
 
-        -- Basic validation -- kiểm tra dữ liệu sản phẩm
-        IF v_product_price_id IS NULL OR v_quantity IS NULL OR v_quantity <= 0 THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Dữ liệu sản phẩm không hợp lệ tìm thấy trong đơn hàng (ID hoặc số lượng).';
-        END IF;
+            -- Basic validation -- kiểm tra dữ liệu sản phẩm
+            IF v_product_price_id IS NULL OR v_quantity IS NULL OR v_quantity <= 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Dữ liệu sản phẩm không hợp lệ tìm thấy trong đơn hàng (ID hoặc số lượng).';
+            END IF;
 
-        -- Get price for calculation -- lấy giá sản phẩm cho tính toán
-        SELECT price INTO v_price FROM product_price WHERE product_price_id = v_product_price_id;
-        IF v_price IS NULL THEN
-             -- Product price not found, trigger rollback
-             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không tìm thấy giá sản phẩm trong đơn hàng.';
-        END IF;
+            -- Get price for calculation -- lấy giá sản phẩm cho tính toán
+            SELECT price INTO v_price FROM product_price WHERE product_price_id = v_product_price_id;
+            IF v_price IS NULL THEN
+                -- Product price not found, trigger rollback
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Không tìm thấy giá sản phẩm trong đơn hàng.';
+            END IF;
 
-        -- Insert into order_product -- chèn vào bảng order_product
-        CALL sp_insert_order_product(v_order_id, v_product_price_id, v_quantity, v_option, @op_id); -- Using session variable temporarily
+            -- Insert into order_product -- chèn vào bảng order_product
+            CALL sp_insert_order_product(v_order_id, v_product_price_id, v_quantity, v_option, @op_id); -- Using session variable temporarily
 
-        -- Accumulate total amount -- tích lũy tổng số tiền
-        SET v_total_amount = v_total_amount + (v_price * v_quantity);
+            -- Accumulate total amount -- tích lũy tổng số tiền
+            SET v_total_amount = v_total_amount + (v_price * v_quantity);
 
-        SET i = i + 1;
-    END WHILE;
+            SET i = i + 1;
+        END WHILE;
 
     -- Update order with calculated total_amount (final_amount is still 0) -- cập nhật đơn hàng với tổng số tiền đã tính toán (final_amount vẫn là 0)
     CALL sp_update_order_amounts(v_order_id, v_total_amount, 0.000);
@@ -1200,42 +1201,42 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
     IF JSON_VALID(p_order_discounts) = 1 THEN
         SET discount_count = JSON_LENGTH(p_order_discounts);
         WHILE i < discount_count DO
-            SET v_discount_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_discounts, CONCAT('$[', i, '].discount_id')));
+                SET v_discount_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_discounts, CONCAT('$[', i, '].discount_id')));
 
-            IF v_discount_id IS NOT NULL THEN
-                SET v_applied_discount = fn_calculate_and_validate_discount(
-                    v_discount_id,
-                    p_customer_id,
-                    v_total_amount,
-                    v_order_time,
-                    v_total_discount_amount
-                );
+                IF v_discount_id IS NOT NULL THEN
+                    SET v_applied_discount = fn_calculate_and_validate_discount(
+                            v_discount_id,
+                            p_customer_id,
+                            v_total_amount,
+                            v_order_time,
+                            v_total_discount_amount
+                                             );
 
-                IF v_applied_discount > 0 THEN
-                    IF NOT EXISTS (SELECT 1 FROM order_discount WHERE order_id = v_order_id AND discount_id = v_discount_id) THEN
-                        CALL sp_insert_order_discount(v_order_id, v_discount_id, v_applied_discount, @od_id);
-                        SET v_total_discount_amount = v_total_discount_amount + v_applied_discount;
+                    IF v_applied_discount > 0 THEN
+                        IF NOT EXISTS (SELECT 1 FROM order_discount WHERE order_id = v_order_id AND discount_id = v_discount_id) THEN
+                            CALL sp_insert_order_discount(v_order_id, v_discount_id, v_applied_discount, @od_id);
+                            SET v_total_discount_amount = v_total_discount_amount + v_applied_discount;
 
-                        -- **Tăng số lần sử dụng discount**
-                        UPDATE discount
-                        SET current_uses = IFNULL(current_uses, 0) + 1,
-                            updated_at = CURRENT_TIMESTAMP
-                        WHERE discount_id = v_discount_id;
-                        -- Lưu ý: Chưa kiểm tra current_uses > max_uses ở đây,
-                        -- việc này nên được xử lý bởi trigger hoặc logic khác nếu cần chặn vượt quá.
+                            -- **Tăng số lần sử dụng discount**
+                            UPDATE discount
+                            SET current_uses = IFNULL(current_uses, 0) + 1,
+                                updated_at = CURRENT_TIMESTAMP
+                            WHERE discount_id = v_discount_id;
+                            -- Lưu ý: Chưa kiểm tra current_uses > max_uses ở đây,
+                            -- việc này nên được xử lý bởi trigger hoặc logic khác nếu cần chặn vượt quá.
+                        END IF;
                     END IF;
                 END IF;
-            END IF;
 
-            SET i = i + 1;
-        END WHILE;
+                SET i = i + 1;
+            END WHILE;
     END IF;
 
     -- 4. Calculate final_amount and update order
     SET v_final_amount = v_total_amount - v_total_discount_amount;
     -- Ensure final amount is not negative
     IF v_final_amount < 0 THEN
-       SET v_final_amount = 0;
+        SET v_final_amount = 0;
     END IF;
 
     CALL sp_update_order_amounts(v_order_id, v_total_amount, v_final_amount);
@@ -1246,32 +1247,32 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
     IF JSON_VALID(p_order_tables) = 1 THEN
         SET table_count = JSON_LENGTH(p_order_tables);
         WHILE i < table_count DO
-            SET v_table_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_tables, CONCAT('$[', i, '].table_id')));
-            SET v_check_in = JSON_UNQUOTE(JSON_EXTRACT(p_order_tables, CONCAT('$[', i, '].check_in')));
+                SET v_table_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_tables, CONCAT('$[', i, '].table_id')));
+                SET v_check_in = JSON_UNQUOTE(JSON_EXTRACT(p_order_tables, CONCAT('$[', i, '].check_in')));
 
-            IF v_table_id IS NOT NULL AND v_check_in IS NOT NULL THEN
-                -- Basic validation for check_in time format could be added here if needed -- kiểm tra định dạng thời gian check_in có thể được thêm vào đây nếu cần
-                 -- Check if this table combination already exists for the order -- kiểm tra xem bàn này đã tồn tại trong đơn hàng chưa
-                 IF NOT EXISTS (SELECT 1 FROM order_table WHERE order_id = v_order_id AND table_id = v_table_id) THEN
-                    CALL sp_insert_order_table(v_order_id, v_table_id, v_check_in, NULL, @ot_id); -- check_out is initially NULL
-                 END IF;
-            END IF;
-            SET i = i + 1;
-        END WHILE;
+                IF v_table_id IS NOT NULL AND v_check_in IS NOT NULL THEN
+                    -- Basic validation for check_in time format could be added here if needed -- kiểm tra định dạng thời gian check_in có thể được thêm vào đây nếu cần
+                    -- Check if this table combination already exists for the order -- kiểm tra xem bàn này đã tồn tại trong đơn hàng chưa
+                    IF NOT EXISTS (SELECT 1 FROM order_table WHERE order_id = v_order_id AND table_id = v_table_id) THEN
+                        CALL sp_insert_order_table(v_order_id, v_table_id, v_check_in, NULL, @ot_id); -- check_out is initially NULL
+                    END IF;
+                END IF;
+                SET i = i + 1;
+            END WHILE;
     END IF;
 
     -- 6. Insert into `payment` -- chèn vào bảng payment
     IF p_amount_paid IS NULL THEN -- Handle case where payment might be deferred or invalid input -- xử lý trường hợp thanh toán có thể bị trì hoãn hoặc dữ liệu nhập không hợp lệ
-       SET v_payment_status = 'PROCESSING';
-       SET v_change_amount = 0.000;
-       SET p_amount_paid = 0.000; -- Ensure amount paid is not NULL for insert
+        SET v_payment_status = 'PROCESSING';
+        SET v_change_amount = 0.000;
+        SET p_amount_paid = 0.000; -- Ensure amount paid is not NULL for insert
     ELSEIF p_amount_paid >= v_final_amount THEN
         SET v_payment_status = 'PAID';
         SET v_change_amount = p_amount_paid - v_final_amount;
     ELSE -- Partial payment or less than total -- thanh toán một phần hoặc nhỏ hơn tổng số tiền
         SET v_payment_status = 'PROCESSING'; -- Or potentially another status like 'PARTIAL' if added to ENUM
         SET v_change_amount = 0.000; -- No change if not fully paid
-        -- Consider adding logic here if partial payments need specific handling
+    -- Consider adding logic here if partial payments need specific handling
     END IF;
     SET p_change = v_change_amount; -- Set output change -- thiết lập số tiền thay đổi  
 
@@ -1290,7 +1291,7 @@ order_proc: BEGIN -- Thêm nhãn 'order_proc' ở đây
         END IF;
 
     ELSE
-         CALL sp_update_order_status(v_order_id, 'PROCESSING');
+        CALL sp_update_order_status(v_order_id, 'PROCESSING');
     END IF;
 
     -- Commit transaction -- xác nhận giao dịch
@@ -1307,9 +1308,9 @@ CREATE FUNCTION fn_check_discount_applicable (
     p_discount_id INT UNSIGNED,
     p_order_time DATETIME -- Assuming check is done based on order time
 )
-RETURNS BOOLEAN
-DETERMINISTIC
-READS SQL DATA
+    RETURNS BOOLEAN
+    DETERMINISTIC
+    READS SQL DATA
 BEGIN
     DECLARE is_applicable BOOLEAN DEFAULT FALSE;
     DECLARE v_is_active BOOLEAN;
@@ -1324,8 +1325,8 @@ BEGIN
 
     IF v_is_active IS NOT NULL AND v_is_active = TRUE THEN
         IF (v_valid_from IS NULL OR p_order_time >= v_valid_from) AND (p_order_time <= v_valid_until) THEN
-             -- Add more checks here (min order value, usage limits etc.)
-             -- For now, only checks active status and validity period
+            -- Add more checks here (min order value, usage limits etc.)
+            -- For now, only checks active status and validity period
             SET is_applicable = TRUE;
         END IF;
     END IF;
@@ -1336,7 +1337,6 @@ DELIMITER ;
 
 -- Function to calculate and validate the applicable amount for a single discount
 DELIMITER //
-DROP FUNCTION IF EXISTS fn_calculate_and_validate_discount;
 CREATE FUNCTION fn_calculate_and_validate_discount (
     p_discount_id INT UNSIGNED,
     p_customer_id INT UNSIGNED,
@@ -1344,9 +1344,9 @@ CREATE FUNCTION fn_calculate_and_validate_discount (
     p_order_time TIMESTAMP,
     p_accumulated_discount DECIMAL(11, 3)
 )
-RETURNS DECIMAL(11, 3)
-DETERMINISTIC
-READS SQL DATA
+    RETURNS DECIMAL(11, 3)
+    DETERMINISTIC
+    READS SQL DATA
 BEGIN
     DECLARE v_applied_discount DECIMAL(11, 3) DEFAULT 0.000;
     DECLARE v_discount_value DECIMAL(11, 3);
@@ -1376,7 +1376,7 @@ BEGIN
             SELECT COUNT(*)
             INTO v_customer_usage_count
             FROM order_discount od
-            JOIN `order` o ON od.order_id = o.order_id
+                     JOIN `order` o ON od.order_id = o.order_id
             WHERE od.discount_id = p_discount_id
               AND o.customer_id = p_customer_id
               AND o.status = 'COMPLETED'; -- Chỉ đếm các đơn đã hoàn thành
@@ -1405,8 +1405,8 @@ BEGIN
             END IF;
 
             IF v_applied_discount < 0 THEN
-                 SET v_applied_discount = 0.000;
-             END IF;
+                SET v_applied_discount = 0.000;
+            END IF;
 
         END IF; -- End check min order value
     END IF; -- End check applicability

@@ -1,25 +1,3 @@
-call sp_create_staff_account_with_permissions(
-    'thanhphuong',
-    '$2a$10$E4vnUguH/3GzHHgvDoRSau.w0lfHaQv5Au5l6bB.01pCBT/hO56B6pring',
-    'Nhân Viên Bán Hàng',
-    'Nguyễn Thành',
-    'Phương',
-    'MALE',
-    '0981234567',
-    'thp@gmail.com');
-
-call sp_create_staff_account_with_permissions(
-     'vanphong',
-        '$2a$10$E4vnUguH/3GzHHgvDoRSau.w0lfHaQv5Au5l6bB.01pCBT/hO56B6pring',
-        'Nhân Viên Bán Hàng',
-        'Nguyễn Văn',
-     'Phương',
-     'MALE',
-     '09857123456',
-     'thpa@gmail.com');
-    
-
-
 INSERT INTO category (category_id, name, description)
 VALUES (3,UPPER('Trân châu đường đen'), 'Các loại đồ uống kết hợp với trân châu đường đen, mang vị ngọt caramel đặc 
 trưng.') ,

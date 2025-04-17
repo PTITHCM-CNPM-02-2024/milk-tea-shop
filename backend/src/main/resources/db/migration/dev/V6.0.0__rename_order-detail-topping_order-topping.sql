@@ -1,1 +1,0 @@
-ALTER TABLE OrderDetailTopping RENAME OrderTopping;
