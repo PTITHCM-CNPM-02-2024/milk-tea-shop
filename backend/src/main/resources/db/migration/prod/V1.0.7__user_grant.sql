@@ -1,5 +1,21 @@
 DELIMITER //
 
+/**
+ * Thủ tục cấp quyền theo vai trò cho người dùng
+ *
+ * Chức năng: Cấp quyền MySQL dựa trên vai trò của tài khoản trong hệ thống
+ * Tham số:
+ *   - p_account_id: ID của tài khoản người dùng cần cấp quyền
+ * Xử lý:
+ *   - Lấy thông tin tài khoản và vai trò từ database
+ *   - Tạo username MySQL từ thông tin người dùng và vai trò (nếu chưa tồn tại)
+ *   - Thu hồi tất cả các quyền cũ
+ *   - Cấp quyền mới phù hợp với vai trò:
+ *     + MANAGER: Tất cả quyền trên database và quyền EXECUTE trên tất cả stored procedures
+ *     + STAFF: Quyền SELECT trên database và quyền EXECUTE giới hạn trên một số stored procedures
+ * Kết quả:
+ *   - Người dùng được cấp quyền MySQL phù hợp với vai trò trong hệ thống
+ */
 CREATE PROCEDURE sp_grant_permissions_by_role(
     IN p_account_id INT UNSIGNED
 )
@@ -167,7 +183,19 @@ BEGIN
     END IF;
 END//
 
--- Thủ tục thu hồi quyền khi tài khoản bị khóa (Giữ nguyên logic)
+/**
+ * Thủ tục thu hồi quyền MySQL khi tài khoản bị khóa
+ *
+ * Chức năng: Thu hồi tất cả quyền trên database khi tài khoản bị khóa
+ * Tham số:
+ *   - p_account_id: ID của tài khoản cần thu hồi quyền
+ * Xử lý:
+ *   - Lấy thông tin tài khoản và vai trò từ database
+ *   - Tạo tên username MySQL từ thông tin tài khoản
+ *   - Thu hồi tất cả quyền trên database nếu người dùng MySQL tồn tại
+ * Kết quả:
+ *   - Người dùng bị thu hồi tất cả quyền MySQL khi tài khoản bị khóa
+ */
 CREATE PROCEDURE sp_revoke_permissions(
     IN p_account_id INT UNSIGNED
 )
@@ -232,7 +260,21 @@ BEGIN
     END IF;
 END //
 
--- Thủ tục khóa/mở khóa tài khoản và xử lý quyền tương ứng (Gọi sp_grant_permissions_by_role đã sửa)
+/**
+ * Thủ tục khóa/mở khóa tài khoản và xử lý quyền tương ứng
+ *
+ * Chức năng: Thay đổi trạng thái khóa của tài khoản và cập nhật quyền MySQL tương ứng
+ * Tham số:
+ *   - p_account_id: ID của tài khoản cần khóa/mở khóa
+ *   - p_is_locked: Trạng thái khóa mới (1: Khóa, 0: Mở khóa)
+ * Xử lý:
+ *   - Kiểm tra trạng thái khóa hiện tại của tài khoản
+ *   - Nếu trạng thái thay đổi:
+ *     + Cập nhật trạng thái khóa trong bảng account
+ *     + Gọi các thủ tục thu hồi hoặc cấp quyền tương ứng
+ * Kết quả:
+ *   - Tài khoản được khóa/mở khóa và quyền MySQL được cập nhật phù hợp
+ */
 CREATE PROCEDURE sp_lock_unlock_account(
     IN p_account_id INT UNSIGNED,
     IN p_is_locked TINYINT(1)
@@ -277,7 +319,29 @@ END //
 
 DELIMITER //
 
--- Thủ tục tạo tài khoản MANAGER (Gọi sp_grant_permissions_by_role đã sửa)
+/**
+ * Thủ tục tạo tài khoản MANAGER
+ *
+ * Chức năng: Tạo tài khoản và thông tin quản lý với quyền hạn MANAGER
+ * Tham số:
+ *   - p_username: Tên đăng nhập
+ *   - p_password: Mật khẩu (đã hash)
+ *   - p_last_name: Họ của quản lý
+ *   - p_first_name: Tên của quản lý
+ *   - p_gender: Giới tính
+ *   - p_phone: Số điện thoại
+ *   - p_email: Email
+ * Tham số trả về:
+ *   - p_new_account_id: ID của tài khoản mới được tạo (NULL nếu thất bại)
+ *   - p_status_message: Thông báo kết quả
+ * Xử lý:
+ *   - Lấy role_id của vai trò MANAGER
+ *   - Tạo tài khoản mới với vai trò MANAGER
+ *   - Cấp quyền MySQL cho tài khoản
+ *   - Tạo thông tin quản lý liên kết với tài khoản
+ * Kết quả:
+ *   - Tài khoản quản lý mới được tạo với đầy đủ thông tin và quyền hạn
+ */
 CREATE PROCEDURE sp_create_manager_account(
     IN p_username VARCHAR(50),
     IN p_password VARCHAR(255), -- Nên là mật khẩu đã hash từ ứng dụng
@@ -364,7 +428,30 @@ BEGIN
 
 END create_manager_proc //-- End labeled block
 
--- Thủ tục tạo tài khoản STAFF (Gọi sp_grant_permissions_by_role đã sửa)
+/**
+ * Thủ tục tạo tài khoản STAFF
+ *
+ * Chức năng: Tạo tài khoản và thông tin nhân viên với quyền hạn STAFF
+ * Tham số:
+ *   - p_username: Tên đăng nhập
+ *   - p_password: Mật khẩu (đã hash)
+ *   - p_position: Vị trí/chức vụ của nhân viên
+ *   - p_last_name: Họ của nhân viên
+ *   - p_first_name: Tên của nhân viên
+ *   - p_gender: Giới tính
+ *   - p_phone: Số điện thoại
+ *   - p_email: Email
+ * Tham số trả về:
+ *   - p_new_account_id: ID của tài khoản mới được tạo (NULL nếu thất bại)
+ *   - p_status_message: Thông báo kết quả
+ * Xử lý:
+ *   - Lấy role_id của vai trò STAFF
+ *   - Tạo tài khoản mới với vai trò STAFF
+ *   - Cấp quyền MySQL giới hạn cho tài khoản
+ *   - Tạo thông tin nhân viên liên kết với tài khoản
+ * Kết quả:
+ *   - Tài khoản nhân viên mới được tạo với đầy đủ thông tin và quyền hạn
+ */
 CREATE PROCEDURE sp_create_staff_account(
     IN p_username VARCHAR(50),
     IN p_password VARCHAR(255), -- Nên là mật khẩu đã hash từ ứng dụng
@@ -449,7 +536,17 @@ BEGIN
 END create_staff_proc// -- End labeled block
 
 DELIMITER //
--- Bảo vệ tài khoản admin mặc định khỏi việc thay đổi username
+
+/**
+ * Trigger bảo vệ tài khoản admin mặc định khỏi việc thay đổi username
+ *
+ * Chức năng: Ngăn chặn việc thay đổi username của tài khoản admin mặc định
+ * Thực thi: Trước khi cập nhật bảng account
+ * Kiểm tra:
+ *   - Kiểm tra xem tài khoản có phải admin mặc định không
+ *   - Nếu là admin mặc định và username bị thay đổi, sẽ báo lỗi
+ * Mục đích: Đảm bảo an toàn cho tài khoản admin quan trọng nhất của hệ thống
+ */
 CREATE TRIGGER protect_default_admin_update
     BEFORE UPDATE
     ON account
@@ -471,7 +568,16 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ tài khoản admin mặc định khỏi việc xóa
+/**
+ * Trigger bảo vệ tài khoản admin mặc định khỏi việc xóa
+ *
+ * Chức năng: Ngăn chặn việc xóa tài khoản admin mặc định
+ * Thực thi: Trước khi xóa bản ghi từ bảng account
+ * Kiểm tra:
+ *   - Kiểm tra xem tài khoản cần xóa có phải là admin mặc định không
+ *   - Nếu là admin mặc định, sẽ báo lỗi và ngăn chặn việc xóa
+ * Mục đích: Đảm bảo an toàn cho tài khoản admin quan trọng nhất của hệ thống
+ */
 CREATE TRIGGER protect_default_admin_delete
     BEFORE DELETE
     ON account

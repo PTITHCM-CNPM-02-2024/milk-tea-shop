@@ -32,6 +32,9 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
   @Query("select (count(c) > 0) from CustomerEntity c where c.phone = :phone")
   boolean existsByPhone(@Param("phone") @NonNull PhoneNumber phone);
 
+  @Query("select (count(c) > 0) from CustomerEntity c where c.id <> :id and c.phone = :phone")
+  boolean existsByIdNotAndPhone(@Param("id") @NonNull Long id, @Param("phone") @NonNull PhoneNumber phone);
+
   @Query("select c from CustomerEntity c where c.phone = :phone")
   Optional<CustomerEntity> findByPhone(@Param("phone") @NonNull PhoneNumber phone);
 
@@ -54,4 +57,6 @@ public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Lon
     @Query("select c from CustomerEntity c where c.id = :id")
     Optional<CustomerEntity> findByIdFetchMembershipTypeAndAccount(@NotNull @Param("id") Long id);
 
+  @Query("select (count(c) > 0) from CustomerEntity c where c.id <> :id and c.email = :email")
+  boolean existsByIdNotAndEmail(@Param("id") @NonNull Long id, @Param("email") @NonNull Email email);
 }

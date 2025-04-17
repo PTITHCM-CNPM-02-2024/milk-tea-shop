@@ -56,6 +56,12 @@ INSERT INTO store (name, address, phone, opening_time, closing_time, email, open
 -- Triggers để bảo vệ dữ liệu mặc định
 DELIMITER //
 
+/**
+ * Trigger ngăn chặn việc xóa các đơn vị đo lường mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các đơn vị đo lường cơ bản như 'mL', 'cái'
+ * Thực thi: Trước khi xóa bản ghi từ bảng unit_of_measure
+ */
 CREATE TRIGGER protect_default_unit_delete
     BEFORE DELETE
     ON unit_of_measure
@@ -67,7 +73,12 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ kích thước sản phẩm mặc định
+/**
+ * Trigger bảo vệ kích thước sản phẩm mặc định khỏi việc thay đổi
+ * 
+ * Chức năng: Ngăn chặn việc thay đổi tên hoặc đơn vị của các kích thước sản phẩm cơ bản
+ * Thực thi: Trước khi cập nhật bảng product_size
+ */
 CREATE TRIGGER protect_default_size_update
     BEFORE UPDATE
     ON product_size
@@ -81,6 +92,12 @@ BEGIN
     END IF;
 END //
 
+/**
+ * Trigger ngăn chặn việc xóa các kích thước sản phẩm mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các kích thước cơ bản như S, M, L, NA
+ * Thực thi: Trước khi xóa bản ghi từ bảng product_size
+ */
 CREATE TRIGGER protect_default_size_delete
     BEFORE DELETE
     ON product_size
@@ -92,7 +109,12 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ danh mục mặc định
+/**
+ * Trigger bảo vệ danh mục mặc định khỏi việc thay đổi tên
+ *
+ * Chức năng: Ngăn chặn việc thay đổi tên của các danh mục cơ bản
+ * Thực thi: Trước khi cập nhật bảng category
+ */
 CREATE TRIGGER protect_default_category_update
     BEFORE UPDATE
     ON category
@@ -106,6 +128,12 @@ BEGIN
     END IF;
 END //
 
+/**
+ * Trigger ngăn chặn việc xóa các danh mục mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các danh mục cơ bản
+ * Thực thi: Trước khi xóa bản ghi từ bảng category
+ */
 CREATE TRIGGER protect_default_category_delete
     BEFORE DELETE
     ON category
@@ -117,7 +145,12 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ loại thành viên mặc định
+/**
+ * Trigger bảo vệ loại thành viên mặc định khỏi việc thay đổi tên
+ *
+ * Chức năng: Ngăn chặn việc thay đổi tên của các loại thành viên cơ bản
+ * Thực thi: Trước khi cập nhật bảng membership_type
+ */
 CREATE TRIGGER protect_default_membership_update
     BEFORE UPDATE
     ON membership_type
@@ -131,6 +164,12 @@ BEGIN
     END IF;
 END //
 
+/**
+ * Trigger ngăn chặn việc xóa các loại thành viên mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các loại thành viên cơ bản
+ * Thực thi: Trước khi xóa bản ghi từ bảng membership_type
+ */
 CREATE TRIGGER protect_default_membership_delete
     BEFORE DELETE
     ON membership_type
@@ -142,7 +181,12 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ vai trò mặc định
+/**
+ * Trigger bảo vệ vai trò mặc định khỏi việc thay đổi tên
+ *
+ * Chức năng: Ngăn chặn việc thay đổi tên của các vai trò cơ bản trong hệ thống
+ * Thực thi: Trước khi cập nhật bảng role
+ */
 CREATE TRIGGER protect_default_role_update
     BEFORE UPDATE
     ON role
@@ -156,6 +200,12 @@ BEGIN
     END IF;
 END //
 
+/**
+ * Trigger ngăn chặn việc xóa các vai trò mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các vai trò cơ bản trong hệ thống
+ * Thực thi: Trước khi xóa bản ghi từ bảng role
+ */
 CREATE TRIGGER protect_default_role_delete
     BEFORE DELETE
     ON role
@@ -167,7 +217,12 @@ BEGIN
     END IF;
 END //
 
--- Bảo vệ phương thức thanh toán mặc định
+/**
+ * Trigger bảo vệ phương thức thanh toán mặc định khỏi việc thay đổi tên
+ *
+ * Chức năng: Ngăn chặn việc thay đổi tên của các phương thức thanh toán cơ bản
+ * Thực thi: Trước khi cập nhật bảng payment_method
+ */
 CREATE TRIGGER protect_default_payment_method_update
     BEFORE UPDATE
     ON payment_method
@@ -181,6 +236,12 @@ BEGIN
     END IF;
 END //
 
+/**
+ * Trigger ngăn chặn việc xóa các phương thức thanh toán mặc định
+ *
+ * Chức năng: Kiểm tra và ngăn chặn việc xóa các phương thức thanh toán cơ bản
+ * Thực thi: Trước khi xóa bản ghi từ bảng payment_method
+ */
 CREATE TRIGGER protect_default_payment_method_delete
     BEFORE DELETE
     ON payment_method
@@ -196,7 +257,12 @@ DELIMITER ;
 
 DELIMITER //
 
--- Trigger ngăn chặn việc thêm mới nếu đã tồn tại thông tin cửa hàng
+/**
+ * Trigger ngăn chặn việc thêm mới thông tin cửa hàng nếu đã tồn tại
+ * 
+ * Chức năng: Đảm bảo trong hệ thống chỉ có một bản ghi thông tin cửa hàng duy nhất
+ * Thực thi: Trước khi thêm bản ghi vào bảng store
+ */
 CREATE TRIGGER before_store_insert
     BEFORE INSERT ON store
     FOR EACH ROW
@@ -213,7 +279,12 @@ BEGIN
     END IF;
 END //
 
--- Trigger ngăn chặn việc xóa thông tin cửa hàng duy nhất
+/**
+ * Trigger ngăn chặn việc xóa thông tin cửa hàng duy nhất
+ * 
+ * Chức năng: Đảm bảo luôn có thông tin cửa hàng trong hệ thống
+ * Thực thi: Trước khi xóa bản ghi từ bảng store
+ */
 CREATE TRIGGER before_store_delete
     BEFORE DELETE ON store
     FOR EACH ROW
@@ -234,7 +305,12 @@ DELIMITER ;
 
 DELIMITER //
 
--- Trigger chỉ cho phép cập nhật thông tin, không thay đổi ID
+/**
+ * Trigger chỉ cho phép cập nhật thông tin cửa hàng, không đổi ID
+ * 
+ * Chức năng: Đảm bảo không thay đổi ID của cửa hàng khi cập nhật thông tin
+ * Thực thi: Trước khi cập nhật bảng store
+ */
 CREATE TRIGGER before_store_update
     BEFORE UPDATE ON store
     FOR EACH ROW

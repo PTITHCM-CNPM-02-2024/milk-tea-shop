@@ -30,11 +30,11 @@ public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCusto
         CustomerEntity customer = mustExistCustomer(command.getId());
         
         if (customer.changeEmail(command.getEmail().orElse(null))) {
-            verifyUniqueEmail(customer.getEmail().orElse(null));
+            verifyUniqueEmail(command.getId(), command.getEmail().orElse(null));
         }
         
         if (customer.changePhone(command.getPhone())) {
-            verifyUniquePhoneNumber(customer.getPhone());
+            verifyUniquePhoneNumber(command.getId(), command.getPhone());
         }
         
         customer.changeFirstName(command.getFirstName().orElse(null));
@@ -51,18 +51,19 @@ public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCusto
         return customerRepository.findById(customerId.getValue())
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));
     }
-    private void verifyUniquePhoneNumber(PhoneNumber phoneNumber) {
+    private void verifyUniquePhoneNumber(CustomerId id , PhoneNumber phoneNumber) {
+        Objects.requireNonNull(id, "Customer id is required");
         Objects.requireNonNull(phoneNumber, "Phone number is required");
-        if (customerRepository.existsByPhone(phoneNumber)) {
+        if (customerRepository.existsByIdNotAndPhone(id.getValue(), phoneNumber)) {
             throw new DuplicateException("Số điện thoại đã tồn tại");
         }
     }
     
-    private void verifyUniqueEmail(Email email) {
+    private void verifyUniqueEmail(CustomerId id, Email email) {
         if (email == null) {
             return;
         }
-        if (customerRepository.existsByEmail(email)) {
+        if (customerRepository.existsByIdNotAndEmail(id.getValue(), email)) {
             throw new DuplicateException("Email đã tồn tại");
         }
     }

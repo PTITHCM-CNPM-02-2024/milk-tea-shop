@@ -1,7 +1,16 @@
 -- Trigger kiểm tra thời hạn membership
 DELIMITER //
 
--- Trigger kiểm tra thời hạn khi cập nhật membership_type
+/**
+ * Trigger kiểm tra thời hạn khi cập nhật membership_type
+ *
+ * Chức năng: Đảm bảo rằng thời hạn membership được cập nhật phải là ngày trong tương lai
+ * Thực thi: Trước khi cập nhật bảng membership_type
+ * Tham số:
+ *   - NEW: Dữ liệu mới sẽ được cập nhật
+ *   - OLD: Dữ liệu hiện tại của bản ghi
+ * Xử lý: Nếu ngày hết hạn không phải là ngày tương lai, sẽ báo lỗi và ngăn cập nhật
+ */
 CREATE TRIGGER before_membership_update_check_expiration
     BEFORE UPDATE
     ON membership_type
@@ -14,7 +23,15 @@ BEGIN
     END IF;
 END //
 
--- Trigger kiểm tra thời hạn khi thêm mới membership_type
+/**
+ * Trigger kiểm tra thời hạn khi thêm mới membership_type
+ *
+ * Chức năng: Đảm bảo rằng thời hạn membership khi tạo mới phải là ngày trong tương lai
+ * Thực thi: Trước khi thêm bản ghi vào bảng membership_type
+ * Tham số:
+ *   - NEW: Dữ liệu mới sẽ được thêm vào
+ * Xử lý: Nếu ngày hết hạn không phải là ngày tương lai, sẽ báo lỗi và ngăn thêm mới
+ */
 CREATE TRIGGER before_membership_insert_check_expiration
     BEFORE INSERT
     ON membership_type
@@ -31,7 +48,20 @@ DELIMITER ;
 
 DELIMITER //
 
--- Thủ tục reset membership về NEWMEM khi hết hạn
+/**
+ * Thủ tục reset membership về NEWMEM khi hết hạn
+ *
+ * Chức năng: Đặt lại loại thành viên của khách hàng về NEWMEM khi membership hiện tại hết hạn
+ * Tham số: Không có
+ * Xử lý:
+ *   - Tìm ID của loại thành viên NEWMEM
+ *   - Cập nhật các khách hàng có loại thành viên đã hết hạn về loại NEWMEM
+ *   - Đặt điểm của khách hàng về 0
+ *   - Tự động gia hạn thời hạn loại thành viên thêm 1 năm
+ * Kết quả trả về:
+ *   - Thông báo số lượng khách hàng đã được đặt lại thành viên
+ *   - Thông báo số lượng loại thành viên đã được gia hạn
+ */
 CREATE PROCEDURE sp_reset_expired_memberships()
 BEGIN
     DECLARE newmem_id TINYINT UNSIGNED;
@@ -79,7 +109,18 @@ DELIMITER ;
 
 DELIMITER //
 
--- Thủ tục tái cấp lại thành viên dựa trên điểm hiện tại
+/**
+ * Thủ tục tái cấp lại thành viên dựa trên điểm hiện tại
+ *
+ * Chức năng: Tính toán và cập nhật lại loại thành viên của khách hàng dựa trên điểm hiện tại
+ * Tham số: Không có
+ * Xử lý:
+ *   - Cập nhật khách hàng sang loại thành viên phù hợp theo điểm hiện có
+ *   - Chỉ xét các khách hàng có điểm > 0
+ *   - Chỉ xét các loại thành viên còn thời hạn
+ * Kết quả trả về:
+ *   - Thông báo số lượng khách hàng đã được cập nhật loại thành viên
+ */
 CREATE PROCEDURE sp_recalculate_customer_memberships()
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -110,7 +151,15 @@ END //
 DELIMITER ;
 DELIMITER //
 
--- Tạo event scheduler chạy hàng ngày để kiểm tra membership hết hạn
+/**
+ * Event tự động kiểm tra và cập nhật membership hàng ngày
+ *
+ * Chức năng: Lên lịch chạy các thủ tục kiểm tra membership hết hạn và tái cấp thành viên mỗi ngày
+ * Lịch thực thi: Mỗi ngày một lần, bắt đầu từ ngày mai
+ * Các thủ tục được gọi:
+ *   - sp_reset_expired_memberships: Đặt lại membership hết hạn
+ *   - sp_recalculate_customer_memberships: Cập nhật lại loại thành viên theo điểm
+ */
 CREATE EVENT IF NOT EXISTS event_check_expired_memberships
     ON SCHEDULE EVERY 1 DAY
         STARTS CURRENT_DATE + INTERVAL 1 DAY
