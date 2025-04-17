@@ -1,1 +1,0 @@
-../backend/src/main/resources/db/migration/dev/B18.0.0__base_line.sql
