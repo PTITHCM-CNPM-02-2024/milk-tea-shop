@@ -500,7 +500,7 @@ SET @new_manager_id = NULL;
 SET @manager_status = '';
 CALL sp_create_manager_account(
         'admin',
-        '$2a$10$34sm7MbcgCEZYhmYhA8Wx.NTW2XubZBnUnHgz5ZvHULOEqI4rN3Pu',
+        '{bcrypt}$2a$10$WMn1T29Wu7giJtgKJ11GruP95voXc9unATF.0GuCtpOcm8oqkxY92',
         'NGUYỄN NGỌC',
         'PHÚ',
         'MALE',
@@ -516,7 +516,7 @@ SET @new_staff_id = NULL;
 SET @staff_status = '';
 CALL sp_create_staff_account(
         'vanphong',
-        '$2a$10$34sm7MbcgCEZYhmYhA8Wx.NTW2XubZBnUnHgz5ZvHULOEqI4rN3Pu',
+        '{bcrypt}$2a$10$WMn1T29Wu7giJtgKJ11GruP95voXc9unATF.0GuCtpOcm8oqkxY92',
         'Nhân Viên Bán Hàng',
         'Nguyễn Văn',
         'Phương',
@@ -529,7 +529,7 @@ CALL sp_create_staff_account(
 SELECT @new_staff_id AS staff_account_id, @staff_status AS status;
 
 CALL sp_create_staff_account('thanhphuong',
-                             '$2a$10$34sm7MbcgCEZYhmYhA8Wx.NTW2XubZBnUnHgz5ZvHULOEqI4rN3Pu',
+                             '{bcrypt}$2a$10$WMn1T29Wu7giJtgKJ11GruP95voXc9unATF.0GuCtpOcm8oqkxY92',
                              'Nhân Viên Bán Hàng',
                              'Nguyễn Thành',
                              'Phương',
