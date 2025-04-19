@@ -10,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -34,7 +32,7 @@ public class GetAllDiscountCommandHandler implements IQueryHandler<DefaultDiscou
                     .id(discount.getId())
                     .name(discount.getName().getValue())
                     .description(discount.getDescription())
-                    .couponId(discount.getCouponEntity().getId())
+                    .couponId(discount.getCoupon().getId())
                     .discountValue(discount.getPromotionDiscountValue().getValue())
                     .discountUnit(discount.getPromotionDiscountValue().getUnit().name())
                     .maxDiscountAmount(discount.getPromotionDiscountValue().getMaxDiscountAmount().getValue())

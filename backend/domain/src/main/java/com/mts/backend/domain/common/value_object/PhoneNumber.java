@@ -2,55 +2,26 @@ package com.mts.backend.domain.common.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class PhoneNumber {
 
-    private final static Pattern PHONE_NUMBER_PATTERN = Pattern.compile("(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)");
+    @jakarta.validation.constraints.Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ")
+    @NotBlank(message = "Số điện thoại không được để trống")
     String value;
 
-    private PhoneNumber(String value) {
-        Objects.requireNonNull(value, "Phone number is required");
-
-        List<String> errors = new ArrayList<>();
-
-        if (value.isBlank()) {
-            errors.add("Số điện thoại không được để trống");
-        }
-
-        if (!PHONE_NUMBER_PATTERN.matcher(value).matches()) {
-            errors.add("Số điện thoại không hợp lệ");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new DomainBusinessLogicException(errors);
-        }
+    public PhoneNumber (@jakarta.validation.constraints.Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") @NotBlank(message = "Số điện thoại không được để trống") String value) {
         this.value = normalize(value);
     }
 
     private static String normalize(String value) {
         return value.replaceAll("[^0-9]", "");
     }
-    public static final class PhoneNumberConverter implements AttributeConverter<PhoneNumber, String> {
-        @Override
-        public String convertToDatabaseColumn(PhoneNumber attribute) {
-            return Objects.isNull(attribute) ? null : attribute.getValue();
-        }
     
-        @Override
-        public PhoneNumber convertToEntityAttribute(String dbData) {
-            return Objects.isNull(dbData) ? null : PhoneNumber.builder().value(dbData).build();
-        }
-    }
-
-
 }

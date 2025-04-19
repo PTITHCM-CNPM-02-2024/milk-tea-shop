@@ -5,7 +5,7 @@ import com.mts.backend.application.order.response.*;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -38,7 +38,7 @@ public class GetOrderByIdQueryHandler implements IQueryHandler<OrderByIdQuery, C
                 .orderId(order.getId())
                 .employeeId(order.getEmployeeEntity().getId())
                 .employeeName(order.getEmployeeEntity().getFullName())
-                .customerName(order.getCustomerEntity().flatMap(CustomerEntity::getFullName).orElse(null))
+                .customerName(order.getCustomer().flatMap(Customer::getFullName).orElse(null))
                 .orderStatus(order.getStatus().map(Enum::name).orElse(null))
                 .totalAmount(order.getTotalAmount().map(Money::getValue).orElse(null))
                 .finalAmount(order.getFinalAmount().map(Money::getValue).orElse(null))
@@ -61,7 +61,7 @@ public class GetOrderByIdQueryHandler implements IQueryHandler<OrderByIdQuery, C
                 .orderDiscounts(order.getOrderDiscounts().stream()
                         .map(orderDiscount -> OrderDiscountDetailResponse.builder()
                                 .name(orderDiscount.getDiscount().getName().getValue())
-                                .couponCode(orderDiscount.getDiscount().getCouponEntity().getCoupon().getValue())
+                                .couponCode(orderDiscount.getDiscount().getCoupon().getCoupon().getValue())
                                 .discountValue(orderDiscount.getDiscount().getPromotionDiscountValue().getDescription())
                                 .discountAmount(orderDiscount.getDiscountAmount().getValue())
                                 .build())

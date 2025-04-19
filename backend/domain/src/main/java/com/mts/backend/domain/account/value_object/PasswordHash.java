@@ -7,29 +7,16 @@ import lombok.Value;
 
 import java.util.Objects;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class PasswordHash {
-
+    @jakarta.validation.constraints.Size(max = 255, message = "Mật khẩu không được vượt quá 255 ký tự")
+    @jakarta.validation.constraints.NotBlank(message = "Mật khẩu không được để trống")
     String value;
 
-    private PasswordHash(String value) {
-        if (value.isBlank()) {
-            throw new DomainException("Mật khẩu không được để trống");
-        }
+    public PasswordHash(
+            @jakarta.validation.constraints.Size(max = 255, message = "Mật khẩu không được vượt quá 255 ký tự")
+            @jakarta.validation.constraints.NotBlank(message = "Mật khẩu không được để trống") String value) {
         this.value = value;
     }
     
-    
-    public static final class PasswordHashConverter implements AttributeConverter<PasswordHash, String> {
-        @Override
-        public String convertToDatabaseColumn(PasswordHash attribute) {
-            return Objects.isNull(attribute) ? null : attribute.getValue();
-        }
-
-        @Override
-        public PasswordHash convertToEntityAttribute(String dbData) {
-            return Objects.isNull(dbData) ? null : PasswordHash.builder().value(dbData).build();
-        }
-    }
 }

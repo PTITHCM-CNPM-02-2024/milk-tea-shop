@@ -1,11 +1,9 @@
 package com.mts.backend.application.promotion.query_handler;
 
-import java.util.List;
 import java.util.Objects;
 
 import com.mts.backend.application.promotion.query.UnusedCouponQuery;
 import com.mts.backend.application.promotion.response.CouponDetailResponse;
-import com.mts.backend.domain.promotion.CouponEntity;
 import com.mts.backend.domain.promotion.jpa.JpaCouponRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;

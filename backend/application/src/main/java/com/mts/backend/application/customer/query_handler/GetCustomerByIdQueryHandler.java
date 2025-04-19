@@ -2,17 +2,16 @@ package com.mts.backend.application.customer.query_handler;
 
 import com.mts.backend.application.customer.query.CustomerByIdQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.FirstName;
 import com.mts.backend.domain.common.value_object.LastName;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
 import com.mts.backend.shared.query.IQueryHandler;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -30,7 +29,7 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
     public CommandResult handle(CustomerByIdQuery query) {
         Objects.requireNonNull(query, "Get customer by id query is required");
         
-        CustomerEntity customer = mustExistCustomer(query.getId());
+        Customer customer = mustExistCustomer(query.getId());
 
         CustomerDetailResponse response = CustomerDetailResponse.builder()
                 .id(customer.getId())
@@ -41,13 +40,13 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
                 .phone(customer.getPhone().getValue())
                 .membershipId(customer.getMembershipTypeEntity().getId())
                 .rewardPoint(customer.getCurrentPoints().getValue())
-                .accountId(customer.getAccountEntity().map(AccountEntity::getId).orElse(null))
+                .accountId(customer.getAccount().map(Account::getId).orElse(null))
                 .build();
         
         return CommandResult.success(response);
     }
     
-    private CustomerEntity mustExistCustomer(CustomerId customerId) {
+    private Customer mustExistCustomer(CustomerId customerId) {
         Objects.requireNonNull(customerId, "Customer id is required");
         return customerRepository.findByIdFetchMembershipTypeAndAccount(customerId.getValue())
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));

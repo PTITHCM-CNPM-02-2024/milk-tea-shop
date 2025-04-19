@@ -40,13 +40,13 @@ public class ManagerController implements IController {
     @PostMapping
     public ResponseEntity<?> createManager(@RequestBody CreateManagerRequest request) {
         var command = CreateManagerCommand.builder()
-                .email(Email.builder().value(request.getEmail()).build())
-                .firstName(FirstName.builder().value(request.getFirstName()).build())
-                .lastName(LastName.builder().value(request.getLastName()).build())
+                .email(Email.of(request.getEmail()))
+                .firstName(FirstName.of(request.getFirstName()))
+                .lastName(LastName.of(request.getLastName()))
                 .gender(Gender.valueOf(request.getGender()))
-                .phone(PhoneNumber.builder().value(request.getPhone()).build())
-                .username(Username.builder().value(request.getUsername()).build())
-                .password(PasswordHash.builder().value(request.getPassword()).build())
+                .phone(PhoneNumber.of(request.getPhone()))
+                .username(Username.of(request.getUsername()))
+                .password(PasswordHash.of(request.getPassword()))
                 .build();
 
         var result = commandBus.dispatch(command);
@@ -58,11 +58,11 @@ public class ManagerController implements IController {
     public ResponseEntity<?> updateManager(@PathVariable("id") Long id, @RequestBody UpdateManagerRequest request) {
         var command = UpdateManagerCommand.builder()
                 .id(ManagerId.of(id))
-                .email(Email.builder().value(request.getEmail()).build())
-                .firstName(FirstName.builder().value(request.getFirstName()).build())
-                .lastName(LastName.builder().value(request.getLastName()).build())
+                .email(Email.of(request.getEmail()))
+                .firstName(FirstName.of(request.getFirstName()))
+                .lastName(LastName.of(request.getLastName()))
                 .gender(Gender.valueOf(request.getGender()))
-                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .phone(PhoneNumber.of(request.getPhone()))
                 .build();
 
         var result = commandBus.dispatch(command);

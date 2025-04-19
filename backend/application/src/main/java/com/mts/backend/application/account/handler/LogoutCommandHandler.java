@@ -32,8 +32,6 @@ public class LogoutCommandHandler implements ICommandHandler<LogoutCommand, Comm
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với id: " + command.getUserPrincipal().getId().getValue()));
         
         account.logout();
-
-        accountRepository.save(account);
         
         return CommandResult.success(account.getId());
     }

@@ -52,14 +52,14 @@ public class EmployeeController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createEmployee(@Parameter(description = "Thông tin nhân viên", required = true) @RequestBody CreateEmployeeRequest request) {
         var command = CreateEmployeeCommand.builder()
-                .email(Email.builder().value(request.getEmail()).build())
-                .firstName(FirstName.builder().value(request.getFirstName()).build())
-                .lastName(LastName.builder().value(request.getLastName()).build())
-                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .email(Email.of(request.getEmail()))
+                .firstName(FirstName.of(request.getFirstName()))
+                .lastName(LastName.of(request.getLastName()))
+                .phone(PhoneNumber.of(request.getPhone()))
                 .gender(Gender.valueOf(request.getGender()))
-                .position(Position.builder().value(request.getPosition()).build())
-                .username(Username.builder().value(request.getUsername()).build())
-                .password(PasswordHash.builder().value(request.getPassword()).build())
+                .position(Position.of(request.getPosition()))
+                .username(Username.of(request.getUsername()))
+                .password(PasswordHash.of(request.getPassword()))
                 .roleId(RoleId.of(request.getRoleId()))
                 .build();
         
@@ -78,12 +78,15 @@ public class EmployeeController implements IController {
     public ResponseEntity<?> updateEmployee(@Parameter(description = "ID nhân viên", required = true) @PathVariable("id") Long id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateEmployeeRequest request) {
         var command = UpdateEmployeeCommand.builder()
                 .id(EmployeeId.of(id))
-                .email(Email.builder().value(request.getEmail()).build())
-                .firstName(FirstName.builder().value(request.getFirstName()).build())
-                .lastName(LastName.builder().value(request.getLastName()).build())
-                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                .email(Email.of(request.getEmail()))
+                .firstName(FirstName.of(request.getFirstName()))
+                .lastName(LastName.of(request.getLastName()))
                 .gender(Gender.valueOf(request.getGender()))
-                .position(Position.builder().value(request.getPosition()).build())
+                .phone(PhoneNumber.of(request.getPhone()))
+                .position(Position.of(request.getPosition()))
+                .username(Username.of(request.getUsername()))
+                .password(PasswordHash.of(request.getPassword()))
+                .roleId(RoleId.of(request.getRoleId()))
                 .build();
         
         var result = commandBus.dispatch(command);

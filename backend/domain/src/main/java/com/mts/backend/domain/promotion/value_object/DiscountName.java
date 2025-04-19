@@ -2,45 +2,23 @@ package com.mts.backend.domain.promotion.value_object;
 
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import jakarta.persistence.AttributeConverter;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-@Value@Builder
+
+@Value(staticConstructor = "of")
 public class DiscountName {
-    String value;
     private final static int MAX_LENGTH = 500;
-    
-    private DiscountName(String value){
-        Objects.requireNonNull(value, "Discount name must not be null");
+    @jakarta.validation.constraints.NotBlank(message = "Tên khuyến mãi không được để trống")
+    @Size(max = 500, message = "Tên khuyến mãi không được quá 500 ký tự")
+    String value;
 
-        List<String> errors = new ArrayList<>();
-
-        if (value.length() > MAX_LENGTH){
-            errors.add("Tên khuyến mãi không được quá " + MAX_LENGTH + " ký tự");
-        }
-
-        if (value.isBlank() ){
-            errors.add("Tên khuyến mãi không được để trống");
-        }
-
-        if(! errors.isEmpty()){
-            throw new DomainBusinessLogicException(errors);
-        }
+    public DiscountName(@jakarta.validation.constraints.NotBlank(message = "Tên khuyến mãi không được để trống") 
+                        @Size(max = 500, message = "Tên khuyến mãi không được quá 500 ký tự") String value) {
         this.value = value;
-    }
-    
-    public static final class DiscountNameConverter implements AttributeConverter<DiscountName, String> {
-        @Override
-        public String convertToDatabaseColumn(DiscountName attribute) {
-            return attribute.getValue();
-        }
-        
-        @Override
-        public DiscountName convertToEntityAttribute(String dbData) {
-            return DiscountName.builder().value(dbData).build();
-        }
     }
 }

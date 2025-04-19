@@ -1,13 +1,9 @@
 package com.mts.backend.application.store.event;
 
-import com.mts.backend.application.store.handler.UpdateAreaMaxAndActiveCommandHandler;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 public class ChangeAreaMaxAndActiveListener implements ApplicationListener<ChangeAreaMaxAndActiveEvent> {

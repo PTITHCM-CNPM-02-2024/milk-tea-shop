@@ -1,7 +1,7 @@
 package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.CreateManagerCommand;
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.account.jpa.JpaRoleRepository;
@@ -73,7 +73,7 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
         }
     }
     
-    private AccountEntity createAccount(CreateManagerCommand command){
+    private Account createAccount(CreateManagerCommand command){
         Objects.requireNonNull(command, "Account id is required");
         
         if (accountRepository.existsByUsername(command.getUsername())){
@@ -88,7 +88,7 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
                 .value(passwordEncoder.encode(command.getPassword().getValue()))
                 .build();
         
-        var account = AccountEntity.builder()
+        var account = Account.builder()
                 .id(AccountId.create().getValue())
                 .username(command.getUsername())
                 .passwordHash(password)

@@ -2,7 +2,7 @@ package com.mts.backend.application.customer.query_handler;
 
 import com.mts.backend.application.customer.query.GetCusByAccountIdQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.FirstName;
 import com.mts.backend.domain.common.value_object.LastName;
@@ -37,7 +37,7 @@ public class GetCusByAccountIdQueryHandler implements IQueryHandler<GetCusByAcco
                 .gender(customer.getGender().map(Enum::name).orElse(null))
                 .membershipId(customer.getMembershipTypeEntity().getId())
                 .rewardPoint(customer.getCurrentPoints().getValue())
-                .accountId(customer.getAccountEntity().map(AccountEntity::getId).orElse(null))
+                .accountId(customer.getAccount().map(Account::getId).orElse(null))
                 .phone(customer.getPhone().getValue())
                 .gender(customer.getGender().map(Enum::name).orElse(null))
                 .build();

@@ -1,7 +1,7 @@
 package com.mts.backend.application.account.handler;
 
 import com.mts.backend.application.account.command.UpdateAccountPasswordCommand;
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.account.value_object.PasswordHash;
@@ -33,7 +33,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
     public CommandResult handle(UpdateAccountPasswordCommand command) {
         Objects.requireNonNull(command, "UpdateAccountPassword must not be null");
         
-        AccountEntity account = mustExistAccount(command.getId());
+        Account account = mustExistAccount(command.getId());
         
         PasswordHash newPasswordHash = encodePassword(command.getNewPassword());
         encodePassword(command.getConfirmPassword());
@@ -45,7 +45,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
             throw new DomainException("Mật khẩu cũ không chính xác");
         }
         
-        if (!account.changePassword(newPasswordHash)) {
+        if (!account.setPassword(newPasswordHash)) {
             throw new DomainException("Mật khẩu mới không được trùng với mật khẩu cũ");
         }
         
@@ -54,13 +54,13 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         return CommandResult.success(account.getId());
     }
     
-    private AccountEntity mustExistAccount(AccountId accountId) {
+    private Account mustExistAccount(AccountId accountId) {
         return accountRepository.findById(accountId.getValue())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
     }
     
     private PasswordHash encodePassword(PasswordHash passwordHash) {
-        return PasswordHash.builder().value(passwordEncoder.encode(passwordHash.getValue())).build();
+        return PasswordHash.of(passwordEncoder.encode(passwordHash.getValue()));
     }
     
     

@@ -1,6 +1,6 @@
 package com.mts.backend.application.security.model;
 
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,13 +8,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class UserPrincipal implements UserDetails {
-    private final AccountEntity account;
+    private final Account account;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(AccountEntity account) {
+    public UserPrincipal(Account account) {
         this.account = account;
         this.authorities =
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + account.getRoleEntity().getName().getValue().toUpperCase()));

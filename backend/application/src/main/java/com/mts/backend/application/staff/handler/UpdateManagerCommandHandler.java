@@ -1,15 +1,12 @@
 package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.UpdateManagerCommand;
-import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
-import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.ManagerEntity;
 import com.mts.backend.domain.staff.identifier.ManagerId;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
-import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -35,25 +32,28 @@ public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManage
     @Transactional
     public CommandResult handle(UpdateManagerCommand command) {
         Objects.requireNonNull(command, "Update manager command is required");
-        
-        ManagerEntity manager = mustExistManager(command.getId());
-        
-        if (manager.changeEmail(command.getEmail())) {
-            verifyUniqueEmail(command.getId(), command.getEmail());
+
+        try {
+            var manager = mustExistManager(command.getId());
+
+            manager.setEmail(command.getEmail());
+            manager.setPhone(command.getPhone());
+            manager.setFirstName(command.getFirstName());
+            manager.setLastName(command.getLastName());
+            manager.setGender(command.getGender());
+
+            return CommandResult.success(manager.getId());
+        } catch (Exception e) {
+            if (e.getMessage().contains("Duplicate entry") &&
+                e.getMessage().contains("uk_manager_email")) {
+                throw new NotFoundException("Email đã tồn tại");
+            }
+            if (e.getMessage().contains("Duplicate entry") &&
+                e.getMessage().contains("uk_manager_phone")) {
+                throw new NotFoundException("Số điện thoại đã tồn tại");
+            }
+            throw new NotFoundException("Đã có lỗi xảy ra khi cập nhật quản lý", e);
         }
-        
-        if (manager.changePhoneNumber(command.getPhone())) {
-            verifyUniquePhoneNumber(command.getId(), command.getPhone());
-        }
-        
-        manager.changeFirstName(command.getFirstName());
-        
-        manager.changeLastName(command.getLastName());
-        
-        manager.changeGender(command.getGender());
-        
-        
-        return CommandResult.success(manager.getId());
     }
 
     private ManagerEntity mustExistManager(ManagerId id) {
@@ -61,27 +61,5 @@ public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManage
 
         return managerRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy quản lý"));
-    }
-    
-    private void verifyUniqueEmail(ManagerId id, Email email) {
-        Objects.requireNonNull(email, "Manager is required");
-        if (managerRepository.existsByIdNotAndEmail(id.getValue(), email)) {
-            throw new DuplicateException("Email đã tồn tại");
-        }
-    }
-    
-    private void verifyUniquePhoneNumber( ManagerId id,  PhoneNumber phone) {
-        Objects.requireNonNull(phone, "Manager is required");
-        if (managerRepository.existsByIdNotAndPhone(id.getValue(), phone)) {
-            throw new DuplicateException("Số điện thoại đã tồn tại");
-        }
-    }
-
-    private void mustExitsAccount(AccountId accountId) {
-        Objects.requireNonNull(accountId, "Account id is required");
-        if (!accountRepository.existsById(accountId.getValue())) {
-            throw new DuplicateException("Account không tồn tại");
-        }
-
     }
 }

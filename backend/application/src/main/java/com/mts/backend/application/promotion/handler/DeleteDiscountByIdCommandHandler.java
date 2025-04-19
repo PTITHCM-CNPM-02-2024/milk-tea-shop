@@ -24,10 +24,10 @@ public class DeleteDiscountByIdCommandHandler implements ICommandHandler<DeleteD
         var discount = jpaDiscountRepository.findById(command.getDiscountId().getValue())
             .orElseThrow(() -> new NotFoundException("Không tìm thấy discount với id: " + command.getDiscountId()));
         
-        if(discount.getCouponEntity() != null) {
-            discount.getCouponEntity().setDiscount(null);
+        if(discount.getCoupon() != null) {
+            discount.getCoupon().setDiscount(null);
         }
-        discount.setCouponEntity(null);
+        discount.setCoupon(null);
         jpaDiscountRepository.delete(discount);
 
         return CommandResult.success(discount.getId());

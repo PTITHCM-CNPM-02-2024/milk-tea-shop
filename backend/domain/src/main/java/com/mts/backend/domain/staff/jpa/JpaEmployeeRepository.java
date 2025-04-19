@@ -1,7 +1,6 @@
 package com.mts.backend.domain.staff.jpa;
 
 import com.mts.backend.domain.common.value_object.Email;
-import com.mts.backend.domain.common.value_object.PhoneNumber;
 import com.mts.backend.domain.staff.EmployeeEntity;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
@@ -24,36 +23,36 @@ public interface JpaEmployeeRepository extends JpaRepository<EmployeeEntity, Lon
     boolean existsByAccountId(@Param("id") @NonNull Long id);
 
     @Query("select (count(e) > 0) from EmployeeEntity e where e.email = :email")
-    boolean existsByEmail(@Param("email") @NonNull Email email);
+    boolean existsByEmail(@Param("email") @NonNull String email);
 
     @Query("select (count(e) > 0) from EmployeeEntity e where e.id <> :id and e.email = :email")
     boolean existsByIdNotAndEmail(@Param("id") @NonNull Long id, @Param("email") @NonNull Email email);
     @Query("select (count(e) > 0) from EmployeeEntity e where e.id <> ?1 and e.phone = ?2")
-    boolean existsByIdNotAndPhone(@NotNull Long id, @NotNull PhoneNumber phone);
+    boolean existsByIdNotAndPhone(@NotNull Long id, @NotNull String phone);
     @Query("select (count(e) > 0) from EmployeeEntity e where e.phone = :phone")
-    boolean existsByPhone(@Param("phone") @NonNull PhoneNumber phone);
+    boolean existsByPhone(@Param("phone") @NonNull String phone);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM milk_tea_shop_prod.Employee WHERE employee_id = :id", nativeQuery = true)
     void deleteEmployee(@Param("id") Long id);
 
-    @EntityGraph(attributePaths = {"accountEntity"})
+    @EntityGraph(attributePaths = {"account"})
     @Query("select e from EmployeeEntity e")
     List<EmployeeEntity> findAllWithJoinFetch();
 
-    @EntityGraph(attributePaths = {"accountEntity"})
+    @EntityGraph(attributePaths = {"account"})
     @Query("select e from EmployeeEntity e")
     Page<EmployeeEntity> findAllWithJoinFetch(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"accountEntity"})
+    @EntityGraph(attributePaths = {"account"})
     @Query("select e from EmployeeEntity e where e.id = :id")
     Optional<EmployeeEntity> findByIdWithJoinFetch(@NotNull @Param("id") Long id);
 
     @Query("select e from EmployeeEntity e where e.accountEntity.id = :id")
     Optional<EmployeeEntity> findByAccountEntity_Id(@Param("id") Long id);
     
-    @EntityGraph(attributePaths = {"accountEntity"})
+    @EntityGraph(attributePaths = {"account"})
     @Query("select e from EmployeeEntity e where e.accountEntity.id = :id")
     Optional<EmployeeEntity> findByAccountEntity_IdFetch(@Param("id") Long id);
 }

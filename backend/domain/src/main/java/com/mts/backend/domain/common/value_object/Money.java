@@ -14,13 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class Money  implements Comparable<Money>, Serializable {
     BigDecimal value;
     private static final int DEFAULT_SCALE = 3;
     
-    private Money(BigDecimal value) {
+    public Money(BigDecimal value) {
         Objects.requireNonNull(value, "BigDecimal is required");
         List<String> businessErrors = new ArrayList<>(List.of());
 
@@ -112,16 +111,5 @@ public class Money  implements Comparable<Money>, Serializable {
     public int compareTo(Money o) {
         return value.compareTo(o.value);
     }
-    @Converter(autoApply = true)
-    public static final class MoneyConverter implements AttributeConverter<Money, BigDecimal>{
-        @Override
-        public BigDecimal convertToDatabaseColumn(Money attribute) {
-            return Objects.isNull(attribute) ? null : attribute.getValue();
-        }
 
-        @Override
-        public Money convertToEntityAttribute(BigDecimal dbData) {
-            return Objects.isNull(dbData) ? null : Money.builder().value(dbData).build();
-        }
-    }
 }

@@ -1,7 +1,7 @@
 package com.mts.backend.application.payment.handler;
 
 import com.mts.backend.application.payment.command.CreatePaymentMethodCommand;
-import com.mts.backend.domain.payment.PaymentMethodEntity;
+import com.mts.backend.domain.payment.PaymentMethod;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
 import com.mts.backend.domain.payment.value_object.PaymentMethodName;
@@ -32,10 +32,10 @@ public class CreatePaymentMethodCommandHandler implements ICommandHandler<Create
         
         verifyUniqueName(name);
 
-        PaymentMethodEntity paymentMethod = PaymentMethodEntity.builder()
+        PaymentMethod paymentMethod = PaymentMethod.builder()
                 .id(PaymentMethodId.create().getValue())
-                .paymentName(name)
-                .paymentDescription(command.getDescription().orElse(null))
+                .name(name)
+                .description(command.getDescription().orElse(null))
                 .build();
         
         var pmSaved = paymentMethodRepository.save(paymentMethod);

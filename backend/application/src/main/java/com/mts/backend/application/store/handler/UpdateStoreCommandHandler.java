@@ -1,7 +1,7 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.UpdateStoreCommand;
-import com.mts.backend.domain.store.StoreEntity;
+import com.mts.backend.domain.store.Store;
 import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -26,23 +26,19 @@ public class UpdateStoreCommandHandler implements ICommandHandler<UpdateStoreCom
         
         var store = mustExistStore(command.getId());
         
-        store.changeAddress(command.getAddress());
-        store.changeEmail(command.getEmail());
-        store.changeStoreName(command.getName());
-        store.changePhoneNumber(command.getPhone());
-        store.changeTaxCode(command.getTaxCode());
-        store.changeOpeningTime(command.getOpenTime());
-        store.changeClosingTime(command.getCloseTime());
-        store.changeOpeningDate(command.getOpeningDate());
+        store.setAddress(command.getAddress());
+        store.setEmail(command.getEmail());
+        store.setName(command.getName());
+        store.setPhone(command.getPhone());
+        store.setTaxCode(command.getTaxCode());
+        store.setOpeningTime(command.getOpenTime());
+        store.setClosingTime(command.getCloseTime());
+        store.setOpeningDate(command.getOpeningDate());
         
-        
-        
-        var savedStore = storeRepository.save(store);
-        
-        return CommandResult.success(savedStore.getId());
+        return CommandResult.success(store.getId());
     }
     @Transactional
-    protected StoreEntity mustExistStore(StoreId id){
+    protected Store mustExistStore(StoreId id){
         Objects.requireNonNull(id, "Store id is required");
         
         return storeRepository.findById(id.getValue())

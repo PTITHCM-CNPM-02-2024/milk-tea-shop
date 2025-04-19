@@ -27,13 +27,13 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
             where o.employeeEntity.id = :id and (o.orderTime between :orderTimeStart and :orderTimeEnd) order by o.finalAmount DESC""")
     Page<OrderEntity> findByEmployeeEntity_IdAndOrderTimeBetween(@Param("id") @NonNull Long id, @Param("orderTimeStart") Instant orderTimeStart, @Param("orderTimeEnd") Instant orderTimeEnd, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"customerEntity.membershipTypeEntity.memberDiscountValue", "employeeEntity", "orderDiscounts.discount.couponEntity", "orderProducts.productPriceEntity.productEntity.categoryEntity", "orderProducts.productPriceEntity.size", "orderTables.table"})
+    @EntityGraph(attributePaths = {"customer.membershipType.memberDiscountValue", "employeeEntity", "orderDiscounts.discount.coupon", "orderProducts.productPriceEntity.productEntity.categoryEntity", "orderProducts.productPriceEntity.size", "orderTables.table"})
     @Query("select o from OrderEntity o where o.id = :id")
     Optional<OrderEntity> findOrderWithDetails(@Param("id") @NonNull Long id);
 
     @Query("""
             select count(o) from OrderEntity o inner join o.orderDiscounts orderDiscounts
-            where o.customerEntity.id = :id and orderDiscounts.discount.id = :id1 and o.status = :status""")
+            where o.customer.id = :id and orderDiscounts.discount.id = :id1 and o.status = :status""")
     long countByCustomerEntity_IdAndOrderDiscounts_Discount_IdAndStatus(@Param("id") @NonNull Long id,
                                                                         @Param("id1") @NonNull Long id1,
                                                                         @Param("status") @NonNull OrderStatus status);
@@ -45,7 +45,7 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
 
 
     @Query("select count(DISTINCT o) from OrderEntity o inner join o.orderDiscounts od " +
-            "where o.customerEntity.id = :customerId and o.status = 'COMPLETED' " +
+            "where o.customer.id = :customerId and o.status = 'COMPLETED' " +
             "and od.discount.id = :discountId")
     long countCompletedOrdersWithSpecificDiscount(
             @Param("customerId") Long customerId,
@@ -54,16 +54,16 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     
 
 
-    @Query("select o from OrderEntity o where o.customerEntity.id is not null and o.customerEntity.id = :id")
+    @Query("select o from OrderEntity o where o.customer.id is not null and o.customer.id = :id")
     List<OrderEntity> findByCustomerEntity_IdNotNullAndCustomerEntity_Id(@Param("id") @NonNull Long id);
 
-    @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderTables.table"})
+    @EntityGraph(attributePaths = {"customer", "employeeEntity", "orderTables.table"})
     @Query("select o from OrderEntity o join o.orderTables ot where o.employeeEntity.id = :id " +
             "and o.status = 'COMPLETED' and size(o.orderTables) > 0 " +
             "and ot.checkOut is null")
     List<OrderEntity> findByEmployeeEntity_IdFetchOrdTbs(@Param("id") @NonNull Long id);
 
-    @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderTables.table"})
+    @EntityGraph(attributePaths = {"customer", "employeeEntity", "orderTables.table"})
     @Query("select o from OrderEntity o join o.orderTables ot where o.employeeEntity.id = :id " +
             "and o.status = 'COMPLETED' and size(o.orderTables) > 0 " +
             "and ot.checkOut is null")
@@ -74,7 +74,7 @@ public interface JpaOrderRepository extends JpaRepository<OrderEntity, Long> {
     @Query("select o from OrderEntity o")
     Page<OrderEntity> findAllFetchEmpCus(Pageable pageable);
     
-    @EntityGraph(attributePaths = {"customerEntity", "employeeEntity", "orderDiscounts.discount.couponEntity", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.productPriceEntity.productEntity", "orderTables.table", "payments.paymentMethod"})
+    @EntityGraph(attributePaths = {"customer", "employeeEntity", "orderDiscounts.discount.coupon", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.productPriceEntity.productEntity", "orderTables.table", "payments.paymentMethod"})
     @Query("select o from OrderEntity o where o.id = :id")
     Optional<OrderEntity> findByIdFetch(@Param("id") Long id);
     

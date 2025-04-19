@@ -45,8 +45,8 @@ public class StoreController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createStore(@RequestBody CreateStoreRequest request) {
         var command = CreateStoreCommand.builder()
-                .name(StoreName.builder().value(request.getName()).build())
-                .address(Address.builder().value(request.getAddress()).build())
+                .name(StoreName.of(request.getName()))
+                .address(Address.of(request.getAddress()))
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
                 .email(Email.builder().value(request.getEmail()).build())
                 .openingDate(LocalDate.parse(request.getOpeningDate()))
@@ -65,8 +65,8 @@ public class StoreController implements IController {
     public ResponseEntity<?> updateStore(@PathVariable("id") Integer id,  @RequestBody UpdateStoreRequest request) {
         var command = UpdateStoreCommand.builder()
                 .id(StoreId.of(id))
-                .name(StoreName.builder().value(request.getName()).build())
-                .address(Address.builder().value(request.getAddress()).build())
+                .name(StoreName.of(request.getName()))
+                .address(Address.of(request.getAddress()))
                 .phone(PhoneNumber.builder().value(request.getPhone()).build())
                 .email(Email.builder().value(request.getEmail()).build())
                 .openingDate(LocalDate.parse(request.getOpeningDate()))

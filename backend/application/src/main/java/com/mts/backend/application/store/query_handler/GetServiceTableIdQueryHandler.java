@@ -3,7 +3,7 @@ package com.mts.backend.application.store.query_handler;
 import com.mts.backend.application.store.query.ServiceTableByIdQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
 import com.mts.backend.application.store.response.ServiceTableDetailResponse;
-import com.mts.backend.domain.store.ServiceTableEntity;
+import com.mts.backend.domain.store.ServiceTable;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
@@ -37,7 +37,7 @@ public class GetServiceTableIdQueryHandler implements IQueryHandler<ServiceTable
                 .id(re.getId())
                 .name(re.getTableNumber().getValue())
                 .isActive(re.getActive())
-                .area(re.getAreaEntity().map(area -> AreaDetailResponse.builder()
+                .area(re.getArea().map(area -> AreaDetailResponse.builder()
                         .id(area.getId())
                         .name(area.getName().getValue())
                         .maxTable(area.getMaxTable().map(MaxTable::getValue).orElse(null))
@@ -48,7 +48,7 @@ public class GetServiceTableIdQueryHandler implements IQueryHandler<ServiceTable
         return CommandResult.success(response);
     }
 
-    private ServiceTableEntity mustExistServiceTable(ServiceTableId id) {
+    private ServiceTable mustExistServiceTable(ServiceTableId id) {
         return serviceTableRepository.findByIdWithArea(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Bàn không tồn tại"));
     }

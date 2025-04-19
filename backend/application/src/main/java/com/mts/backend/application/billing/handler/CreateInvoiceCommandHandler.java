@@ -9,7 +9,7 @@ import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.OrderDiscountEntity;
 import com.mts.backend.domain.order.OrderEntity;
-import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -192,7 +192,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillPaymentInfo(String template, OrderEntity order, PaymentEntity payment) {
+    private String fillPaymentInfo(String template, OrderEntity order, Payment payment) {
         DecimalFormat currency = new DecimalFormat("#,###");
         var paymentDetail = getPayment(payment);
 
@@ -241,7 +241,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .map(orderDiscount -> {
                     var discount = orderDiscount.getDiscount();
 
-                    var coupon = discount.getCouponEntity();
+                    var coupon = discount.getCoupon();
 
                     return OrderDiscountDetailResponse.builder()
                             .name(discount.getName().getValue())
@@ -253,7 +253,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .collect(Collectors.toList());
     }
 
-    private PaymentDetailResponse getPayment(PaymentEntity payment){
+    private PaymentDetailResponse getPayment(Payment payment){
         var paymentMethod = payment.getPaymentMethod();
 
         return PaymentDetailResponse.builder()
@@ -271,7 +271,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
     }
 
     private String fillCustomerInfo(String template, OrderEntity order) {
-        if (order.getCustomerEntity().isEmpty()) {
+        if (order.getCustomer().isEmpty()) {
             template = template.replace("{{clientName}}", "Khách vãng lai");
             template = template.replace("{{clientAddress}}", "");
             template = template.replace("{{clientEmail}}", "");
@@ -282,7 +282,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
             return template;
         }
 
-        var customer = order.getCustomerEntity().get();
+        var customer = order.getCustomer().get();
 
         var membershipType = customer.getMembershipTypeEntity();
 

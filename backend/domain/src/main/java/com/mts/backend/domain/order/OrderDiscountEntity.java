@@ -1,9 +1,8 @@
 package com.mts.backend.domain.order;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.order.identifier.OrderDiscountId;
 import com.mts.backend.domain.persistence.BaseEntity;
-import com.mts.backend.domain.promotion.DiscountEntity;
+import com.mts.backend.domain.promotion.Discount;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -40,7 +39,7 @@ public class OrderDiscountEntity extends BaseEntity<Long> {
     @Comment("Mã chương trình giảm giá được áp dụng")
     @JoinColumn(name = "discount_id", nullable = false)
     @NotNull
-    private DiscountEntity discount;
+    private Discount discount;
 
     
     @Comment("Số tiền giảm giá được áp dụng")

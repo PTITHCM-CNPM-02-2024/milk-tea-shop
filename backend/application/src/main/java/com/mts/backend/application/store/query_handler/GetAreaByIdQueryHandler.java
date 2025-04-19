@@ -2,10 +2,7 @@ package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.AreaByIdQuery;
 import com.mts.backend.application.store.response.AreaDetailResponse;
-import com.mts.backend.application.store.response.AreaSummaryResponse;
 import com.mts.backend.application.store.response.ServiceTableSummaryResponse;
-import com.mts.backend.domain.store.AreaEntity;
-import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaAreaRepository;
 import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;

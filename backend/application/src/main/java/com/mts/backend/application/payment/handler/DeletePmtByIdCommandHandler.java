@@ -35,7 +35,7 @@ public class DeletePmtByIdCommandHandler implements ICommandHandler<DeletePmtByI
         }catch (DataIntegrityViolationException e) {
             throw new DomainException("Không thể xóa phương thức thanh toán, vui lòng xóa toàn bộ thanh toán liên quan");
         }
-        return CommandResult.success(paymentMethod.getPaymentName());
+        return CommandResult.success(paymentMethod.getName());
     }
     
 }

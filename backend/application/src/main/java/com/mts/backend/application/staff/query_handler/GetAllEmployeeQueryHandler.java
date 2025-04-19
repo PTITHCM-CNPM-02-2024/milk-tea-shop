@@ -2,6 +2,7 @@ package com.mts.backend.application.staff.query_handler;
 
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.staff.EmployeeEntity;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -34,7 +35,7 @@ public class GetAllEmployeeQueryHandler implements IQueryHandler<DefaultEmployee
                     .phone(emp.getPhone().getValue())
                     .gender(emp.getGender().toString())
                     .position(emp.getPosition().getValue())
-                    .accountId(emp.getAccountEntity().getId())
+                    .accountId(emp.getAccount().getId())
                     .build();
         });
 

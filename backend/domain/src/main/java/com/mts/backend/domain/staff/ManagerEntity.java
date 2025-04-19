@@ -1,20 +1,22 @@
 package com.mts.backend.domain.staff;
 
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
+import com.mts.backend.domain.common.provider.IdentifiableProvider;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.persistence.BaseEntity;
+import com.mts.backend.domain.staff.identifier.ManagerId;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.validator.constraints.Range;
 
 import java.util.Objects;
 
-@Getter
-@Setter
+
 @Entity
 @Table(name = "manager", schema = "milk_tea_shop_prod", uniqueConstraints = {
         @UniqueConstraint(name = "account_id", columnNames = {"account_id"})
@@ -23,11 +25,12 @@ import java.util.Objects;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-@Builder
 public class ManagerEntity extends BaseEntity<Long> {
-    public ManagerEntity(Long id, AccountEntity accountEntity, @NotNull LastName lastName, @NotNull FirstName firstName, Gender gender, @NotNull PhoneNumber phone, @NotNull Email email) {
+
+
+    public ManagerEntity(@NotNull @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX) Long id, @NotNull Account account, @NotNull @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
         this.id = id;
-        this.accountEntity = accountEntity;
+        this.account = account;
         this.lastName = lastName;
         this.firstName = firstName;
         this.gender = gender;
@@ -36,6 +39,10 @@ public class ManagerEntity extends BaseEntity<Long> {
     }
 
     public ManagerEntity() {
+    }
+
+    public static ManagerEntityBuilder builder() {
+        return new ManagerEntityBuilder();
     }
 
     @Override
@@ -58,24 +65,36 @@ public class ManagerEntity extends BaseEntity<Long> {
     @Comment("Mã quản lý")
     @Column(name = "manager_id", columnDefinition = "int UNSIGNED")
     @NotNull
+    @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX)
     private Long id;
+
+    public boolean setId(@NotNull ManagerId id) {
+        if (ManagerId.of(this.id).equals(id)) {
+            return false;
+        }
+        this.id = id.getValue();
+        return true;
+    }
 
     @OneToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
-    private AccountEntity accountEntity;
+    @NotNull
+    private Account account;
 
     @Comment("Họ")
     @Column(name = "last_name", nullable = false, length = 70)
     @NotNull
-    @Convert(converter = LastName.LastNameConverter.class)
-    private LastName lastName;
+    @Size(max = 70, message = "Họ không được vượt quá 70 ký tự")
+    @NotBlank(message = "Họ không được để trống")
+    private String lastName;
 
     @Comment("Tên")
     @Column(name = "first_name", nullable = false, length = 70)
     @NotNull
-    @Convert(converter = com.mts.backend.domain.common.value_object.FirstName.FirstNameConverter.class)
-    private FirstName firstName;
+    @Size(max = 70, message = "Tên không được vượt quá 70 ký tự")
+    @NotBlank(message = "Tên không được để trống")
+    private String firstName;
 
     @Comment("Giới tính")
     @Column(name = "gender")
@@ -85,52 +104,69 @@ public class ManagerEntity extends BaseEntity<Long> {
     @Comment("Số điện thoại")
     @Column(name = "phone", nullable = false, length = 15)
     @NotNull
-    @Convert(converter = PhoneNumber.PhoneNumberConverter.class)
-    private PhoneNumber phone;
+    @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @jakarta.validation.constraints.Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ")
+    private String phone;
 
     @Comment("Email")
     @Column(name = "email", nullable = false, length = 100)
     @NotNull
-    @Convert(converter = Email.EmailConverter.class)
-    private Email email;
-    
-    public boolean changeFirstName(FirstName firstName) {
-        Objects.requireNonNull(firstName, "First name is required");
-        if (this.firstName.equals(firstName)) {
+    @Size(max = 100, message = "Email không được vượt quá 100 ký tự")
+    @NotBlank(message = "Email không được để trống")
+    @jakarta.validation.constraints.Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ")
+    private String email;
+
+    public boolean setFirstName(@NotNull FirstName firstName) {
+        if (FirstName.of(this.firstName).equals(firstName)) {
             return false;
         }
-        this.firstName = firstName;
+        this.firstName = firstName.getValue();
         return true;
     }
 
-    public boolean changeLastName(LastName lastName) {
+    public FirstName getFirstName() {
+        return FirstName.of(this.firstName);
+    }
+
+    public boolean setLastName(@NotNull LastName lastName) {
         Objects.requireNonNull(lastName, "Last name is required");
-        if (this.lastName.equals(lastName)) {
+        if (LastName.of(this.lastName).equals(lastName)) {
             return false;
         }
-        this.lastName = lastName;
+        this.lastName = lastName.getValue();
         return true;
     }
 
-    public boolean changeEmail(Email email) {
-        Objects.requireNonNull(email, "Email is required");
-        if (this.email.equals(email)) {
+    public LastName getLastName() {
+        return LastName.of(this.lastName);
+    }
+
+    public boolean setEmail(@NotNull Email email) {
+        if (Email.of(this.email).equals(email)) {
             return false;
         }
-        this.email = email;
+        this.email = email.getValue();
         return true;
     }
 
-    public boolean changePhoneNumber(PhoneNumber phoneNumber) {
-        Objects.requireNonNull(phoneNumber, "Phone number is required");
-        if (this.phone.equals(phoneNumber)) {
+    public Email getEmail() {
+        return Email.of(this.email);
+    }
+
+    public boolean setPhone(@NotNull PhoneNumber phoneNumber) {
+        if (PhoneNumber.of(this.phone).equals(phoneNumber)) {
             return false;
         }
-        this.phone = phoneNumber;
+        this.phone = phoneNumber.getValue();
         return true;
     }
 
-    public boolean changeGender(Gender gender) {
+    public PhoneNumber getPhone() {
+        return PhoneNumber.of(this.phone);
+    }
+
+    public boolean setGender(@NotNull Gender gender) {
         Objects.requireNonNull(gender, "gender is required");
         if (this.gender.equals(gender)) {
             return false;
@@ -139,6 +175,80 @@ public class ManagerEntity extends BaseEntity<Long> {
         this.gender = gender;
         return true;
     }
-    
 
+
+    public @NotNull @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX) Long getId() {
+        return this.id;
+    }
+
+    public Gender getGender() {
+        return this.gender;
+    }
+
+    public static class ManagerEntityBuilder {
+        private @NotNull
+        @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX) Long id;
+        private @NotNull Account account;
+        private @NotNull
+        @Size(max = 70, message = "Họ không được vượt quá 70 ký tự")
+        @NotBlank(message = "Họ không được để trống") String lastName;
+        private @NotNull
+        @Size(max = 70, message = "Tên không được vượt quá 70 ký tự")
+        @NotBlank(message = "Tên không được để trống") String firstName;
+        private Gender gender;
+        private @NotNull
+        @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự")
+        @NotBlank(message = "Số điện thoại không được để trống")
+        @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone;
+        private @NotNull
+        @Size(max = 100, message = "Email không được vượt quá 100 ký tự")
+        @NotBlank(message = "Email không được để trống")
+        @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email;
+
+        ManagerEntityBuilder() {
+        }
+
+        public ManagerEntityBuilder id(@NotNull @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX) Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public ManagerEntityBuilder accountEntity(@NotNull Account account) {
+            this.account = account;
+            return this;
+        }
+
+        public ManagerEntityBuilder lastName(@NotNull @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public ManagerEntityBuilder firstName(@NotNull FirstName firstName) {
+            this.firstName = firstName.getValue();
+            return this;
+        }
+
+        public ManagerEntityBuilder gender(Gender gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        public ManagerEntityBuilder phone(@NotNull PhoneNumber phone) {
+            this.phone = phone.getValue();
+            return this;
+        }
+
+        public ManagerEntityBuilder email(Email email) {
+            this.email = email.getValue();
+            return this;
+        }
+
+        public ManagerEntity build() {
+            return new ManagerEntity(this.id, this.account, this.lastName, this.firstName, this.gender, this.phone, this.email);
+        }
+
+        public String toString() {
+            return "ManagerEntity.ManagerEntityBuilder(id=" + this.id + ", account=" + this.account + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
+        }
+    }
 }

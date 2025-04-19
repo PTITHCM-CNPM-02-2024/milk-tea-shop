@@ -1,7 +1,7 @@
 package com.mts.backend.application.payment.handler;
 
 import com.mts.backend.application.payment.command.UpdatePaymentMethodCommand;
-import com.mts.backend.domain.payment.PaymentMethodEntity;
+import com.mts.backend.domain.payment.PaymentMethod;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
 import com.mts.backend.domain.payment.value_object.PaymentMethodName;
@@ -48,17 +48,17 @@ public class UpdatePaymentMethodCommandHandler implements ICommandHandler<Update
         
         PaymentMethodName name = command.getName();
         
-        if (paymentMethod.changeName(name)) {
+        if (paymentMethod.setName(name)) {
             verifyUniqueName(command.getPaymentMethodId(), name);
         }
         
-        paymentMethod.setPaymentDescription(command.getDescription().orElse(null));
+        paymentMethod.setDescription(command.getDescription().orElse(null));
         
         
         return CommandResult.success(paymentMethod.getId());
     }
     
-    private PaymentMethodEntity mustExistPaymentMethod(PaymentMethodId id){
+    private PaymentMethod mustExistPaymentMethod(PaymentMethodId id){
         Objects.requireNonNull(id, "PaymentMethodId is required");
         
         return paymentMethodRepository.findById(id.getValue())

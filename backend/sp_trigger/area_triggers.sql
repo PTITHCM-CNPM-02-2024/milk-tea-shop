@@ -1,4 +1,4 @@
--- 11. Area
+-- 11. AreaEntity
 
 DELIMITER //
 

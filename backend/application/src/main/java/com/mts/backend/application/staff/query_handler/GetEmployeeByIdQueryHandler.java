@@ -35,7 +35,7 @@ public class GetEmployeeByIdQueryHandler implements IQueryHandler<EmployeeByIdQu
                 .phone(employee.getPhone().getValue())
                 .gender(employee.getGender().toString())
                 .position(employee.getPosition().getValue())
-                .accountId(employee.getAccountEntity().getId())
+                .accountId(employee.getAccount().getId())
                 .build();
         
         return CommandResult.success(response);

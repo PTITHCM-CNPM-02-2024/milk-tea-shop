@@ -56,7 +56,7 @@ BEGIN
            a.name AS area_name
     FROM OrderTable ot
     JOIN ServiceTable t ON ot.table_id = t.table_id
-    JOIN Area a ON t.area_id = a.area_id
+    JOIN AreaEntity a ON t.area_id = a.area_id
     WHERE ot.order_id = p_order_id;
 END //
 

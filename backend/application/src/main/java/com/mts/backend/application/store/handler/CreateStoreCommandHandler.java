@@ -1,7 +1,7 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.CreateStoreCommand;
-import com.mts.backend.domain.store.StoreEntity;
+import com.mts.backend.domain.store.Store;
 import com.mts.backend.domain.store.identifier.StoreId;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -32,7 +32,7 @@ public class CreateStoreCommandHandler implements ICommandHandler<CreateStoreCom
             throw new DomainException("Thông tin cửa hàng là duy nhất không thể tạo thêm");
         }
         
-        var store = StoreEntity.builder()
+        var store = Store.builder()
                 .id(StoreId.create().getValue())
                 .name(command.getName())
                 .address(command.getAddress())

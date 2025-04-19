@@ -24,7 +24,9 @@ public class DeleteCouponByIdCommandHandler implements ICommandHandler<DeleteCou
         var coupon = jpaCouponRepository.findById(command.getCouponId().getValue())
             .orElseThrow(() -> new NotFoundException("Coupon not found"));
 
-        coupon.getDiscount().setCouponEntity(null);
+        if (coupon.getDiscount().isPresent()){
+            coupon.getDiscount().get().setCoupon(null);
+        }
         
         jpaCouponRepository.delete(coupon);
 

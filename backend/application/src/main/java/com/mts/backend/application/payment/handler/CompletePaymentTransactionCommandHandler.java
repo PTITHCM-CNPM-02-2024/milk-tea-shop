@@ -9,7 +9,7 @@ import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -47,7 +47,7 @@ public class CompletePaymentTransactionCommandHandler implements ICommandHandler
         Objects.requireNonNull(command, "PaymentTransactionCommand is required");
         IPaymentProvider paymentProvider = paymentProviderFactory.getPaymentProvider(command.getPaymentMethodId());
         
-        PaymentEntity payment = mustExistPayment(command.getPaymentId());
+        Payment payment = mustExistPayment(command.getPaymentId());
         OrderEntity order = mustExistOrder(OrderId.of(payment.getOrderEntity().getId()));
         
         PaymentResult paymentResult = paymentProvider.dispatch(payment, order, command);
@@ -62,7 +62,7 @@ public class CompletePaymentTransactionCommandHandler implements ICommandHandler
         return CommandResult.success(result.getData());
         
     }
-    private PaymentEntity mustExistPayment(PaymentId id) {
+    private Payment mustExistPayment(PaymentId id) {
         return paymentRepository.findById(id.getValue()).orElseThrow(() -> new NotFoundException("Không tìm thấy thanh toán"));
     }
 

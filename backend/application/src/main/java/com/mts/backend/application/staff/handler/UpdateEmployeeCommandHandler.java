@@ -29,22 +29,29 @@ public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmplo
     public CommandResult handle(UpdateEmployeeCommand command) {
         Objects.requireNonNull(command, "Update employee command is required");
         
-        EmployeeEntity employee = mustExistEmployee(command.getId());
         
-        if (employee.changeEmail(command.getEmail())) {
-            verifyUniqueEmail(command.getId(), command.getEmail());
+        try{
+            EmployeeEntity employee = mustExistEmployee(command.getId());
+            employee.setEmail(command.getEmail());
+            employee.setPhone(command.getPhone());
+            employee.setPosition(command.getPosition());
+            employee.setFirstName(command.getFirstName());
+            employee.setLastName(command.getLastName());
+            employee.setGender(command.getGender());
+            return CommandResult.success(employee.getId());
+        }catch (Exception e) {
+            if (e.getMessage().contains("Duplicate entry") &&
+                e.getMessage().contains("uk_employee_email")) {
+                throw new DuplicateException("Email đã tồn tại");
+            }
+            if (e.getMessage().contains("Duplicate entry") &&
+                e.getMessage().contains("uk_employee_phone")) {
+                throw new DuplicateException("Số điện thoại đã tồn tại");
+            }
+            throw new NotFoundException("Đã có lỗi xảy ra khi cập nhật nhân viên", e);
         }
-        if (employee.changePhoneNumber(command.getPhone())) {
-            verifyUniquePhoneNumber(command.getId(), command.getPhone());
-        }
-        
-        employee.changePosition(command.getPosition());
-        employee.changeFirstName(command.getFirstName());
-        employee.changeLastName(command.getLastName());
-        employee.changeGender(command.getGender());
         
         
-        return CommandResult.success(employee.getId());
     }
     
     private EmployeeEntity mustExistEmployee(EmployeeId employeeId) {
@@ -53,18 +60,5 @@ public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmplo
                 .orElseThrow(() -> new NotFoundException("Nhân viên không tồn tại"));
     }
     
-    private void verifyUniqueEmail(EmployeeId id,  Email email) {
-        Objects.requireNonNull(email, "Email is required");
-        if (employeeRepository.existsByIdNotAndEmail(id.getValue(), email)) {
-            throw new DuplicateException("Email đã tồn tại");
-        }
-    }
-    
-    private void verifyUniquePhoneNumber(EmployeeId id,  PhoneNumber phone) {
-        Objects.requireNonNull(phone, "Phone number is required");
-        if (employeeRepository.existsByIdNotAndPhone(id.getValue(), phone)) {
-            throw new DuplicateException("Số điện thoại đã tồn tại");
-        }
-    }
 
 }

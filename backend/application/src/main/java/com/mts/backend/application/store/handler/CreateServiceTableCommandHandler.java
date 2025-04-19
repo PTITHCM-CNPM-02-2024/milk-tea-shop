@@ -1,18 +1,18 @@
 package com.mts.backend.application.store.handler;
 
 import com.mts.backend.application.store.command.CreateServiceTableCommand;
-import com.mts.backend.domain.store.AreaEntity;
-import com.mts.backend.domain.store.ServiceTableEntity;
+import com.mts.backend.domain.store.Area;
+import com.mts.backend.domain.store.ServiceTable;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.identifier.ServiceTableId;
 import com.mts.backend.domain.store.jpa.JpaAreaRepository;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.domain.store.value_object.TableNumber;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
-import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -22,7 +22,8 @@ import java.util.Optional;
 public class CreateServiceTableCommandHandler implements ICommandHandler<CreateServiceTableCommand, CommandResult> {
     private final JpaAreaRepository jpaAreaRepository;
     private final JpaServiceTableRepository jpaServiceTableRepository;
-    public CreateServiceTableCommandHandler(JpaAreaRepository jpaAreaRepository, JpaServiceTableRepository jpaServiceTableRepository){
+
+    public CreateServiceTableCommandHandler(JpaAreaRepository jpaAreaRepository, JpaServiceTableRepository jpaServiceTableRepository) {
         this.jpaAreaRepository = jpaAreaRepository;
         this.jpaServiceTableRepository = jpaServiceTableRepository;
     }
@@ -35,51 +36,34 @@ public class CreateServiceTableCommandHandler implements ICommandHandler<CreateS
     @Transactional
     public CommandResult handle(CreateServiceTableCommand command) {
         Objects.requireNonNull(command, "Create service table command is required");
-        Optional<AreaEntity> area = mustExitTableIfSpecificAndNonMaxTable(command.getAreaId().orElse(null));
-        
+        Optional<Area> area = command.getAreaId()
+                .map(AreaId::getValue)
+                .flatMap(jpaAreaRepository::findById);
 
-        TableNumber name = verifyUniqueName(command.getName());
+        var isActive = area.map(Area::getActive).orElse(true);
 
-        var isActive = area.map(AreaEntity::getActive).orElse(true);
-        var serviceTable = ServiceTableEntity.builder()
+        var serviceTable = ServiceTable.builder()
                 .id(ServiceTableId.create().getValue())
-                .tableNumber(name)
-                .areaEntity(area.orElse(null))
+                .tableNumber(command.getName())
                 .active(isActive)
                 .build();
-
-        var savedServiceTable = jpaServiceTableRepository.save(serviceTable);
-
-        return CommandResult.success(savedServiceTable.getId());
-    }
-
-    @Transactional
-    protected Optional<AreaEntity> mustExitTableIfSpecificAndNonMaxTable(AreaId areaId) {
-        if (areaId == null) {
-            return Optional.empty();
-        }
-
-        var area = jpaAreaRepository.findById(areaId.getValue()).orElseThrow(() -> new NotFoundException("Khu vực" + areaId + 
-                " không tồn tại"));
         
+        serviceTable.setArea(area.orElse(null));
+        try {
 
-        var count = jpaServiceTableRepository.countByAreaEntity_Id(areaId.getValue());
+            var savedServiceTable = jpaServiceTableRepository.save(serviceTable);
 
-        if (area.getMaxTable().isPresent() && count >= area.getMaxTable().get().getValue()) {
-            throw new NotFoundException("Khu vực đã đạt số bàn tối đa");
+            return CommandResult.success(savedServiceTable.getId());
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("uk_service_table_name")) {
+                throw new DuplicateException("Tên bàn đã tồn tại");
+            }
+            if(e.getMessage().contains("fk_service_table_area")){
+                throw new DomainException("Khu vực không tồn tại");
+            }
+            throw new DomainException("Lỗi không xác định khi tạo bàn", e);
         }
-
-        return Optional.of(area);
     }
-    
-    @Transactional
-    protected TableNumber verifyUniqueName(TableNumber number) {
-        Objects.requireNonNull(number, "TableNumber is required");
 
-        if (jpaServiceTableRepository.existsByTableNumber(number)) {
-            throw new DuplicateException("Tên bàn đã tồn tại");
-        }
 
-        return number;
-    }
 }

@@ -32,8 +32,8 @@ public class GetAllPaymentMethodCommandHandler implements IQueryHandler<DefaultP
         List<PaymentMethodDetailResponse> paymentMethodDetailRespons = paymentMethods.stream()
                 .map(paymentMethod -> PaymentMethodDetailResponse.builder()
                         .id(paymentMethod.getId())
-                        .name(paymentMethod.getPaymentName().getValue())
-                        .description(paymentMethod.getPaymentDescription().orElse(null))
+                        .name(paymentMethod.getName().getValue())
+                        .description(paymentMethod.getDescription().orElse(null))
                         .build())
                 .toList();
         

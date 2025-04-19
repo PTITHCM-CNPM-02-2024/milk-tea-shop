@@ -44,7 +44,7 @@ public class RoleController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createRole(@Parameter(description = "Thông tin vai trò", required = true) @RequestBody CreateRoleRequest request) {
         var command = CreateRoleCommand.builder()
-                .name(RoleName.builder().value(request.getName()).build())
+                .name(RoleName.of(request.getName()))
                 .description(request.getDescription())
                 .build();
         var result = roleCommandBus.dispatch(command);
@@ -74,7 +74,7 @@ public class RoleController implements IController {
     public ResponseEntity<?> updateRole(@Parameter(description = "ID vai trò", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateRoleRequest request) {
         var command = UpdateRoleCommand.builder()
                 .id(RoleId.of(id))
-                .roleName(RoleName.builder().value(request.getName()).build())
+                .roleName(RoleName.of(request.getName()))
                 .description(request.getDescription())
                 .build();
         var result = roleCommandBus.dispatch(command);

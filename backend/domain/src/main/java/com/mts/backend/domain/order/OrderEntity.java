@@ -1,18 +1,18 @@
 package com.mts.backend.domain.order;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.order.identifier.OrderDiscountId;
 import com.mts.backend.domain.order.identifier.OrderProductId;
 import com.mts.backend.domain.order.identifier.OrderTableId;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.domain.product.ProductPriceEntity;
 import com.mts.backend.domain.product.identifier.ProductPriceId;
-import com.mts.backend.domain.promotion.DiscountEntity;
+import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.staff.EmployeeEntity;
-import com.mts.backend.domain.store.ServiceTableEntity;
+import com.mts.backend.domain.store.ServiceTable;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -20,10 +20,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.type.SqlTypes;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -50,7 +47,7 @@ import java.util.Set;
                         @NamedAttributeNode("orderDiscounts"),
                         @NamedAttributeNode("orderProducts"),
                         @NamedAttributeNode("orderTables"),
-                        @NamedAttributeNode("customerEntity"),
+                        @NamedAttributeNode("customer"),
                         @NamedAttributeNode("employeeEntity"),
                         @NamedAttributeNode("payments"),
                 }
@@ -58,7 +55,7 @@ import java.util.Set;
         @NamedEntityGraph(name = "graph.order.fetchEmpCus",
                 attributeNodes = {
                         @NamedAttributeNode("employeeEntity"),
-                        @NamedAttributeNode("customerEntity")
+                        @NamedAttributeNode("customer")
                 }
         )
         }
@@ -77,7 +74,7 @@ public class OrderEntity extends BaseEntity<Long> {
     @Comment("Mã khách hàng")
     @JoinColumn(name = "customer_id")
     @Nullable
-    private CustomerEntity customerEntity;
+    private Customer customer;
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã nhân viên")
     @JoinColumn(name = "employee_id", nullable = false)
@@ -129,15 +126,15 @@ public class OrderEntity extends BaseEntity<Long> {
     @OneToMany(mappedBy = "orderEntity", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
     @Builder.Default
-    private Set<PaymentEntity> payments = new LinkedHashSet<>();
+    private Set<Payment> payments = new LinkedHashSet<>();
 
-    public Optional<CustomerEntity> getCustomerEntity() {
-        return Optional.ofNullable(customerEntity);
+    public Optional<Customer> getCustomer() {
+        return Optional.ofNullable(customer);
     }
 
-    public void setCustomerEntity(CustomerEntity customerEntity) {
+    public void setCustomer(Customer customer) {
         orderCanBeModified();
-        this.customerEntity = customerEntity;
+        this.customer = customer;
         recalculateTotalAmount();
     }
 
@@ -166,7 +163,7 @@ public class OrderEntity extends BaseEntity<Long> {
         this.point = point;
     }
 
-    public OrderDiscountEntity addDiscount(DiscountEntity discount) {
+    public OrderDiscountEntity addDiscount(Discount discount) {
         orderCanBeModified();
         var existingOrderDiscount = findOrderDiscount(discount);
 
@@ -186,7 +183,7 @@ public class OrderEntity extends BaseEntity<Long> {
         return orderDiscount;
     }
 
-    public boolean removeDiscount(DiscountEntity discount) {
+    public boolean removeDiscount(Discount discount) {
         orderCanBeModified();
         var existingOrderDiscount = findOrderDiscount(discount);
 
@@ -263,7 +260,7 @@ public class OrderEntity extends BaseEntity<Long> {
         return false;
     }
 
-    public OrderTableEntity addOrderTable(ServiceTableEntity orderTable) {
+    public OrderTableEntity addOrderTable(ServiceTable orderTable) {
         orderCanBeModified();
         var existingOrderTable = findOrderTable(orderTable);
 
@@ -324,7 +321,7 @@ public class OrderEntity extends BaseEntity<Long> {
         return false;
     }
 
-    private Optional<OrderTableEntity> findOrderTable(ServiceTableEntity orderTable) {
+    private Optional<OrderTableEntity> findOrderTable(ServiceTable orderTable) {
         return orderTables.stream()
                 .filter(orderTableEntity -> orderTableEntity.getTable().getId().equals(orderTable.getId()))
                 .findFirst();
@@ -337,7 +334,7 @@ public class OrderEntity extends BaseEntity<Long> {
                 .findFirst();
     }
 
-    private Optional<OrderDiscountEntity> findOrderDiscount(DiscountEntity discount) {
+    private Optional<OrderDiscountEntity> findOrderDiscount(Discount discount) {
         return orderDiscounts.stream()
                 .filter(orderDiscountEntity -> orderDiscountEntity.getDiscount().getId().equals(discount.getId()))
                 .findFirst();
@@ -381,8 +378,8 @@ public class OrderEntity extends BaseEntity<Long> {
         }
 
         // Apply membership discount based on original total if customer exists
-        if (getCustomerEntity().isPresent()) {
-            var discountMember = getCustomerEntity().get().getMembershipTypeEntity().getMemberDiscountValue();
+        if (getCustomer().isPresent()) {
+            var discountMember = getCustomer().get().getMembershipTypeEntity().getMemberDiscountValue();
 
             Money memberDiscountAmount = switch (discountMember.getUnit()) {
                 case PERCENTAGE -> {

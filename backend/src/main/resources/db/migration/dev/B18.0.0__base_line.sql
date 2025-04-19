@@ -7,7 +7,7 @@ create table area
     is_active   tinyint(1) default 1                 null comment 'Trạng thái hoạt động (1: Có, 0: Không)',
     created_at  datetime   default CURRENT_TIMESTAMP null,
     updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key area_pk (name)
+    constraint uk_area_name unique (name)
 );
 
 create table category
@@ -17,7 +17,7 @@ create table category
     description        varchar(1000)                      null comment 'Mô tả danh mục',
     created_at         datetime default CURRENT_TIMESTAMP null,
     updated_at         datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key category_pk (name)
+    constraint uk_category_name unique (name)
 );
 
 create table coupon
@@ -27,7 +27,7 @@ create table coupon
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key coupon_uk (coupon)
+    constraint uk_coupon_coupon unique (coupon)
 );
 
 create table discount
@@ -49,9 +49,9 @@ create table discount
     is_active                tinyint(1) default 1                 not null comment 'Trạng thái kích hoạt: 1 - đang hoạt động, 0 - không hoạt động',
     created_at               datetime   default CURRENT_TIMESTAMP null comment 'Thời điểm tạo chương trình giảm giá',
     updated_at               datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời điểm cập nhật gần nhất',
-    unique key discount_pk (coupon_id),
-    unique key discount_pk_2 (name),
-    foreign key discount_ibfk_2 (coupon_id) references coupon (coupon_id)
+    constraint uk_discount_coupon_id unique (coupon_id),
+    constraint uk_discount_name unique (name),
+    constraint fk_discount_coupon foreign key (coupon_id) references coupon (coupon_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -68,8 +68,8 @@ create table membership_type
     is_active          tinyint(1) default 1                 null comment 'Trạng thái (1: Hoạt động, 0: Không hoạt động)',
     created_at         datetime   default CURRENT_TIMESTAMP null,
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key membership_type_pk (type),
-    unique key membership_type_pk_2 (required_point)
+    constraint uk_membership_type_type unique (type),
+    constraint uk_membership_type_required_point unique (required_point)
 );
 
 create table payment_method
@@ -79,7 +79,7 @@ create table payment_method
     payment_description varchar(255)                       null comment 'Mô tả phương thức thanh toán',
     created_at          datetime default CURRENT_TIMESTAMP null,
     updated_at          datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key payment_method_pk (payment_name)
+    constraint uk_payment_method_payment_name unique (payment_name)
 );
 
 create table product
@@ -93,8 +93,8 @@ create table product
     image_path   varchar(1000)                        null comment 'Đường dẫn mô tả hình ảnh',
     created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    index product_category_idx (category_id),
-    foreign key product_ibfk_1 (category_id) references category (category_id)
+    index idx_product_category_id (category_id),
+    constraint fk_product_category foreign key (category_id) references category (category_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 );
@@ -107,7 +107,7 @@ create table role
     CHECK (LENGTH(TRIM(name)) > 0 AND LENGTH(name) <= 50),
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key role_pk (name)
+    constraint uk_role_name unique (name)
 );
 
 create table account
@@ -122,9 +122,9 @@ create table account
     token_version int unsigned default '0'               not null comment 'Kiểm tra tính hợp lệ của token',
     created_at    datetime     default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at    datetime     default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    unique key account_username_uk (username),
-    index account_role_idx (role_id),
-    foreign key account_ibfk_1 (role_id) references role (role_id)
+    constraint uk_account_username unique (username),
+    index idx_account_role_id (role_id),
+    constraint fk_account_role foreign key (role_id) references role (role_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -142,14 +142,14 @@ create table customer
     gender             enum ('MALE', 'FEMALE', 'OTHER')    null comment 'Giới tính',
     created_at         timestamp default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at         timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Ngày cập nhật',
-    unique key customer_email_uk (email),
-    unique key customer_phone_uk (phone),
-    index customer_account_idx (account_id),
-    index customer_membership_idx (membership_type_id),
-    foreign key customer_ibfk_1 (membership_type_id) references membership_type (membership_type_id)
+    constraint uk_customer_email unique (email),
+    constraint uk_customer_phone unique (phone),
+    index idx_customer_account_id (account_id),
+    index idx_customer_membership_type_id (membership_type_id),
+    constraint fk_customer_membership_type foreign key (membership_type_id) references membership_type (membership_type_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
-    foreign key customer_ibfk_2 (account_id) references account (account_id)
+    constraint fk_customer_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 );
@@ -157,7 +157,7 @@ create table customer
 create table employee
 (
     employee_id int unsigned auto_increment comment 'Mã nhân viên' primary key,
-    account_id  int unsigned                       null comment 'Mã tài khoản',
+    account_id  int unsigned                       not null comment 'Mã tài khoản',
     position    varchar(50)                        not null comment 'Chức vụ',
     last_name   varchar(70)                        not null comment 'Họ',
     first_name  varchar(70)                        not null comment 'Tên',
@@ -166,8 +166,10 @@ create table employee
     email       varchar(100)                       not null comment 'Email',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key employee_account_uk (account_id),
-    foreign key employee_ibfk_1 (account_id) references account (account_id)
+    constraint uk_employee_account_id unique (account_id),
+    constraint uk_employee_email unique (email),
+    constraint uk_employee_phone unique (phone),
+    constraint fk_employee_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -175,7 +177,7 @@ create table employee
 create table manager
 (
     manager_id int unsigned auto_increment comment 'Mã quản lý' primary key,
-    account_id int unsigned                       null comment 'Mã tài khoản',
+    account_id int unsigned                       not null comment 'Mã tài khoản',
     last_name  varchar(70)                        not null comment 'Họ',
     first_name varchar(70)                        not null comment 'Tên',
     gender     enum ('MALE', 'FEMALE', 'OTHER')   null comment 'Giới tính',
@@ -183,8 +185,10 @@ create table manager
     email      varchar(100)                       not null comment 'Email',
     created_at datetime default CURRENT_TIMESTAMP null,
     updated_at datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key manager_account_uk (account_id),
-    foreign key manager_ibfk_1 (account_id) references account (account_id)
+    constraint uk_manager_account_id unique (account_id),
+    constraint uk_manager_email unique (email),
+    constraint uk_manager_phone unique (phone),
+    constraint fk_manager_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -202,11 +206,11 @@ create table manager
     point          int unsigned default '1'                      null,
     created_at     datetime     default CURRENT_TIMESTAMP        null,
     updated_at     datetime     default CURRENT_TIMESTAMP        null on update CURRENT_TIMESTAMP,
-    index order_employee_idx (employee_id),
-    foreign key order_ibfk_1 (customer_id) references customer (customer_id)
+    index idx_order_employee_id (employee_id),
+    constraint fk_order_customer foreign key (customer_id) references customer (customer_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    foreign key order_ibfk_2 (employee_id) references employee (employee_id)
+    constraint fk_order_employee foreign key (employee_id) references employee (employee_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
@@ -219,11 +223,11 @@ create table order_discount
     discount_amount   decimal(11, 3)                     not null comment 'Số tiền giảm giá được áp dụng',
     created_at        datetime default CURRENT_TIMESTAMP null,
     updated_at        datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key order_discount_pk (order_id, discount_id),
-    foreign key order_discount_ibfk_1 (order_id) references `order` (order_id)
+    constraint uk_order_discount_order_discount unique (order_id, discount_id),
+    constraint fk_order_discount_order foreign key (order_id) references `order` (order_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    foreign key order_discount_ibfk_2 (discount_id) references discount (discount_id)
+    constraint fk_order_discount_discount foreign key (discount_id) references discount (discount_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
@@ -239,11 +243,11 @@ create table payment
     payment_time      timestamp      default CURRENT_TIMESTAMP null comment 'Thời gian thanh toán',
     created_at        datetime       default CURRENT_TIMESTAMP null,
     updated_at        datetime       default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    index payment_method_idx (payment_method_id),
-    foreign key payment_ibfk_1 (order_id) references `order` (order_id)
+    index idx_payment_payment_method_id (payment_method_id),
+    constraint fk_payment_order foreign key (order_id) references `order` (order_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    foreign key payment_ibfk_2 (payment_method_id) references payment_method (payment_method_id)
+    constraint fk_payment_payment_method foreign key (payment_method_id) references payment_method (payment_method_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -256,9 +260,9 @@ create table service_table
     is_active    tinyint(1) default 1                 null comment 'Bàn có sẵn (1: Có, 0: Không)',
     created_at   datetime   default CURRENT_TIMESTAMP null,
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key service_table_pk (area_id, table_number),
-    index service_table_area_idx (area_id),
-    foreign key service_table_ibfk_1 (area_id) references area (area_id)
+    constraint uk_service_table_area_table_number unique (area_id, table_number),
+    index idx_service_table_area_id (area_id),
+    constraint fk_service_table_area foreign key (area_id) references area (area_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 );
@@ -272,13 +276,13 @@ create table order_table
     check_out      datetime                           null comment 'Thời gian rời bàn',
     created_at     datetime default CURRENT_TIMESTAMP null,
     updated_at     datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key order_table_pk (order_id, table_id),
-    index order_table_order_idx (order_id),
-    index order_table_table_idx (table_id),
-    foreign key order_table_ibfk_1 (order_id) references `order` (order_id)
+    constraint uk_order_table_order_table unique (order_id, table_id),
+    index idx_order_table_order_id (order_id),
+    index idx_order_table_table_id (table_id),
+    constraint fk_order_table_order foreign key (order_id) references `order` (order_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    foreign key order_table_ibfk_2 (table_id) references service_table (table_id)
+    constraint fk_order_table_service_table foreign key (table_id) references service_table (table_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
@@ -306,8 +310,8 @@ create table unit_of_measure
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key unit_of_measure_pk (name),
-    unique key unit_of_measure_pk_2 (symbol)
+    constraint uk_unit_of_measure_name unique (name),
+    constraint uk_unit_of_measure_symbol unique (symbol)
 );
 
 create table product_size
@@ -319,8 +323,8 @@ create table product_size
     description varchar(1000)                      null comment 'Mô tả',
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key product_size_pk (unit_id, name),
-    foreign key product_size_ibfk_1 (unit_id) references unit_of_measure (unit_id)
+    constraint uk_product_size_unit_name unique (unit_id, name),
+    constraint fk_product_size_unit_of_measure foreign key (unit_id) references unit_of_measure (unit_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -333,13 +337,13 @@ create table product_price
     price            decimal(11, 3)                     not null comment 'Giá',
     created_at       datetime default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
-    unique key product_price_pk (product_id, size_id),
-    index product_price_product_idx (product_id),
-    index product_price_size_idx (size_id),
-    foreign key product_price_ibfk_1 (product_id) references product (product_id)
+    constraint uk_product_price_product_size unique (product_id, size_id),
+    index idx_product_price_product_id (product_id),
+    index idx_product_price_size_id (size_id),
+    constraint fk_product_price_product foreign key (product_id) references product (product_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    foreign key product_price_ibfk_2 (size_id) references product_size (size_id)
+    constraint fk_product_price_product_size foreign key (size_id) references product_size (size_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
@@ -353,13 +357,13 @@ create table order_product
     `option`         varchar(500)                       null comment 'Tùy chọn cho việc lựa chọn lượng đá, đường ',
     created_at       datetime default CURRENT_TIMESTAMP null,
     updated_at       datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    unique key order_product_pk (order_id, product_price_id),
-    index order_product_order_idx (order_id),
-    index order_product_price_idx (product_price_id),
-    foreign key order_product_ibfk_1 (order_id) references `order` (order_id)
+    constraint uk_order_product_order_product_price unique (order_id, product_price_id),
+    index idx_order_product_order_id (order_id),
+    index idx_order_product_product_price_id (product_price_id),
+    constraint fk_order_product_order foreign key (order_id) references `order` (order_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    foreign key order_product_ibfk_2 (product_price_id) references product_price (product_price_id)
+    constraint fk_order_product_product_price foreign key (product_price_id) references product_price (product_price_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );

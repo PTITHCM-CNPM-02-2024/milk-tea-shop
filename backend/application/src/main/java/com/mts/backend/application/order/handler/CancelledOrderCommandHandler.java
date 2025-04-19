@@ -5,7 +5,7 @@ import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
-import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -58,7 +58,7 @@ public class CancelledOrderCommandHandler implements ICommandHandler<CancelledOr
                 .orElseThrow(() -> new NotFoundException("Order not found"));
     }
     
-    private List<PaymentEntity> getAllPayment(OrderId id){
+    private List<Payment> getAllPayment(OrderId id){
         Objects.requireNonNull(id, "Order id is required");
         
         var payments =

@@ -6,7 +6,7 @@ import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.FirstName;
 import com.mts.backend.domain.common.value_object.LastName;
 import com.mts.backend.domain.common.value_object.PhoneNumber;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -30,7 +30,7 @@ public class GetCustomerByPhoneQueryHandler implements IQueryHandler<CustomerByP
     public CommandResult handle(CustomerByPhoneQuery query) {
         Objects.requireNonNull(query, "Get customer by phone query is required");
         
-        CustomerEntity customer = mustExistCustomer(query.getPhone());
+        Customer customer = mustExistCustomer(query.getPhone());
 
         CustomerDetailResponse response = CustomerDetailResponse.builder()
                 .id(customer.getId())
@@ -40,13 +40,13 @@ public class GetCustomerByPhoneQueryHandler implements IQueryHandler<CustomerByP
                 .phone(customer.getPhone().getValue())
                 .membershipId(customer.getMembershipTypeEntity().getId())
                 .rewardPoint(customer.getCurrentPoints().getValue())
-                .accountId(customer.getAccountEntity().map(a -> a.getId()).orElse(null))
+                .accountId(customer.getAccount().map(a -> a.getId()).orElse(null))
                 .build();
         
         return CommandResult.success(response);
     }
     
-    private CustomerEntity mustExistCustomer(PhoneNumber phoneNumber) {
+    private Customer mustExistCustomer(PhoneNumber phoneNumber) {
         Objects.requireNonNull(phoneNumber, "Phone number is required");
         return customerRepository.findByPhone(phoneNumber)
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));

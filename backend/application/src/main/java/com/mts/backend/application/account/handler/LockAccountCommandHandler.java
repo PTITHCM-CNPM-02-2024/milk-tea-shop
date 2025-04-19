@@ -31,7 +31,7 @@ public class LockAccountCommandHandler implements ICommandHandler<UpdateLockAcco
         var account = accountRepository.findById(command.getId().getValue())
                 .orElseThrow(() -> new NotFoundException("Tài khoản không tồn tại"));
         
-        account.changeLock(command.isLocked());
+        account.setLock(command.isLocked());
         
         var updatedAccount = accountRepository.saveAndFlush(account);
         

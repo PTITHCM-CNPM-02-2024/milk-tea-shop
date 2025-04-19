@@ -6,7 +6,7 @@ import com.mts.backend.application.payment.response.PaymentResult;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
-import com.mts.backend.domain.payment.PaymentEntity;
+import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
@@ -41,11 +41,11 @@ public class CashProvider implements IPaymentProvider{
      */
     @Override
     @Transactional
-    public PaymentInitResponse initPayment(PaymentEntity payment, OrderEntity order) {
+    public PaymentInitResponse initPayment(Payment payment, OrderEntity order) {
         
         validWhenInit(payment, order);
         
-        payment.changeStatus(PaymentStatus.PROCESSING);
+        payment.setStatus(PaymentStatus.PROCESSING);
         
         var savedPayment = paymentRepository.save(payment);
         
@@ -59,7 +59,7 @@ public class CashProvider implements IPaymentProvider{
         
     }
     
-    private void validWhenInit(PaymentEntity payment, OrderEntity order) {
+    private void validWhenInit(Payment payment, OrderEntity order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Final amount is required");
         List<String> errors = new ArrayList<>();
@@ -92,7 +92,7 @@ public class CashProvider implements IPaymentProvider{
         
     }
 
-    private void validWhenDispatch(PaymentEntity payment, OrderEntity order) {
+    private void validWhenDispatch(Payment payment, OrderEntity order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Order is required");
         List<String> errors = new ArrayList<>();
@@ -136,7 +136,7 @@ public class CashProvider implements IPaymentProvider{
      */
     @Override
     @Transactional
-    public PaymentResult dispatch(PaymentEntity payment, OrderEntity order, PaymentTransactionCommand transactionCommand) {
+    public PaymentResult dispatch(Payment payment, OrderEntity order, PaymentTransactionCommand transactionCommand) {
         
         validWhenDispatch(payment, order);
         
@@ -146,19 +146,19 @@ public class CashProvider implements IPaymentProvider{
             throw new DomainException("Số tiền thanh toán không đủ");
         }
         
-        payment.changeAmountPaid(transactionCommand.getAmount());
+        payment.setAmountPaid(transactionCommand.getAmount());
         
         if (transactionCommand.getAmount().compareTo(order.getFinalAmount().get()) > 0)
         {
-            payment.changeChangeAmount(transactionCommand.getAmount().subtract(order.getFinalAmount().get()));
+            payment.setChangeAmount(transactionCommand.getAmount().subtract(order.getFinalAmount().get()));
         }
 
-        payment.changeStatus(PaymentStatus.PAID);
+        payment.setStatus(PaymentStatus.PAID);
         
-        List<PaymentEntity> getOtherPayments = paymentRepository.findByOrderEntity_IdAndIdNot(order.getId(), payment.getId());
+        List<Payment> getOtherPayments = paymentRepository.findByOrderEntity_IdAndIdNot(order.getId(), payment.getId());
         
         for (var pa : getOtherPayments){
-            pa.changeStatus(PaymentStatus.CANCELLED);
+            pa.setStatus(PaymentStatus.CANCELLED);
         }
         
         

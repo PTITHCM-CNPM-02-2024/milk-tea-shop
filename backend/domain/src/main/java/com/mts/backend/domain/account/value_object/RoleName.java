@@ -10,49 +10,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class RoleName {
     
-String value;
-    
     private final static Pattern pattern = Pattern.compile("^[a-zA-Z0-9_]{3,20}$");
-    
-    private RoleName(String value) {
-        Objects.requireNonNull(value, "Role name is required");
-        List<String> businessErrors = new ArrayList<>();
+    @jakarta.validation.constraints.Pattern(regexp = "^[a-zA-Z0-9_]{3,20}$",
+            message = "Tên vai trò không hợp lệ")
+    @jakarta.validation.constraints.NotBlank(message = "Tên vai trò không được để trống")
+    String value;
 
-        if (value.isBlank()) {
-            businessErrors.add("Tên vai trò không được để trống");
-        }
-
-        if (value.length() < 3 || value.length() > 20) {
-            businessErrors.add("Tên vai trò phải từ 3 đến 20 ký tự");
-        }
-
-        if (!pattern.matcher(value).matches()) {
-            businessErrors.add("Tên vai trò không hợp lệ");
-        }
-
-        if (!businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(businessErrors);
-        }
-        this.value = value;
+    public RoleName(@jakarta.validation.constraints.Pattern(regexp = "^[a-zA-Z0-9_]{3,20}$",
+            message = "Tên vai trò không hợp lệ") @jakarta.validation.constraints.NotBlank(message = "Tên vai trò không được để trống") String value) {
+        this.value = normalize(value);
     }
-    
+
     private static String normalize(String value) {
-        return value.trim().replaceAll("\\s+", " ").toLowerCase();
+        return value.trim().replaceAll("\\s+", " ").toUpperCase();
     }
-    @jakarta.persistence.Converter(autoApply = true)
-    public static final class RoleNameConverter implements AttributeConverter<RoleName, String> {
-        @Override
-        public String convertToDatabaseColumn(RoleName attribute) {
-            return Objects.isNull(attribute) ? null : attribute.getValue();
-        }
-        
-        @Override
-        public RoleName convertToEntityAttribute(String dbData) {
-            return Objects.isNull(dbData) ? null : RoleName.builder().value(dbData).build();
-        }
-    }
+    
 }

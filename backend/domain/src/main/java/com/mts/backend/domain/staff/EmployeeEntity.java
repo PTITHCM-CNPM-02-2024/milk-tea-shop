@@ -1,21 +1,24 @@
 package com.mts.backend.domain.staff;
 
-import com.mts.backend.domain.account.AccountEntity;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.persistence.BaseEntity;
+import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
+import java.util.Optional;
 
-@Getter
-@Setter
+
 @Entity
 @Table(name = "employee", schema = "milk_tea_shop_prod", uniqueConstraints = {
         @UniqueConstraint(name = "account_id", columnNames = {"account_id"})
@@ -24,58 +27,18 @@ import java.util.Objects;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-@Builder
 public class EmployeeEntity extends BaseEntity<Long> {
     @Id
     @Comment("Mã nhân viên")
     @Column(name = "employee_id", columnDefinition = "int UNSIGNED")
     @NotNull
+    @Getter
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @Comment("Mã tài khoản")
-    @JoinColumn(name = "account_id")
-    @NotNull
-    private AccountEntity accountEntity;
-
-    @Comment("Chức vụ")
-    @Column(name = "position", nullable = false, length = 50)
-    @Convert(converter = Position.PositionConverter.class)
-    private Position position;
-
-    @Comment("Họ")
-    @Column(name = "last_name", nullable = false, length = 70)
-    @Convert(converter = LastName.LastNameConverter.class)
-    @NotNull
-    private LastName lastName;
-
-    @Comment("Tên")
-    @Column(name = "first_name", nullable = false, length = 70)
-    @NotNull
-    @Convert(converter = FirstName.FirstNameConverter.class)
-    private FirstName firstName;
-
-    @Comment("Giới tính")
-    @Column(name = "gender")
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private Gender gender;
-
-    @Comment("Số điện thoại")
-    @Column(name = "phone", nullable = false, length = 15)
-    @NotNull
-    @Convert(converter = PhoneNumber.PhoneNumberConverter.class)
-    private PhoneNumber phone;
-
-    @Comment("Email")
-    @Column(name = "email", nullable = false, length = 100)
-    @NotNull
-    @Convert(converter = Email.EmailConverter.class)
-    private Email email;
-
-    public EmployeeEntity(Long id, AccountEntity accountEntity, Position position, @NotNull LastName lastName, @NotNull FirstName firstName, Gender gender, @NotNull PhoneNumber phone, @NotNull Email email) {
+    public EmployeeEntity(@NotNull Long id, @NotNull Account account, @NotBlank(message = "Chức vụ không được " +
+                                                                                           "để trống") @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự") String position, @NotBlank(message = "Họ không được để trống") @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, @NotNull Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
         this.id = id;
-        this.accountEntity = accountEntity;
+        this.account = account;
         this.position = position;
         this.lastName = lastName;
         this.firstName = firstName;
@@ -87,40 +50,134 @@ public class EmployeeEntity extends BaseEntity<Long> {
     public EmployeeEntity() {
     }
 
-    public boolean changeFirstName(FirstName firstName) {
-        if (this.firstName.equals(firstName)) {
+    public static EmployeeEntityBuilder builder() {
+        return new EmployeeEntityBuilder();
+    }
+
+    private boolean setId(@NotNull EmployeeId id) {
+        if (EmployeeId.of(this.id).equals(id)) {
             return false;
         }
-        this.firstName = firstName;
+        this.id = id.getValue();
         return true;
     }
 
-    public boolean changeLastName(LastName lastName) {
-        if (this.lastName.equals(lastName)) {
+    @OneToOne(fetch = FetchType.LAZY)
+    @Comment("Mã tài khoản")
+    @JoinColumn(name = "account_id")
+    @NotNull
+    private Account account;
+    
+    public Account getAccount() {
+        return account;
+    }
+
+    public boolean setAccount(@NotNull Account account) {
+        if (Objects.equals(this.account, account)) {
             return false;
         }
-        this.lastName = lastName;
+        this.account = account;
         return true;
     }
 
-    public boolean changeEmail(Email email) {
-        if (this.email.equals(email)) {
+
+    @Comment("Chức vụ")
+    @Column(name = "position", nullable = false, length = 50)
+    @NotBlank(message = "Chức vụ không được để trống")
+    @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự")
+    private String position;
+
+    public Position getPosition() {
+        return Position.of(this.position);
+    }
+
+    @Comment("Họ")
+    @Column(name = "last_name", nullable = false, length = 70)
+    @NotBlank(message = "Họ không được để trống")
+    @Size(max = 70, message = "Họ không được vượt quá 70 ký tự")
+    private String lastName;
+
+
+    @Comment("Tên")
+    @Column(name = "first_name", nullable = false, length = 70)
+    @NotNull
+    @Size(max = 70, message = "Tên không được vượt quá 70 ký tự")
+    @NotBlank(message = "Tên không được để trống")
+    private String firstName;
+
+    @Comment("Giới tính")
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    @Getter
+    private Gender gender;
+
+    @Comment("Số điện thoại")
+    @Column(name = "phone", nullable = false, length = 15)
+    @NotNull
+    @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @jakarta.validation.constraints.Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ")
+    private String phone;
+
+    @Comment("Email")
+    @Column(name = "email", nullable = false, length = 100)
+    @NotNull
+    @Size(max = 100, message = "Email không được vượt quá 100 ký tự")
+    @NotBlank(message = "Email không được để trống")
+    @jakarta.validation.constraints.Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ")
+    private String email;
+
+
+    public boolean setFirstName(@NotNull FirstName firstName) {
+        if (FirstName.of(this.firstName).equals(firstName)) {
             return false;
         }
-        this.email = email;
+        this.firstName = firstName.getValue();
         return true;
     }
 
-    public boolean changePhoneNumber(PhoneNumber phoneNumber) {
-        if (this.phone.equals(phoneNumber)) {
+    public FirstName getFirstName() {
+        return FirstName.of(this.firstName);
+    }
+
+    public boolean setLastName(@NotNull LastName lastName) {
+        if (LastName.of(this.lastName).equals(lastName)) {
             return false;
         }
-        this.phone = phoneNumber;
+        this.lastName = lastName.getValue();
         return true;
     }
 
-    public boolean changeGender(Gender gender) {
-        Objects.requireNonNull(gender, "gender is required");
+    public LastName getLastName() {
+        return LastName.of(this.lastName);
+    }
+
+    public boolean setEmail(@NotNull Email email) {
+        if (Email.of(this.email).equals(email)) {
+            return false;
+        }
+        this.email = email.getValue();
+        return true;
+    }
+
+    public Email getEmail() {
+        return Email.of(this.email);
+    }
+
+    public boolean setPhone(@NotNull PhoneNumber phoneNumber) {
+        if (PhoneNumber.of(this.phone).equals(phoneNumber)) {
+            return false;
+        }
+        this.phone = phoneNumber.getValue();
+        return true;
+    }
+
+    public PhoneNumber getPhone() {
+        return PhoneNumber.of(this.phone);
+    }
+
+    public boolean setGender(@NotNull Gender gender) {
         if (this.gender.equals(gender)) {
             return false;
         }
@@ -129,17 +186,16 @@ public class EmployeeEntity extends BaseEntity<Long> {
         return true;
     }
 
-    public boolean changePosition(Position position) {
-        Objects.requireNonNull(position, "Position is required");
-        if (this.position.equals(position)) {
+    public boolean setPosition(@NotNull Position position) {
+        if (Position.of(this.position).equals(position)) {
             return false;
         }
-        this.position = position;
+        this.position = position.getValue();
         return true;
     }
-    
+
     public String getFullName() {
-        return this.firstName.getValue() + " " + this.lastName.getValue();
+        return this.firstName + " " + this.lastName;
     }
 
     @Override
@@ -156,5 +212,77 @@ public class EmployeeEntity extends BaseEntity<Long> {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    public static class EmployeeEntityBuilder {
+        private @NotNull Long id;
+        private @NotNull Account account;
+        private @NotBlank(message = "Chức vụ không được để trống")
+        @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự") String position;
+        private @NotBlank(message = "Họ không được để trống")
+        @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") String lastName;
+        private @NotNull
+        @Size(max = 70, message = "Tên không được vượt quá 70 ký tự")
+        @NotBlank(message = "Tên không được để trống") String firstName;
+        private @NotNull Gender gender;
+        private @NotNull
+        @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự")
+        @NotBlank(message = "Số điện thoại không được để trống")
+        @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone;
+        private @NotNull
+        @Size(max = 100, message = "Email không được vượt quá 100 ký tự")
+        @NotBlank(message = "Email không được để trống")
+        @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email;
+
+        EmployeeEntityBuilder() {
+        }
+
+        public EmployeeEntityBuilder id(@NotNull Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public EmployeeEntityBuilder accountEntity(@NotNull Account account) {
+            this.account = account;
+            return this;
+        }
+
+        public EmployeeEntityBuilder position(@NotNull Position position) {
+            this.position = position.getValue();
+            return this;
+        }
+
+        public EmployeeEntityBuilder lastName(@NotNull LastName lastName) {
+            this.lastName = lastName.getValue();
+            return this;
+        }
+
+        public EmployeeEntityBuilder firstName(@NotNull FirstName firstName) {
+            this.firstName = firstName.getValue();
+            return this;
+        }
+
+        public EmployeeEntityBuilder gender(@NotNull Gender gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        public EmployeeEntityBuilder phone(@NotNull PhoneNumber phone) {
+            this.phone = phone.getValue();
+            return this;
+        }
+
+        public EmployeeEntityBuilder email(@NotNull Email email) {
+            this.email = email.getValue();
+            return this;
+        }
+
+        public EmployeeEntity build() {
+            return new EmployeeEntity(this.id, this.account, this.position, this.lastName, this.firstName, this.gender, this.phone, this.email);
+        }
+
+        public String toString() {
+            return "EmployeeEntity.EmployeeEntityBuilder(id=" + this.id + ", account=" + this.account + ", position=" + this.position + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
+        }
     }
 }

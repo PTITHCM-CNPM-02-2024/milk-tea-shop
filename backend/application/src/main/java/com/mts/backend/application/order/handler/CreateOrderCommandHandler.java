@@ -6,7 +6,7 @@ import com.mts.backend.application.order.command.OrderProductCommand;
 import com.mts.backend.application.order.command.OrderTableCommand;
 import com.mts.backend.application.order.response.OrderBasicResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
@@ -16,12 +16,10 @@ import com.mts.backend.domain.order.OrderProductEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.product.ProductEntity;
 import com.mts.backend.domain.product.ProductPriceEntity;
-import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.jpa.JpaProductPriceRepository;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
-import com.mts.backend.domain.promotion.DiscountEntity;
+import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.domain.staff.EmployeeEntity;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
@@ -93,7 +91,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         var saveOrder = orderRepository.save(order);
 
         OrderBasicResponse response = 
-                OrderBasicResponse.builder().customerId(saveOrder.getCustomerEntity().map(CustomerEntity::getId).orElse(null))
+                OrderBasicResponse.builder().customerId(saveOrder.getCustomer().map(Customer::getId).orElse(null))
                         .employeeId(saveOrder.getEmployeeEntity().getId())
                         .finalAmount(saveOrder.getFinalAmount().map(Money::getValue).orElse(null))
                         .note(saveOrder.getCustomizeNote().orElse(null))
@@ -129,11 +127,11 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
                 .orElseThrow(() -> new DomainException("Nhân viên không tồn tại"));
         
         
-        if (employee.getAccountEntity().getActive().isPresent() && !employee.getAccountEntity().getActive().get()){
+        if (employee.getAccount().getActive().isPresent() && !employee.getAccount().getActive().get()){
             throw new DomainException("Tài khoản nhân viên không hoạt động");
         }
         
-        if (employee.getAccountEntity().getLocked()){
+        if (employee.getAccount().getLocked()){
             throw new DomainException("Tài khoản nhân viên đã bị khóa");
         }
         
@@ -185,11 +183,10 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         var customer = customerRepository.findById(customerId.getValue())
                 .orElseThrow(() -> new DomainException("Khách hàng không tồn tại"));
         
-        order.setCustomerEntity(customer);
+        order.setCustomer(customer);
         
-        customer.increaseRewardPoint(RewardPoint.builder()
-                .value(POINT)
-                .build());
+        customer.increaseRewardPoint(RewardPoint.of(POINT));
+        
         
     }
     
@@ -207,7 +204,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         
     }
     
-    private void checkDiscountToApply(OrderEntity order, DiscountEntity discount){
+    private void checkDiscountToApply(OrderEntity order, Discount discount){
 
         if (!discount.isApplicable()) {
             String baseError = "Khuyến mãi không thể áp dụng: ";
@@ -252,8 +249,8 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         }
 
         // 3. Kiểm tra số lần sử dụng của khách hàng
-        if (order.getCustomerEntity().isPresent() && discount.getMaxUsesPerCustomer().isPresent()) {
-            var customerId = order.getCustomerEntity().get().getId();
+        if (order.getCustomer().isPresent() && discount.getMaxUsesPerCustomer().isPresent()) {
+            var customerId = order.getCustomer().get().getId();
             var currentDiscountUseByCustomer = orderRepository.countByCustomerEntity_IdAndOrderDiscounts_Discount_IdAndStatus(
                     customerId, discount.getId(), OrderStatus.COMPLETED);
 

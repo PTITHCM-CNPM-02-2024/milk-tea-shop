@@ -2,13 +2,16 @@ package com.mts.backend.application.customer.handler;
 
 import com.mts.backend.application.customer.command.CreateMembershipCommand;
 import com.mts.backend.domain.common.value_object.MemberDiscountValue;
-import com.mts.backend.domain.customer.MembershipTypeEntity;
+import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,16 +29,15 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
     public CommandResult handle(CreateMembershipCommand command) {
         Objects.requireNonNull(command, "Create membership command is required");
 
-        MemberDiscountValue memberDiscountValue = MemberDiscountValue.builder()
+        try{
+            MemberDiscountValue memberDiscountValue = MemberDiscountValue.builder()
                 .unit(command.getDiscountUnit())
                 .value(command.getDiscountValue()).build();
-        
-        verifyUniqueName(command.getName());
         
         var validUntil = command.getValidUntil().isPresent() ? command.getValidUntil().get() :
                 LocalDateTime.of(LocalDateTime.now().getYear() + 1, 1,1,0,0);
         
-        MembershipTypeEntity membershipType = MembershipTypeEntity.builder()
+        MembershipType membershipType = MembershipType.builder()
                 .id(MembershipTypeId.create().getValue())
                 .type(command.getName())
                 .description(command.getDescription())
@@ -45,24 +47,19 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
                 .active(true)
                 .build();
         
-        verifyUniqueRewardPoint(command.getRequiredPoints());
-        
         var savedMembershipType = membershipTypeRepository.save(membershipType);
         
         return CommandResult.success(savedMembershipType.getId());
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("uk_membership_type_type")) {
+                throw new DomainException("Tên loại thành viên đã tồn tại");
+            }
+            if (e.getMessage().contains("uk_membership_type_required_point")) {
+                throw new DomainException("Điểm thưởng đã tồn tại");
+            }
+            throw new DomainException("Lỗi khi tạo loại thành viên", e);
+        }
     }
 
-    private void verifyUniqueName(MemberTypeName name) {
-        Objects.requireNonNull(name, "Member type name is required");
-        if (membershipTypeRepository.existsByType(name)) {
-            throw new DuplicateException("Tên loại thành viên đã tồn tại");
-        }
-    }
-    
-    private void verifyUniqueRewardPoint(int requiredPoints) {
-        if (membershipTypeRepository.existsByRequiredPoint(requiredPoints)) {
-            throw new DuplicateException("Điểm thưởng đã tồn tại");
-        }
-    }
     
 }

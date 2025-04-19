@@ -5,8 +5,8 @@ import com.mts.backend.application.payment.provider.IPaymentProviderFactory;
 import com.mts.backend.domain.order.OrderEntity;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
-import com.mts.backend.domain.payment.PaymentEntity;
-import com.mts.backend.domain.payment.PaymentMethodEntity;
+import com.mts.backend.domain.payment.Payment;
+import com.mts.backend.domain.payment.PaymentMethod;
 import com.mts.backend.domain.payment.identifier.PaymentId;
 import com.mts.backend.domain.payment.identifier.PaymentMethodId;
 import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
@@ -48,13 +48,13 @@ public class CreatePaymentCommandHandler implements ICommandHandler<CreatePaymen
         
         OrderEntity order = mustExistOrder(command.getOrderId());
         
-        PaymentMethodEntity paymentMethod = mustExistPaymentMethod(command.getPaymentMethodId());
+        PaymentMethod paymentMethod = mustExistPaymentMethod(command.getPaymentMethodId());
         
         if (order.getFinalAmount().isEmpty()){
             throw new DomainException("Không thể tạo thanh toán cho đơn hàng không có giá trị");
         }
         
-        PaymentEntity payment = PaymentEntity.builder()
+        Payment payment = Payment.builder()
                 .id(PaymentId.create().getValue())
                 .orderEntity(order)
                 .paymentMethod(paymentMethod)
@@ -74,7 +74,7 @@ public class CreatePaymentCommandHandler implements ICommandHandler<CreatePaymen
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng với id: " + id.getValue()));
     }
     
-    private PaymentMethodEntity mustExistPaymentMethod(PaymentMethodId id) {
+    private PaymentMethod mustExistPaymentMethod(PaymentMethodId id) {
         return paymentMethodRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phương thức thanh toán với id: " + id.getValue()));
     }

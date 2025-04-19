@@ -13,4 +13,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class CreateEmployeeCommand extends UserBaseCommand implements ICommand<CommandResult> {
     private Position position;
+    
 }

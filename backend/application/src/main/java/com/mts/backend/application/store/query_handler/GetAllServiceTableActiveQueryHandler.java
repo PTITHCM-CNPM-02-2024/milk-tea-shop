@@ -1,17 +1,11 @@
 package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.ServiceTableActiveQuery;
-import com.mts.backend.application.store.response.AreaDetailResponse;
-import com.mts.backend.application.store.response.ServiceTableDetailResponse;
 import com.mts.backend.application.store.response.ServiceTableSummaryResponse;
-import com.mts.backend.domain.store.AreaEntity;
-import com.mts.backend.domain.store.identifier.AreaId;
+import com.mts.backend.domain.store.Area;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
-import com.mts.backend.domain.store.value_object.MaxTable;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,10 +34,10 @@ public class GetAllServiceTableActiveQueryHandler implements IQueryHandler<Servi
                             .id(e.getId())
                             .isActive(e.getActive())
                             .name(e.getTableNumber().getValue())
-                            .areaId(e.getAreaEntity().map(AreaEntity::getId).orElse(null))
+                            .areaId(e.getArea().map(Area::getId).orElse(null))
                             .build();
                     
-                    e.getAreaEntity().ifPresent(area -> {
+                    e.getArea().ifPresent(area -> {
                         serviceTableResponse.setAreaId(area.getId());
                     });
                     

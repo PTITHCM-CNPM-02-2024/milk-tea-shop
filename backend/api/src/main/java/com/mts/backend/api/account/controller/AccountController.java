@@ -47,8 +47,8 @@ public class AccountController implements IController {
     @PostMapping
     public ResponseEntity<?> createAccount(@Parameter(description = "Thông tin tài khoản", required = true) @RequestBody CreateAccountRequest request) {
         CreateAccountCommand command = CreateAccountCommand.builder()
-                .username(Username.builder().value(request.getUsername()).build())
-                .password(PasswordHash.builder().value(request.getPassword()).build())
+                .username(Username.of(request.getUsername()))
+                .password(PasswordHash.of(request.getPassword()))
                 .roleId(RoleId.of(request.getRoleId()))
                 .build();
 
@@ -77,7 +77,7 @@ public class AccountController implements IController {
 
         UpdateAccountCommand command = UpdateAccountCommand.builder()
                 .id(AccountId.of(id))
-                .username(Username.builder().value(request.getUsername()).build())
+                .username(Username.of(request.getUsername()))
                 .build();
 
         var result = accountCommandBus.dispatch(command);
@@ -105,9 +105,9 @@ public class AccountController implements IController {
         }
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
                 .id(AccountId.of(id))
-                .oldPassword(PasswordHash.builder().value(oldPassword).build())
-                .newPassword(PasswordHash.builder().value(newPassword).build())
-                .confirmPassword(PasswordHash.builder().value(confirmPassword).build())
+                .oldPassword(PasswordHash.of(oldPassword))
+                .newPassword(PasswordHash.of(newPassword))
+                .confirmPassword(PasswordHash.of(confirmPassword))
                 .build();
 
         var result = accountCommandBus.dispatch(command);

@@ -8,49 +8,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Value
-@Builder
-public class PaymentMethodName  {
-    
-    String value;
-    
+@Value(staticConstructor = "of")
+public class PaymentMethodName {
     private static final int MAX_LENGTH = 50;
-    
-    private PaymentMethodName (String value){
-        Objects.requireNonNull(value, "Payment method name is required");
+    @jakarta.validation.constraints.Size(max = 50, message = "Tên phương thức thanh toán không được vượt quá 50 ký tự")
+    @jakarta.validation.constraints.NotBlank(message = "Tên phương thức thanh toán không được để trống")
+    String value;
 
-        List<String> businessErrors = new ArrayList<>(List.of());
+    public PaymentMethodName(@jakarta.validation.constraints.NotBlank(message = "Tên phương thức thanh toán không được để trống") @jakarta.validation.constraints.Size(max = 50, message = "Tên phương thức thanh toán không được vượt quá 50 ký tự") String value) {
 
-        if (value.isBlank()) {
-            businessErrors.add("Tên phương thức thanh toán không được để trống");
-        }
-
-        if (value.length() > MAX_LENGTH) {
-            businessErrors.add("Tên phương thức thanh toán không được vượt quá " + MAX_LENGTH + " ký tự");
-        }
-        
-        if (!businessErrors.isEmpty()){
-            throw new DomainBusinessLogicException(businessErrors);
-        }
-        
-        this.value = normalize(value);    
+        this.value = normalize(value);
     }
-    
-    
-    private static String normalize(String value){
+
+
+    private static String normalize(String value) {
         return value.trim().toUpperCase();
     }
-    
-    public static final class PaymentMethodNameConverter implements jakarta.persistence.AttributeConverter<PaymentMethodName, String> {
-        
-        @Override
-        public String convertToDatabaseColumn(PaymentMethodName paymentMethodName) {
-            return Objects.isNull(paymentMethodName) ? null : paymentMethodName.getValue();
-        }
-        
-        @Override
-        public PaymentMethodName convertToEntityAttribute(String value) {
-            return Objects.isNull(value) ? null : new PaymentMethodName(value);
-        }
-    }
+
 }

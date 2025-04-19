@@ -28,8 +28,8 @@ public class GetPaymentMethodByIdQueryHandler implements IQueryHandler<PaymentMe
 
         var result = PaymentMethodDetailResponse.builder()
             .id(paymentMethod.getId())
-            .name(paymentMethod.getPaymentName().getValue())
-            .description(paymentMethod.getPaymentDescription().orElse(null))
+            .name(paymentMethod.getName().getValue())
+            .description(paymentMethod.getDescription().orElse(null))
             .build();
 
         return CommandResult.success(result);

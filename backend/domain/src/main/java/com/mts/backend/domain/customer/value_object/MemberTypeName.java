@@ -1,53 +1,24 @@
 package com.mts.backend.domain.customer.value_object;
 
-import com.mts.backend.shared.exception.DomainBusinessLogicException;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-@Value
-@Builder
-public class MemberTypeName  {
-    String value;
+@Value(staticConstructor = "of")
+public class MemberTypeName {
     private static final int MAX_LENGTH = 50;
-    
-    private MemberTypeName(String value) {
-        Objects.requireNonNull(value, "Member type name is required");
-        List<String> errors = new ArrayList<>();
+    @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự")
+    @NotBlank(message = "Tên loại thành viên không được để trống")
+    String value;
 
-        if (value.length() > MAX_LENGTH) {
-            errors.add("Tên loại thành viên không được vượt quá 50 ký tự");
-        }
-
-        if (value.isBlank()) {
-            errors.add("Tên loại thành viên không được để trống");
-        }
-        
-        if (!errors.isEmpty()) {
-            throw new DomainBusinessLogicException(errors);
-        }
-
-        this.value = normalizer(value);
+    public MemberTypeName(@NotBlank(message = "Tên loại thành viên không được để trống") @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự") String value) {
+        this.value = normalize(value);
     }
-    
-    
-    private static String normalizer(String value) {
+
+
+    private static String normalize(String value) {
         return value.trim().replaceAll("\\s+", " ").toUpperCase();
     }
-    
-    public static final class MemberTypeNameConverter implements jakarta.persistence.AttributeConverter<MemberTypeName, String> {
-        @Override
-        public String convertToDatabaseColumn(MemberTypeName attribute) {
-            return Objects.isNull(attribute) ? null : attribute.getValue();
-        }
-        
-        @Override
-        public MemberTypeName convertToEntityAttribute(String dbData) {
-            return Objects.isNull(dbData) ? null : new MemberTypeName(dbData);
-        }
-    }
-    
-    
+
+
 }

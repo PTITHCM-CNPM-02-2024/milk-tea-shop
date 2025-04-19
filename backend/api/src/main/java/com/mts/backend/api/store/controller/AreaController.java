@@ -41,9 +41,9 @@ public class AreaController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createArea(@RequestBody CreateAreaRequest request) {
         var command = CreateAreaCommand.builder()
-                .name(AreaName.builder().value(request.getName()).build())
+                .name(AreaName.of(request.getName()))
                 .isActive(request.getIsActive())
-                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
+                .maxTable(request.getMaxTable().map(MaxTable::of).orElse(null))
                 .build();
 
         var result = commandBus.dispatch(command);
@@ -58,10 +58,10 @@ public class AreaController implements IController {
         
         var command = UpdateAreaCommand.builder()
                 .areaId(AreaId.of(id))
-                .name(AreaName.builder().value(request.getName()).build())
+                .name(AreaName.of(request.getName()))
                 .description(request.getDescription().orElse(null))
                 .active(request.getIsActive())
-                .maxTable(request.getMaxTable().map(max -> MaxTable.builder().value(max).build()).orElse(null))
+                .maxTable(request.getMaxTable().map(MaxTable::of).orElse(null))
                 .build();
         
         var result = commandBus.dispatch(command);

@@ -42,7 +42,7 @@ public class ServiceTableController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createServiceTable(@RequestBody CreateServiceTableRequest request) {
         var command = CreateServiceTableCommand.builder()
-                .name(TableNumber.builder().value(request.getName()).build())
+                .name(TableNumber.of(request.getName()))
                 .areaId(AreaId.of(request.getAreaId()))
                 .description(request.getDescription())
                 .build();

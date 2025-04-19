@@ -4,7 +4,7 @@ import com.mts.backend.application.staff.query.CheckoutTableByEmpIdQuery;
 import com.mts.backend.application.order.response.OrderDetailResponse;
 import com.mts.backend.application.order.response.OrderTableDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -39,7 +38,7 @@ public class GetAllCheckoutTableByEmpIdQueryHandler implements IQueryHandler<Che
                         .orderId(order.getId())
                         .employeeId(order.getEmployeeEntity().getId())
                         .employeeName(order.getEmployeeEntity().getFullName())
-                        .customerName(order.getCustomerEntity().flatMap(CustomerEntity::getFullName)
+                        .customerName(order.getCustomer().flatMap(Customer::getFullName)
                                 .orElse(null))
                         .orderStatus(order.getStatus().map(Enum::name).orElse(null))
                         .totalAmount(order.getTotalAmount().map(Money::getValue).orElse(null))

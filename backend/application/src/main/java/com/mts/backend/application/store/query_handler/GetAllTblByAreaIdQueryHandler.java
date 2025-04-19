@@ -2,7 +2,7 @@ package com.mts.backend.application.store.query_handler;
 
 import com.mts.backend.application.store.query.ServiceTableByAreaIdQuery;
 import com.mts.backend.application.store.response.ServiceTableSummaryResponse;
-import com.mts.backend.domain.store.AreaEntity;
+import com.mts.backend.domain.store.Area;
 import com.mts.backend.domain.store.identifier.AreaId;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -37,7 +37,7 @@ public class GetAllTblByAreaIdQueryHandler implements IQueryHandler<ServiceTable
                     .id(se.getId())
                     .name(se.getTableNumber().getValue())
                     .isActive(se.getActive())
-                    .areaId(se.getAreaEntity().map(AreaEntity::getId).orElse(null))
+                    .areaId(se.getArea().map(Area::getId).orElse(null))
                     .build();
             return response;
         });

@@ -7,21 +7,20 @@ import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.lang.Nullable;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "payment", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "payment_method_id", columnList = "payment_method_id")
@@ -32,64 +31,89 @@ import java.util.Optional;
 })
 
 @NamedEntityGraphs({
-        @NamedEntityGraph(name ="graph.payment.fetchPmt",
+        @NamedEntityGraph(name = "graph.payment.fetchPmt",
                 attributeNodes = {
                         @NamedAttributeNode("paymentMethod"),
                 })
 })
-@Builder
-public class PaymentEntity extends BaseEntity<Long> {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Payment extends BaseEntity<Long> {
     @Id
     @Comment("Mã thanh toán")
     @Column(name = "payment_id", columnDefinition = "int UNSIGNED")
     @NotNull
+    @Getter
     private Long id;
 
     @Comment("Số tiền đã trả")
     @Column(name = "amount_paid", nullable = false, precision = 11, scale = 3)
     @Nullable
-    @Convert(converter = Money.MoneyConverter.class)
-    private Money amountPaid;
-    
-    public Optional<Money> getAmountPaid() {
-        return Optional.ofNullable(amountPaid);
+    private BigDecimal amountPaid;
+
+    public static PaymentBuilder builder() {
+        return new PaymentBuilder();
     }
-    
+
+
+    public Optional<Money> getAmountPaid() {
+        return Optional.ofNullable(amountPaid).map(Money::of);
+    }
+
     public Optional<Money> getChangeAmount() {
-        return Optional.ofNullable(changeAmount);
+        return Optional.ofNullable(changeAmount).map(Money::of);
     }
 
     @Comment("Tiền thừa")
     @ColumnDefault("0.00")
     @Column(name = "change_amount", precision = 11, scale = 3)
-    @Convert(converter = Money.MoneyConverter.class)
     @Nullable
-    private Money changeAmount;
+    private BigDecimal changeAmount;
 
     @Comment("Thời gian thanh toán")
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "payment_time")
     @NotNull
+    @Getter
+    @Setter
     private Instant paymentTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã phương thức thanh toán")
     @JoinColumn(name = "payment_method_id")
     @NotNull
-    private PaymentMethodEntity paymentMethod;
+    @Getter
+    private PaymentMethod paymentMethod;
+    
+    public boolean setPaymentMethod(@NotNull PaymentMethod paymentMethod) {
+        if (this.paymentMethod.equals(paymentMethod)) {
+            return false;
+        }
+        this.paymentMethod = paymentMethod;
+        return true;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã đơn hàng")
     @JoinColumn(name = "order_id", nullable = false)
     @NotNull
+    @Getter
     private OrderEntity orderEntity;
+
+    public boolean setOrderEntity(@NotNull OrderEntity orderEntity) {
+        if (this.orderEntity.equals(orderEntity)) {
+            return false;
+        }
+        this.orderEntity = orderEntity;
+        return true;
+    }
 
     @Comment("Trạng thái thanh toán")
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PaymentStatus status;
 
-    public boolean changeStatus(PaymentStatus status) {
+    public boolean setStatus(PaymentStatus status) {
         canModifyPayment();
         if (Objects.equals(this.status, status)) {
             return false;
@@ -98,43 +122,29 @@ public class PaymentEntity extends BaseEntity<Long> {
         return true;
     }
 
-    public PaymentEntity(Long id, @Nullable Money amountPaid, @Nullable Money changeAmount,
-                         @Nullable Instant paymentTime, @NotNull PaymentMethodEntity paymentMethod, @NotNull OrderEntity orderEntity, PaymentStatus status) {
-        this.id = id;
-        this.amountPaid = amountPaid;
-        this.changeAmount = changeAmount;
-        this.paymentTime = paymentTime;
-        this.paymentMethod = paymentMethod;
-        this.orderEntity = orderEntity;
-        this.status = status;
+    public boolean setAmountPaid(@Nullable Money amountPaid) {
+        canModifyPayment();
+        if (Objects.equals(Money.of(this.amountPaid), amountPaid)) {
+            return false;
+        }
+        this.amountPaid = amountPaid == null ? null : amountPaid.getValue();
+        return true;
     }
 
-    public PaymentEntity() {
-    }
-    
-    public boolean changeAmountPaid(Money amountPaid) {
+    public boolean setChangeAmount(@Nullable Money changeAmount) {
         canModifyPayment();
-        if (Objects.equals(this.amountPaid, amountPaid)) {
+        if (Objects.equals(Money.of(this.changeAmount), changeAmount)) {
             return false;
         }
-        this.amountPaid = amountPaid;
+        this.changeAmount = changeAmount == null ? null : changeAmount.getValue();
         return true;
     }
-    
-    public boolean changeChangeAmount(Money changeAmount) {
-        canModifyPayment();
-        if (Objects.equals(this.changeAmount, changeAmount)) {
-            return false;
-        }
-        this.changeAmount = changeAmount;
-        return true;
-    }
-    
-    public void cancel(){
+
+    public void cancel() {
         canModifyPayment();
         this.status = PaymentStatus.CANCELLED;
     }
-    
+
     public Optional<PaymentStatus> getStatus() {
         return Optional.ofNullable(status);
     }
@@ -146,7 +156,7 @@ public class PaymentEntity extends BaseEntity<Long> {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        PaymentEntity that = (PaymentEntity) o;
+        Payment that = (Payment) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
@@ -154,11 +164,67 @@ public class PaymentEntity extends BaseEntity<Long> {
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
-    
-    
-    private void canModifyPayment(){
+
+
+    private void canModifyPayment() {
         if (status == PaymentStatus.PAID || status == PaymentStatus.CANCELLED) {
             throw new DomainException("Thanh toán đã được thực hiện hoặc đã hủy, không thể sửa đổi" + status);
+        }
+    }
+
+    public static class PaymentBuilder {
+        private @NotNull Long id;
+        private BigDecimal amountPaid;
+        private BigDecimal changeAmount;
+        private @NotNull Instant paymentTime;
+        private @NotNull PaymentMethod paymentMethod;
+        private @NotNull OrderEntity orderEntity;
+        private PaymentStatus status;
+
+        PaymentBuilder() {
+        }
+
+        public PaymentBuilder id(@NotNull Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public PaymentBuilder amountPaid(@Nullable Money amountPaid) {
+            this.amountPaid = amountPaid == null ? null : amountPaid.getValue();
+            return this;
+        }
+
+        public PaymentBuilder changeAmount(@Nullable Money changeAmount) {
+            this.changeAmount = changeAmount == null ? null : changeAmount.getValue();
+            return this;
+        }
+
+        public PaymentBuilder paymentTime(@NotNull Instant paymentTime) {
+            this.paymentTime = paymentTime;
+            return this;
+        }
+
+        public PaymentBuilder paymentMethod(@NotNull PaymentMethod paymentMethod) {
+            this.paymentMethod = paymentMethod;
+            return this;
+        }
+
+        public PaymentBuilder orderEntity(@NotNull OrderEntity orderEntity) {
+            this.orderEntity = orderEntity;
+            return this;
+        }
+
+        public PaymentBuilder status(PaymentStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Payment build() {
+            return new Payment(this.id, this.amountPaid, this.changeAmount, this.paymentTime, this.paymentMethod, this.orderEntity, this.status);
+        }
+
+        public String toString() {
+            return "Payment.PaymentBuilder(id=" + this.id + ", amountPaid=" + this.amountPaid + ", changeAmount=" + this.changeAmount + ", paymentTime=" + this.paymentTime + ", paymentMethod=" + this.paymentMethod + ", orderEntity=" + this.orderEntity + ", status=" + this.status + ")";
         }
     }
 }

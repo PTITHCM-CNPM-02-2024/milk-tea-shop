@@ -48,7 +48,7 @@ CREATE PROCEDURE sp_get_service_table_by_id(
 BEGIN
     SELECT t.*, a.name AS area_name
     FROM ServiceTable t
-             LEFT JOIN Area a ON t.area_id = a.area_id
+             LEFT JOIN AreaEntity a ON t.area_id = a.area_id
     WHERE t.table_id = p_table_id;
 END //
 
@@ -59,7 +59,7 @@ CREATE PROCEDURE sp_get_service_tables_by_area(
 BEGIN
     SELECT t.*, a.name AS area_name
     FROM ServiceTable t
-             LEFT JOIN Area a ON t.area_id = a.area_id
+             LEFT JOIN AreaEntity a ON t.area_id = a.area_id
     WHERE t.area_id = p_area_id
     ORDER BY t.table_number;
 END //
@@ -69,7 +69,7 @@ CREATE PROCEDURE sp_get_all_service_tables()
 BEGIN
     SELECT t.*, a.name AS area_name
     FROM ServiceTable t
-             LEFT JOIN Area a ON t.area_id = a.area_id
+             LEFT JOIN AreaEntity a ON t.area_id = a.area_id
     ORDER BY COALESCE(a.name, 'ZZZ'), t.table_number;
 END //
 
@@ -78,7 +78,7 @@ CREATE PROCEDURE sp_get_active_service_tables()
 BEGIN
     SELECT t.*, a.name AS area_name
     FROM ServiceTable t
-             LEFT JOIN Area a ON t.area_id = a.area_id
+             LEFT JOIN AreaEntity a ON t.area_id = a.area_id
     WHERE t.is_active = 1
     ORDER BY COALESCE(a.name, 'ZZZ'), t.table_number;
 END //
@@ -107,7 +107,7 @@ BEGIN
         has_active_order,
         IF(has_active_order, 'Đang sử dụng', IF(t.is_active, 'Sẵn sàng', 'Không sẵn sàng')) AS status
     FROM ServiceTable t
-             LEFT JOIN Area a ON t.area_id = a.area_id
+             LEFT JOIN AreaEntity a ON t.area_id = a.area_id
     WHERE t.table_id = p_table_id;
 END //
 

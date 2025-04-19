@@ -5,7 +5,7 @@ import com.mts.backend.application.payment.query.PaymentByIdQuery;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.customer.CustomerEntity;
+import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
@@ -41,7 +41,7 @@ public class GetPaymentByIdQueryHandler implements IQueryHandler<PaymentByIdQuer
                         .finalAmount(payment.getOrderEntity().getFinalAmount().map(Money::getValue).orElse(null))
                         .totalAmount(payment.getOrderEntity().getTotalAmount().map(Money::getValue).orElse(null))
                         .note(payment.getOrderEntity().getCustomizeNote().orElse(null))
-                        .customerId(payment.getOrderEntity().getCustomerEntity().map(CustomerEntity::getId).orElse(null))
+                        .customerId(payment.getOrderEntity().getCustomer().map(Customer::getId).orElse(null))
                         .employeeId(payment.getOrderEntity().getEmployeeEntity().getId())
                         .orderStatus(payment.getOrderEntity().getStatus().map(Enum::name).orElse(null))
                         .orderTime(payment.getOrderEntity().getOrderTime())

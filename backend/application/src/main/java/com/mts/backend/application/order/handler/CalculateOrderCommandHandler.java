@@ -14,7 +14,7 @@ import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.product.ProductPriceEntity;
 import com.mts.backend.domain.product.jpa.JpaProductPriceRepository;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
-import com.mts.backend.domain.promotion.DiscountEntity;
+import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
 import com.mts.backend.domain.staff.EmployeeEntity;
 import com.mts.backend.shared.command.CommandResult;
@@ -84,7 +84,7 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
             var customer = customerRepository.findByIdFetchMembershipType(command.getCustomerId().get().getValue())
                     .orElseThrow(() -> new DomainException("Khách hàng không tồn tại"));
 
-            order.setCustomerEntity(customer);
+            order.setCustomer(customer);
         }
     }
     
@@ -128,7 +128,7 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
         
     }
 
-    private void checkDiscountToApply(OrderEntity order, DiscountEntity discount){
+    private void checkDiscountToApply(OrderEntity order, Discount discount){
 
         if (!discount.isApplicable()) {
             String baseError = "Khuyến mãi không thể áp dụng: ";
@@ -173,8 +173,8 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
         }
 
         // 3. Kiểm tra số lần sử dụng của khách hàng
-        if (order.getCustomerEntity().isPresent() && discount.getMaxUsesPerCustomer().isPresent()) {
-            var customerId = order.getCustomerEntity().get().getId();
+        if (order.getCustomer().isPresent() && discount.getMaxUsesPerCustomer().isPresent()) {
+            var customerId = order.getCustomer().get().getId();
             var currentDiscountUseByCustomer = orderRepository.countByCustomerEntity_IdAndOrderDiscounts_Discount_IdAndStatus(
                     customerId, discount.getId(), OrderStatus.COMPLETED);
 

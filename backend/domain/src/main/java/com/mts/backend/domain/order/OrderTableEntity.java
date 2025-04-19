@@ -1,7 +1,7 @@
 package com.mts.backend.domain.order;
 
 import com.mts.backend.domain.persistence.BaseEntity;
-import com.mts.backend.domain.store.ServiceTableEntity;
+import com.mts.backend.domain.store.ServiceTable;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -54,9 +54,9 @@ public class OrderTableEntity extends BaseEntity<Long> {
     @Comment("Mã bàn")
     @JoinColumn(name = "table_id", nullable = false)
     @NotNull
-    private ServiceTableEntity table;
+    private ServiceTable table;
 
-    public OrderTableEntity(Long id, OrderEntity orderEntity, @NotNull LocalDateTime checkIn, LocalDateTime checkOut, ServiceTableEntity table) {
+    public OrderTableEntity(Long id, OrderEntity orderEntity, @NotNull LocalDateTime checkIn, LocalDateTime checkOut, ServiceTable table) {
         this.id = id;
         this.orderEntity = orderEntity;
         this.checkIn = checkIn;

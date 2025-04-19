@@ -1,10 +1,6 @@
 package com.mts.backend.domain.customer.jpa;
 
-import com.mts.backend.domain.account.identifier.AccountId;
-import com.mts.backend.domain.common.value_object.Email;
-import com.mts.backend.domain.common.value_object.PhoneNumber;
-import com.mts.backend.domain.customer.CustomerEntity;
-import com.mts.backend.domain.customer.identifier.CustomerId;
+import com.mts.backend.domain.customer.Customer;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,45 +14,45 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface JpaCustomerRepository extends JpaRepository<CustomerEntity, Long> {
-  @Query("select c from CustomerEntity c where c.accountEntity.id = :id")
-  Optional<CustomerEntity> findByAccountEntity_Id(@Param("id") Long id);
+public interface JpaCustomerRepository extends JpaRepository<Customer, Long> {
+  @Query("select c from Customer c where c.accountEntity.id = :id")
+  Optional<Customer> findByAccountEntity_Id(@Param("id") Long id);
 
-  @EntityGraph(attributePaths = {"membershipTypeEntity", "accountEntity"})
-  @Query("select c from CustomerEntity c where c.accountEntity.id = :id")
-  Optional<CustomerEntity> findByAccountEntity_IdFetch(@Param("id") Long id);
+  @EntityGraph(attributePaths = {"membershipType", "account"})
+  @Query("select c from Customer c where c.accountEntity.id = :id")
+  Optional<Customer> findByAccountEntity_IdFetch(@Param("id") Long id);
 
-  @Query("select (count(c) > 0) from CustomerEntity c where c.accountEntity.id = :id")
+  @Query("select (count(c) > 0) from Customer c where c.accountEntity.id = :id")
   boolean existsByAccountEntity_Id(@Param("id") @NonNull Long id);
 
-  @Query("select (count(c) > 0) from CustomerEntity c where c.phone = :phone")
-  boolean existsByPhone(@Param("phone") @NonNull PhoneNumber phone);
+  @Query("select (count(c) > 0) from Customer c where c.phone = :phone")
+  boolean existsByPhone(@Param("phone") @NonNull String phone);
 
-  @Query("select (count(c) > 0) from CustomerEntity c where c.id <> :id and c.phone = :phone")
-  boolean existsByIdNotAndPhone(@Param("id") @NonNull Long id, @Param("phone") @NonNull PhoneNumber phone);
+  @Query("select (count(c) > 0) from Customer c where c.id <> :id and c.phone = :phone")
+  boolean existsByIdNotAndPhone(@Param("id") @NonNull Long id, @Param("phone") @NonNull String phone);
 
-  @Query("select c from CustomerEntity c where c.phone = :phone")
-  Optional<CustomerEntity> findByPhone(@Param("phone") @NonNull PhoneNumber phone);
+  @Query("select c from Customer c where c.phone = :phone")
+  Optional<Customer> findByPhone(@Param("phone") @NonNull String phone);
 
-  @Query("select c from CustomerEntity c where c.email = :email")
-  Optional<CustomerEntity> findByEmail(@Param("email") @NonNull Email email);
+  @Query("select c from Customer c where c.email = :email")
+  Optional<Customer> findByEmail(@Param("email") @NonNull String email);
 
-  @Query("select (count(c) > 0) from CustomerEntity c where c.email = :email")
-  boolean existsByEmail(@Param("email") @NonNull Email email);
+  @Query("select (count(c) > 0) from Customer c where c.email = :email")
+  boolean existsByEmail(@Param("email") @NonNull String email);
 
-    @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue"})
-    @Query("select c from CustomerEntity c where c.id = :id")
-  Optional<CustomerEntity> findByIdFetchMembershipType(@NotNull @Param("id") Long id);
+    @EntityGraph(attributePaths = {"membershipType.memberDiscountValue"})
+    @Query("select c from Customer c where c.id = :id")
+  Optional<Customer> findByIdFetchMembershipType(@NotNull @Param("id") Long id);
     
-    @EntityGraph(attributePaths = {"membershipTypeEntity.memberDiscountValue", "accountEntity"})
-    @Query("select c from CustomerEntity c")
-    Page<CustomerEntity> findAllFetch(Pageable pageable);
+    @EntityGraph(attributePaths = {"membershipType.memberDiscountValue", "account"})
+    @Query("select c from Customer c")
+    Page<Customer> findAllFetch(Pageable pageable);
     
     
     @EntityGraph(value = "graph.customer.fetchMembershipTypeAndAccount", type = EntityGraph.EntityGraphType.FETCH)
-    @Query("select c from CustomerEntity c where c.id = :id")
-    Optional<CustomerEntity> findByIdFetchMembershipTypeAndAccount(@NotNull @Param("id") Long id);
+    @Query("select c from Customer c where c.id = :id")
+    Optional<Customer> findByIdFetchMembershipTypeAndAccount(@NotNull @Param("id") Long id);
 
-  @Query("select (count(c) > 0) from CustomerEntity c where c.id <> :id and c.email = :email")
-  boolean existsByIdNotAndEmail(@Param("id") @NonNull Long id, @Param("email") @NonNull Email email);
+  @Query("select (count(c) > 0) from Customer c where c.id <> :id and c.email = :email")
+  boolean existsByIdNotAndEmail(@Param("id") @NonNull Long id, @Param("email") @NonNull String email);
 }
