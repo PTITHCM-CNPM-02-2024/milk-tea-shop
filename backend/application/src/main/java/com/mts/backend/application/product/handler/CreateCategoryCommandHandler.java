@@ -11,11 +11,15 @@ import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import jakarta.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class CreateCategoryCommandHandler implements ICommandHandler<CreateCategoryCommand, CommandResult> {
     private final JpaCategoryRepository categoryRepository;
@@ -40,14 +44,14 @@ public class CreateCategoryCommandHandler implements ICommandHandler<CreateCateg
                 .description(command.getDescription().orElse(null))
                 .build();
 
-        var createdCategory = categoryRepository.save(category);
+        var createdCategory = categoryRepository.saveAndFlush(category);
 
         return CommandResult.success(createdCategory.getId());
         }catch(DataIntegrityViolationException e){
-            if(e.getMessage().contains("uk_category_name")){
-                throw new DuplicateException("Tên danh mục đã tồn tại");
+            if (e.getMessage().contains("uk_category_name")) {
+                throw new DuplicateException("Tên danh mục " + command.getName().getValue() + " đã tồn tại");
             }
-            throw new DomainException("Lỗi khi tạo danh mục", e);
+            throw new DomainException("Lỗi khi tạo danh mục %s".formatted(command.getName().getValue()));
         }
 
     }

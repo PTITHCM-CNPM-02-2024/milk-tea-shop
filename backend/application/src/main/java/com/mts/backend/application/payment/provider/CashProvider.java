@@ -14,12 +14,14 @@ import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
 import com.mts.backend.shared.exception.DomainBusinessLogicException;
 import com.mts.backend.shared.exception.DomainException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class CashProvider implements IPaymentProvider{
     private final static PaymentMethodId PAYMENT_METHOD_ID = PaymentMethodId.of(1);
@@ -140,12 +142,21 @@ public class CashProvider implements IPaymentProvider{
         
         validWhenDispatch(payment, order);
         
+        if (order.getFinalAmount().isEmpty())
+        {
+            throw new DomainException("Đơn hàng không có giá trị");
+        }
+        
+        if(order.getTotalAmount().isEmpty())
+        {
+            throw new DomainException("Đơn hàng không có giá trị");
+        }
         
         if (transactionCommand.getAmount().compareTo(order.getFinalAmount().get()) < 0)
         {
             throw new DomainException("Số tiền thanh toán không đủ");
         }
-        
+        log.info("Dispatching payment with transaction ID: {}", transactionCommand);
         payment.setAmountPaid(transactionCommand.getAmount());
         
         if (transactionCommand.getAmount().compareTo(order.getFinalAmount().get()) > 0)

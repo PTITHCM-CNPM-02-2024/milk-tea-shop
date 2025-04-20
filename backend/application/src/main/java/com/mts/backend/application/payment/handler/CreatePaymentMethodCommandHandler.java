@@ -44,10 +44,10 @@ public class CreatePaymentMethodCommandHandler implements ICommandHandler<Create
             return CommandResult.success(pmSaved.getId());
 
         } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("uk_payment_method_name")) {
+            if (e.getMessage().contains("uk_payment_method_payment_name")) {
                 throw new DuplicateException("Tên phương thức thanh toán đã tồn tại");
             }
-            throw new DomainException("Lỗi khi tạo phương thức thanh toán", e);
+            throw new DomainException("Lỗi khi tạo phương thức thanh toán %s".formatted(e.getMessage()), e);
         }
 
     }

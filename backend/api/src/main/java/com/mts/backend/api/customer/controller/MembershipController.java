@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,8 +76,8 @@ public class MembershipController implements IController {
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
                 .requiredPoints(request.getRequiredPoint())
-                .validUntil(request.getValidUntil() == null ? null : ZonedDateTime.parse(request.getValidUntil()).toLocalDateTime())
-                .active(request.isActive())
+                .validUntil(request.getValidUntil() == null ? null : LocalDateTime.parse(request.getValidUntil()))
+                .active(request.getIsActive())
                 .build();
         
         var result = commandBus.dispatch(command);

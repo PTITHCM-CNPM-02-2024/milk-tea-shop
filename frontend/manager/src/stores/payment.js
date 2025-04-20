@@ -67,7 +67,7 @@ export const usePaymentStore = defineStore('payment', {
         this.reportLoading = true
         this.error = null
         const response = await paymentService.getPaymentReport(month, year)
-
+        console.log(response.data)
         if (response && response.data) {
           this.paymentReport = response.data
         } else {

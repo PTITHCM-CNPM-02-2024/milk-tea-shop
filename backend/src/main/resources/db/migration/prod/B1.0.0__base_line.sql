@@ -94,6 +94,7 @@ create table product
     created_at   datetime   default CURRENT_TIMESTAMP null comment 'Thời gian tạo',
     updated_at   datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment 'Thời gian cập nhật',
     index idx_product_category_id (category_id),
+    constraint uk_product_name unique (name),
     constraint fk_product_category foreign key (category_id) references category (category_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
@@ -193,7 +194,7 @@ create table manager
         ON DELETE RESTRICT
 );
 
-    create table `order`
+create table `order`
 (
     order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,
     customer_id    int unsigned                                  null comment 'Mã khách hàng',

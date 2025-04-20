@@ -47,7 +47,7 @@ public class Payment extends BaseEntity<Long> {
     private Long id;
 
     @Comment("Số tiền đã trả")
-    @Column(name = "amount_paid", nullable = false, precision = 11, scale = 3)
+    @Column(name = "amount_paid", precision = 11, scale = 3)
     @Nullable
     private BigDecimal amountPaid;
 
@@ -124,7 +124,7 @@ public class Payment extends BaseEntity<Long> {
 
     public boolean setAmountPaid(@Nullable Money amountPaid) {
         canModifyPayment();
-        if (Objects.equals(Money.of(this.amountPaid), amountPaid)) {
+        if (getAmountPaid().isPresent() && getAmountPaid().get().equals(amountPaid)) {
             return false;
         }
         this.amountPaid = amountPaid == null ? null : amountPaid.getValue();
@@ -133,7 +133,7 @@ public class Payment extends BaseEntity<Long> {
 
     public boolean setChangeAmount(@Nullable Money changeAmount) {
         canModifyPayment();
-        if (Objects.equals(Money.of(this.changeAmount), changeAmount)) {
+        if (getChangeAmount().isPresent() && getChangeAmount().get().equals(changeAmount)) {
             return false;
         }
         this.changeAmount = changeAmount == null ? null : changeAmount.getValue();

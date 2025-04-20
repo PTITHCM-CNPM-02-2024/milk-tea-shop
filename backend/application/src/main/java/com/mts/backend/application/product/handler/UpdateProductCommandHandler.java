@@ -15,6 +15,7 @@ import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 
+import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class UpdateProductCommandHandler implements ICommandHandler<UpdateProduc
      * @return
      */
     @Override
+    @Transactional
     public CommandResult handle(UpdateProductInformCommand command) {
         Objects.requireNonNull(command.getProductId(), "Product id is required");
 

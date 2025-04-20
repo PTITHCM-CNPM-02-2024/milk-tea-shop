@@ -43,8 +43,8 @@ public class GetOrderOverviewByEmpIdReportQueryHandler implements IQueryHandler<
         var response = OverviewReportResponse.builder()
                 .sumOrderValue(sum)
                 .avgOrderValue(avg)
-                .minOrderValue(min != null ? min.getValue() : null)
-                .maxOrderValue(max != null ? max.getValue() : null)
+                .minOrderValue(min)
+                .maxOrderValue(max)
                 .build();
 
         return CommandResult.success(response);

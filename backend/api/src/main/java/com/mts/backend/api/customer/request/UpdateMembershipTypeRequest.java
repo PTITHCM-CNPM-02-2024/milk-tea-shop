@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -14,8 +16,8 @@ public class UpdateMembershipTypeRequest {
     private String name;
     private String description;
     private String validUntil;
-    private boolean isActive;
-    private int requiredPoint;
+    private Boolean isActive;
+    private Integer requiredPoint;
     private String discountUnit;
-    private double discountValue;
+    private Double discountValue;
 }

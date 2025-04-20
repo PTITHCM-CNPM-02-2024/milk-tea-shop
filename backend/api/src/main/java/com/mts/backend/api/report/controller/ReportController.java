@@ -1,4 +1,4 @@
-package com.mts.backend.api.reports.controller;
+package com.mts.backend.api.report.controller;
 
 import com.mts.backend.api.common.IController;
 import com.mts.backend.application.report.ReportQueryBus;
@@ -17,10 +17,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.Parameter;
 
 @RequestMapping("/api/v1/reports")
 @RestController

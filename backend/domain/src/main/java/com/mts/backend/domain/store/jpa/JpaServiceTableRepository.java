@@ -15,20 +15,20 @@ import java.util.Optional;
 
 @Repository
 public interface JpaServiceTableRepository extends JpaRepository<ServiceTable, Integer> {
-  @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
+  @EntityGraph(attributePaths = {"area"}, type = EntityGraph.EntityGraphType.FETCH)
   @Query("select s from ServiceTable s WHERE s.active = :active")
   Slice<ServiceTable> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active, Pageable pageable);
 
-  @EntityGraph(attributePaths = {"areaEntity"}, type = EntityGraph.EntityGraphType.FETCH)
+  @EntityGraph(attributePaths = {"area"}, type = EntityGraph.EntityGraphType.FETCH)
   @Query("select s from ServiceTable s WHERE s.active = :active")
   List<ServiceTable> findAllByActiveFetchArea(@Param("active") @NonNull Boolean active);
   
   
-  @EntityGraph(attributePaths = {"areaEntity"})
+  @EntityGraph(attributePaths = {"area"})
   @Query("select s from ServiceTable s WHERE (s.active = :active or :active is null)")
   Page<ServiceTable> findAllFetchArea(@Param("active") @Nullable Boolean active, Pageable pageable);
 
-  @EntityGraph(attributePaths = {"areaEntity"})
+  @EntityGraph(attributePaths = {"area"})
   @Query("select s from ServiceTable s")
   Page<ServiceTable> findAllFetchArea(Pageable pageable);
 
@@ -48,7 +48,7 @@ public interface JpaServiceTableRepository extends JpaRepository<ServiceTable, I
 
 
   
-  @EntityGraph(attributePaths = {"areaEntity"})
+  @EntityGraph(attributePaths = {"area"})
     @Query("select s from ServiceTable s where s.id = :id")
   Optional<ServiceTable> findByIdWithArea(@Param("id")  @NonNull Integer id);
 

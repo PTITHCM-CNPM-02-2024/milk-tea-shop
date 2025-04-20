@@ -32,7 +32,7 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
      */
     @Override
     @Transactional
-    public CommandResult handle(UpdateCategoryCommand command) {
+    public CommandResult handle(UpdateCategoryCommand command)  {
         Objects.requireNonNull(command, "UpdateCategoryCommand is required");
 
         try {
@@ -42,11 +42,11 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
             category.setName(command.getName());
 
             return CommandResult.success(category.getId());
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             if (e.getMessage().contains("uk_category_name")) {
-                throw new DuplicateException("Tên danh mục " + command.getName().getValue() + " đã tồn tại");
+               return CommandResult.notFoundFail("Tên danh mục " + command.getName().getValue() + " đã tồn tại");
             }
-            throw new DomainException("Lỗi khi cập nhật danh mục", e);
+            throw new DomainException("Lỗi khi cập nhật danh mục"+ e.getMessage());
         }
     }
 

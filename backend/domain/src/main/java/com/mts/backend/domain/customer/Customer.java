@@ -8,7 +8,9 @@ import com.mts.backend.domain.customer.value_object.RewardPoint;
 import com.mts.backend.domain.persistence.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
@@ -41,6 +43,8 @@ import java.util.Optional;
                         @NamedAttributeNode("account")
                 })
 })
+@AllArgsConstructor
+@NoArgsConstructor
 public class Customer extends BaseEntity<Long> {
     @Id
     @Comment("Mã khách hàng")
@@ -48,22 +52,7 @@ public class Customer extends BaseEntity<Long> {
     @NotNull
     @Getter
     private Long id;
-
-    public Customer(@NotNull Long id, @NotNull MembershipType membershipType, @Nullable Account account, @Nullable @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String lastName, @Nullable @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String firstName, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @Nullable @Size(max = 100, message = "Email không được vượt quá 255 ký tự") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email, @NotNull @PositiveOrZero(message = "Điểm hiện tại không được âm") Integer currentPoint, @Nullable Gender gender) {
-        this.id = id;
-        this.membershipType = membershipType;
-        this.account = account;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.phone = phone;
-        this.email = email;
-        this.currentPoint = currentPoint;
-        this.gender = gender;
-    }
-
-    public Customer() {
-    }
-
+    
     public static CustomerBuilder builder() {
         return new CustomerBuilder();
     }
@@ -117,14 +106,12 @@ public class Customer extends BaseEntity<Long> {
     @Column(name = "last_name", length = 70)
     @Nullable
     @jakarta.validation.constraints.Size(max = 70, message = "Họ không được vượt quá 70 ký tự")
-    @jakarta.validation.constraints.NotBlank(message = "Họ không được để trống")
     private String lastName;
 
     @Comment("Tên")
     @Column(name = "first_name", length = 70)
     @Nullable
     @jakarta.validation.constraints.Size(max = 70, message = "Họ không được vượt quá 70 ký tự")
-    @jakarta.validation.constraints.NotBlank(message = "Họ không được để trống")
     private String firstName;
 
     @Comment("Số điện thoại")
@@ -169,7 +156,7 @@ public class Customer extends BaseEntity<Long> {
 
 
     public boolean setFirstName(@jakarta.annotation.Nullable FirstName firstName) {
-        if (Objects.equals(FirstName.of(this.firstName), firstName)) {
+        if (getFirstName().isPresent() && Objects.equals(FirstName.of(this.firstName), firstName)) {
             return false;
         }
 
@@ -178,7 +165,7 @@ public class Customer extends BaseEntity<Long> {
     }
 
     public boolean setLastName(@Nullable LastName lastName) {
-        if (Objects.equals(LastName.of(this.lastName), lastName)) {
+        if ( getLastName().isPresent() && Objects.equals(LastName.of(this.lastName), lastName)) {
             return false;
         }
         this.lastName = lastName == null ? null : lastName.getValue();

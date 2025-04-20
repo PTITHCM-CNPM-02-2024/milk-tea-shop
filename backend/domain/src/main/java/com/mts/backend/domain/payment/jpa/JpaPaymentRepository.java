@@ -18,42 +18,52 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JpaPaymentRepository extends JpaRepository<Payment, Long> {
-  @Query("select p from Payment p where p.order.id = :id")
-  List<Payment> findByOrderEntity_Id(@Param("id") Long id);
+    @Query("select p from Payment p where p.order.id = :id")
+    List<Payment> findByOrderEntity_Id(@Param("id") Long id);
 
-  @Query("""
-          select p from Payment p
-          where p.order.id is not null and p.order.id = :id and p.order.status = :status and p.status = :status1""")
-  List<Payment> findByOrderAndPaymentStatus(@Param("id") OrderId orderId, @Param("status") OrderStatus status,
-                                            @Param("status1") PaymentStatus status1);
+    @Query("""
+            select p from Payment p
+            where p.order.id is not null and p.order.id = :id and p.order.status = :status and p.status = :status1""")
+    List<Payment> findByOrderAndPaymentStatus(@Param("id") OrderId orderId, @Param("status") OrderStatus status,
+                                              @Param("status1") PaymentStatus status1);
 
-  @Query("select p from Payment p where p.order.id = :id and p.id <> :id1")
-  List<Payment> findByOrderEntity_IdAndIdNot(@Param("id") @NonNull Long id, @Param("id1") @NonNull Long id1);
-  
+    @Query("select p from Payment p where p.order.id = :id and p.id <> :id1")
+    List<Payment> findByOrderEntity_IdAndIdNot(@Param("id") @NonNull Long id, @Param("id1") @NonNull Long id1);
+
     @EntityGraph(attributePaths = {"paymentMethod", "order"})
     @Query("select p from Payment p")
     Page<Payment> findAllFetch(Pageable pageable);
-    
+
     @EntityGraph(attributePaths = {"paymentMethod", "order.customer", "order.employee"})
     @Query("select p from Payment p where p.id = :id")
     Optional<Payment> findByIdFetch(@Param("id") Long id);
-    
 
-  @Query("select p from Payment p where p.paymentTime between :paymentTimeStart and :paymentTimeEnd")
-  Page<Payment> findByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd, Pageable pageable);
 
-  @Query("select p from Payment p where p.paymentTime between :paymentTimeStart and :paymentTimeEnd")
-    @EntityGraph(value = "graph.payment.fetchPmt", type = EntityGraph.EntityGraphType.FETCH)
-  List<Payment> findByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd);
+    @Query("select p from Payment p where p.paymentTime between :paymentTimeStart and :paymentTimeEnd")
+    Page<Payment> findByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd, Pageable pageable);
 
-  @Query("select count(p) from Payment p where p.paymentTime between :paymentTimeStart and :paymentTimeEnd")
-  long countByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd);
-  
+    @Query("SELECT " +
+           "SUM(p.amountPaid), " +
+           "SUM(p.changeAmount), " +
+           "FUNCTION('DATE', p.paymentTime) as c_date, " +
+           "COUNT(p) " +
+           "FROM Payment p " +
+           "WHERE p.paymentTime BETWEEN :paymentTimeStart AND :paymentTimeEnd " +
+           "AND p.status = 'PAID' " +
+           "GROUP BY c_date " +
+           "ORDER BY c_date")
+    List<Object[]> findByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param(
+            "paymentTimeEnd") @NonNull Instant paymentTimeEnd);
+
+    @Query("select count(p) from Payment p where p.paymentTime between :paymentTimeStart and :paymentTimeEnd")
+    long countByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart, @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd);
+
     @Query(value = "SELECT SUM(p.amount_paid) FROM milk_tea_shop_prod.payment p WHERE p.payment_time BETWEEN " +
                    ":paymentTimeStart AND " +
                    ":paymentTimeEnd AND p.status = :#{#status.name()}", nativeQuery = true)
     BigDecimal findTotalAmountPaidByPaymentTimeBetween(@Param("paymentTimeStart") @NonNull Instant paymentTimeStart,
                                                        @Param("paymentTimeEnd") @NonNull Instant paymentTimeEnd,
                                                        @Param("status") @NonNull PaymentStatus status);
+
 
 }

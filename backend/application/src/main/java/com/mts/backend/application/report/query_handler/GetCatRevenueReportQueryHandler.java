@@ -39,7 +39,7 @@ public class GetCatRevenueReportQueryHandler implements IQueryHandler<CatRevenue
         
         var response = result.stream()
                 .map(r -> {
-                    var categoryName = r[0] instanceof CategoryName c ? c.getValue() : null;
+                    var categoryName = r[0] instanceof String c ? c: null;
                     var finalAmount = r[1] instanceof BigDecimal b ? b : null;
                     
                     var responseItem = CatRevenueByTimeResponse.builder()

@@ -1,119 +1,56 @@
 <template>
   <v-container fluid class="pa-0 main-container">
     <!-- Alert nội bộ trang -->
-    <v-alert
-      v-model="showAlert"
-      :type="alertType"
-      :icon="alertIcon"
-      border="start"
-      closable
-      class="ma-2"
-      style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 100; max-width: 500px;"
-    >
+    <v-alert v-model="showAlert" :type="alertType" :icon="alertIcon" border="start" closable class="ma-2"
+      style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 100; max-width: 500px;">
       {{ alertMessage }}
     </v-alert>
-    
+
     <div class="d-flex flex-grow-1 main-content">
       <div class="left-panel">
-        <CategoryList
-            :categories="categoryStore.allCategories"
-            :selectedCategory="categoryStore.selectedCategory"
-            :products="productStore.products"
-            :allProducts="productStore.allProducts"
-            @select-category="handleCategorySelect"
-        />
+        <CategoryList :categories="categoryStore.allCategories" :selectedCategory="categoryStore.selectedCategory"
+          :products="productStore.products" :allProducts="productStore.allProducts"
+          @select-category="handleCategorySelect" />
 
-        <ProductGrid
-            :products="filteredProducts"
-            :loading="productStore.loading"
-            @add-to-cart="openCustomizationModal"
-        />
+        <ProductGrid :products="filteredProducts" :loading="productStore.loading"
+          @add-to-cart="openCustomizationModal" />
       </div>
 
       <div class="right-panel">
-        <Cart
-            :cart="cartStore.items"
-            :subtotal="cartStore.subtotal"
-            :discount="cartStore.discount"
-            :total="cartStore.total"
-            :customer="cartStore.selectedCustomer"
-            :tables="cartStore.selectedTables"
-            @remove-item="removeCartItem"
-            @edit-item="editCartItem"
-            @clear-cart="clearCart"
-            @find-customer="openCustomerModal"
-            @select-table="openTableModal"
-            @checkout="openPaymentModal"
-            @update-quantity="updateCartQuantity"
-        />
+        <Cart :cart="cartStore.items" :subtotal="cartStore.subtotal" :discount="cartStore.discount"
+          :total="cartStore.total" :customer="cartStore.selectedCustomer" :tables="cartStore.selectedTables"
+          @remove-item="removeCartItem" @edit-item="editCartItem" @clear-cart="clearCart"
+          @find-customer="openCustomerModal" @select-table="openTableModal" @checkout="openPaymentModal"
+          @update-quantity="updateCartQuantity" />
       </div>
     </div>
-    
+
     <!-- Dialogs -->
-    <v-dialog
-        v-model="showCustomizationModal"
-        max-width="600px"
-        persistent
-    >
-      <OrderCustomization
-          :product="editingProduct"
-          :editMode="editingItemIndex !== -1"
-          :initialOptions="editingProduct?.options || {}"
-          @add-to-cart="addToCart"
-          @cancel="showCustomizationModal = false"
-      />
+    <v-dialog v-model="showCustomizationModal" max-width="600px" persistent>
+      <OrderCustomization :product="editingProduct" :editMode="editingItemIndex !== -1"
+        :initialOptions="editingProduct?.options || {}" @add-to-cart="addToCart"
+        @cancel="showCustomizationModal = false" />
     </v-dialog>
 
-    <v-dialog
-        v-model="showCustomerModal"
-        max-width="600px"
-        persistent
-    >
-      <CustomerSearchModal
-          @select-customer="selectCustomer"
-          @cancel="showCustomerModal = false"
-      />
+    <v-dialog v-model="showCustomerModal" max-width="600px" persistent>
+      <CustomerSearchModal @select-customer="selectCustomer" @cancel="showCustomerModal = false" />
     </v-dialog>
 
-    <v-dialog
-        v-model="showTableModal"
-        max-width="800px"
-        persistent
-    >
-      <TableSelection
-          :initial-tables="cartStore.selectedTables"
-          @select-tables="selectTables"
-          @cancel="showTableModal = false"
-      />
+    <v-dialog v-model="showTableModal" max-width="800px" persistent>
+      <TableSelection :initial-tables="cartStore.selectedTables" @select-tables="selectTables"
+        @cancel="showTableModal = false" />
     </v-dialog>
 
-    <v-dialog
-        v-model="showPaymentModal"
-        max-width="600px"
-        persistent
-    >
-      <PaymentModal
-          :cart="cartStore.items"
-          :customer="cartStore.selectedCustomer"
-          :tables="cartStore.selectedTables"
-          :subtotal="cartStore.subtotal"
-          :discount="cartStore.discount"
-          :total="cartStore.total"
-          :employeeId="employeeId"
-          :applied-coupons="cartStore.selectedCoupons"
-          @complete-order="completeOrder"
-          @cancel="showPaymentModal = false"
-          @apply-coupon="applyCoupon"
-          @remove-coupon="removeCoupon"
-      />
+    <v-dialog v-model="showPaymentModal" max-width="600px" persistent>
+      <PaymentModal :cart="cartStore.items" :customer="cartStore.selectedCustomer" :tables="cartStore.selectedTables"
+        :subtotal="cartStore.subtotal" :discount="cartStore.discount" :total="cartStore.total" :employeeId="employeeId"
+        :applied-coupons="cartStore.selectedCoupons" @complete-order="completeOrder" @cancel="showPaymentModal = false"
+        @apply-coupon="applyCoupon" @remove-coupon="removeCoupon" />
     </v-dialog>
 
     <!-- Dialog hiển thị hóa đơn -->
     <v-dialog v-model="billDialog" max-width="600px">
-      <BillDialog 
-        :bill-html="billHtml" 
-        @close="closeBillDialog"
-      />
+      <BillDialog :bill-html="billHtml" @close="closeBillDialog" />
     </v-dialog>
   </v-container>
 </template>
@@ -170,39 +107,39 @@ const searchQuery = computed(() => props.searchQuery || '');
 // Lọc sản phẩm dựa trên từ khóa tìm kiếm
 const filteredProducts = computed(() => {
   console.log('Tìm kiếm với từ khóa:', searchQuery.value);
-  
+
   if (!searchQuery.value || !searchQuery.value.trim()) {
     // Nếu không có từ khóa tìm kiếm, trả về danh sách sản phẩm hiện tại
     return productStore.products;
   }
-  
+
   // Chuyển từ khóa tìm kiếm về chữ thường
   const query = searchQuery.value.toLowerCase().trim();
-  
+
   // Lọc sản phẩm dựa trên các tiêu chí
   return productStore.products.filter(product => {
     // Tìm trong tên sản phẩm
     if (product.name && product.name.toLowerCase().includes(query)) {
       return true;
     }
-    
+
     // Tìm trong mô tả sản phẩm
     if (product.description && product.description.toLowerCase().includes(query)) {
       return true;
     }
-    
+
     // Tìm trong tên danh mục
-    if (product.category && typeof product.category === 'object' && 
-        product.category.name && product.category.name.toLowerCase().includes(query)) {
+    if (product.category && typeof product.category === 'object' &&
+      product.category.name && product.category.name.toLowerCase().includes(query)) {
       return true;
     }
-    
+
     // Tìm theo mã sản phẩm hoặc ID
-    if ((product.code && product.code.toLowerCase().includes(query)) || 
-        (product.id && product.id.toString().includes(query))) {
+    if ((product.code && product.code.toLowerCase().includes(query)) ||
+      (product.id && product.id.toString().includes(query))) {
       return true;
     }
-    
+
     return false;
   });
 });
@@ -215,7 +152,7 @@ watch(() => props.searchQuery, (newQuery) => {
     // Load tất cả sản phẩm nếu đang lọc theo danh mục
     productStore.handleCategoryChange('all');
   }
-  
+
   // Hiển thị thông báo nếu tìm kiếm không có kết quả
   if (newQuery && filteredProducts.value.length === 0) {
     setAlert('info', `Không tìm thấy sản phẩm phù hợp với "${newQuery}"`);
@@ -229,7 +166,7 @@ watch(() => props.searchQuery, (newQuery) => {
 function setAlert(type, message) {
   alertType.value = type;
   alertMessage.value = message;
-  
+
   // Đặt icon dựa trên loại
   switch (type) {
     case 'success':
@@ -244,7 +181,7 @@ function setAlert(type, message) {
     default:
       alertIcon.value = 'mdi-information';
   }
-  
+
   showAlert.value = true;
 }
 
@@ -265,7 +202,7 @@ const billHtml = ref('');
 function handleCategorySelect(category) {
   // Thay đổi danh mục đã chọn trong store
   categoryStore.selectCategory(category);
-  
+
   // Lọc sản phẩm từ dữ liệu đã tải (không gọi API)
   const categoryId = typeof category === 'object' ? category.id : category;
   productStore.handleCategoryChange(categoryId);
@@ -303,14 +240,14 @@ function addToCart(item) {
   showCustomizationModal.value = false;
   editingProduct.value = null;
   editingItemIndex.value = -1;
-  
+
   // Tính toán lại tổng tiền
   cartStore.calculateOrderFromServer(props.employeeId);
 }
 
 function removeCartItem(index) {
   cartStore.removeItem(index);
-  
+
   // Tính toán lại tổng tiền
   cartStore.calculateOrderFromServer(props.employeeId);
 }
@@ -319,7 +256,7 @@ function editCartItem(index) {
   if (index >= 0 && index < cartStore.items.length) {
     const item = cartStore.items[index];
     editingItemIndex.value = index;
-    
+
     // Lấy chi tiết sản phẩm từ server
     productStore.fetchProductDetail(item.product.id)
       .then(productDetail => {
@@ -347,7 +284,7 @@ function clearCart() {
 // Cập nhật số lượng trong giỏ hàng
 function updateCartQuantity(index, newQuantity) {
   cartStore.updateQuantity(index, newQuantity);
-  
+
   // Tính toán lại tổng tiền
   cartStore.calculateOrderFromServer(props.employeeId);
 }
@@ -400,7 +337,7 @@ async function completeOrder(paymentData) {
     // Hiển thị hộp thoại xác nhận
     const confirmed = window.confirm('Xác nhận thanh toán đơn hàng?');
     if (!confirmed) return;
-    
+
     // Kiểm tra giỏ hàng
     if (cartStore.items.length === 0) {
       showAlert.value = true;
@@ -408,14 +345,14 @@ async function completeOrder(paymentData) {
       alertMessage.value = 'Giỏ hàng đang trống, không thể thanh toán.';
       return;
     }
-    
+
     // Tạo đơn hàng
     const orderData = await cartStore.createOrder(props.employeeId, paymentData.note || 'Đơn hàng từ app');
-    
+
     if (!orderData || !orderData.orderId) {
       throw new Error('Không tạo được đơn hàng');
     }
-    
+
     const orderId = orderData.orderId;
 
     // Khởi tạo thanh toán
@@ -435,10 +372,8 @@ async function completeOrder(paymentData) {
     const billing = await OrderService.completePayment(
       paymentId,
       paymentData.methodId,
-      { 
-        amount: paymentData.amount,
-        cashReceived: paymentData.cashReceived || paymentData.amount,
-        cashReturned: paymentData.cashReturned || 0
+      {
+        amount: paymentData.amount
       }
     );
 
@@ -450,10 +385,10 @@ async function completeOrder(paymentData) {
 
     // Đóng modal thanh toán
     showPaymentModal.value = false;
-    
+
     // Reset giỏ hàng
     cartStore.clearCart();
-    
+
     // Hiển thị thông báo thành công
     showSuccess('Thanh toán đơn hàng thành công!');
   } catch (error) {
@@ -475,19 +410,19 @@ onMounted(async () => {
     showError('Không xác định được nhân viên hiện tại');
     return;
   }
-  
+
   // Hiển thị thông tin nhân viên
   showInfo(`Nhân viên ID: ${props.employeeId} - ${props.employeeName}`);
-  
+
   // Tải tất cả sản phẩm trước
   await productStore.fetchAllProducts();
-  
+
   // Sau đó tải danh mục
   await categoryStore.fetchCategories();
-  
+
   // Cài đặt danh mục được chọn là 'all'
   categoryStore.selectCategory('all');
-  
+
   // Set up watcher cho bất kỳ thay đổi nào của giỏ hàng
   watch(
     () => [cartStore.items.length, cartStore.selectedCustomer, cartStore.selectedCoupons.length],
@@ -527,4 +462,4 @@ onMounted(async () => {
   background-color: var(--v-theme-surface);
   min-width: 360px;
 }
-</style> 
+</style>

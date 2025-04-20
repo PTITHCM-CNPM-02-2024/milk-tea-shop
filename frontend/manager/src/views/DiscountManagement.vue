@@ -442,7 +442,7 @@
                 type="number"
                 :rules="[
                   v => !!v || 'Vui lòng nhập giá trị giảm tối đa',
-                  v => v > 0 || 'Giá trị phải lớn hơn 0'
+                  v => v >= 1000 || 'Giá trị phải lớn hơn 1000đ'
                 ]"
                 required
               ></v-text-field>
@@ -454,7 +454,7 @@
                 type="number"
                 :rules="[
                   v => !!v || 'Vui lòng nhập giá trị đơn hàng tối thiểu',
-                  v => v >= 0 || 'Giá trị không được nhỏ hơn 0'
+                  v => v >= 1000 || 'Giá trị không được nhỏ hơn 1000đ'
                 ]"
                 required
               ></v-text-field>

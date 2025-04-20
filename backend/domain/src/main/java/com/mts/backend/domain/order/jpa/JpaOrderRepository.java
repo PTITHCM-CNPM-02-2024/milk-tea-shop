@@ -27,7 +27,7 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
             where o.employee.id = :id and (o.orderTime between :orderTimeStart and :orderTimeEnd) order by o.finalAmount DESC""")
     Page<Order> findByEmployeeEntity_IdAndOrderTimeBetween(@Param("id") @NonNull Long id, @Param("orderTimeStart") Instant orderTimeStart, @Param("orderTimeEnd") Instant orderTimeEnd, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"customer.membershipType.memberDiscountValue", "employee", "orderDiscounts.discount.coupon", "orderProducts.productPrice.product.category", "orderProducts.productPrice.size", "orderTables.table"})
+    @EntityGraph(attributePaths = {"customer.membershipType.memberDiscountValue", "employee", "orderDiscounts.discount.coupon", "orderProducts.price.size", "orderTables.table"})
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findOrderWithDetails(@Param("id") @NonNull Long id);
 
@@ -74,7 +74,7 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
     @Query("select o from Order o")
     Page<Order> findAllFetchEmpCus(Pageable pageable);
     
-    @EntityGraph(attributePaths = {"customer", "employee", "orderDiscounts.discount.coupon", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.productPrice.product", "orderTables.table", "payments.paymentMethod"})
+    @EntityGraph(attributePaths = {"customer.membershipType.memberDiscountValue", "employee", "orderDiscounts.discount.coupon", "orderDiscounts.discount.promotionDiscountValue", "orderProducts.price.product.productPrices", "orderProducts.price.size", "orderTables.table", "payments.paymentMethod"})
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdFetch(@Param("id") Long id);
     
@@ -101,19 +101,19 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
                                     @Param("endDate") Instant endDate);
 
     @Query("""
-            SELECT  new com.mts.backend.domain.common.value_object.Money(MAX(o.finalAmount))
+            SELECT  MAX(o.finalAmount)
             from Order o
             where o.orderTime BETWEEN :startDate AND :endDate AND o.employee.id = :employeeId
            """)
-    Money getMaxRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+    BigDecimal getMaxRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
                                     @Param("endDate") Instant endDate);
 
     @Query("""
-            SELECT  new com.mts.backend.domain.common.value_object.Money(MIN(o.finalAmount))
+            SELECT  MIN(o.finalAmount)
             from Order o
             where o.orderTime BETWEEN :startDate AND :endDate AND o.employee.id = :employeeId
            """)
-    Money getMinRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
+    BigDecimal getMinRevenueByEmpId(@Param("employeeId") Long employeeId,@Param("startDate") Instant startDate,
                                @Param("endDate") Instant endDate);
     
     @Query("""
@@ -123,16 +123,16 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
     BigDecimal getAvgOrderValue();
 
     @Query("""
-            SELECT  new com.mts.backend.domain.common.value_object.Money(MIN(o.finalAmount)) 
+            SELECT  MIN(o.finalAmount) 
             from Order o 
            """)
-    Money getMinOrderValue();
+    BigDecimal getMinOrderValue();
     
     @Query("""
-            SELECT  new com.mts.backend.domain.common.value_object.Money(MAX(o.finalAmount))
+            SELECT  MAX(o.finalAmount)
             from Order o 
            """)
-    Money getMaxOrderValue();
+    BigDecimal getMaxOrderValue();
     @Query("""
     SELECT c.name AS categoryName, o.finalAmount AS finalAmount, o.id AS orderId
     FROM Order o
@@ -192,23 +192,23 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
             @Param("toDate") Instant toDate
     );
 
-    @Query("""
-    SELECT
-        p.id AS maSanPham, 
-        p.name AS tenSanPham, 
-        COALESCE(c.name, 'Không có danh mục') AS danhMuc,
-        SUM(op.quantity) AS soLuongBan,
-        SUM(op.quantity * pp.price) AS doanhThu
-    FROM Order o
-    JOIN o.orderProducts op
-    JOIN op.price pp
-    JOIN pp.product p
-    LEFT JOIN p.category c
-    WHERE o.status = 'COMPLETED'
-    AND o.orderTime BETWEEN :fromDate AND :toDate
-    GROUP BY p.id, p.name, c.name
-    ORDER BY SUM(op.quantity) DESC
-    """)
+    @Query(value = """
+
+         SELECT
+        p.product_id as productId,
+        p.name as productName,
+        COALESCE(c.name, 'Không có danh mục') as categoryName,
+        SUM(op.quantity) as totalQuantity,
+        SUM(op.quantity * pp.price) as totalRevenue
+    FROM `order` o
+    JOIN order_product op ON o.order_id = op.order_id
+    JOIN product_price pp ON op.product_price_id = pp.product_price_id
+    JOIN product p ON pp.product_id = p.product_id
+    LEFT JOIN category c ON p.category_id = c.category_id
+    WHERE o.status = 'COMPLETED' AND
+     o.order_time BETWEEN :fromDate AND :toDate
+    GROUP BY p.product_id, p.name, c.name
+    ORDER BY totalRevenue DESC""", nativeQuery = true)
     List<Object[]> findTopSaleByProduct(
             @Param("fromDate") Instant fromDate,
             @Param("toDate") Instant toDate,

@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
@@ -35,6 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Entity
 @Table(name = "`order`", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "employee_id", columnList = "employee_id")

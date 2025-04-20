@@ -129,12 +129,13 @@
 
             <!-- Biểu đồ thống kê -->
             <v-card class="mb-4 pa-4">
-              <v-card-title class="px-0 pt-0 text-subtitle-1">Doanh thu theo thời gian</v-card-title>
+              <v-card-title class="px-0 pt-0 text-subtitle-1">Doanh thu theo thời gian (Tháng {{ reportMonth }}/{{ reportYear }})</v-card-title>
               <div style="height: 300px; position: relative">
-                <!-- Đây là vị trí cho biểu đồ nếu có thư viện tương thích -->
-                <div class="text-center text-grey d-flex flex-column justify-center align-center" style="height: 100%">
+                <Line v-if="chartData.labels && chartData.labels.length > 0" :data="chartData" :options="chartOptions" />
+                <!-- Hiển thị khi không có dữ liệu hoặc đang tải -->
+                <div v-else class="text-center text-grey d-flex flex-column justify-center align-center" style="height: 100%">
                   <v-icon size="large" class="mb-2">mdi-chart-line</v-icon>
-                  <span>Biểu đồ doanh thu sẽ hiển thị ở đây</span>
+                  <span>{{ paymentStore.reportLoading ? 'Đang tải dữ liệu biểu đồ...' : 'Không có dữ liệu doanh thu cho tháng này' }}</span>
                 </div>
               </div>
             </v-card>
@@ -530,6 +531,28 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { usePaymentStore } from '@/stores/payment'
 import { useRouter } from 'vue-router'
+import { Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+
+// Đăng ký các thành phần cần thiết của Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 const paymentStore = usePaymentStore()
 const router = useRouter()
@@ -617,7 +640,19 @@ const formatCurrency = (value) => {
 // Format thời gian
 const formatTime = (time) => {
   if (!time) return '-'
-  return time
+  // Format lại nếu là dạng ISO 8601 hoặc timestamp
+  try {
+    const date = new Date(time);
+    return new Intl.DateTimeFormat('vi-VN', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    }).format(date);
+  } catch (e) {
+    return time; // Trả về giá trị gốc nếu không parse được
+  }
 }
 
 // Xử lý khi thay đổi trang thanh toán
@@ -735,6 +770,88 @@ const getOrderStatusText = (status) => {
     default: return 'Không xác định'
   }
 }
+
+// ---- Dữ liệu và tùy chọn cho biểu đồ ----
+const chartData = computed(() => {
+  const labels = []
+  const data = []
+
+  if (paymentStore.paymentReport && paymentStore.paymentReport.paymentDetailResponses) {
+    // Nhóm doanh thu theo ngày
+    const dailyRevenue = {}
+    paymentStore.paymentReport.paymentDetailResponses.forEach(payment => {
+      if (payment.paymentTime && payment.amountPaid) {
+        const date = new Date(payment.paymentTime)
+        const day = date.getDate() // Lấy ngày trong tháng
+        const revenue = payment.amountPaid - (payment.change || 0)
+        
+        if (dailyRevenue[day]) {
+          dailyRevenue[day] += revenue
+        } else {
+          dailyRevenue[day] = revenue
+        }
+      }
+    })
+
+    // Lấy số ngày trong tháng được chọn
+    const daysInMonth = new Date(reportYear.value, reportMonth.value, 0).getDate()
+    
+    // Tạo labels và data cho tất cả các ngày trong tháng
+    for (let day = 1; day <= daysInMonth; day++) {
+      labels.push(`Ngày ${day}`)
+      data.push(dailyRevenue[day] || 0) // Nếu không có doanh thu thì là 0
+    }
+  }
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Doanh thu (VND)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgb(54, 162, 235)',
+        borderWidth: 1,
+        tension: 0.1,
+        data: data
+      }
+    ]
+  }
+})
+
+const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false // Ẩn chú thích mặc định
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          let label = context.dataset.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed.y !== null) {
+            label += formatCurrency(context.parsed.y);
+          }
+          return label;
+        }
+      }
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        callback: function(value) {
+          return formatCurrency(value);
+        }
+      }
+    }
+  }
+})
+// ----------------------------------------
 
 // Khởi tạo
 onMounted(async () => {

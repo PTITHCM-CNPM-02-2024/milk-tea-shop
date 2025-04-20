@@ -2,7 +2,7 @@ package com.mts.backend.api.auth;
 import com.mts.backend.api.auth.request.AuthenticationRequest;
 import com.mts.backend.application.account.AuthCommandBus;
 import com.mts.backend.application.account.command.AuthenticationCommand;
-import com.mts.backend.application.account.handler.LogoutCommand;
+import com.mts.backend.application.account.command.LogoutCommand;
 import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;

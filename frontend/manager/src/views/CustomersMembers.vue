@@ -259,10 +259,6 @@
                     </v-list>
 
                     <div class="d-flex align-center justify-space-between mt-4">
-                      <div>
-                        <div class="text-caption text-medium-emphasis">Thành viên hiện tại:</div>
-                        <div class="text-h6 font-weight-bold">{{ getMemberCount(item.id) }}</div>
-                      </div>
 
                       <div class="d-flex gap-2">
                         <v-btn
@@ -1243,8 +1239,11 @@ const openAddMembershipDialog = () => {
 
 const openEditMembershipDialog = (membership) => {
   editMode.value = true
-  editedMembership.value = {...membership}
-  membershipDialog.value = true
+  // Sao chép các thuộc tính hiện có
+  editedMembership.value = { ...membership };
+  // Đảm bảo isActive luôn là boolean (mặc định là true nếu null/undefined)
+  editedMembership.value.isActive = membership.isActive ?? true;
+  membershipDialog.value = true;
 }
 
 const closeMembershipDialog = () => {

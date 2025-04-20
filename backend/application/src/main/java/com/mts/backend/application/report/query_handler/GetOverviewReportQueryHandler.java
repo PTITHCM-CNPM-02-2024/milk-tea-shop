@@ -42,8 +42,8 @@ public class GetOverviewReportQueryHandler implements IQueryHandler<BasicReportQ
         
         response.setSumOrderValue(totalOrderValue);
         response.setAvgOrderValue(avgOrderValue);
-        response.setMinOrderValue(minOrderValue.getValue());
-        response.setMaxOrderValue(maxOrderValue.getValue());
+        response.setMinOrderValue(minOrderValue);
+        response.setMaxOrderValue(maxOrderValue);
         
         return CommandResult.success(response);
         
