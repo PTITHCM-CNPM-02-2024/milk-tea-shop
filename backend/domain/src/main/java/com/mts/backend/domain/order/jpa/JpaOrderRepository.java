@@ -15,6 +15,7 @@ import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -157,26 +158,26 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
     JOIN op.price pp
     JOIN pp.product p
     RIGHT JOIN p.category c
-    WHERE o.orderTime BETWEEN :startDate AND :endDate
+    WHERE CAST(o.orderTime AS DATE) BETWEEN :startDate AND :endDate
     GROUP BY c.name
     ORDER BY totalRevenue DESC
     """)
     List<Object[]> findFinalAmountsByCategoryAndDateRange(
-            @Param("startDate") Instant startDate,
-            @Param("endDate") Instant endDate);
+            @Param("startDate") java.sql.Date startDate,
+            @Param("endDate") java.sql.Date endDate);
 
 
     @Query("""
     SELECT CAST(o.orderTime AS date) as get_date, SUM(o.finalAmount) as totalRevenue
     FROM Order o
-    WHERE o.orderTime BETWEEN :fromDate AND :toDate
+    WHERE CAST(o.orderTime AS DATE) BETWEEN :fromDate AND :toDate
     AND o.status = 'COMPLETED'
     GROUP BY CAST(o.orderTime AS date)
-    ORDER BY get_date
+    ORDER BY totalRevenue desc
     """)
     List<Object[]> findRevenueByTimeRange(
-            @Param("fromDate") Instant fromDate,
-            @Param("toDate") Instant toDate
+            @Param("fromDate") java.sql.Date fromDate,
+            @Param("toDate") java.sql.Date toDate
     );
 
     @Query("""
@@ -184,7 +185,7 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
     FROM Order o
     WHERE o.orderTime BETWEEN :fromDate AND :toDate AND o.employee.id = :employeeId
     GROUP BY CAST(o.orderTime AS date)
-    ORDER BY get_date
+    ORDER BY totalRevenue desc
     """)
     List<Object[]> findRevenueByTimeRange(
             @Param("employeeId") Long employeeId,
@@ -192,28 +193,27 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
             @Param("toDate") Instant toDate
     );
 
-    @Query(value = """
-
-         SELECT
-        p.product_id as productId,
-        p.name as productName,
-        COALESCE(c.name, 'Không có danh mục') as categoryName,
-        SUM(op.quantity) as totalQuantity,
-        SUM(op.quantity * pp.price) as totalRevenue
-    FROM `order` o
-    JOIN order_product op ON o.order_id = op.order_id
-    JOIN product_price pp ON op.product_price_id = pp.product_price_id
-    JOIN product p ON pp.product_id = p.product_id
-    LEFT JOIN category c ON p.category_id = c.category_id
+    @Query("""
+    SELECT
+        p.id,
+        p.name,
+        COALESCE(c.name, 'Không có danh mục'),
+        SUM(op.quantity),
+        SUM(op.quantity * pp.price)
+    FROM Order o
+     JOIN o.orderProducts op
+     JOIN op.price pp
+     JOIN pp.product p
+    LEFT JOIN p.category c
     WHERE o.status = 'COMPLETED' AND
-     o.order_time BETWEEN :fromDate AND :toDate
-    GROUP BY p.product_id, p.name, c.name
-    ORDER BY totalRevenue DESC""", nativeQuery = true)
+     CAST(o.orderTime AS date) BETWEEN :fromDate AND :toDate
+    GROUP BY p.id, p.name, c.name
+    ORDER BY SUM(op.quantity) DESC
+    """)
     List<Object[]> findTopSaleByProduct(
-            @Param("fromDate") Instant fromDate,
-            @Param("toDate") Instant toDate,
+            @Param("fromDate") java.sql.Date fromDate,
+            @Param("toDate") java.sql.Date toDate,
             Pageable pageable
     );
-    
 
 }

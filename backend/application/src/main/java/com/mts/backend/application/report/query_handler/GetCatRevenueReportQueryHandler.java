@@ -26,16 +26,12 @@ public class GetCatRevenueReportQueryHandler implements IQueryHandler<CatRevenue
     public CommandResult handle(CatRevenueReportQuery query) {
         Objects.requireNonNull(query, "CatRevenueReportQuery must not be null");
         
-        var fromDate = query.getFromDate().map(d -> d.atZone(ZoneOffset.systemDefault()).toInstant())
+        var fromDate = query.getFromDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneOffset.systemDefault()).toLocalDate()))
                 .orElse(null);
-        var toDate = query.getToDate().map(d -> d.atZone(ZoneOffset.systemDefault()).toInstant())
+        var toDate = query.getToDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneOffset.systemDefault()).toLocalDate()))
                 .orElse(null);
         
         var result = orderRepository.findFinalAmountsByCategoryAndDateRange(fromDate, toDate);
-        
-        if (result.isEmpty()) {
-            return CommandResult.success();
-        }
         
         var response = result.stream()
                 .map(r -> {
@@ -45,8 +41,8 @@ public class GetCatRevenueReportQueryHandler implements IQueryHandler<CatRevenue
                     var responseItem = CatRevenueByTimeResponse.builder()
                             .name(categoryName)
                             .revenue(finalAmount)
-                            .fromDate(fromDate.atZone(ZoneOffset.systemDefault()).toLocalDateTime())
-                            .toDate(toDate.atZone(ZoneOffset.systemDefault()).toLocalDateTime())
+                            .fromDate(query.getFromDate().orElse(null))
+                            .toDate(query.getToDate().orElse(null))
                             .build();
                     
                     return responseItem;

@@ -31,14 +31,13 @@ public class GetTopSaleProductQueryHandler implements IQueryHandler<TopSaleProdu
      * @return
      */
     @Override
-    @Transactional
     public CommandResult handle(TopSaleProductQuery query) {
         Objects.requireNonNull(query, "TopSaleProductQuery must not be null");
         
-        var fromDate = query.getFromDate().map(d -> d.atZone(ZoneId.systemDefault()).toInstant())
+        var fromDate = query.getFromDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
         
-        var toDate = query.getToDate().map(d -> d.atZone(ZoneId.systemDefault()).toInstant())
+        var toDate = query.getToDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
         
        var result = orderRepository.findTopSaleByProduct( fromDate, toDate, Pageable.ofSize(query.getLimit()));

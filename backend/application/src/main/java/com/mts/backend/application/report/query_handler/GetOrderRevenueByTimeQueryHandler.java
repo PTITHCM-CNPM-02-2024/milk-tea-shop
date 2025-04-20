@@ -29,12 +29,10 @@ public class GetOrderRevenueByTimeQueryHandler implements IQueryHandler<OrderRev
     public CommandResult handle(OrderRevenueByTimeQuery query) {
         Objects.requireNonNull(query, "OrderRevenueByTimeQuery must not be null");
         
-        var fromDate = query.getFromDate().map(d -> d.atZone(ZoneId.systemDefault())
-                .toInstant())
+        var fromDate = query.getFromDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
         
-        var toDate = query.getToDate().map(d -> d.atZone(ZoneId.systemDefault())
-                .toInstant())
+        var toDate = query.getToDate().map(d -> java.sql.Date.valueOf(d.atZone(ZoneId.systemDefault()).toLocalDate()))
                 .orElse(null);
         
         var result = orderRepository.findRevenueByTimeRange(fromDate, toDate);
