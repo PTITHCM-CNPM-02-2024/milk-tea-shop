@@ -44,7 +44,7 @@ public class GetAllOrderByEmpIdQueryHandler implements IQueryHandler<OrderByEmpI
                     OrderBasicResponse orderBasicResponse = OrderBasicResponse.builder()
                             .orderId(r.getId())
                             .customerId(r.getCustomer().map(Customer::getId).orElse(null))
-                            .employeeId(r.getEmployeeEntity().getId())
+                            .employeeId(r.getEmployee().getId())
                             .orderTime(r.getOrderTime())
                             .finalAmount(r.getFinalAmount().map(Money::getValue).orElse(null))
                             .totalAmount(r.getTotalAmount().map(Money::getValue).orElse(null))

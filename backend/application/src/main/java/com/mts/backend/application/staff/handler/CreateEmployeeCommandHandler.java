@@ -6,7 +6,7 @@ import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.domain.account.value_object.PasswordHash;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -40,7 +40,7 @@ public class CreateEmployeeCommandHandler implements ICommandHandler<CreateEmplo
 
         var account = createAccount(command);
 
-        var em = EmployeeEntity.
+        var em = Employee.
                 builder()
                 .id(EmployeeId.create().getValue())
                 .firstName(command.getFirstName())

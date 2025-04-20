@@ -6,15 +6,17 @@ import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.domain.account.value_object.PasswordHash;
-import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.staff.ManagerEntity;
+import com.mts.backend.domain.staff.Manager;
 import com.mts.backend.domain.staff.identifier.ManagerId;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,56 +39,44 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
     @Override
     @Transactional
     public CommandResult handle(CreateManagerCommand command) {
-        
-        verifyUniqueEmail(command.getEmail());
-        verifyUniquePhone(command.getPhone());
+        Objects.requireNonNull(command, "CreateManagerCommand is required");
         
         var account = createAccount(command);
 
-        ManagerEntity manager = ManagerEntity.builder()
+        try{
+            Manager manager = Manager.builder()
                 .id(ManagerId.create().getValue())
                 .firstName(command.getFirstName())
                 .lastName(command.getLastName())
                 .email(command.getEmail())
                 .phone(command.getPhone())
                 .gender(command.getGender())
-                .accountEntity(account)
+                .account(account)
                 .build();
         
         var savedManager = managerRepository.save(manager);
         
         return  CommandResult.success(savedManager.getId());
-    }
-    
-    private void verifyUniqueEmail (Email email){
-        Objects.requireNonNull(email, "Email is required");
-        if (managerRepository.existsByEmail(email)){
-            throw new DuplicateException("Email đã tồn tại");
+        }catch(DataIntegrityViolationException e){
+            if(e.getMessage().contains("fk_manager_account")){
+                throw new NotFoundException("Tài khoản không tồn tại");
+            }
+            if(e.getMessage().contains("uk_manager_email")){
+                throw new DuplicateException("Email đã tồn tại");
+            }
+            if(e.getMessage().contains("uk_manager_phone")){
+                throw new DuplicateException("Số điện thoại đã tồn tại");
+            }
+            throw new DomainException("Lỗi khi tạo nhân viên", e);
         }
-        
-    }
     
-    private void verifyUniquePhone (PhoneNumber phoneNumber){
-        Objects.requireNonNull(phoneNumber, "Phone number is required");
-        if (managerRepository.existsByPhone(phoneNumber)){
-            throw new DuplicateException("Số điện thoại đã tồn tại");
-        }
     }
     
     private Account createAccount(CreateManagerCommand command){
         Objects.requireNonNull(command, "Account id is required");
         
-        if (accountRepository.existsByUsername(command.getUsername())){
-            throw new DuplicateException("Tên đăng nhập đã tồn tại");
-        }
-        
-        if (!roleRepository.existsById(command.getRoleId().getValue())){
-            throw new NotFoundException("Không tìm thấy quyền với id: " + command.getRoleId().getValue());
-        }
-        
-        var password = PasswordHash.builder()
-                .value(passwordEncoder.encode(command.getPassword().getValue()))
-                .build();
+        try{
+            var password = PasswordHash.of(passwordEncoder.encode(command.getPassword().getValue()));
         
         var account = Account.builder()
                 .id(AccountId.create().getValue())
@@ -103,7 +93,18 @@ public class CreateManagerCommandHandler implements ICommandHandler<CreateManage
         accountRepository.saveAndFlush(account);
         
         accountRepository.grantPermissionsByRole(account.getId());
-        
+
         return account;
+
+        }catch(DataIntegrityViolationException e){
+            if(e.getMessage().contains("uk_account_username")){
+                throw new DuplicateException("Tên đăng nhập đã tồn tại");
+            }
+            if(e.getMessage().contains("fk_account_role")){
+                throw new NotFoundException("Quyền không tồn tại");
+            }
+            throw new DomainException("Lỗi khi tạo tài khoản", e);
+        }
+        
     }
 }

@@ -10,7 +10,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
@@ -32,6 +34,8 @@ import static java.sql.Types.TIMESTAMP;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account extends BaseEntity<Long> {
     @Id
     @Comment("Mã tài khoản")
@@ -39,22 +43,7 @@ public class Account extends BaseEntity<Long> {
     @NotNull
     @Getter
     private Long id;
-
-    public Account(@NotNull Long id, @NotNull Role role, @NotNull @NotBlank @Pattern(regexp = "^[a-zA-Z0-9]{3,50}$",
-            message = "Tên đăng nhập phải chứa ít nhất 3 ký tự và không quá 50 ký tự") String username, @NotNull @NotBlank(message = "Mật khẩu không được để trống") @Size(max = 255, message = "Mật khẩu không được quá 255 ký tự") String passwordHash, @Nullable Boolean active, @Nullable Instant lastLogin, @NotNull Boolean locked, Long tokenVersion) {
-        this.id = id;
-        this.role = role;
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.active = active;
-        this.lastLogin = lastLogin;
-        this.locked = locked;
-        this.tokenVersion = tokenVersion;
-    }
-
-    public Account() {
-    }
-
+    
     public static AccountBuilder builder() {
         return new AccountBuilder();
     }
@@ -71,6 +60,7 @@ public class Account extends BaseEntity<Long> {
     @Comment("Mã vai trò")
     @JoinColumn(name = "role_id")
     @NotNull
+    @Getter
     private Role role;
     
     public boolean setRole(@NotNull Role role) {
@@ -88,6 +78,14 @@ public class Account extends BaseEntity<Long> {
     @Pattern(regexp = "^[a-zA-Z0-9]{3,50}$",
             message = "Tên đăng nhập phải chứa ít nhất 3 ký tự và không quá 50 ký tự")
     private String username;
+    
+    public Username getUsername() {
+        return Username.of(username);
+    }
+    
+    public PasswordHash getPassword() {
+        return PasswordHash.of(passwordHash);
+    }
 
     @Comment("Mật khẩu đã mã hóa")
     @Column(name = "password_hash", nullable = false, length = 255)
@@ -115,6 +113,7 @@ public class Account extends BaseEntity<Long> {
     @Column(name = "last_login")
     @JdbcTypeCode(TIMESTAMP)
     @Nullable
+    
     private Instant lastLogin;
 
     public Optional<Instant> getLastLogin() {
@@ -133,6 +132,8 @@ public class Account extends BaseEntity<Long> {
     @Comment("Kiểm tra tính hợp lệ của token")
     @ColumnDefault("'0'")
     @Column(name = "token_version", columnDefinition = "int UNSIGNED")
+    @Getter
+    @Setter
     private Long tokenVersion;
 
 

@@ -1,6 +1,6 @@
-package com.mts.backend.application.account.response;
+package com.mts.backend.application.account.handler;
 
-import com.mts.backend.application.account.handler.LogoutCommand;
+import com.mts.backend.application.account.command.LogoutCommand;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;

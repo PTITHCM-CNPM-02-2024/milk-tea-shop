@@ -3,7 +3,7 @@ package com.mts.backend.application.product.query_handler;
 import com.mts.backend.application.product.query.ProdByIdQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
-import com.mts.backend.domain.product.ProductEntity;
+import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -32,7 +32,7 @@ public class GetProductByIdQueryHandler implements IQueryHandler<ProdByIdQuery, 
                 .image_url(result.getImagePath())
                 .signature(result.getSignature())
                 .available(result.getAvailable())
-                .category(result.getCategoryEntity().map(category -> CategoryDetailResponse.builder()
+                .category(result.getCategory().map(category -> CategoryDetailResponse.builder()
                         .id(category.getId())
                         .name(category.getName().getValue())
                         .build()).orElse(null))
@@ -53,7 +53,7 @@ public class GetProductByIdQueryHandler implements IQueryHandler<ProdByIdQuery, 
     }
     
     
-    private ProductEntity mustExist(ProductId productId) {
+    private Product mustExist(ProductId productId) {
         return jpaProductRepository.findByIdFetch(productId.getValue()).orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với id: " + productId.getValue()));
     }
     

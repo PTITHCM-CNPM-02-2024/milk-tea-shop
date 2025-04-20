@@ -1,7 +1,6 @@
 package com.mts.backend.domain.order.jpa;
 
-import com.mts.backend.domain.order.OrderTableEntity;
-import com.mts.backend.domain.promotion.identifier.CouponId;
+import com.mts.backend.domain.order.OrderTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,12 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface JpaOrderTableRepository extends JpaRepository<OrderTableEntity, Long> {
+public interface JpaOrderTableRepository extends JpaRepository<OrderTable, Long> {
     
 
     @Query(value = "SELECT * FROM milk_tea_shop_prod.OrderTable WHERE table_id = :tableId",
             nativeQuery = true)
-    List<OrderTableEntity> findByTableId(@Param("tableId") Long tableId);
+    List<OrderTable> findByTableId(@Param("tableId") Long tableId);
 
     @Modifying
     @Transactional

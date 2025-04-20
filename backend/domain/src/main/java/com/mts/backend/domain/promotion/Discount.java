@@ -76,6 +76,7 @@ public class Discount extends BaseEntity<Long> {
     @Comment("Liên kết với mã giảm giá (coupon), NULL nếu không yêu cầu mã giảm giá")
     @JoinColumn(name = "coupon_id", nullable = false)
     @NotNull
+    @Getter
     private Coupon coupon;
     
     public boolean setCoupon(@NotNull Coupon coupon) {
@@ -151,6 +152,7 @@ public class Discount extends BaseEntity<Long> {
     @ColumnDefault("'0'")
     @Column(name = "current_uses", columnDefinition = "int UNSIGNED")
     @NotNull(message = "Số lần sử dụng không được để trống")
+    @Getter
     private Long currentUse;
 
     public long increaseCurrentUses() {

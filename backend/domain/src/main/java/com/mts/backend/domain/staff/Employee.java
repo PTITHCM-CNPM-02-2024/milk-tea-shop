@@ -5,7 +5,6 @@ import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.value_object.Position;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,7 +15,6 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
-import java.util.Optional;
 
 
 @Entity
@@ -27,7 +25,7 @@ import java.util.Optional;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class EmployeeEntity extends BaseEntity<Long> {
+public class Employee extends BaseEntity<Long> {
     @Id
     @Comment("Mã nhân viên")
     @Column(name = "employee_id", columnDefinition = "int UNSIGNED")
@@ -35,8 +33,8 @@ public class EmployeeEntity extends BaseEntity<Long> {
     @Getter
     private Long id;
 
-    public EmployeeEntity(@NotNull Long id, @NotNull Account account, @NotBlank(message = "Chức vụ không được " +
-                                                                                           "để trống") @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự") String position, @NotBlank(message = "Họ không được để trống") @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, @NotNull Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
+    public Employee(@NotNull Long id, @NotNull Account account, @NotBlank(message = "Chức vụ không được " +
+                                                                                    "để trống") @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự") String position, @NotBlank(message = "Họ không được để trống") @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, @NotNull Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
         this.id = id;
         this.account = account;
         this.position = position;
@@ -47,7 +45,7 @@ public class EmployeeEntity extends BaseEntity<Long> {
         this.email = email;
     }
 
-    public EmployeeEntity() {
+    public Employee() {
     }
 
     public static EmployeeEntityBuilder builder() {
@@ -205,7 +203,7 @@ public class EmployeeEntity extends BaseEntity<Long> {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        EmployeeEntity employee = (EmployeeEntity) o;
+        Employee employee = (Employee) o;
         return getId() != null && Objects.equals(getId(), employee.getId());
     }
 
@@ -277,12 +275,12 @@ public class EmployeeEntity extends BaseEntity<Long> {
             return this;
         }
 
-        public EmployeeEntity build() {
-            return new EmployeeEntity(this.id, this.account, this.position, this.lastName, this.firstName, this.gender, this.phone, this.email);
+        public Employee build() {
+            return new Employee(this.id, this.account, this.position, this.lastName, this.firstName, this.gender, this.phone, this.email);
         }
 
         public String toString() {
-            return "EmployeeEntity.EmployeeEntityBuilder(id=" + this.id + ", account=" + this.account + ", position=" + this.position + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
+            return "Employee.EmployeeEntityBuilder(id=" + this.id + ", account=" + this.account + ", position=" + this.position + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
         }
     }
 }

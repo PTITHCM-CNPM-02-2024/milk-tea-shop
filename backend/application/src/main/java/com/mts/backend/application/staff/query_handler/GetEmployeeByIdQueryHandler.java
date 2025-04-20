@@ -3,7 +3,7 @@ package com.mts.backend.application.staff.query_handler;
 import com.mts.backend.application.staff.query.EmployeeByIdQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -41,7 +41,7 @@ public class GetEmployeeByIdQueryHandler implements IQueryHandler<EmployeeByIdQu
         return CommandResult.success(response);
     }
     
-    private EmployeeEntity mustExistEmployee(EmployeeId id){
+    private Employee mustExistEmployee(EmployeeId id){
         Objects.requireNonNull(id, "Employee id is required");
         
         return employeeRepository.findByIdWithJoinFetch(id.getValue())

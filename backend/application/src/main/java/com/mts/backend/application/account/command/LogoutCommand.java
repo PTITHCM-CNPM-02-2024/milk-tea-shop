@@ -1,4 +1,4 @@
-package com.mts.backend.application.account.handler;
+package com.mts.backend.application.account.command;
 
 import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.identifier.AccountId;

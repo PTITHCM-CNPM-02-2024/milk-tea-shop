@@ -45,9 +45,7 @@ public class CouponController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createCoupon(@Parameter(description = "Thông tin coupon", required = true) @RequestBody CreateCouponRequest request) {
         var command = CreateCouponCommand.builder()
-                .coupon(CouponCode.builder()
-                        .value(request.getCoupon())
-                        .build())
+                .coupon(CouponCode.of(request.getCoupon()))
                 .description(request.getDescription())
                 .build();
         
@@ -68,9 +66,7 @@ public class CouponController implements IController {
         
         var command = UpdateCouponCommand.builder()
                 .id(CouponId.of(id))
-                .coupon(CouponCode.builder()
-                        .value(request.getCoupon())
-                        .build())
+                .coupon(CouponCode.of(request.getCoupon()))
                 .description(request.getDescription())
                 .build();
         

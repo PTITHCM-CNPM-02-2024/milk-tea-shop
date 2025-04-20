@@ -1,9 +1,9 @@
 package com.mts.backend.application.product.handler;
 
 import com.mts.backend.application.product.command.AddProductPriceCommand;
-import com.mts.backend.domain.product.ProductEntity;
-import com.mts.backend.domain.product.ProductPriceEntity;
-import com.mts.backend.domain.product.ProductSizeEntity;
+import com.mts.backend.domain.product.Product;
+import com.mts.backend.domain.product.ProductPrice;
+import com.mts.backend.domain.product.ProductSize;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.identifier.ProductPriceId;
 import com.mts.backend.domain.product.identifier.ProductSizeId;
@@ -46,9 +46,9 @@ public class AddProductPriceCommandHandler implements ICommandHandler<AddProduct
             
             var size = mustBeExistProductSize(price.getSizeId());
 
-            product.addProductPriceEntity(ProductPriceEntity.builder()
+            product.addPrice(ProductPrice.builder()
                     .id(ProductPriceId.create().getValue())
-                    .productEntity(product)
+                    .product(product)
                     .size(size)
                     .price(price.getPrice())
                     .build());
@@ -57,12 +57,12 @@ public class AddProductPriceCommandHandler implements ICommandHandler<AddProduct
         return CommandResult.success(product.getId());
     }
 
-    private ProductEntity mustBeExistProduct(ProductId productId) {
+    private Product mustBeExistProduct(ProductId productId) {
         Objects.requireNonNull(productId, "ProductId is required");
         return productRepository.findById(productId.getValue()).orElseThrow(() -> new NotFoundException("Sản phẩm " + productId + " không tồn tại"));
     }
 
-    private ProductSizeEntity mustBeExistProductSize(ProductSizeId sizeId) {
+    private ProductSize mustBeExistProductSize(ProductSizeId sizeId) {
         Objects.requireNonNull(sizeId, "ProductSizeId is required");
 
         if (!sizeRepository.existsById(sizeId.getValue())) {

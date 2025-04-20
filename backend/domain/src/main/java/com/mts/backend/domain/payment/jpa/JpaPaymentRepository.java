@@ -18,23 +18,23 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JpaPaymentRepository extends JpaRepository<Payment, Long> {
-  @Query("select p from Payment p where p.orderEntity.id = :id")
+  @Query("select p from Payment p where p.order.id = :id")
   List<Payment> findByOrderEntity_Id(@Param("id") Long id);
 
   @Query("""
           select p from Payment p
-          where p.orderEntity.id is not null and p.orderEntity.id = :id and p.orderEntity.status = :status and p.status = :status1""")
+          where p.order.id is not null and p.order.id = :id and p.order.status = :status and p.status = :status1""")
   List<Payment> findByOrderAndPaymentStatus(@Param("id") OrderId orderId, @Param("status") OrderStatus status,
                                             @Param("status1") PaymentStatus status1);
 
-  @Query("select p from Payment p where p.orderEntity.id = :id and p.id <> :id1")
+  @Query("select p from Payment p where p.order.id = :id and p.id <> :id1")
   List<Payment> findByOrderEntity_IdAndIdNot(@Param("id") @NonNull Long id, @Param("id1") @NonNull Long id1);
   
-    @EntityGraph(attributePaths = {"paymentMethod", "orderEntity"})
+    @EntityGraph(attributePaths = {"paymentMethod", "order"})
     @Query("select p from Payment p")
     Page<Payment> findAllFetch(Pageable pageable);
     
-    @EntityGraph(attributePaths = {"paymentMethod", "orderEntity.customer", "orderEntity.employeeEntity"})
+    @EntityGraph(attributePaths = {"paymentMethod", "order.customer", "order.employee"})
     @Query("select p from Payment p where p.id = :id")
     Optional<Payment> findByIdFetch(@Param("id") Long id);
     

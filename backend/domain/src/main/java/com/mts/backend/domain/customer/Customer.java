@@ -127,7 +127,6 @@ public class Customer extends BaseEntity<Long> {
     @jakarta.validation.constraints.NotBlank(message = "Họ không được để trống")
     private String firstName;
 
-    @Getter
     @Comment("Số điện thoại")
     @Column(name = "phone", nullable = false, length = 15)
     @NotNull
@@ -135,6 +134,10 @@ public class Customer extends BaseEntity<Long> {
     @jakarta.validation.constraints.NotBlank(message = "Số điện thoại không được để trống")
     @jakarta.validation.constraints.Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ")
     private String phone;
+
+    public PhoneNumber getPhone() {
+        return PhoneNumber.of(this.phone);
+    }
 
     @Comment("Email")
     @Column(name = "email", length = 100)
@@ -149,6 +152,10 @@ public class Customer extends BaseEntity<Long> {
     @NotNull
     @PositiveOrZero(message = "Điểm hiện tại không được âm")
     private Integer currentPoint;
+    
+    public RewardPoint getCurrentPoint() {
+        return RewardPoint.of(this.currentPoint);
+    }
 
     @Comment("Giới tính")
     @Column(name = "gender")

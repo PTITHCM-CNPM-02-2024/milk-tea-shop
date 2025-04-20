@@ -2,8 +2,7 @@ package com.mts.backend.application.staff.query_handler;
 
 import com.mts.backend.application.staff.query.DefaultEmployeeQuery;
 import com.mts.backend.application.staff.response.EmployeeDetailResponse;
-import com.mts.backend.domain.account.Account;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -25,7 +24,7 @@ public class GetAllEmployeeQueryHandler implements IQueryHandler<DefaultEmployee
     public CommandResult handle(DefaultEmployeeQuery query) {
         Objects.requireNonNull(query);
 
-        Page<EmployeeEntity> employees = employeeRepository.findAllWithJoinFetch(PageRequest.of(query.getPage(), query.getSize()));
+        Page<Employee> employees = employeeRepository.findAllWithJoinFetch(PageRequest.of(query.getPage(), query.getSize()));
         Page<EmployeeDetailResponse> responses = employees.map( emp -> {
             return EmployeeDetailResponse.builder()
                     .id(emp.getId())

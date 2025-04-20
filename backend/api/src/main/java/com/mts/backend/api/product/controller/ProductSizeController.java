@@ -45,8 +45,8 @@ public class ProductSizeController implements IController {
     public ResponseEntity<?> createProductSize(@Parameter(description = "Thông tin size sản phẩm", required = true) @RequestBody CreateProductSizeRequest request) {
 
         CreateProductSizeCommand command = CreateProductSizeCommand.builder()
-                .name(ProductSizeName.builder().value(request.getName()).build())
-                .quantity(QuantityOfProductSize.builder().value(request.getQuantity()).build())
+                .name(ProductSizeName.of(request.getName()))
+                .quantity(QuantityOfProductSize.of(request.getQuantity()))
                 .unitId(UnitOfMeasureId.of(request.getUnitId()))
                 .description(request.getDescription())
                 .build();
@@ -67,8 +67,8 @@ public class ProductSizeController implements IController {
     public ResponseEntity<?> updateProductSize(@Parameter(description = "ID size sản phẩm", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateProductSizeRequest request) {
         UpdateProductSizeCommand command = UpdateProductSizeCommand.builder().
                 id(ProductSizeId.of(id))
-                .name(ProductSizeName.builder().value(request.getName()).build())
-                .quantity(QuantityOfProductSize.builder().value(request.getQuantity()).build())
+                .name(ProductSizeName.of(request.getName()))
+                .quantity(QuantityOfProductSize.of(request.getQuantity()))
                 .unitId(UnitOfMeasureId.of(request.getUnitId()))
                 .description(request.getDescription())
                 .build();

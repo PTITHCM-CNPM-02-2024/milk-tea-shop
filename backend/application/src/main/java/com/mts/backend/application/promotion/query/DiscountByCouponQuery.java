@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class DiscountByCouponQuery implements IQuery<CommandResult> {
-    private CouponCode couponId;
+    private CouponCode code;
 }

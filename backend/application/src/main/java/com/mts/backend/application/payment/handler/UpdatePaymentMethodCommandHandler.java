@@ -7,9 +7,12 @@ import com.mts.backend.domain.payment.jpa.JpaPaymentMethodRepository;
 import com.mts.backend.domain.payment.value_object.PaymentMethodName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,63 +20,48 @@ import java.util.Objects;
 
 @Service
 public class UpdatePaymentMethodCommandHandler implements ICommandHandler<UpdatePaymentMethodCommand, CommandResult> {
-    
+
     private final JpaPaymentMethodRepository paymentMethodRepository;
-    
+
     private static final List<PaymentMethodId> BLACK_LIST_PAYMENT_METHOD = List.of(
             PaymentMethodId.of(1),
             PaymentMethodId.of(2),
             PaymentMethodId.of(3),
             PaymentMethodId.of(4),
-            PaymentMethodId.of(5)
-    );
-    
+            PaymentMethodId.of(5));
+
     public UpdatePaymentMethodCommandHandler(JpaPaymentMethodRepository paymentMethodRepository) {
         this.paymentMethodRepository = paymentMethodRepository;
     }
+
     /**
-     * @param command 
+     * @param command
      * @return
      */
     @Override
     @Transactional
     public CommandResult handle(UpdatePaymentMethodCommand command) {
         Objects.requireNonNull(command, "UpdatePaymentMethodCommand is required");
-        
+
         if (BLACK_LIST_PAYMENT_METHOD.contains(command.getPaymentMethodId())) {
-            throw new NotFoundException("Không thể cập nhật phương thức thanh toán này");
+            throw new DomainException("Không thể cập nhật phương thức thanh toán này");
         }
-        
-        var paymentMethod = mustExistPaymentMethod(command.getPaymentMethodId());
-        
-        PaymentMethodName name = command.getName();
-        
-        if (paymentMethod.setName(name)) {
-            verifyUniqueName(command.getPaymentMethodId(), name);
-        }
-        
-        paymentMethod.setDescription(command.getDescription().orElse(null));
-        
-        
-        return CommandResult.success(paymentMethod.getId());
-    }
-    
-    private PaymentMethod mustExistPaymentMethod(PaymentMethodId id){
-        Objects.requireNonNull(id, "PaymentMethodId is required");
-        
-        return paymentMethodRepository.findById(id.getValue())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy phương thức thanh toán"));
-    }
-    
-    
-    
-    
-    private void verifyUniqueName(PaymentMethodId id, PaymentMethodName name){
-        Objects.requireNonNull(id, "PaymentMethodId is required");
-        Objects.requireNonNull(name, "PaymentMethodName is required");
-        
-        if (paymentMethodRepository.existsByIdNotAndPaymentName(id.getValue(), name)) {
-            throw new DuplicateException("Tên phương thức thanh toán đã tồn tại");
+
+        try {
+            var paymentMethod = paymentMethodRepository.findById(command.getPaymentMethodId().getValue())
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy phương thức thanh toán"));
+
+            paymentMethod.setName(command.getName());
+
+            paymentMethod.setDescription(command.getDescription().orElse(null));
+
+            return CommandResult.success(paymentMethod.getId());
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("uk_payment_method_name")) {
+                throw new DuplicateException("Tên phương thức thanh toán đã tồn tại");
+            }
+            throw new DomainException("Lỗi khi cập nhật phương thức thanh toán", e);
         }
     }
+
 }

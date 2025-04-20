@@ -1,15 +1,11 @@
 package com.mts.backend.application.product.query_handler;
 
 import com.mts.backend.application.product.query.ProductForSaleQuery;
-import com.mts.backend.application.product.response.CategoryDetailResponse;
-import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.application.product.response.ProductSummaryResponse;
-import com.mts.backend.domain.product.ProductEntity;
+import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +26,7 @@ public class GetAllProductForSaleQueryHandler implements IQueryHandler<ProductFo
     @Override
     public CommandResult handle(ProductForSaleQuery query) {
         Objects.requireNonNull(query, "OrderedProductQuery is required");
-        List<ProductEntity> products = productRepository.findAllForSaleFetch(query.getAvailableOrder());
+        List<Product> products = productRepository.findAllForSaleFetch(query.getAvailableOrder());
         
         List<ProductSummaryResponse> responses = products.stream().map(product -> {
             
@@ -43,7 +39,7 @@ public class GetAllProductForSaleQueryHandler implements IQueryHandler<ProductFo
                     .minPrice(product.getMinPrice().getValue())
                     .build();
             
-            product.getCategoryEntity().ifPresent(category -> {
+            product.getCategory().ifPresent(category -> {
                 productResponse.setCatId(category.getId());
             });
             

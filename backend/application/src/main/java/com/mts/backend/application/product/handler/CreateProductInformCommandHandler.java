@@ -12,23 +12,25 @@ import com.mts.backend.domain.product.jpa.JpaProductSizeRepository;
 import com.mts.backend.domain.product.value_object.ProductName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
-public class
-CreateProductInformCommandHandler implements ICommandHandler<CreateProductCommand, CommandResult> {
+public class CreateProductInformCommandHandler implements ICommandHandler<CreateProductCommand, CommandResult> {
     private final JpaCategoryRepository categoryRepository;
     private final JpaProductSizeRepository sizeRepository;
     private final JpaProductRepository productRepository;
 
     public CreateProductInformCommandHandler(JpaProductPriceRepository priceRepository,
-                                             JpaCategoryRepository categoryRepository,
-                                             JpaProductSizeRepository sizeRepository, JpaProductRepository productRepository) {
+            JpaCategoryRepository categoryRepository,
+            JpaProductSizeRepository sizeRepository, JpaProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
         this.sizeRepository = sizeRepository;
         this.productRepository = productRepository;
@@ -40,69 +42,46 @@ CreateProductInformCommandHandler implements ICommandHandler<CreateProductComman
 
         Objects.requireNonNull(command.getName(), "Product name is required");
 
-        verifyUniqueName(command.getName());
+        try {
 
-        var categoryEn = verifyCategoryExists(command.getCategoryId().orElse(null));
+            var product = Product.builder().id(ProductId.create().getValue()).name(command.getName())
+                    .description(command.getDescription().orElse(null))
+                    .category(command.getCategoryId().map(c -> categoryRepository.getReferenceById(c.getValue()))
+                            .orElse(null))
+                    .available(command.getAvailable().orElse(true)).signature(command.getSignature().orElse(null))
+                    .imagePath(command.getImagePath().orElse(null)).build();
 
+            command.getProductPrices().forEach(p -> {
 
-        var product = ProductEntity.
-                builder().
-                id(ProductId.create().getValue()).
-                name(command.getName()).
-                description(command.getDescription().orElse(null)).
-                categoryEntity(categoryEn).
-                available(command.getAvailable().orElse(true)).
-                signature(command.getSignature().orElse(null)).
-                imagePath(command.getImagePath().orElse(null)).
-                build();
+                var size = sizeRepository.getReferenceById(p.getSizeId().getValue());
 
-        command.getProductPrices().forEach(p -> {
-            
-            var size =   verifySizeExists(p.getSizeId());
-            
-            ProductPriceEntity productPrice = ProductPriceEntity.builder()
-                    .productEntity(product)
-                    .size(size)
-                    .price(p.getPrice())
-                    .build();
-            
-            product.addProductPriceEntity(productPrice);
+                ProductPrice productPrice = ProductPrice.builder()
+                        .product(product)
+                        .size(size)
+                        .price(p.getPrice())
+                        .build();
 
-        });
-        
-        var result = productRepository.save(product);
+                product.addPrice(productPrice);
 
-        return CommandResult.success(result.getId());
-    }
+            });
 
-    private void verifyUniqueName(ProductName name) {
-        Objects.requireNonNull(name, "Product name is required");
+            var result = productRepository.save(product);
+            return CommandResult.success(result.getId());
 
-        if (productRepository.existsByName(name)) {
-            throw new DuplicateException("Tên sản phẩm đã tồn tại");
-        }
-    }
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("uk_product_name")) {
+                throw new DuplicateException("Tên sản phẩm đã tồn tại");
+            }
+            if (e.getMessage().contains("fk_product_category")) {
+                throw new NotFoundException("Danh mục sản phẩm không tồn tại");
+            }
+            if (e.getMessage().contains("fk_product_price_product_size")) {
+                throw new NotFoundException("Kích cỡ sản phẩm không tồn tại");
+            }
 
-    private CategoryEntity verifyCategoryExists(CategoryId categoryId) {
-        if (categoryId == null) {
-            return null;
+            throw new DomainException("Lỗi khi tạo sản phẩm", e);
         }
 
-        if (!categoryRepository.existsById(categoryId.getValue())) {
-            throw new NotFoundException("Category " + categoryId.getValue() + " không tồn tại");
-        }
-
-        return categoryRepository.getReferenceById(categoryId.getValue());
-    }
-    
-    private ProductSizeEntity verifySizeExists(ProductSizeId sizeId) {
-        Objects.requireNonNull(sizeId, "Product size id is required");
-
-        if (!sizeRepository.existsById(sizeId.getValue())) {
-            throw new NotFoundException("Size " + sizeId.getValue() + " không tồn tại");
-        }
-        
-        return sizeRepository.getReferenceById(sizeId.getValue());
     }
 
 }

@@ -38,8 +38,8 @@ public class GetCustomerByIdQueryHandler implements IQueryHandler<CustomerByIdQu
                 .email(customer.getEmail().map(Email::getValue).orElse(null))
                 .gender(customer.getGender().map(Enum::name).orElse(null))
                 .phone(customer.getPhone().getValue())
-                .membershipId(customer.getMembershipTypeEntity().getId())
-                .rewardPoint(customer.getCurrentPoints().getValue())
+                .membershipId(customer.getMembershipType().getId())
+                .rewardPoint(customer.getCurrentPoint().getValue())
                 .accountId(customer.getAccount().map(Account::getId).orElse(null))
                 .build();
         

@@ -2,9 +2,8 @@ package com.mts.backend.application.product.query_handler;
 
 import com.mts.backend.application.product.query.CatByIdQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
-import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.application.product.response.ProductSummaryResponse;
-import com.mts.backend.domain.product.CategoryEntity;
+import com.mts.backend.domain.product.Category;
 import com.mts.backend.domain.product.jpa.JpaCategoryRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -42,7 +41,7 @@ public class GetCatByIdQueryHandler implements IQueryHandler<CatByIdQuery, Comma
                         productResponse.setDescription(p.getDescription());
                         productResponse.setImage_url(p.getImagePath());
                         productResponse.setSignature(p.getSignature());
-                        productResponse.setCatId(p.getCategoryEntity().map(CategoryEntity::getId).orElse(null));
+                        productResponse.setCatId(p.getCategory().map(Category::getId).orElse(null));
                         productResponse.setAvailable(p.getAvailable());
                         return productResponse;
                     }).toList())

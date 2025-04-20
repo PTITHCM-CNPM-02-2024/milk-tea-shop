@@ -15,14 +15,14 @@ import java.util.Optional;
 
 @Repository
 public interface JpaCustomerRepository extends JpaRepository<Customer, Long> {
-  @Query("select c from Customer c where c.accountEntity.id = :id")
+  @Query("select c from Customer c where c.account.id = :id")
   Optional<Customer> findByAccountEntity_Id(@Param("id") Long id);
 
   @EntityGraph(attributePaths = {"membershipType", "account"})
-  @Query("select c from Customer c where c.accountEntity.id = :id")
+  @Query("select c from Customer c where c.account.id = :id")
   Optional<Customer> findByAccountEntity_IdFetch(@Param("id") Long id);
 
-  @Query("select (count(c) > 0) from Customer c where c.accountEntity.id = :id")
+  @Query("select (count(c) > 0) from Customer c where c.account.id = :id")
   boolean existsByAccountEntity_Id(@Param("id") @NonNull Long id);
 
   @Query("select (count(c) > 0) from Customer c where c.phone = :phone")

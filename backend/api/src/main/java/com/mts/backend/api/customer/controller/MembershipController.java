@@ -47,7 +47,7 @@ public class MembershipController implements IController {
     public ResponseEntity<?> createMembership(@Parameter(description = "Thông tin hạng thành viên", required = true) @RequestBody CreateMembershipTypeRequest request) {
         var command = CreateMembershipCommand.
                 builder()
-                .name(MemberTypeName.builder().value(request.getName()).build())
+                .name(MemberTypeName.of(request.getName()))
                 .description(request.getDescription())
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(request.getDiscountValue())
@@ -70,7 +70,7 @@ public class MembershipController implements IController {
     public ResponseEntity<?> updateMembership(@Parameter(description = "ID hạng thành viên", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateMembershipTypeRequest request){
         var command = UpdateMemberCommand.builder()
                 .memberId(MembershipTypeId.of(id))
-                .name(MemberTypeName.builder().value(request.getName()).build())
+                .name(MemberTypeName.of(request.getName()))
                 .description(request.getDescription())
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(BigDecimal.valueOf(request.getDiscountValue()))

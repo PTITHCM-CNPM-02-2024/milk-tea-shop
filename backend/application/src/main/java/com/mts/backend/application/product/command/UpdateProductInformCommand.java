@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -22,4 +24,8 @@ public class UpdateProductInformCommand implements ICommand<CommandResult>{
     private String imagePath;
     private boolean isAvailable;
     private boolean isSignature;
+
+    public Optional<CategoryId> getCategoryId() {
+        return Optional.ofNullable(categoryId);
+    }
 }

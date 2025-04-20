@@ -48,7 +48,7 @@ public class CategoryController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createCategory(@Parameter(description = "Thông tin danh mục", required = true) @RequestBody CreateCategoryRequest createCategoryRequest) {
         CreateCategoryCommand createCategoryCommand = CreateCategoryCommand.builder()
-                .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
+                .name(CategoryName.of(createCategoryRequest.getName()))
                 .description(createCategoryRequest.getDescription())
                 .build();
 
@@ -68,7 +68,7 @@ public class CategoryController implements IController {
                                             @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody CreateCategoryRequest createCategoryRequest) {
         UpdateCategoryCommand createCategoryCommand = UpdateCategoryCommand.builder()
                 .id(CategoryId.of(id))
-                .name(CategoryName.builder().value(createCategoryRequest.getName()).build())
+                .name(CategoryName.of(createCategoryRequest.getName()))
                 .description(createCategoryRequest.getDescription())
                 .build();   
         var result = categoryCommandBus.dispatch(createCategoryCommand);

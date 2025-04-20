@@ -3,7 +3,7 @@ package com.mts.backend.application.product.query_handler;
 import com.mts.backend.application.product.query.DefaultCategoryQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
 import com.mts.backend.application.product.response.CategorySummaryResponse;
-import com.mts.backend.domain.product.CategoryEntity;
+import com.mts.backend.domain.product.Category;
 import com.mts.backend.domain.product.jpa.JpaCategoryRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -27,7 +27,7 @@ public class GetAllCategoryQueryHandler implements IQueryHandler<DefaultCategory
     public CommandResult handle(DefaultCategoryQuery query) {
         Objects.requireNonNull(query);
         
-        Page<CategoryEntity> categories = categoryRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
+        Page<Category> categories = categoryRepository.findAll(Pageable.ofSize(query.getSize()).withPage(query.getPage()));
         
         Page<CategorySummaryResponse> responses = categories.map(category -> {
             return CategoryDetailResponse.builder()

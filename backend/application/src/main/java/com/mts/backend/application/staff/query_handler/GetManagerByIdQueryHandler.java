@@ -3,7 +3,7 @@ package com.mts.backend.application.staff.query_handler;
 import com.mts.backend.application.staff.query.ManagerByIdQuery;
 import com.mts.backend.application.staff.response.ManagerDetailResponse;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
-import com.mts.backend.domain.staff.ManagerEntity;
+import com.mts.backend.domain.staff.Manager;
 import com.mts.backend.domain.staff.identifier.ManagerId;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -34,13 +34,13 @@ public class GetManagerByIdQueryHandler implements IQueryHandler<ManagerByIdQuer
                 .email(manager.getEmail().getValue())
                 .phone(manager.getPhone().getValue())
                 .gender(manager.getGender().toString())
-                .accountId(manager.getAccountEntity().getId())
+                .accountId(manager.getAccount().getId())
                 .build();
         
         return CommandResult.success(response);
     }
     
-    private ManagerEntity mustExistManager(ManagerId id){
+    private Manager mustExistManager(ManagerId id){
         Objects.requireNonNull(id, "Manager id is required");
         
         return managerRepository.findByIdWithJoinFetch(id.getValue())

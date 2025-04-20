@@ -46,7 +46,7 @@ public class PaymentMethodController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createPaymentMethod(@Parameter(description = "Thông tin phương thức thanh toán", required = true) @RequestBody CreatePaymentMethodRequest request) {
         CreatePaymentMethodCommand command = CreatePaymentMethodCommand.builder()
-                .name(PaymentMethodName.builder().value(request.getName()).build())
+                .name(PaymentMethodName.of(request.getName()))
                 .description(request.getDescription().orElse(null))
                 .build();
 
@@ -66,7 +66,7 @@ public class PaymentMethodController implements IController {
                                                               @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdatePaymentMethodRequest request){
         UpdatePaymentMethodCommand command = UpdatePaymentMethodCommand.builder()
                 .paymentMethodId(PaymentMethodId.of(id))
-                .name(PaymentMethodName.builder().value(request.getName()).build())
+                .name(PaymentMethodName.of(request.getName()))
                 .description(request.getDescription().orElse(null))
                 .build();
         

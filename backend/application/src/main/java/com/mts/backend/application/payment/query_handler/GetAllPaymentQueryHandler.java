@@ -1,7 +1,6 @@
 package com.mts.backend.application.payment.query_handler;
 
 import java.time.ZoneId;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,10 +31,10 @@ public class GetAllPaymentQueryHandler implements IQueryHandler<DefaultPaymentQu
             .id(payment.getId())
             .paymentMethod(PaymentMethodDetailResponse.builder()
                 .id(payment.getPaymentMethod().getId())
-                .name(payment.getPaymentMethod().getPaymentName().getValue())
-                .description(payment.getPaymentMethod().getPaymentDescription().orElse(null))
+                .name(payment.getPaymentMethod().getName().getValue())
+                .description(payment.getPaymentMethod().getDescription().orElse(null))
                 .build())
-            .orderId(payment.getOrderEntity().getId())
+            .orderId(payment.getOrder().getId())
             .paymentTime(payment.getPaymentTime().atZone(ZoneId.systemDefault()).toLocalDateTime())
             .status(payment.getStatus().map(Enum::name).orElse(null))
             .amountPaid(payment.getAmountPaid().map(Money::getValue).orElse(null))

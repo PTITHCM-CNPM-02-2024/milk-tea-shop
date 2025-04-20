@@ -8,41 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class UnitSymbol{
+    @jakarta.validation.constraints.NotBlank(message = "Ký hiệu đơn vị đo không được để trống")
+    @jakarta.validation.constraints.Size(max = 5, message = "Ký hiệu đơn vị đo không được vượt quá 5 ký tự")
     String value;
     
     private static final int MAX_LENGTH = 5;
     
-    private UnitSymbol(String value) {
-        Objects.requireNonNull(value, "Ký hiệu đơn vị đo không được để trống");
-        List<String> businessErrors = new ArrayList<>();
-
-        if (value.trim().isEmpty()) {
-            businessErrors.add("Ký hiệu đơn vị đo không được để trống");
-        }
-
-        if (value.length() > MAX_LENGTH) {
-            businessErrors.add("Ký hiệu đơn vị đo không được quá " + MAX_LENGTH + " ký tự");
-        }
-        
-        if (!businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(businessErrors);
-        }
+    public UnitSymbol(
+            @jakarta.validation.constraints.NotBlank(message = "Ký hiệu đơn vị đo không được để trống")
+            @jakarta.validation.constraints.Size(max = MAX_LENGTH, message = "Ký hiệu đơn vị đo không được vượt quá " + MAX_LENGTH + " ký tự") String value) {
         this.value = value;
-    }
-    
-    public static final class UnitSymbolConverter implements jakarta.persistence.AttributeConverter<UnitSymbol, String> {
-        @Override
-        public String convertToDatabaseColumn(UnitSymbol attribute) {
-            return attribute == null ? null : attribute.getValue();
-        }
-
-        @Override
-        public UnitSymbol convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : new UnitSymbol(dbData);
-        }
     }
     
 }

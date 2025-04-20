@@ -27,7 +27,7 @@ public class GetAllOrderQueryHandler implements IQueryHandler<DefaultOrderQuery,
         Page<OrderBasicResponse> result = orders.map(order -> OrderBasicResponse.builder()
             .orderId(order.getId())
             .customerId(order.getCustomer().map(Customer::getId).orElse(null))
-            .employeeId(order.getEmployeeEntity().getId())
+            .employeeId(order.getEmployee().getId())
             .orderTime(order.getOrderTime())
             .orderStatus(order.getStatus().map(Enum::name).orElse(null))
             .totalAmount(order.getTotalAmount().map(Money::getValue).orElse(null))

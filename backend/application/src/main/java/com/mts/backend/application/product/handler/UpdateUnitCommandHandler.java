@@ -1,15 +1,19 @@
 package com.mts.backend.application.product.handler;
 
 import com.mts.backend.application.product.command.UpdateUnitCommand;
-import com.mts.backend.domain.product.UnitOfMeasureEntity;
+import com.mts.backend.domain.product.UnitOfMeasure;
 import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
 import com.mts.backend.domain.product.jpa.JpaUnitOfMeasureRepository;
 import com.mts.backend.domain.product.value_object.UnitName;
 import com.mts.backend.domain.product.value_object.UnitSymbol;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
+import com.mts.backend.shared.exception.DomainException;
+import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -17,54 +21,42 @@ import java.util.Objects;
 @Service
 public class UpdateUnitCommandHandler implements ICommandHandler<UpdateUnitCommand, CommandResult> {
     private final JpaUnitOfMeasureRepository unitRepository;
-    
+
     public UpdateUnitCommandHandler(JpaUnitOfMeasureRepository unitRepository) {
         this.unitRepository = unitRepository;
     }
+
     /**
-     * @param command 
+     * @param command
      * @return
      */
     @Override
     @Transactional
     public CommandResult handle(UpdateUnitCommand command) {
         Objects.requireNonNull(command, "UpdateUnitCommand is required");
-        
-        var unit = mustBeExistUnit(command.getId());
-        
-        unit.setDescription(command.getDescription().orElse(null));
-        
-        if (unit.changeUnitName(command.getName())) {
-            verifyUniqueName(command.getId(), unit.getName());
+
+        try {
+            var unit = mustBeExistUnit(command.getId());
+
+            unit.setDescription(command.getDescription().orElse(null));
+            unit.setName(command.getName());
+            unit.setSymbol(command.getSymbol());
+
+            return CommandResult.success(unit.getId());
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("uk_unit_of_measure_name")) {
+                throw new DuplicateException("Đơn vị " + command.getName().getValue() + " đã tồn tại");
+            }
+            if (e.getMessage().contains("uk_unit_of_measure_symbol")) {
+                throw new DuplicateException("Kí hiệu " + command.getSymbol().getValue() + " đã tồn tại");
+            }
+            throw new DomainException("Lỗi khi cập nhật đơn vị tính", e);
         }
-        
-        if (unit.changeUnitSymbol(command.getSymbol())) {
-            verifyUniqueSymbol(command.getId(), unit.getSymbol());
-        }
-        
-        
-        
-        return CommandResult.success(unit.getId());
     }
-    
-    private UnitOfMeasureEntity mustBeExistUnit(UnitOfMeasureId unitId) {
+
+    private UnitOfMeasure mustBeExistUnit(UnitOfMeasureId unitId) {
         return unitRepository.findById(unitId.getValue())
                 .orElseThrow(() -> new NotFoundException("Đơn vị " + unitId + " không tồn tại"));
     }
-    
-    private void verifyUniqueName(UnitOfMeasureId id, UnitName name) {
-        Objects.requireNonNull(name, "Unit name is required");
-        
-        if (unitRepository.existsByIdNotAndName(id.getValue(), name)) {
-            throw new NotFoundException("Đơn vị " + name.getValue() + " đã tồn tại");
-        }
-    }
-    
-    private void verifyUniqueSymbol(UnitOfMeasureId id, UnitSymbol symbol) {
-        Objects.requireNonNull(symbol, "Unit symbol is required");
-        
-        if (unitRepository.existsByIdNotAndSymbol(id.getValue(), symbol)) {
-            throw new NotFoundException("Đơn vị " + symbol.getValue() + " đã tồn tại");
-        }
-    }
+
 }

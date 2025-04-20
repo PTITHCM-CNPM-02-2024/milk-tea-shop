@@ -28,7 +28,7 @@ public class GetDiscountByCouponQueryHandler implements IQueryHandler<DiscountBy
         Objects.requireNonNull(query, "Discount by coupon query is required");
 
         var discount =
-                discountRepository.findByCouponEntity_Coupon(query.getCouponId()).orElseThrow(() -> new NotFoundException(
+                discountRepository.findByCouponEntity_Coupon(query.getCode().getValue()).orElseThrow(() -> new NotFoundException(
                 "Không tìm thấy mã giảm giá"));
 
         var response = DiscountDetailResponse.builder()

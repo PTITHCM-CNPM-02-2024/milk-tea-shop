@@ -36,8 +36,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Parameter(description = "Thông tin đăng nhập", required = true) @RequestBody AuthenticationRequest request) {
         var command = new AuthenticationCommand(
-                Username.builder().value(request.getUsername()).build(),
-                PasswordHash.builder().value(request.getPassword()).build()
+                Username.of(request.getUsername()),
+                PasswordHash.of(request.getPassword())
         );
         
         var result = accountCommandBus.dispatch(command);

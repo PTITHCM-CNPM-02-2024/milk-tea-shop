@@ -1,7 +1,7 @@
 package com.mts.backend.application.order.handler;
 
 import com.mts.backend.application.order.command.CancelledOrderCommand;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
@@ -52,7 +52,7 @@ public class CancelledOrderCommandHandler implements ICommandHandler<CancelledOr
     }
         
     
-    private OrderEntity mustExistOrder(OrderId orderId) {
+    private Order mustExistOrder(OrderId orderId) {
         Objects.requireNonNull(orderId, "Order id is required");
         return orderRepository.findById(orderId.getValue())
                 .orElseThrow(() -> new NotFoundException("Order not found"));

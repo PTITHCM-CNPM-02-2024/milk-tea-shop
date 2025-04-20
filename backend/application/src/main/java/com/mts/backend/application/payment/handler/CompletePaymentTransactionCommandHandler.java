@@ -5,7 +5,7 @@ import com.mts.backend.application.payment.command.PaymentTransactionCommand;
 import com.mts.backend.application.payment.provider.IPaymentProvider;
 import com.mts.backend.application.payment.provider.IPaymentProviderFactory;
 import com.mts.backend.application.payment.response.PaymentResult;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
@@ -48,11 +48,11 @@ public class CompletePaymentTransactionCommandHandler implements ICommandHandler
         IPaymentProvider paymentProvider = paymentProviderFactory.getPaymentProvider(command.getPaymentMethodId());
         
         Payment payment = mustExistPayment(command.getPaymentId());
-        OrderEntity order = mustExistOrder(OrderId.of(payment.getOrderEntity().getId()));
+        Order order = mustExistOrder(OrderId.of(payment.getOrder().getId()));
         
         PaymentResult paymentResult = paymentProvider.dispatch(payment, order, command);
         
-        order.changeStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.COMPLETED);
         
         var result = invoiceCommandHandler.handle(CreateInvoiceCommand.builder()
                 .order(order)
@@ -67,7 +67,7 @@ public class CompletePaymentTransactionCommandHandler implements ICommandHandler
     }
 
 
-    private OrderEntity mustExistOrder(OrderId id) {
+    private Order mustExistOrder(OrderId id) {
         return orderRepository.findOrderWithDetails(id.getValue()).orElseThrow(() -> new NotFoundException("Không tìm thấy " +
                 "đơn hàng"));
     }

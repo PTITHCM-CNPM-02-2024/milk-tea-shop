@@ -2,8 +2,7 @@ package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.UpdateEmployeeCommand;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
-import com.mts.backend.domain.common.value_object.*;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -31,7 +30,7 @@ public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmplo
         
         
         try{
-            EmployeeEntity employee = mustExistEmployee(command.getId());
+            Employee employee = mustExistEmployee(command.getId());
             employee.setEmail(command.getEmail());
             employee.setPhone(command.getPhone());
             employee.setPosition(command.getPosition());
@@ -54,7 +53,7 @@ public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmplo
         
     }
     
-    private EmployeeEntity mustExistEmployee(EmployeeId employeeId) {
+    private Employee mustExistEmployee(EmployeeId employeeId) {
         Objects.requireNonNull(employeeId, "Employee id is required");
         return employeeRepository.findById(employeeId.getValue())
                 .orElseThrow(() -> new NotFoundException("Nhân viên không tồn tại"));

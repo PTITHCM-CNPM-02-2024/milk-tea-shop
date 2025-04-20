@@ -84,12 +84,12 @@ public class CustomerController implements IController {
     public ResponseEntity<?> updateCustomer(@Parameter(description = "ID khách hàng", required = true) @PathVariable("id") Long id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateCustomerRequest request) {
         UpdateCustomerCommand command = UpdateCustomerCommand.builder()
                 .id(CustomerId.of(id))
-                .email(Objects.isNull(request.getEmail()) ? null : Email.builder().value(request.getEmail()).build())
+                .email(Objects.isNull(request.getEmail()) ? null : Email.of(request.getEmail()))
                 .firstName(Objects.isNull(request.getFirstName()) ? null :
-                        FirstName.builder().value(request.getFirstName()).build())
+                        FirstName.of(request.getFirstName()))
                 .lastName(Objects.isNull(request.getLastName()) ? null :
-                        LastName.builder().value(request.getLastName()).build())
-                .phone(PhoneNumber.builder().value(request.getPhone()).build())
+                        LastName.of(request.getLastName()))
+                .phone(PhoneNumber.of(request.getPhone()))
                 .gender(Objects.isNull(request.getGender()) ? null : Gender.valueOf(request.getGender()))
                 .build();
 
@@ -157,7 +157,7 @@ public class CustomerController implements IController {
     @GetMapping("/search/phone")
     @PreAuthorize("hasAnyRole('MANAGER', 'STAFF')")
     public ResponseEntity<?> getCustomerByPhone(@Parameter(description = "Số điện thoại", required = true) @RequestParam("phone") String phone) {
-        var request = CustomerByPhoneQuery.builder().phone(PhoneNumber.builder().value(phone).build()).build();
+        var request = CustomerByPhoneQuery.builder().phone(PhoneNumber.of(phone)).build();
 
         var result = customerQueryBus.dispatch(request);
 

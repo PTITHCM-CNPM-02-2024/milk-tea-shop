@@ -11,17 +11,17 @@ import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.RewardPoint;
-import com.mts.backend.domain.order.OrderEntity;
-import com.mts.backend.domain.order.OrderProductEntity;
+import com.mts.backend.domain.order.Order;
+import com.mts.backend.domain.order.OrderProduct;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.product.ProductPriceEntity;
+import com.mts.backend.domain.product.ProductPrice;
 import com.mts.backend.domain.product.jpa.JpaProductPriceRepository;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.staff.identifier.EmployeeId;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.domain.store.jpa.JpaServiceTableRepository;
@@ -79,7 +79,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
             throw new DomainException("Đơn hàng phải có ít nhất một sản phẩm");
         }
         
-        OrderEntity order = createInitialOrder(command);
+        Order order = createInitialOrder(command);
         
         addProductsToOrder(order, command.getOrderProducts());
         addMemberDiscountValue(order, command.getCustomerId().orElse(null));
@@ -92,7 +92,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
 
         OrderBasicResponse response = 
                 OrderBasicResponse.builder().customerId(saveOrder.getCustomer().map(Customer::getId).orElse(null))
-                        .employeeId(saveOrder.getEmployeeEntity().getId())
+                        .employeeId(saveOrder.getEmployee().getId())
                         .finalAmount(saveOrder.getFinalAmount().map(Money::getValue).orElse(null))
                         .note(saveOrder.getCustomizeNote().orElse(null))
                         .orderId(saveOrder.getId())
@@ -104,12 +104,12 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         return CommandResult.success(response);
     }
 
-    private OrderEntity createInitialOrder(CreateOrderCommand command) {
+    private Order createInitialOrder(CreateOrderCommand command) {
         OrderId orderId = OrderId.create();
-        EmployeeEntity employee = mustExistEmployee(command.getEmployeeId());
-        return OrderEntity.builder()
+        Employee employee = mustExistEmployee(command.getEmployeeId());
+        return Order.builder()
                 .id(orderId.getValue())
-                .employeeEntity(employee)
+                .employee(employee)
                 .orderTime(Instant.now())
                 .customizeNote(command.getNote())
                 .status(OrderStatus.PROCESSING)
@@ -120,7 +120,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
     }
 
     
-    private EmployeeEntity mustExistEmployee(EmployeeId employeeId) {
+    private Employee mustExistEmployee(EmployeeId employeeId) {
         Objects.requireNonNull(employeeId, "Employee id is required");
         
         var employee = employeeRepository.findById(employeeId.getValue())
@@ -138,25 +138,25 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         return employee;
     }
 
-    private void addProductsToOrder(OrderEntity order, List<OrderProductCommand> orderProductCommands) {
+    private void addProductsToOrder(Order order, List<OrderProductCommand> orderProductCommands) {
         Objects.requireNonNull(orderProductCommands, "Order product command is required");
         
-        Set<ProductPriceEntity> productPrices = new HashSet<>();
+        Set<ProductPrice> productPrices = new HashSet<>();
         for (OrderProductCommand orderProductCommand : orderProductCommands) {
             var price = productPriceRepository.findByProductEntity_IdAndSize_Id(orderProductCommand.getProductId().getValue(),
                     orderProductCommand.getSizeId().getValue())
                     .orElseThrow(() -> new DomainException("Đơn hàng không thể tạo do sản phẩm không tồn tại"));
             
-            if (!price.getProductEntity().isOrdered()){
+            if (!price.getProduct().isOrdered()){
                 throw new DomainException("Sản phẩm không thể đặt hàng");
             }
             
-            order.addOrderProduct(price, orderProductCommand.getOption(), orderProductCommand.getQuantity());
+            order.addProduct(price, orderProductCommand.getOption(), orderProductCommand.getQuantity());
         }
         
     }
     
-     private void addDiscountsToOrder(OrderEntity order, List<OrderDiscountCommand> orderDiscountCommands) {
+     private void addDiscountsToOrder(Order order, List<OrderDiscountCommand> orderDiscountCommands) {
         
         for (OrderDiscountCommand orderDiscountCommand : orderDiscountCommands) {
             var discount = discountRepository.findById(orderDiscountCommand.getDiscountId().getValue())
@@ -175,7 +175,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         
     }
     
-   private void addMemberDiscountValue(OrderEntity order, CustomerId customerId){
+   private void addMemberDiscountValue(Order order, CustomerId customerId){
         
         if (customerId == null){
             return;
@@ -190,7 +190,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
         
     }
     
-    private void addTablesToOrder(OrderEntity order, List<OrderTableCommand> tables){
+    private void addTablesToOrder(Order order, List<OrderTableCommand> tables){
         
         for (OrderTableCommand tbl : tables) {
             var table = serviceTableRepository.findById(tbl.getServiceTableId().getValue())
@@ -199,12 +199,12 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
             if(!table.getActive()){
                 throw new DomainException("Bàn %s không hoạt động".formatted(table.getTableNumber().getValue()));
             }
-            order.addOrderTable(table);
+            order.addTable(table);
         }
         
     }
     
-    private void checkDiscountToApply(OrderEntity order, Discount discount){
+    private void checkDiscountToApply(Order order, Discount discount){
 
         if (!discount.isApplicable()) {
             String baseError = "Khuyến mãi không thể áp dụng: ";
@@ -233,7 +233,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
 
         // 1. Kiểm tra số lượng sản phẩm tối thiểu
         int totalQuantity = order.getOrderProducts().stream()
-                .mapToInt(OrderProductEntity::getQuantity)
+                .mapToInt(OrderProduct::getQuantity)
                 .sum();
 
         if (discount.getMinRequiredProduct().isPresent() && totalQuantity < discount.getMinRequiredProduct().get()) {

@@ -37,8 +37,8 @@ public class GetAllCustomerQueryHandler implements IQueryHandler<DefaultCustomer
                     .lastName(customer.getLastName().map(LastName::getValue).orElse(null))
                     .email(customer.getEmail().map(Email::getValue).orElse(null))
                     .phone(customer.getPhone().getValue())
-                    .membershipId(customer.getMembershipTypeEntity().getId())
-                    .rewardPoint(customer.getCurrentPoints().getValue())
+                    .membershipId(customer.getMembershipType().getId())
+                    .rewardPoint(customer.getCurrentPoint().getValue())
                     .accountId(customer.getAccount().map(Account::getId).orElse(null))
                     .build();
         });

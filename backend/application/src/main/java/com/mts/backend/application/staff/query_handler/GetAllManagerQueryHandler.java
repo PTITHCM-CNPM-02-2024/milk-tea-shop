@@ -32,7 +32,7 @@ public class GetAllManagerQueryHandler implements IQueryHandler<DefaultManagerQu
                     .email(manager.getEmail().getValue())
                     .phone(manager.getPhone().getValue())
                     .gender(manager.getGender().toString())
-                    .accountId(manager.getAccountEntity().getId())
+                    .accountId(manager.getAccount().getId())
                     .build();
         });
         

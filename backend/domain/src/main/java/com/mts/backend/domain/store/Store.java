@@ -85,7 +85,7 @@ public class Store extends BaseEntity<Integer> {
         return true;
     }
 
-    public StoreName getStoreName() {
+    public StoreName getName() {
         return StoreName.of(this.name);
     }
 
@@ -151,21 +151,25 @@ public class Store extends BaseEntity<Integer> {
     @Comment("Ngày khai trương")
     @Column(name = "opening_date", nullable = false)
     @NotNull
+    @Getter
     private LocalDate openingDate;
 
     @Comment("Mã số thuế")
     @Column(name = "tax_code", length = 20)
     @NotNull
     @Size(max = 20, message = "Mã số thuế không được vượt quá 20 ký tự")
+    @Getter
     private String taxCode;
 
     @Comment("Thời gian mở cửa")
     @Column(name = "opening_time", nullable = false)
     @NotNull
+    @Getter
     private LocalTime openingTime;
 
     @Column(name = "closing_time", nullable = false)
     @NotNull
+    @Getter
     private LocalTime closingTime;
 
 

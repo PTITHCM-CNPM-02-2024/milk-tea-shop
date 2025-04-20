@@ -40,7 +40,7 @@ public class GetAllSignatureProductQueryHandler implements IQueryHandler<Signatu
             ProductDetailResponse response =
                     ProductDetailResponse.builder().id(product.getId()).description(product.getDescription()).name(product.getName().getValue()).image_url(product.getImagePath()).signature(product.getSignature()).build();
 
-            product.getCategoryEntity().ifPresent(category -> {
+            product.getCategory().ifPresent(category -> {
                 response.setCategory(CategoryDetailResponse.builder().id(category.getId()).name(category.getName().getValue()).build());
             });
 

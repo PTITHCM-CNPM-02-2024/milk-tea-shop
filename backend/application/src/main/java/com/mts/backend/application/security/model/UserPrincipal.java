@@ -16,7 +16,7 @@ public class UserPrincipal implements UserDetails {
     public UserPrincipal(Account account) {
         this.account = account;
         this.authorities =
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + account.getRoleEntity().getName().getValue().toUpperCase()));
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + account.getRole().getName().getValue().toUpperCase()));
     }
     
     public Long getTokenVersion() {

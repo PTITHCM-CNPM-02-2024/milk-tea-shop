@@ -45,7 +45,7 @@ public class ProductController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createProduct(@Parameter(description = "Thông tin sản phẩm", required = true) @RequestBody CreateProductRequest createProductRequest) {
         CreateProductCommand createProductCommand = CreateProductCommand.builder()
-                .name(ProductName.builder().value(createProductRequest.getName()).build())
+                .name(ProductName.of(createProductRequest.getName()))
                 .description(createProductRequest.getDescription())
                 .categoryId(Objects.isNull(createProductRequest.getCategoryId()) ? null :
                         CategoryId.of(createProductRequest.getCategoryId()))
@@ -57,7 +57,7 @@ public class ProductController implements IController {
         for (var productPrice : createProductRequest.getPrices().entrySet()) {
             createProductCommand.getProductPrices().add(ProductPriceCommand.builder()
                     .sizeId(ProductSizeId.of(productPrice.getKey()))
-                    .price(Money.builder().value(productPrice.getValue()).build())
+                    .price(Money.of(productPrice.getValue()))
                     .build());
         }
 
@@ -76,7 +76,7 @@ public class ProductController implements IController {
     public ResponseEntity<?> updateProductInform(@Parameter(description = "ID sản phẩm", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateProductInformRequest updateProductInformRequest) {
         UpdateProductInformCommand updateProductInformCommand = UpdateProductInformCommand.builder()
                 .productId(ProductId.of(id))
-                .name(ProductName.builder().value(updateProductInformRequest.getName()).build())
+                .name(ProductName.of(updateProductInformRequest.getName()))
                 .description(updateProductInformRequest.getDescription())
                 .categoryId(Objects.isNull(updateProductInformRequest.getCategoryId()) ? null :
                         CategoryId.of(updateProductInformRequest.getCategoryId()))
@@ -141,7 +141,7 @@ public class ProductController implements IController {
             for (var productPrice : addProductPriceRequest.getProductPrices()) {
                 addProductPriceCommand.getProductPrices().add(ProductPriceCommand.builder()
                         .sizeId(ProductSizeId.of(productPrice.getSizeId()))
-                        .price(Money.builder().value(productPrice.getPrice()).build())
+                        .price(Money.of(productPrice.getPrice()))
                         .build());
             }
         }
@@ -167,7 +167,7 @@ public class ProductController implements IController {
             for (var productPrice : addProductPriceRequest.getProductPrices()) {
                 updateProductPriceCommand.getProductPrices().add(ProductPriceCommand.builder()
                         .sizeId(ProductSizeId.of(productPrice.getSizeId()))
-                        .price(Money.builder().value(productPrice.getPrice()).build())
+                        .price(Money.of(productPrice.getPrice()))
                         .build());
             }
         }

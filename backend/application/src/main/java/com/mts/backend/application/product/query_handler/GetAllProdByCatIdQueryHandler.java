@@ -2,11 +2,10 @@ package com.mts.backend.application.product.query_handler;
 
 import com.mts.backend.application.product.query.ProdByCatIdQuery;
 import com.mts.backend.application.product.response.CategoryDetailResponse;
-import com.mts.backend.application.product.response.CategorySummaryResponse;
 import com.mts.backend.application.product.response.ProductDetailResponse;
 import com.mts.backend.application.product.response.ProductSummaryResponse;
-import com.mts.backend.domain.product.CategoryEntity;
-import com.mts.backend.domain.product.ProductEntity;
+import com.mts.backend.domain.product.Category;
+import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.identifier.CategoryId;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -35,7 +34,7 @@ public class GetAllProdByCatIdQueryHandler implements IQueryHandler<ProdByCatIdQ
         if (query.getId().isPresent() && (query.getId().get().getValue() == 1)){
             
             var topping = productRepository.findAllByCategoryEntity_Id(1).stream()
-                    .filter(ProductEntity::isOrdered)
+                    .filter(Product::isOrdered)
                     .toList();
 
             List<ProductDetailResponse> responses = topping.stream().map(product -> {
@@ -47,7 +46,7 @@ public class GetAllProdByCatIdQueryHandler implements IQueryHandler<ProdByCatIdQ
                         .signature(product.getSignature())
                         .build();
                 
-                product.getCategoryEntity().ifPresent(category -> {
+                product.getCategory().ifPresent(category -> {
                     productResponse.setCategory(CategoryDetailResponse.builder()
                             .id(category.getId())
                             .name(category.getName().getValue())
@@ -88,7 +87,7 @@ public class GetAllProdByCatIdQueryHandler implements IQueryHandler<ProdByCatIdQ
                     .image_url(product.getImagePath())
                     .signature(product.getSignature())
                     .minPrice(BigDecimal.valueOf(product.getProductPriceEntities().stream().mapToInt(price -> price.getPrice().getValue().intValue()).min().orElse(0)))
-                    .catId(product.getCategoryEntity().map(CategoryEntity::getId).orElse(null))
+                    .catId(product.getCategory().map(Category::getId).orElse(null))
                     .build();
         });
         

@@ -2,7 +2,6 @@ package com.mts.backend.application.account;
 
 import com.mts.backend.application.account.command.*;
 import com.mts.backend.application.account.handler.*;
-import com.mts.backend.application.account.response.LogoutCommandHandler;
 import com.mts.backend.shared.command.AbstractCommandBus;
 
 import org.springframework.context.annotation.Profile;

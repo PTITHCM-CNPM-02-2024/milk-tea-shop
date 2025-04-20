@@ -10,6 +10,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.validator.constraints.Range;
@@ -25,21 +28,10 @@ import java.util.Objects;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
-public class ManagerEntity extends BaseEntity<Long> {
-
-
-    public ManagerEntity(@NotNull @Range(min = 1, max = IdentifiableProvider.INT_UNSIGNED_MAX) Long id, @NotNull Account account, @NotNull @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
-        this.id = id;
-        this.account = account;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.gender = gender;
-        this.phone = phone;
-        this.email = email;
-    }
-
-    public ManagerEntity() {
-    }
+@AllArgsConstructor
+@NoArgsConstructor
+public class Manager extends BaseEntity<Long> {
+    
 
     public static ManagerEntityBuilder builder() {
         return new ManagerEntityBuilder();
@@ -52,7 +44,7 @@ public class ManagerEntity extends BaseEntity<Long> {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        ManagerEntity that = (ManagerEntity) o;
+        Manager that = (Manager) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
@@ -79,7 +71,7 @@ public class ManagerEntity extends BaseEntity<Long> {
     @OneToOne(fetch = FetchType.LAZY)
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
-    @NotNull
+    @Getter
     private Account account;
 
     @Comment("Họ")
@@ -213,13 +205,13 @@ public class ManagerEntity extends BaseEntity<Long> {
             return this;
         }
 
-        public ManagerEntityBuilder accountEntity(@NotNull Account account) {
+        public ManagerEntityBuilder account(@NotNull Account account) {
             this.account = account;
             return this;
         }
 
-        public ManagerEntityBuilder lastName(@NotNull @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") @NotBlank(message = "Họ không được để trống") String lastName) {
-            this.lastName = lastName;
+        public ManagerEntityBuilder lastName(@NotNull LastName lastName) {
+            this.lastName = lastName.getValue();
             return this;
         }
 
@@ -243,12 +235,12 @@ public class ManagerEntity extends BaseEntity<Long> {
             return this;
         }
 
-        public ManagerEntity build() {
-            return new ManagerEntity(this.id, this.account, this.lastName, this.firstName, this.gender, this.phone, this.email);
+        public Manager build() {
+            return new Manager(this.id, this.account, this.lastName, this.firstName, this.gender, this.phone, this.email);
         }
 
         public String toString() {
-            return "ManagerEntity.ManagerEntityBuilder(id=" + this.id + ", account=" + this.account + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
+            return "Manager.ManagerEntityBuilder(id=" + this.id + ", account=" + this.account + ", lastName=" + this.lastName + ", firstName=" + this.firstName + ", gender=" + this.gender + ", phone=" + this.phone + ", email=" + this.email + ")";
         }
     }
 }

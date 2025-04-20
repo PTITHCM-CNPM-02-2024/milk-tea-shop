@@ -6,7 +6,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.math.BigDecimal;
@@ -20,27 +22,13 @@ import java.util.Objects;
 @NoArgsConstructor(force = true)
 public class MemberDiscountValue {
     @NotNull(message = "Giá trị giảm giá không được để trống")
+    @Getter
     BigDecimal value;
+    
     @NotNull(message = "Đơn vị giảm giá không được để trống")
     @Enumerated(EnumType.STRING)
+    @Getter
     DiscountUnit unit;
-
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        MemberDiscountValue that = (MemberDiscountValue) o;
-        return value != null && Objects.equals(value, that.value)
-               && unit != null && Objects.equals(unit, that.unit);
-    }
-
-    @Override
-    public final int hashCode() {
-        return Objects.hash(value, unit);
-    }
 
     public MemberDiscountValue(BigDecimal value, DiscountUnit unit) {
         List<String> errors = new ArrayList<>();
@@ -74,6 +62,24 @@ public class MemberDiscountValue {
         this.value = value.setScale(3, RoundingMode.HALF_UP);
         this.unit = unit;
     }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        MemberDiscountValue that = (MemberDiscountValue) o;
+        return value != null && Objects.equals(value, that.value)
+               && unit != null && Objects.equals(unit, that.unit);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(value, unit);
+    }
+
     @Transient
     public boolean isPercentage() {
         return unit == DiscountUnit.PERCENTAGE;
@@ -83,7 +89,7 @@ public class MemberDiscountValue {
     public boolean isMoney() {
         return unit == DiscountUnit.FIXED;
     }
-    
+
     public String getDescription() {
         if (isPercentage()) {
             return "Giảm giá " + value + "%";

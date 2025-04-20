@@ -6,17 +6,17 @@ import com.mts.backend.application.order.command.OrderProductCommand;
 import com.mts.backend.application.order.response.OrderDetailResponse;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
-import com.mts.backend.domain.order.OrderEntity;
-import com.mts.backend.domain.order.OrderProductEntity;
+import com.mts.backend.domain.order.Order;
+import com.mts.backend.domain.order.OrderProduct;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.product.ProductPriceEntity;
+import com.mts.backend.domain.product.ProductPrice;
 import com.mts.backend.domain.product.jpa.JpaProductPriceRepository;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.domain.promotion.Discount;
 import com.mts.backend.domain.promotion.jpa.JpaDiscountRepository;
-import com.mts.backend.domain.staff.EmployeeEntity;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DomainException;
@@ -53,9 +53,9 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
     public CommandResult handle(CalculateOrderCommand command) {
         Objects.requireNonNull(command, "CalculateOrderCommand must not be null");
         
-        var order = OrderEntity.builder()
+        var order = Order.builder()
                 .id(OrderId.create().getValue())
-                .employeeEntity(EmployeeEntity.builder()
+                .employee(Employee.builder()
                         .id(command.getEmployeeId().getValue())
                         .build())
                 .status(OrderStatus.PROCESSING)
@@ -78,7 +78,7 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
         
     }
     
-    private void addCustomerToOrder(OrderEntity order, CalculateOrderCommand command) {
+    private void addCustomerToOrder(Order order, CalculateOrderCommand command) {
 
         if (command.getCustomerId().isPresent()) {
             var customer = customerRepository.findByIdFetchMembershipType(command.getCustomerId().get().getValue())
@@ -89,27 +89,27 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
     }
     
     
-    private void addProductsToOrder(OrderEntity order, List<OrderProductCommand> orderProductCommands) {
+    private void addProductsToOrder(Order order, List<OrderProductCommand> orderProductCommands) {
         Objects.requireNonNull(orderProductCommands, "Order product command is required");
 
-        Set<ProductPriceEntity> productPrices = new HashSet<>();
+        Set<ProductPrice> productPrices = new HashSet<>();
         for (OrderProductCommand orderProductCommand : orderProductCommands) {
             var price =
                     productPriceRepository.findByProductEntity_IdAndSize_IdFetchPrices(orderProductCommand.getProductId().getValue(),
                             orderProductCommand.getSizeId().getValue())
                     .orElseThrow(() -> new DomainException("Đơn hàng không thể tạo do sản phẩm không tồn tại"));
 
-            if (!price.getProductEntity().isOrdered()){
+            if (!price.getProduct().isOrdered()){
                 throw new DomainException("Sản phẩm không thể đặt hàng");
             }
 
-            order.addOrderProduct(price, orderProductCommand.getOption(), orderProductCommand.getQuantity());
+            order.addProduct(price, orderProductCommand.getOption(), orderProductCommand.getQuantity());
         }
 
     }
 
 
-    private void addDiscountsToOrder(OrderEntity order, List<OrderDiscountCommand> orderDiscountCommands) {
+    private void addDiscountsToOrder(Order order, List<OrderDiscountCommand> orderDiscountCommands) {
         
         for (OrderDiscountCommand orderDiscountCommand : orderDiscountCommands) {
             var discount = discountRepository.findById(orderDiscountCommand.getDiscountId().getValue())
@@ -128,7 +128,7 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
         
     }
 
-    private void checkDiscountToApply(OrderEntity order, Discount discount){
+    private void checkDiscountToApply(Order order, Discount discount){
 
         if (!discount.isApplicable()) {
             String baseError = "Khuyến mãi không thể áp dụng: ";
@@ -157,7 +157,7 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
 
         // 1. Kiểm tra số lượng sản phẩm tối thiểu
         int totalQuantity = order.getOrderProducts().stream()
-                .mapToInt(OrderProductEntity::getQuantity)
+                .mapToInt(OrderProduct::getQuantity)
                 .sum();
 
         if (discount.getMinRequiredProduct().isPresent() && totalQuantity < discount.getMinRequiredProduct().get()) {

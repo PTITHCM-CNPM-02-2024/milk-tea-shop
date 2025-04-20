@@ -9,49 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Value
-@Builder
+@Value(staticConstructor = "of")
 public class ProductSizeName {
-   String value;
-    
     private static final int MAX_LENGTH = 5;
-    private ProductSizeName(String value) {
-        Objects.requireNonNull(value, "Tên kích thước không được để trống");
+    @jakarta.validation.constraints.NotBlank(message = "Tên không được để trống")
+    @jakarta.validation.constraints.Size(max = 5, message = "Tên không được vượt quá 5 ký tự")
+    String value;
 
-        List<String> businessErrors = new ArrayList<>();
-
-        if (value.isBlank()) {
-            businessErrors.add("Tên không được để trống");
-        }
-
-        if (value.length() > MAX_LENGTH) {
-            businessErrors.add("Tên không được quá " + MAX_LENGTH + " ký tự");
-        }
-        
-        if (!businessErrors.isEmpty()) {
-            throw new DomainBusinessLogicException(businessErrors);
-        }
-        this.value = value;
+    public ProductSizeName(
+            @jakarta.validation.constraints.NotBlank(message = "Tên không được để trống")
+            @jakarta.validation.constraints.Size(max = 5, message = "Tên không được vượt quá 5 ký tự") String value) {
+        this.value = normalize(value);
     }
-    
+
     private String normalize(String name) {
         return name.toUpperCase().trim();
     }
     
-    public String getValue() {
-        return normalize(value);
-    }
-    
-    public static final class ProductSizeNameConverter implements AttributeConverter<ProductSizeName, String> {
-        @Override
-        public String convertToDatabaseColumn(ProductSizeName attribute) {
-            return attribute == null ? null : attribute.getValue();
-        }
 
-        @Override
-        public ProductSizeName convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : new ProductSizeName(dbData);
-        }
-    }
-    
 }

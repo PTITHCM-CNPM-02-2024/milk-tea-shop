@@ -1,7 +1,6 @@
 package com.mts.backend.domain.product.jpa;
 
-import com.mts.backend.domain.product.UnitOfMeasureEntity;
-import com.mts.backend.domain.product.identifier.UnitOfMeasureId;
+import com.mts.backend.domain.product.UnitOfMeasure;
 import com.mts.backend.domain.product.value_object.UnitName;
 import com.mts.backend.domain.product.value_object.UnitSymbol;
 import jakarta.transaction.Transactional;
@@ -15,27 +14,27 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface JpaUnitOfMeasureRepository extends JpaRepository<UnitOfMeasureEntity, Integer> {
-  @Query("select (count(u) > 0) from UnitOfMeasureEntity u where u.symbol = :symbol")
+public interface JpaUnitOfMeasureRepository extends JpaRepository<UnitOfMeasure, Integer> {
+  @Query("select (count(u) > 0) from UnitOfMeasure u where u.symbol = :symbol")
   boolean existsBySymbol(@Param("symbol") @NonNull UnitSymbol symbol);
 
-  @Query("select (count(u) > 0) from UnitOfMeasureEntity u where u.name = :name")
+  @Query("select (count(u) > 0) from UnitOfMeasure u where u.name = :name")
   boolean existsByName(@Param("name") @NonNull UnitName name);
 
-  @Query("select u from UnitOfMeasureEntity u where u.name = ?1")
-  Optional<UnitOfMeasureEntity> findByName(@NonNull UnitName name);
+  @Query("select u from UnitOfMeasure u where u.name = ?1")
+  Optional<UnitOfMeasure> findByName(@NonNull UnitName name);
 
-  @Query("select u from UnitOfMeasureEntity u where u.symbol = ?1")
-  Optional<UnitOfMeasureEntity> findBySymbol(@NonNull UnitSymbol symbol);
+  @Query("select u from UnitOfMeasure u where u.symbol = ?1")
+  Optional<UnitOfMeasure> findBySymbol(@NonNull UnitSymbol symbol);
 
   @Modifying
   @Transactional
   @Query(value = "DELETE FROM milk_tea_shop_prod.UnitOfMeasure WHERE unit_id = :id", nativeQuery = true)
   void deleteUnitOfMeasure(@Param("id") Integer id);
   
-    @Query("select (count(u) > 0) from UnitOfMeasureEntity u where u.id <> :id and u.symbol = :symbol")
+    @Query("select (count(u) > 0) from UnitOfMeasure u where u.id <> :id and u.symbol = :symbol")
     boolean existsByIdNotAndSymbol(@Param("id") @NonNull Integer id, @Param("symbol") @NonNull UnitSymbol symbol);
     
-    @Query("select (count(u) > 0) from UnitOfMeasureEntity u where u.id <> :id and u.name = :name")
+    @Query("select (count(u) > 0) from UnitOfMeasure u where u.id <> :id and u.name = :name")
     boolean existsByIdNotAndName(@Param("id") @NonNull Integer id, @Param("name") @NonNull UnitName name);
 }

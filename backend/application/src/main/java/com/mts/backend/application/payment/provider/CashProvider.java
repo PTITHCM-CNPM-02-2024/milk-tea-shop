@@ -3,7 +3,7 @@ package com.mts.backend.application.payment.provider;
 import com.mts.backend.application.payment.command.PaymentTransactionCommand;
 import com.mts.backend.application.payment.response.PaymentInitResponse;
 import com.mts.backend.application.payment.response.PaymentResult;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.value_object.OrderStatus;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
 import com.mts.backend.domain.payment.Payment;
@@ -41,7 +41,7 @@ public class CashProvider implements IPaymentProvider{
      */
     @Override
     @Transactional
-    public PaymentInitResponse initPayment(Payment payment, OrderEntity order) {
+    public PaymentInitResponse initPayment(Payment payment, Order order) {
         
         validWhenInit(payment, order);
         
@@ -59,7 +59,7 @@ public class CashProvider implements IPaymentProvider{
         
     }
     
-    private void validWhenInit(Payment payment, OrderEntity order) {
+    private void validWhenInit(Payment payment, Order order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Final amount is required");
         List<String> errors = new ArrayList<>();
@@ -92,7 +92,7 @@ public class CashProvider implements IPaymentProvider{
         
     }
 
-    private void validWhenDispatch(Payment payment, OrderEntity order) {
+    private void validWhenDispatch(Payment payment, Order order) {
         Objects.requireNonNull(payment, "Payment is required");
         Objects.requireNonNull(order, "Order is required");
         List<String> errors = new ArrayList<>();
@@ -136,7 +136,7 @@ public class CashProvider implements IPaymentProvider{
      */
     @Override
     @Transactional
-    public PaymentResult dispatch(Payment payment, OrderEntity order, PaymentTransactionCommand transactionCommand) {
+    public PaymentResult dispatch(Payment payment, Order order, PaymentTransactionCommand transactionCommand) {
         
         validWhenDispatch(payment, order);
         

@@ -2,7 +2,7 @@ package com.mts.backend.application.staff.handler;
 
 import com.mts.backend.application.staff.command.UpdateManagerCommand;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
-import com.mts.backend.domain.staff.ManagerEntity;
+import com.mts.backend.domain.staff.Manager;
 import com.mts.backend.domain.staff.identifier.ManagerId;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -56,7 +56,7 @@ public class UpdateManagerCommandHandler implements ICommandHandler<UpdateManage
         }
     }
 
-    private ManagerEntity mustExistManager(ManagerId id) {
+    private Manager mustExistManager(ManagerId id) {
         Objects.requireNonNull(id, "Manager id is required");
 
         return managerRepository.findById(id.getValue())

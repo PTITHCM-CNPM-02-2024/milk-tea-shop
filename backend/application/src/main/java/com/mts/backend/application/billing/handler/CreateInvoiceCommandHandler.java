@@ -7,8 +7,8 @@ import com.mts.backend.application.order.response.OrderTableDetailResponse;
 import com.mts.backend.application.payment.response.PaymentDetailResponse;
 import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.order.OrderDiscountEntity;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
+import com.mts.backend.domain.order.OrderDiscount;
 import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -86,7 +86,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillOrderInfo(String template, OrderEntity order) {
+    private String fillOrderInfo(String template, Order order) {
         DateTimeFormatter formatter = DateTimeFormatter
                 .ofPattern("yyyy-MM-dd HH:mm:ss")
                 .withZone(ZoneId.systemDefault());
@@ -95,12 +95,12 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         template = template.replace("{{notes}}", order.getCustomizeNote().orElse(""));
         template = template.replace("{{currentDate}}", LocalDateTime.now().format(formatter));
         template = template.replace("{{currentUser}}",
-                "Nhân viên: %s".formatted(order.getEmployeeEntity().getFirstName().getValue()));
+                "Nhân viên: %s".formatted(order.getEmployee().getFirstName().getValue()));
 
         return template;
     }
 
-    private String fillTableInfo(String template, OrderEntity order) {
+    private String fillTableInfo(String template, Order order) {
         var tableList = getTables(order);
 
         if (tableList.isEmpty()) {
@@ -118,7 +118,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillDiscountInfo(String template, OrderEntity order) {
+    private String fillDiscountInfo(String template, Order order) {
         var discounts = getDiscounts(order);
         
         if (discounts.isEmpty()) {
@@ -147,7 +147,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillProductItems(String template, OrderEntity order) {
+    private String fillProductItems(String template, Order order) {
         DecimalFormat currency = new DecimalFormat("#,###");
         var products = getProducts(order);
 
@@ -184,7 +184,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         
         // Total discount
         Money totalDiscount = order.getOrderDiscounts().stream()
-                .map(OrderDiscountEntity::getDiscountAmount)
+                .map(OrderDiscount::getDiscountAmount)
                 .reduce(Money.ZERO, Money::add);
 
         template = template.replace("{{discountAmount}}", currency.format(totalDiscount.getValue()));
@@ -192,7 +192,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillPaymentInfo(String template, OrderEntity order, Payment payment) {
+    private String fillPaymentInfo(String template, Order order, Payment payment) {
         DecimalFormat currency = new DecimalFormat("#,###");
         var paymentDetail = getPayment(payment);
 
@@ -204,7 +204,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private List<OrderTableDetailResponse> getTables(OrderEntity order) {
+    private List<OrderTableDetailResponse> getTables(Order order) {
         return order.getOrderTables().stream()
                 .map(orderTable -> {
                     var table = orderTable.getTable();
@@ -215,12 +215,12 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .collect(Collectors.toList());
     }
 
-    private List<OrderProductDetailResponse> getProducts(OrderEntity order) {
+    private List<OrderProductDetailResponse> getProducts(Order order) {
         return order.getOrderProducts().stream()
                 .map(orderProduct -> {
-                    var productPrice = orderProduct.getProductPriceEntity();
+                    var productPrice = orderProduct.getPrice();
 
-                    var product = productPrice.getProductEntity();
+                    var product = productPrice.getProduct();
 
                     var size = productPrice.getSize();
                     return OrderProductDetailResponse.builder()
@@ -236,7 +236,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .collect(Collectors.toList());
     }
 
-    private List<OrderDiscountDetailResponse> getDiscounts(OrderEntity order) {
+    private List<OrderDiscountDetailResponse> getDiscounts(Order order) {
         return order.getOrderDiscounts().stream()
                 .map(orderDiscount -> {
                     var discount = orderDiscount.getDiscount();
@@ -259,8 +259,8 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return PaymentDetailResponse.builder()
                 .paymentMethod(new PaymentMethodDetailResponse(
                         paymentMethod.getId(),
-                        paymentMethod.getPaymentName().getValue(),
-                        paymentMethod.getPaymentDescription().orElse(null)))
+                        paymentMethod.getName().getValue(),
+                        paymentMethod.getDescription().orElse(null)))
                 .amountPaid(payment.getAmountPaid()
                         .map(Money::getValue)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy số tiền đã thanh toán")))
@@ -270,7 +270,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                 .build();
     }
 
-    private String fillCustomerInfo(String template, OrderEntity order) {
+    private String fillCustomerInfo(String template, Order order) {
         if (order.getCustomer().isEmpty()) {
             template = template.replace("{{clientName}}", "Khách vãng lai");
             template = template.replace("{{clientAddress}}", "");
@@ -284,7 +284,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
         var customer = order.getCustomer().get();
 
-        var membershipType = customer.getMembershipTypeEntity();
+        var membershipType = customer.getMembershipType();
 
         template = template.replace("{{clientName}}", customer.getFullName().orElse(""));
         template = template.replace("{{clientAddress}}", "");
@@ -299,8 +299,8 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         return template;
     }
 
-    private String fillEmployeeInfo(String template, OrderEntity order) {
-        var employee = order.getEmployeeEntity();
+    private String fillEmployeeInfo(String template, Order order) {
+        var employee = order.getEmployee();
 
         template = template.replace("{{staffName}}", employee.getFirstName().getValue() + " " + employee.getLastName().getValue());
         template = template.replace("{{staffId}}", String.valueOf(employee.getId()));

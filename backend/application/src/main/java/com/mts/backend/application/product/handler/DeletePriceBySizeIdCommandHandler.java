@@ -3,7 +3,7 @@ package com.mts.backend.application.product.handler;
 import com.mts.backend.application.product.command.DeletePriceBySizeIdCommand;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.order.value_object.OrderStatus;
-import com.mts.backend.domain.product.ProductEntity;
+import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.jpa.JpaProductRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -44,14 +44,14 @@ public class DeletePriceBySizeIdCommandHandler implements ICommandHandler<Delete
                     "trong đơn hàng");
         }
         
-        if (product.removeProductPriceEntity(command.getSizeId())) {
+        if (product.removePrice(command.getSizeId())) {
             return CommandResult.success(product.getId());
         }
 
         return CommandResult.notFoundFail("Không tìm thấy kích thước " + command.getSizeId() + " trong sản phẩm " + command.getProductId());
     }
 
-    private ProductEntity mustBeExistProduct(ProductId productId) {
+    private Product mustBeExistProduct(ProductId productId) {
         return productRepository.findById(productId.getValue())
                 .orElseThrow(() -> new NotFoundException("Sản phẩm " + productId + " không tồn tại"));
     }

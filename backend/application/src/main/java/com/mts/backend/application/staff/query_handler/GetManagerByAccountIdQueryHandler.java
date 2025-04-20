@@ -27,7 +27,7 @@ public class GetManagerByAccountIdQueryHandler implements IQueryHandler<GetManag
                 .lastName(manager.getLastName().getValue())
                 .email(manager.getEmail().getValue())
                 .phone(manager.getPhone().getValue())
-                .accountId(manager.getAccountEntity().getId())
+                .accountId(manager.getAccount().getId())
                 .build();
 
         return CommandResult.success(response);

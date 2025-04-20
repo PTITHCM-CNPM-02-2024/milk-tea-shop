@@ -145,7 +145,7 @@ public class DiscountController implements IController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getDiscountByCouponCode(@Parameter(description = "Mã coupon", required = true) @PathVariable("code") String code) {
         var command = DiscountByCouponQuery.builder()
-                .couponId(CouponCode.of(code))
+                .code(CouponCode.of(code))
                 .build();
 
         var result = queryBus.dispatch(command);

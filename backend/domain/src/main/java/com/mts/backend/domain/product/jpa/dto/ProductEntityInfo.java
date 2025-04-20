@@ -1,12 +1,13 @@
 package com.mts.backend.domain.product.jpa.dto;
 
+import com.mts.backend.domain.product.Product;
 import com.mts.backend.domain.product.identifier.ProductId;
 import com.mts.backend.domain.product.value_object.ProductName;
 
 import java.util.Set;
 
 /**
- * Projection for {@link com.mts.backend.domain.product.ProductEntity}
+ * Projection for {@link Product}
  */
 public interface ProductEntityInfo {
     ProductId getId();

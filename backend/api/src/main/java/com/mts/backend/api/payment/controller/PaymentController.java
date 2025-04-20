@@ -72,7 +72,7 @@ public class PaymentController implements IController {
             .paymentId(PaymentId.of(paymentId))
             .paymentMethodId(PaymentMethodId.of(methodId))
             .transactionId(System.currentTimeMillis())
-            .amount(Money.builder().value(request.getAmount()).build())
+            .amount(Money.of(request.getAmount()))
             .build();
     
     var result = paymentCommandBus.dispatch(command);

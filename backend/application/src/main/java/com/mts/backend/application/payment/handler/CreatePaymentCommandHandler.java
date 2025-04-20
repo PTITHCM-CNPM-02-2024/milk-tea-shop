@@ -2,7 +2,7 @@ package com.mts.backend.application.payment.handler;
 
 import com.mts.backend.application.payment.command.CreatePaymentCommand;
 import com.mts.backend.application.payment.provider.IPaymentProviderFactory;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.identifier.OrderId;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
 import com.mts.backend.domain.payment.Payment;
@@ -46,7 +46,7 @@ public class CreatePaymentCommandHandler implements ICommandHandler<CreatePaymen
     public CommandResult handle(CreatePaymentCommand command) {
         Objects.requireNonNull(command, "CreatePaymentCommand is required");
         
-        OrderEntity order = mustExistOrder(command.getOrderId());
+        Order order = mustExistOrder(command.getOrderId());
         
         PaymentMethod paymentMethod = mustExistPaymentMethod(command.getPaymentMethodId());
         
@@ -69,7 +69,7 @@ public class CreatePaymentCommandHandler implements ICommandHandler<CreatePaymen
         
     }
     
-    private OrderEntity mustExistOrder(OrderId id) {
+    private Order mustExistOrder(OrderId id) {
         return orderRepository.findById(id.getValue())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng với id: " + id.getValue()));
     }

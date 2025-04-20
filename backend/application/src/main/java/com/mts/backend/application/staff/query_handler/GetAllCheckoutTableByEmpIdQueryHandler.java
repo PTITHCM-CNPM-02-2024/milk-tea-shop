@@ -36,8 +36,8 @@ public class GetAllCheckoutTableByEmpIdQueryHandler implements IQueryHandler<Che
         
         Page<OrderDetailResponse> orderDetailResponses = orders.map(order -> OrderDetailResponse.builder()
                         .orderId(order.getId())
-                        .employeeId(order.getEmployeeEntity().getId())
-                        .employeeName(order.getEmployeeEntity().getFullName())
+                        .employeeId(order.getEmployee().getId())
+                        .employeeName(order.getEmployee().getFullName())
                         .customerName(order.getCustomer().flatMap(Customer::getFullName)
                                 .orElse(null))
                         .orderStatus(order.getStatus().map(Enum::name).orElse(null))

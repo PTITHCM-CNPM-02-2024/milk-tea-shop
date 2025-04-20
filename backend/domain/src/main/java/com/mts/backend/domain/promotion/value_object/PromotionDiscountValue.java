@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.lang.NonNull;
@@ -22,36 +23,18 @@ import java.util.Objects;
 @AllArgsConstructor
 public class PromotionDiscountValue {
     @NonNull
+    @Getter
     BigDecimal value;
-
-    public static PromotionDiscountValueBuilder builder() {
-        return new PromotionDiscountValueBuilder();
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        PromotionDiscountValue that = (PromotionDiscountValue) o;
-        return value != null && Objects.equals(value, that.value)
-               && unit != null && Objects.equals(unit, that.unit)
-               && maxDiscountAmount != null && Objects.equals(maxDiscountAmount, that.maxDiscountAmount);
-    }
-
-    @Override
-    public final int hashCode() {
-        return Objects.hash(value, unit, maxDiscountAmount);
-    }
-
     @NonNull
     @Enumerated(EnumType.STRING)
+    @Getter
     DiscountUnit unit;
     @NonNull
     BigDecimal maxDiscountAmount;
-
+    
+    public Money getMaxDiscountAmount() {
+        return Money.of(maxDiscountAmount);
+    }
 
     public PromotionDiscountValue(BigDecimal value, DiscountUnit unit, Money maxDiscountAmount) {
 
@@ -87,6 +70,28 @@ public class PromotionDiscountValue {
         this.value = value;
         this.unit = unit;
         this.maxDiscountAmount = maxDiscountAmount.getValue();
+    }
+
+    public static PromotionDiscountValueBuilder builder() {
+        return new PromotionDiscountValueBuilder();
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        PromotionDiscountValue that = (PromotionDiscountValue) o;
+        return value != null && Objects.equals(value, that.value)
+               && unit != null && Objects.equals(unit, that.unit)
+               && maxDiscountAmount != null && Objects.equals(maxDiscountAmount, that.maxDiscountAmount);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(value, unit, maxDiscountAmount);
     }
 
     public Money maxDiscountAmount() {

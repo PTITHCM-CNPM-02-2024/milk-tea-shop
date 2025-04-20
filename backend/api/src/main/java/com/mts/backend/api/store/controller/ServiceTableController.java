@@ -58,7 +58,7 @@ public class ServiceTableController implements IController {
                                                              @RequestBody UpdateServiceTableRequest request) {
         var command = UpdateServiceTableCommand.builder()
                 .id(ServiceTableId.of(request.getId()))
-                .name(TableNumber.builder().value(request.getName()).build())
+                .name(TableNumber.of(request.getName()))
                 .isActive(request.getIsActive())
                 .areaId(Objects.isNull(request.getAreaId()) ? null : AreaId.of(request.getAreaId()))
                 .build();

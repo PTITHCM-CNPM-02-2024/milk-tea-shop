@@ -1,7 +1,7 @@
 package com.mts.backend.domain.payment;
 
 import com.mts.backend.domain.common.value_object.Money;
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.value_object.PaymentStatus;
 import com.mts.backend.domain.persistence.BaseEntity;
 import com.mts.backend.shared.exception.DomainException;
@@ -98,13 +98,13 @@ public class Payment extends BaseEntity<Long> {
     @JoinColumn(name = "order_id", nullable = false)
     @NotNull
     @Getter
-    private OrderEntity orderEntity;
+    private Order order;
 
-    public boolean setOrderEntity(@NotNull OrderEntity orderEntity) {
-        if (this.orderEntity.equals(orderEntity)) {
+    public boolean setOrder(@NotNull Order order) {
+        if (this.order.equals(order)) {
             return false;
         }
-        this.orderEntity = orderEntity;
+        this.order = order;
         return true;
     }
 
@@ -178,7 +178,7 @@ public class Payment extends BaseEntity<Long> {
         private BigDecimal changeAmount;
         private @NotNull Instant paymentTime;
         private @NotNull PaymentMethod paymentMethod;
-        private @NotNull OrderEntity orderEntity;
+        private @NotNull Order order;
         private PaymentStatus status;
 
         PaymentBuilder() {
@@ -209,8 +209,8 @@ public class Payment extends BaseEntity<Long> {
             return this;
         }
 
-        public PaymentBuilder orderEntity(@NotNull OrderEntity orderEntity) {
-            this.orderEntity = orderEntity;
+        public PaymentBuilder orderEntity(@NotNull Order order) {
+            this.order = order;
             return this;
         }
 
@@ -220,11 +220,11 @@ public class Payment extends BaseEntity<Long> {
         }
 
         public Payment build() {
-            return new Payment(this.id, this.amountPaid, this.changeAmount, this.paymentTime, this.paymentMethod, this.orderEntity, this.status);
+            return new Payment(this.id, this.amountPaid, this.changeAmount, this.paymentTime, this.paymentMethod, this.order, this.status);
         }
 
         public String toString() {
-            return "Payment.PaymentBuilder(id=" + this.id + ", amountPaid=" + this.amountPaid + ", changeAmount=" + this.changeAmount + ", paymentTime=" + this.paymentTime + ", paymentMethod=" + this.paymentMethod + ", orderEntity=" + this.orderEntity + ", status=" + this.status + ")";
+            return "Payment.PaymentBuilder(id=" + this.id + ", amountPaid=" + this.amountPaid + ", changeAmount=" + this.changeAmount + ", paymentTime=" + this.paymentTime + ", paymentMethod=" + this.paymentMethod + ", order=" + this.order + ", status=" + this.status + ")";
         }
     }
 }

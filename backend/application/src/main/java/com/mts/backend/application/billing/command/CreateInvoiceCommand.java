@@ -1,6 +1,6 @@
 package com.mts.backend.application.billing.command;
 
-import com.mts.backend.domain.order.OrderEntity;
+import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.payment.Payment;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommand;
@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class CreateInvoiceCommand implements ICommand<CommandResult> {
     
-    private OrderEntity order;
+    private Order order;
     private Payment payment;
 }

@@ -12,8 +12,8 @@ import com.mts.backend.domain.common.value_object.FirstName;
 import com.mts.backend.domain.common.value_object.LastName;
 import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
-import com.mts.backend.domain.staff.EmployeeEntity;
-import com.mts.backend.domain.staff.ManagerEntity;
+import com.mts.backend.domain.staff.Employee;
+import com.mts.backend.domain.staff.Manager;
 import com.mts.backend.domain.staff.jpa.JpaEmployeeRepository;
 import com.mts.backend.domain.staff.jpa.JpaManagerRepository;
 import com.mts.backend.shared.command.CommandResult;
@@ -54,7 +54,7 @@ public class GetUserInfoByIdQueryHandler implements IQueryHandler<UserInfoQueryB
         }
         
         
-        var role = account.get().getRoleEntity().getId();
+        var role = account.get().getRole().getId();
         
         return switch (role) {
             case  (1) -> {
@@ -67,7 +67,7 @@ public class GetUserInfoByIdQueryHandler implements IQueryHandler<UserInfoQueryB
                         .firstName(manager.get().getFirstName().getValue())
                         .lastName(manager.get().getLastName().getValue())
                         .email(manager.get().getEmail().getValue())
-                        .accountId(manager.get().getAccountEntity().getId())
+                        .accountId(manager.get().getAccount().getId())
                         .gender(manager.get().getGender().name())
                         .phone(manager.get().getPhone().getValue())
                         .build();
@@ -103,8 +103,8 @@ public class GetUserInfoByIdQueryHandler implements IQueryHandler<UserInfoQueryB
                         .lastName(customer.get().getLastName().map(LastName::getValue).orElse(null))
                         .email(customer.get().getEmail().map(Email::getValue).orElse(null))
                         .phone(customer.get().getPhone().getValue())
-                        .membershipId(customer.get().getMembershipTypeEntity().getId())
-                        .rewardPoint(customer.get().getCurrentPoints().getValue())
+                        .membershipId(customer.get().getMembershipType().getId())
+                        .rewardPoint(customer.get().getCurrentPoint().getValue())
                         .accountId(customer.get().getAccount().map(Account::getId).orElse(null))
                         .build();
                 yield CommandResult.success(cusResponse);
@@ -115,7 +115,7 @@ public class GetUserInfoByIdQueryHandler implements IQueryHandler<UserInfoQueryB
     }
     
     
-    private Optional<ManagerEntity> getManagerById(AccountId id) {
+    private Optional<Manager> getManagerById(AccountId id) {
         return managerRepository.findByAccountEntity_Id(id.getValue());
     }
     
@@ -123,7 +123,7 @@ public class GetUserInfoByIdQueryHandler implements IQueryHandler<UserInfoQueryB
         return customerRepository.findByAccountEntity_Id(id.getValue());
     }
     
-    private Optional<EmployeeEntity> getEmployeeById(AccountId id) {
+    private Optional<Employee> getEmployeeById(AccountId id) {
         return employeeRepository.findByAccountEntity_Id(id.getValue());
     }
 }

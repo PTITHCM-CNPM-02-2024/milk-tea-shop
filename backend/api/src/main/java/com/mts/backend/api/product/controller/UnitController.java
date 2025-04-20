@@ -43,9 +43,9 @@ public class UnitController implements IController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> createUnit(@Parameter(description = "Thông tin đơn vị tính", required = true) @RequestBody CreateUnitRequest createUnitRequest){
         CreateUnitCommand command =
-                CreateUnitCommand.builder().name(UnitName.builder().value(createUnitRequest.getName()).build())
+                CreateUnitCommand.builder().name(UnitName.of(createUnitRequest.getName()))
                         .description(createUnitRequest.getDescription())
-                        .symbol(UnitSymbol.builder().value(createUnitRequest.getSymbol()).build())
+                        .symbol(UnitSymbol.of(createUnitRequest.getSymbol()))
                         .build();
         
         var result = unitCommandBus.dispatch(command);
@@ -63,9 +63,9 @@ public class UnitController implements IController {
     public ResponseEntity<?> updateUnit(@Parameter(description = "ID đơn vị tính", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateUnitRequest updateUnitRequest){
         UpdateUnitCommand command =
                 UpdateUnitCommand.builder().id(UnitOfMeasureId.of(id))
-                        .name(UnitName.builder().value(updateUnitRequest.getName()).build())
+                        .name(UnitName.of(updateUnitRequest.getName()))
                         .description(updateUnitRequest.getDescription())
-                        .symbol(UnitSymbol.builder().value(updateUnitRequest.getSymbol()).build())
+                        .symbol(UnitSymbol.of(updateUnitRequest.getSymbol()))
                         .build();
         
         var result = unitCommandBus.dispatch(command);

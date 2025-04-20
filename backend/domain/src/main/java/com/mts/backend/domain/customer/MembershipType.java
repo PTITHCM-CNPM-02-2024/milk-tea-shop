@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.Setter;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
@@ -157,6 +159,10 @@ public class MembershipType extends BaseEntity<Integer> {
         }
         this.type = type.getValue();
         return true;
+    }
+
+    public MemberTypeName getType() {
+        return MemberTypeName.of(this.type);
     }
 
     public Optional<String> getDescription() {

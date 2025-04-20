@@ -38,8 +38,8 @@ public class GetCustomerByPhoneQueryHandler implements IQueryHandler<CustomerByP
                 .lastName(customer.getLastName().map(LastName::getValue).orElse(null))
                 .email(customer.getEmail().map(Email::getValue).orElse(null))
                 .phone(customer.getPhone().getValue())
-                .membershipId(customer.getMembershipTypeEntity().getId())
-                .rewardPoint(customer.getCurrentPoints().getValue())
+                .membershipId(customer.getMembershipType().getId())
+                .rewardPoint(customer.getCurrentPoint().getValue())
                 .accountId(customer.getAccount().map(a -> a.getId()).orElse(null))
                 .build();
         
@@ -48,7 +48,7 @@ public class GetCustomerByPhoneQueryHandler implements IQueryHandler<CustomerByP
     
     private Customer mustExistCustomer(PhoneNumber phoneNumber) {
         Objects.requireNonNull(phoneNumber, "Phone number is required");
-        return customerRepository.findByPhone(phoneNumber)
+        return customerRepository.findByPhone(phoneNumber.getValue())
                 .orElseThrow(() -> new NotFoundException("Khách hàng không tồn tại"));
     }
     

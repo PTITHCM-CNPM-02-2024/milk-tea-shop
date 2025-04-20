@@ -124,9 +124,8 @@ public class Coupon extends BaseEntity<Long> {
         return this.id;
     }
 
-    public @NotNull @Pattern(regexp = "^[a-zA-Z0-9]{3,15}$",
-            message = "Mã coupon phải chứa ít nhất 3 ký tự và không quá 15 ký tự") @NotBlank(message = "Mã coupon không được để trống") String getCoupon() {
-        return this.coupon;
+    public CouponCode getCoupon() {
+        return CouponCode.of(this.coupon);
     }
 
     public static class CouponBuilder {

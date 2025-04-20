@@ -46,6 +46,10 @@ public class Role extends BaseEntity<Integer> {
             message = "Tên vai trò không hợp lệ")
     @NotBlank(message = "Tên vai trò không được để trống")
     private String name;
+    
+    public RoleName getName() {
+        return RoleName.of(name);
+    }
 
     @Comment("Mô tả vai trò")
     @Column(name = "description", length = 1000)
