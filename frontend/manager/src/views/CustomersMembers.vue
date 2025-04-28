@@ -440,6 +440,10 @@
                           label="Tên đăng nhập"
                           variant="outlined"
                           hint="Để trống nếu không tạo tài khoản"
+                          :rules="[
+                            v => /^[a-zA-Z0-9_-]+$/.test(v) || 'Tên đăng nhập chỉ được chứa chữ cái, số và các ký tự . _ -',
+                            v => (v && v.length >= 3 && v.length <= 50) || 'Tên đăng nhập phải có ít nhất 3 ký tự và không quá 50 ký tự'
+                          ]"
                           persistent-hint
                         ></v-text-field>
                       </v-col>
@@ -451,6 +455,9 @@
                           variant="outlined"
                           type="password"
                           hint="Để trống nếu không tạo tài khoản"
+                          :rules="[
+                            v => (v && v.length >= 6) || 'Mật khẩu phải có ít nhất 6 ký tự'
+                          ]"
                           persistent-hint
                         ></v-text-field>
                       </v-col>
@@ -893,9 +900,8 @@
           </template>
           <template v-else>
             Bạn có chắc chắn muốn xóa loại thành viên <strong>{{ editedMembership.name }}</strong>?
-            <p class="text-medium-emphasis mt-2">Lưu ý: Khách hàng thuộc loại thành viên này sẽ bị ảnh hưởng.</p>
+            <p class="text-medium-emphasis mt-2 text-justify">Lưu ý: Tất cả khách hàng thuộc loại thành viên này sẽ bị hạ về <strong>NEWMEM</strong>.</p>
           </template>
-          <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
 
         <v-divider></v-divider>

@@ -63,7 +63,7 @@ public interface JpaProductRepository extends JpaRepository<Product, Integer> {
     @EntityGraph(attributePaths = {"category", "productPrices.size.unit"})
     Slice<Product> findAllForSaleFetch(@Param("isOrdered") Boolean isOrdered, Pageable pageable);
     
-    @Query("select p from Product p")
+    @Query("select p from Product p order by p.updatedAt desc")
     @EntityGraph(attributePaths = {"category", "productPrices.size.unit"})
     Page<Product> findAllFetch(Pageable pageable);
     

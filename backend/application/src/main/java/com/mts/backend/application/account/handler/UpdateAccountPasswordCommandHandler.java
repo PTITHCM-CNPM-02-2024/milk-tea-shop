@@ -36,7 +36,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         Account account = mustExistAccount(command.getId());
         
         PasswordHash newPasswordHash = encodePassword(command.getNewPassword());
-        encodePassword(command.getConfirmPassword());
+        
         if (!passwordEncoder.matches(command.getConfirmPassword().getValue(), newPasswordHash.getValue())) {
             throw new DomainException("Mật khẩu mới và xác nhận mật khẩu không khớp");
         }
@@ -45,9 +45,11 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
             throw new DomainException("Mật khẩu cũ không chính xác");
         }
         
-        if (!account.setPassword(newPasswordHash)) {
+        if (!passwordEncoder.matches(command.getNewPassword().getValue(), account.getPasswordHash().getValue())) {
             throw new DomainException("Mật khẩu mới không được trùng với mật khẩu cũ");
         }
+        
+        account.setPasswordHash(newPasswordHash);
         
         account.incrementTokenVersion();
         

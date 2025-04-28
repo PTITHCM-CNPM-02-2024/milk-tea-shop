@@ -51,3 +51,6 @@ dependencies {
 springBoot{
     buildInfo()
 }
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
+}

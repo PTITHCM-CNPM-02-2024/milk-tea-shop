@@ -23,10 +23,10 @@ public class UserPrincipal implements UserDetails {
         return account.getTokenVersion();
     }
     
-    public AccountId getId() {
-        return AccountId.of(account.getId());
+    public Long getId() {
+        return account.getId();
     }
-
+    
     /**
      * @return
      */

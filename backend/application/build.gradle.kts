@@ -23,3 +23,6 @@ dependencies{
     implementation("com.google.firebase:firebase-storage:21.0.1")
     implementation("com.google.firebase:firebase-admin:9.4.3")
 }
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
+}

@@ -250,7 +250,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="error" text @click="couponDialog = false">
+        <v-btn text @click="couponDialog = false">
           Đóng
         </v-btn>
         <v-btn 
@@ -437,6 +437,9 @@
                 v-model.number="discountForm.maxDiscountAmount"
                 label="Số tiền giảm tối đa (đồng)"
                 type="number"
+                :rules="[
+                  v => v === 0 || v > 1000 || 'Số tiền phải bằng 0 hoặc lớn hơn 1000đ'
+                ]"
                 min="0"
               ></v-text-field>
             </v-col>
@@ -445,6 +448,9 @@
                 v-model.number="discountForm.minimumOrderValue"
                 label="Giá trị đơn hàng tối thiểu (đồng)"
                 type="number"
+                :rules="[
+                  v => v === 0 || v > 1000 || 'Giá trị phải bằng 0 hoặc lớn hơn 1000đ'
+                ]"
                 min="0"
               ></v-text-field>
             </v-col>
@@ -454,14 +460,14 @@
                 :items="discountStore.unusedCoupons"
                 item-value="id"
                 item-title="coupon"
-                label="Mã giảm giá kèm theo (tùy chọn)"
+                label="Mã giảm giá kèm theo"
                 clearable
               ></v-select>
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.maxUsage"
-                label="Số lần sử dụng tối đa"
+                label="Số lần sử dụng tối đa (tùy chọn)"
                 type="number"
                 min="0"
               ></v-text-field>
@@ -469,7 +475,7 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.maxUsagePerCustomer"
-                label="Số lần sử dụng tối đa/khách hàng"
+                label="Số lần sử dụng tối đa/khách hàng (tùy chọn)"
                 type="number"
                 min="0"
               ></v-text-field>
@@ -519,7 +525,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="error" text @click="discountDialog = false">
+        <v-btn text @click="discountDialog = false">
           Đóng
         </v-btn>
         <v-btn 

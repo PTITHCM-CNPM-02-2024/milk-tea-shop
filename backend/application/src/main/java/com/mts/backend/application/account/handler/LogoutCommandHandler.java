@@ -28,8 +28,8 @@ public class LogoutCommandHandler implements ICommandHandler<LogoutCommand, Comm
     public CommandResult handle(LogoutCommand command) {
         Objects.requireNonNull(command, "Command cannot be null");
         
-        var account = accountRepository.findById(command.getUserPrincipal().getId().getValue())
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với id: " + command.getUserPrincipal().getId().getValue()));
+        var account = accountRepository.findById(command.getUserPrincipal().getId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với id: " + command.getUserPrincipal().getId()));
         
         account.logout();
         

@@ -261,7 +261,7 @@
                           v-model="editedEmployee.username"
                           label="Tên đăng nhập"
                           variant="outlined"
-                          :rules="[!editMode ? v => !!v || 'Tên đăng nhập là bắt buộc' : () => true]"
+                          :rules="[!editMode ? v => !!v && /^[a-zA-Z0-9_-]+$/.test(v) && v.length >= 3 && v.length <= 50 || 'Tên đăng nhập phải có ít nhất 3 ký tự và không quá 50 ký tự' : () => true]"
                         ></v-text-field>
                       </v-col>
 
@@ -271,7 +271,7 @@
                           label="Mật khẩu"
                           variant="outlined"
                           type="password"
-                          :rules="[!editMode ? v => !!v || 'Mật khẩu là bắt buộc' : () => true]"
+                          :rules="[!editMode ? v => !!v && v.length >= 6 || 'Mật khẩu phải có ít nhất 6 ký tự' : () => true]"
                         ></v-text-field>
                       </v-col>
 
@@ -584,8 +584,7 @@
           Bạn có chắc chắn muốn xóa nhân viên 
           <strong class="text-justify" v-if="employeeToDelete">{{ employeeToDelete.firstName }} {{ employeeToDelete.lastName }}</strong>?
           <br>
-          <p class="text-medium-emphasis text-justify mt-2">Xóa nhân viên sẽ xóa tài khoản và các đơn hàng liên quan.</p>
-          <p class="text-medium-emphasis text-justify mt-2">Hành động này không thể hoàn tác.</p>
+          <p class="text-medium-emphasis text-justify mt-2">Lưu ý: Xóa nhân viên sẽ xóa tài khoản của nhân viên.</p>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions class="pa-3">

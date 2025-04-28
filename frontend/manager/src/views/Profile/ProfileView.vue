@@ -394,19 +394,20 @@ const updatingPassword = ref(false)
 // Validation rules
 const nameRules = [
   v => !!v || 'Trường này là bắt buộc',
-  v => (v && v.length <= 50) || 'Tên không được quá 50 ký tự',
+  v => (v && v.length <= 70) || 'Tên không được quá 70 ký tự',
   v => (v && /^[a-zA-ZÀ-ỹ\s]+$/.test(v)) || 'Chỉ chứa chữ cái và khoảng trắng'
 ]
 
 // Giữ lại usernameRules để kiểm tra username trong dữ liệu
 const usernameRules = [
   v => !!v || 'Tên đăng nhập là bắt buộc',
-  v => (v && v.length >= 3) || 'Tên đăng nhập phải có ít nhất 3 ký tự',
-  v => /^[a-zA-Z0-9._-]+$/.test(v) || 'Tên đăng nhập chỉ được chứa chữ cái, số và các ký tự . _ -'
+  v => (v && v.length >= 3 && v.length <= 50) || 'Tên đăng nhập phải có ít nhất 3 ký tự và không quá 50 ký tự',
+  v => /^[a-zA-Z0-9_-]+$/.test(v) || 'Tên đăng nhập chỉ được chứa chữ cái, số và các ký tự . _ -'
 ]
 
 const emailRules = [
   v => !!v || 'Email là bắt buộc',
+  v => (v && v.length <= 255) || 'Email không được quá 255 ký tự',
   v => /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/.test(v) || 'Email không hợp lệ'
 ]
 

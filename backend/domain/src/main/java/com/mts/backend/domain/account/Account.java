@@ -145,12 +145,11 @@ public class Account extends BaseEntity<Long> {
         return true;
     }
 
-    public boolean setPassword(@NotNull PasswordHash passwordHash) {
+    public void setPasswordHash(@NotNull PasswordHash passwordHash) {
         if (PasswordHash.of(this.passwordHash).equals(passwordHash)) {
-            return false;
+            return;
         }
         this.passwordHash = passwordHash.getValue();
-        return true;
     }
 
     public void login() {

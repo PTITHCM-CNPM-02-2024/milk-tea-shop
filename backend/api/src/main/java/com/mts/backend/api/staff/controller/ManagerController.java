@@ -3,7 +3,6 @@ package com.mts.backend.api.staff.controller;
 import com.mts.backend.api.common.IController;
 import com.mts.backend.api.staff.request.CreateManagerRequest;
 import com.mts.backend.api.staff.request.UpdateManagerRequest;
-import com.mts.backend.application.report.ReportQueryBus;
 import com.mts.backend.application.staff.ManagerCommandBus;
 import com.mts.backend.application.staff.ManagerQueryBus;
 import com.mts.backend.application.staff.command.CreateManagerCommand;
@@ -16,14 +15,14 @@ import com.mts.backend.domain.account.value_object.PasswordHash;
 import com.mts.backend.domain.account.value_object.Username;
 import com.mts.backend.domain.common.value_object.*;
 import com.mts.backend.domain.staff.identifier.ManagerId;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/managers")
@@ -55,6 +54,8 @@ public class ManagerController implements IController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Cập nhật thông tin quản lý")
+    @PreAuthorize("authentication.principal.id == #id")
     public ResponseEntity<?> updateManager(@PathVariable("id") Long id, @RequestBody UpdateManagerRequest request) {
         var command = UpdateManagerCommand.builder()
                 .id(ManagerId.of(id))
@@ -82,7 +83,7 @@ public class ManagerController implements IController {
 
     @GetMapping
     public ResponseEntity<?> getManagers(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         var request = DefaultManagerQuery.builder()
                 .page(page)
                 .size(size)
@@ -94,11 +95,18 @@ public class ManagerController implements IController {
     }
 
     @GetMapping("/account/{id}")
-    public ResponseEntity<?> getManagerByAccountId(@PathVariable("id") Long id) {
-        var query = GetManagerByAccountIdQuery.builder().accountId(AccountId.of(id)).build();
-        
+    @Operation(summary = "Lấy quản lý theo ID tài khoản")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Thành công"),
+            @ApiResponse(responseCode = "404", description = "Không tìm thấy quản lý")
+    })
+    public ResponseEntity<?> getManagerByAccountId(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id) {
+        var query = GetManagerByAccountIdQuery.builder()
+                .accountId(AccountId.of(id)).build();
+
         var result = queryBus.dispatch(query);
 
         return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
+
 }

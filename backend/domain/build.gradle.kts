@@ -20,3 +20,7 @@ dependencies{
 
 group = "com.mts.backend"
 version = "1.0-SNAPSHOT"
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
+}

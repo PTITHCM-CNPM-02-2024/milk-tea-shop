@@ -99,7 +99,7 @@ tasks.withType<Test>{
     useJUnitPlatform()
 }
 
-tasks.withType<JavaCompile>{
+tasks.withType<JavaCompile> {
     options.compilerArgs.add("-parameters")
 }
 

@@ -96,7 +96,7 @@ public class ProductController implements IController {
     })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getProductDetail(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page, @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "100") Integer size) {
+    public ResponseEntity<?> getAllProduct(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page, @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "100") Integer size) {
         DefaultProductQuery getProductDetailCommand = DefaultProductQuery.builder()
                 .page(page)
                 .size(size)
