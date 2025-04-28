@@ -40,6 +40,7 @@ public class UpdateRoleCommandHandler implements ICommandHandler<UpdateRoleComma
 
             role.setDescription(command.getDescription().orElse(null));
 
+            var updatedRole = roleRepository.saveAndFlush(role);
             return CommandResult.success(role.getId());
 
         } catch (DataIntegrityViolationException e) {

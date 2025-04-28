@@ -51,6 +51,8 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         
         account.incrementTokenVersion();
         
+        accountRepository.saveAndFlush(account);
+        
         return CommandResult.success(account.getId());
     }
     

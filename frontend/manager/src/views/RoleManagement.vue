@@ -72,9 +72,9 @@
       density="comfortable"
       class="elevation-0"
     >
-      <!-- Cột STT -->
-      <template v-slot:item.index="{ item, index }">
-        {{ roleStore.currentPage * roleStore.pageSize + index + 1 }}
+      <!-- Thêm template v-slot:item.id -->
+      <template v-slot:item.id="{ item }">
+        <span class="text-caption">#{{ item.id }}</span>
       </template>
       
       <!-- Cột Tên -->
@@ -135,6 +135,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="addForm" @submit.prevent="saveRole">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="addDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="addDialogError = null"
+            >
+              {{ addDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedRole.name"
               label="Tên vai trò"
@@ -159,7 +171,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeAddDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeAddDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveRole" 
@@ -182,6 +194,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="editForm" @submit.prevent="updateRole">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="editDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="editDialogError = null"
+            >
+              {{ editDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedRole.name"
               label="Tên vai trò"
@@ -207,7 +231,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeEditDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeEditDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="updateRole" 
@@ -220,13 +244,13 @@
     </v-dialog>
     
     <!-- Dialog xác nhận xóa vai trò -->
-    <v-dialog v-model="deleteDialog" width="400">
+    <v-dialog v-model="deleteDialog" width="400" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
         
-        <v-card-text class="pa-4">
+        <v-card-text class="pa-4 pt-5">
           Bạn có chắc chắn muốn xóa vai trò <strong>{{ editedRole.name }}</strong>?
           <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
@@ -235,7 +259,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeDeleteDialog">Đóng</v-btn>
           <v-btn 
             color="error" 
             @click="deleteSelectedRole" 
@@ -287,11 +311,15 @@ const snackbar = ref({
 const addForm = ref(null)
 const editForm = ref(null)
 
+// Biến theo dõi lỗi dialog
+const addDialogError = ref(null)
+const editDialogError = ref(null)
+
 // Cấu hình headers cho bảng
 const headers = [
-  { title: 'STT', key: 'index', width: '70px', sortable: false },
-  { title: 'Tên vai trò', key: 'name', sortable: true },
-  { title: 'Mô tả', key: 'description', sortable: false },
+  { title: 'ID', key: 'id', width: '80px', sortable: true },
+  { title: 'Tên vai trò', key: 'name', align: 'start', sortable: true },
+  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Hành động', key: 'actions', sortable: false, align: 'end', width: '120px' }
 ]
 
@@ -396,6 +424,9 @@ function closeDeleteDialog() {
 async function saveRole() {
   if (!addForm.value) return
   
+  // Reset lỗi dialog
+  addDialogError.value = null
+  
   const { valid } = await addForm.value.validate()
   if (!valid) return
   
@@ -410,13 +441,19 @@ async function saveRole() {
     showSnackbar('Vai trò đã được tạo thành công.', 'success')
     closeAddDialog()
   } catch (error) {
-    showSnackbar(error.response?.data?.message || 'Không thể tạo vai trò mới. Vui lòng thử lại', 'error')
+    console.error('Lỗi khi tạo vai trò:', error)
+    addDialogError.value = error.response?.data?.message || 'Không thể tạo vai trò mới. Vui lòng thử lại'
+    showSnackbar(error.response?.data || 'Không thể tạo vai trò mới. Vui lòng thử lại', 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
 // Cập nhật vai trò
 async function updateRole() {
   if (!editForm.value) return
+  
+  // Reset lỗi dialog
+  editDialogError.value = null
   
   const { valid } = await editForm.value.validate()
   if (!valid) return
@@ -432,7 +469,10 @@ async function updateRole() {
     showSnackbar('Vai trò đã được cập nhật thành công.', 'success')
     closeEditDialog()
   } catch (error) {
-    showSnackbar(error.response?.data?.message || 'Không thể cập nhật vai trò. Vui lòng thử lại', 'error')
+    console.error('Lỗi khi cập nhật vai trò:', error)
+    editDialogError.value = error.response?.data?.message || 'Không thể cập nhật vai trò. Vui lòng thử lại'
+    showSnackbar(error.response?.data || 'Không thể cập nhật vai trò. Vui lòng thử lại', 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -443,7 +483,9 @@ async function deleteSelectedRole() {
     showSnackbar('Vai trò đã được xóa thành công.', 'success')
     closeDeleteDialog()
   } catch (error) {
-    showSnackbar(error.response?.data?.message || 'Không thể xóa vai trò. Vui lòng thử lại', 'error')
+    console.error('Lỗi khi xóa vai trò:', error)
+    showSnackbar(error.response?.data || 'Không thể xóa vai trò. Vui lòng thử lại', 'error')
+    closeDeleteDialog()
   }
 }
 

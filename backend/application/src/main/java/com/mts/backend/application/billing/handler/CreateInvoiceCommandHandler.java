@@ -10,6 +10,7 @@ import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.order.Order;
 import com.mts.backend.domain.order.OrderDiscount;
 import com.mts.backend.domain.payment.Payment;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.domain.store.jpa.JpaStoreRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
@@ -95,7 +96,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         template = template.replace("{{notes}}", order.getCustomizeNote().orElse(""));
         template = template.replace("{{currentDate}}", LocalDateTime.now().format(formatter));
         template = template.replace("{{currentUser}}",
-                "Nhân viên: %s".formatted(order.getEmployee().getFirstName().getValue()));
+                "Nhân viên: %s".formatted(order.getEmployee().map(e ->e.getFirstName().getValue()).orElse("")));
 
         return template;
     }
@@ -302,8 +303,12 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
     private String fillEmployeeInfo(String template, Order order) {
         var employee = order.getEmployee();
 
-        template = template.replace("{{staffName}}", employee.getFirstName().getValue() + " " + employee.getLastName().getValue());
-        template = template.replace("{{staffId}}", String.valueOf(employee.getId()));
+        template = template.replace("{{staffName}}",
+                employee.map(e->e.getFirstName().getValue() + " " + e.getLastName().getValue())
+                        .orElse("Nhân viên không xác định"));
+        template = template.replace("{{staffId}}", String.valueOf(
+                employee.map(Employee::getId)
+                        .orElse(-1L)));
 
         return template;
     }

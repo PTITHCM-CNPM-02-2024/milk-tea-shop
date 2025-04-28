@@ -21,6 +21,16 @@
       {{ customerStore.error }}
     </v-alert>
 
+    <v-alert
+      v-if="membershipStore.error"
+      type="error"
+      variant="tonal"
+      closable
+      class="mx-4 mb-4"
+    >
+      {{ membershipStore.error }}
+    </v-alert>
+
     <!-- Tabs -->
     <v-tabs v-model="activeTab" color="primary" align-tabs="start" class="px-4 mb-4">
       <v-tab value="customers">
@@ -200,7 +210,7 @@
 
           <v-card-text>
             <!-- Hiển thị danh sách thẻ thành viên -->
-            <div v-if="customerStore.loading" class="d-flex justify-center py-4">
+            <div v-if="membershipStore.loading" class="d-flex justify-center py-4">
               <v-progress-circular
                 indeterminate
                 color="primary"
@@ -208,20 +218,20 @@
               ></v-progress-circular>
             </div>
 
-            <div v-else-if="customerStore.membershipTypes.length === 0" class="text-center py-4">
+            <div v-else-if="membershipStore.membershipTypes.length === 0" class="text-center py-4">
               <v-icon size="64" color="grey-lighten-2" class="mb-2">mdi-credit-card-off</v-icon>
               <p class="text-body-1 text-medium-emphasis">Không có dữ liệu chương trình thành viên</p>
             </div>
 
             <v-row v-else>
               <v-col
-                v-for="item in customerStore.membershipTypes"
+                v-for="item in membershipStore.membershipTypes"
                 :key="item.id"
                 cols="12" sm="6" md="4" lg="3"
               >
                 <v-card
                   class="membership-card"
-                  :class="{'inactive-card': item.isActive}"
+                  :class="{'inactive-card': !item.isActive}"
                   elevation="3"
                 >
                   <div class="membership-header" :class="getMembershipHeaderClass(item)">
@@ -231,7 +241,7 @@
                       </v-avatar>
                       <div>
                         <div class="text-h6 font-weight-bold text-white">{{ item.name }}</div>
-                        <div class="text-body-2 text-white">{{ item.requiredPoints }} điểm</div>
+                        <div class="text-body-2 text-white">{{ item.requiredPoint }} điểm</div>
                       </div>
                     </div>
 
@@ -280,7 +290,7 @@
                   </v-card-text>
 
                   <v-chip
-                    v-if="item.isActive"
+                    v-if="!item.isActive"
                     class="status-chip"
                     color="error"
                     size="small"
@@ -329,24 +339,46 @@
             <v-window-item value="info">
               <v-container class="pa-4">
                 <v-form ref="customerForm" @submit.prevent="saveCustomer">
+                  <!-- Hiển thị lỗi dialog -->
+                  <v-alert
+                    v-if="customerDialogError"
+                    type="error"
+                    variant="tonal"
+                    closable
+                    class="mb-4"
+                    @update:model-value="customerDialogError = null"
+                  >
+                    {{ customerDialogError }}
+                  </v-alert>
+
                   <v-row>
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedCustomer.firstName"
+                        @update:model-value="value => editedCustomer.firstName = toUpperCaseValue(value)"
                         label="Họ"
                         variant="outlined"
                         hint="Có thể để trống"
                         persistent-hint
+                        :rules="[
+                          v => !v || v.length <= 70 || 'Họ không được vượt quá 70 ký tự',
+                          v => !v || /^[a-zA-ZÀ-ỹ\s]+$/.test(v) || 'Họ không được chứa ký tự đặc biệt'
+                        ]"
                       ></v-text-field>
                     </v-col>
 
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedCustomer.lastName"
+                        @update:model-value="value => editedCustomer.lastName = toUpperCaseValue(value)"
                         label="Tên"
                         variant="outlined"
                         hint="Có thể để trống"
                         persistent-hint
+                        :rules="[
+                          v => !v || v.length <= 70 || 'Tên không được vượt quá 70 ký tự',
+                          v => !v || /^[a-zA-ZÀ-ỹ\s]+$/.test(v) || 'Tên không được chứa ký tự đặc biệt'
+                        ]"
                       ></v-text-field>
                     </v-col>
 
@@ -390,7 +422,9 @@
                         :items="membershipOptions"
                         label="Loại thành viên"
                         variant="outlined"
-                        :rules="[v => !!v || 'Vui lòng chọn loại thành viên']"
+                        disabled
+                        hint="Không thể thay đổi hạng thành viên"
+                        persistent-hint
                       ></v-select>
                     </v-col>
 
@@ -711,7 +745,19 @@
         <v-divider></v-divider>
 
         <v-card-text>
-          <v-form ref="membershipForm" @submit.prevent="saveMembership" class="pa-4">
+          <v-form ref="membershipForm" @submit.prevent="saveMembership">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="membershipDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="membershipDialogError = null"
+            >
+              {{ membershipDialogError }}
+            </v-alert>
+
             <v-row>
               <v-col cols="12">
                 <v-text-field
@@ -764,7 +810,7 @@
 
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model.number="editedMembership.requiredPoints"
+                  v-model.number="editedMembership.requiredPoint"
                   label="Điểm thưởng yêu cầu"
                   variant="outlined"
                   type="number"
@@ -835,18 +881,18 @@
     </v-dialog>
 
     <!-- Dialog xác nhận xóa -->
-    <v-dialog v-model="deleteDialog" max-width="400">
+    <v-dialog v-model="deleteDialog" max-width="520px" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h6 pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
 
-        <v-card-text class="pa-4">
+        <v-card-text class="py-4 pt-5">
           <template v-if="activeTab === 'customers'">
-            Bạn có chắc chắn muốn xóa khách hàng <strong>{{ editedCustomer.firstName }} {{ editedCustomer.lastName }}</strong> khỏi hệ thống?
+            Bạn có chắc chắn muốn xóa khách hàng <strong>{{ editedCustomer.firstName }} {{ editedCustomer.lastName }}</strong>?
           </template>
           <template v-else>
-            Bạn có chắc chắn muốn xóa loại thành viên <strong>{{ editedMembership.name }}</strong> khỏi hệ thống?
+            Bạn có chắc chắn muốn xóa loại thành viên <strong>{{ editedMembership.name }}</strong>?
             <p class="text-medium-emphasis mt-2">Lưu ý: Khách hàng thuộc loại thành viên này sẽ bị ảnh hưởng.</p>
           </template>
           <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
@@ -890,11 +936,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useCustomerStore } from '@/stores/customer'
+import { useMembershipStore } from '@/stores/membership'
 import { useRoleStore } from '@/stores/role'
 import { debounce } from 'lodash'
 import { accountService } from '@/services/accountService'
 
 const customerStore = useCustomerStore()
+const membershipStore = useMembershipStore()
 const roleStore = useRoleStore()
 
 // State
@@ -928,11 +976,11 @@ const editedMembership = ref({
   id: null,
   name: '',
   description: null,
-  requiredPoints: 0,
-  discountValue: 0,
-  discountUnit: 'PERCENTAGE',
   validUntil: null,
-  isActive: true
+  isActive: ref(true),
+  discountUnit: 'PERCENTAGE',
+  requiredPoint: 0,
+  discountValue: 0,
 })
 
 // Default Values
@@ -954,11 +1002,11 @@ const defaultMembership = {
   id: null,
   name: '',
   description: null,
-  requiredPoints: 0,
+  requiredPoint: 0,
   discountValue: 0,
   discountUnit: 'PERCENTAGE',
   validUntil: null,
-  isActive: true
+  isActive: ref(true)
 }
 
 // Forms
@@ -968,11 +1016,17 @@ const passwordForm = ref(null)
 const roleForm = ref(null)
 
 // Snackbar
-const snackbar = reactive({
+const snackbar = ref({
   show: false,
   text: '',
   color: 'success'
 })
+
+// Biến theo dõi lỗi dialog
+const customerDialogError = ref(null)
+const membershipDialogError = ref(null)
+const passwordDialogError = ref(null)
+const roleDialogError = ref(null)
 
 // Validation rules
 const emailRules = [
@@ -1009,7 +1063,7 @@ const customerHeaders = [
 
 // Computed
 const membershipOptions = computed(() => {
-  return customerStore.membershipTypes.map(type => ({
+  return membershipStore.membershipTypes.map(type => ({
     title: type.name,
     value: type.id
   }))
@@ -1069,7 +1123,7 @@ const loadCustomers = () => {
 }
 
 const loadMemberships = () => {
-  customerStore.fetchMembershipTypes(0, 100) // lấy tất cả dữ liệu
+  membershipStore.fetchMembershipTypes(0, 100) // lấy tất cả dữ liệu
 }
 
 // Lấy danh sách vai trò
@@ -1091,7 +1145,7 @@ const getInitials = (firstName, lastName) => {
 
 const getMembershipName = (membershipId) => {
   if (!membershipId) return 'Không có'
-  const membership = customerStore.membershipTypes.find(m => m.id === membershipId)
+  const membership = membershipStore.membershipTypes.find(m => m.id === membershipId)
   return membership ? membership.name : 'Không xác định'
 }
 
@@ -1239,10 +1293,7 @@ const openAddMembershipDialog = () => {
 
 const openEditMembershipDialog = (membership) => {
   editMode.value = true
-  // Sao chép các thuộc tính hiện có
   editedMembership.value = { ...membership };
-  // Đảm bảo isActive luôn là boolean (mặc định là true nếu null/undefined)
-  editedMembership.value.isActive = membership.isActive ?? true;
   membershipDialog.value = true;
 }
 
@@ -1321,10 +1372,10 @@ const saveMembership = async () => {
 
   try {
     if (editMode.value) {
-      await customerStore.updateMembershipType(editedMembership.value.id, editedMembership.value)
+      await membershipStore.updateMembershipType(editedMembership.value.id, editedMembership.value)
       showSnackbar('Cập nhật loại thành viên thành công', 'success')
     } else {
-      await customerStore.createMembershipType(editedMembership.value)
+      await membershipStore.createMembershipType(editedMembership.value)
       showSnackbar('Thêm loại thành viên mới thành công', 'success')
     }
     closeMembershipDialog()
@@ -1341,7 +1392,7 @@ const deleteItem = async () => {
       showSnackbar('Xóa khách hàng thành công', 'success')
       loadCustomers()
     } else {
-      await customerStore.deleteMembershipType(editedMembership.value.id)
+      await membershipStore.deleteMembershipType(editedMembership.value.id)
       showSnackbar('Xóa loại thành viên thành công', 'success')
       loadMemberships()
     }
@@ -1438,30 +1489,6 @@ const initRoleChange = () => {
   }
 }
 
-// Thêm phương thức kích hoạt/vô hiệu hóa tài khoản
-// Kích hoạt/Vô hiệu hóa tài khoản
-const toggleAccountActiveStatus = async () => {
-  loading.value = true
-  try {
-    await accountService.toggleAccountActive(accountDetail.value.id, !accountDetail.value.isActive)
-    
-    // Cập nhật trạng thái hoạt động trong UI
-    accountDetail.value.isActive = !accountDetail.value.isActive
-    
-    showSnackbar(
-      accountDetail.value.isActive 
-        ? 'Tài khoản đã được kích hoạt thành công' 
-        : 'Tài khoản đã được vô hiệu hóa thành công', 
-      'success'
-    )
-  } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
-  } finally {
-    loading.value = false
-  }
-}
-
-// Thêm phương thức khóa/mở khóa tài khoản
 // Khóa/Mở khóa tài khoản
 const toggleAccountLockStatus = async () => {
   loading.value = true
@@ -1483,6 +1510,12 @@ const toggleAccountLockStatus = async () => {
     loading.value = false
   }
 }
+
+// Helper function to convert string to uppercase
+const toUpperCaseValue = (str) => {
+  if (!str) return '';
+  return str.toUpperCase();
+};
 
 // Lifecycle hooks
 onMounted(() => {

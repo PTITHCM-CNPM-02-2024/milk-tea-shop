@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Objects;
 
@@ -40,13 +42,14 @@ public class UpdateCategoryCommandHandler implements ICommandHandler<UpdateCateg
 
             category.setDescription(command.getDescription());
             category.setName(command.getName());
-
-            return CommandResult.success(category.getId());
-        } catch (Exception e) {
+            
+            categoryRepository.saveAndFlush(category);
+            return CommandResult.success("Cập nhật danh mục thành công");
+        } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("uk_category_name")) {
-               return CommandResult.notFoundFail("Tên danh mục " + command.getName().getValue() + " đã tồn tại");
+                throw new DuplicateException("Tên danh mục " + command.getName().getValue() + " đã tồn tại");
             }
-            throw new DomainException("Lỗi khi cập nhật danh mục"+ e.getMessage());
+            return CommandResult.businessFail("Lỗi khi cập nhật danh mục %s".formatted(command.getName().getValue()));
         }
     }
 

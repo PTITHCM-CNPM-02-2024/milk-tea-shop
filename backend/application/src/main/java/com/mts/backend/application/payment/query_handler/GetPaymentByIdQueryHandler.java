@@ -7,6 +7,7 @@ import com.mts.backend.application.payment.response.PaymentMethodDetailResponse;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.payment.jpa.JpaPaymentRepository;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.exception.NotFoundException;
 import com.mts.backend.shared.query.IQueryHandler;
@@ -42,7 +43,7 @@ public class GetPaymentByIdQueryHandler implements IQueryHandler<PaymentByIdQuer
                         .totalAmount(payment.getOrder().getTotalAmount().map(Money::getValue).orElse(null))
                         .note(payment.getOrder().getCustomizeNote().orElse(null))
                         .customerId(payment.getOrder().getCustomer().map(Customer::getId).orElse(null))
-                        .employeeId(payment.getOrder().getEmployee().getId())
+                        .employeeId(payment.getOrder().getEmployee().map(Employee::getId).orElse(null))
                         .orderStatus(payment.getOrder().getStatus().map(Enum::name).orElse(null))
                         .orderTime(payment.getOrder().getOrderTime())
                         .build())

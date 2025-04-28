@@ -52,9 +52,10 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         Objects.requireNonNull(command, "Create customer command is required");
 
         try {
-            MembershipType msEn = membershipTypeRepository
-                    .findById(command.getMembershipId().map(MembershipTypeId::getValue).orElse(null))
-                    .orElseThrow(() -> new NotFoundException("Membership type không tồn tại"));
+           
+            var msEn = command.getMembershipId().map(MembershipTypeId::getValue)
+                    .map(membershipTypeRepository::getReferenceById)
+                    .orElse(null);
 
             Account acEn = create(command);
 
@@ -67,9 +68,10 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
                     .phone(command.getPhone())
                     .membershipType(msEn)
                     .account(acEn)
-                    .currentPoint(RewardPoint.of(msEn.getRequiredPoint()))
+                    .currentPoint(RewardPoint.of(msEn == null ? RewardPoint.of(0).getValue() : msEn.getRequiredPoint()))
                     .build();
 
+            var createdAccount = accountRepository.saveAndFlush(acEn);
             var createdCustomer = customerRepository.save(cus);
 
             return CommandResult.success(createdCustomer.getId());

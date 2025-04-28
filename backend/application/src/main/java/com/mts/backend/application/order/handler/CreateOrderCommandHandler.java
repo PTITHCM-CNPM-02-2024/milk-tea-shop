@@ -92,7 +92,7 @@ public class CreateOrderCommandHandler implements ICommandHandler<CreateOrderCom
 
         OrderBasicResponse response = 
                 OrderBasicResponse.builder().customerId(saveOrder.getCustomer().map(Customer::getId).orElse(null))
-                        .employeeId(saveOrder.getEmployee().getId())
+                        .employeeId(saveOrder.getEmployee().map(Employee::getId).orElse(null))
                         .finalAmount(saveOrder.getFinalAmount().map(Money::getValue).orElse(null))
                         .note(saveOrder.getCustomizeNote().orElse(null))
                         .orderId(saveOrder.getId())

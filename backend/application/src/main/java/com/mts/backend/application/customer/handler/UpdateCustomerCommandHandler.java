@@ -39,6 +39,7 @@ public class UpdateCustomerCommandHandler implements ICommandHandler<UpdateCusto
             customer.setPhone(command.getPhone());
             customer.changeEmail(command.getEmail().orElse(null));
 
+            customerRepository.saveAndFlush(customer);
             return CommandResult.success(customer.getId());
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("uk_customer_phone")) {

@@ -186,7 +186,7 @@ public class CustomerController implements IController {
             @ApiResponse(responseCode = "200", description = "Thành công")
     })
     @GetMapping("/account/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("(hasAnyRole('MANAGER', 'STAFF') ) or @authentication.principal.id == #id")
     public ResponseEntity<?> getAccount(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id) {
         var query = GetCusByAccountIdQuery.builder()
                 .accountId(AccountId.of(id))

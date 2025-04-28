@@ -23,7 +23,7 @@ public class UpdateMemberCommand implements ICommand<CommandResult>{
     private String description;
     private DiscountUnit discountUnit;
     private BigDecimal discountValue;
-    private int requiredPoints;
+    private int requiredPoint;
     private LocalDateTime validUntil;
     private boolean active;
 }

@@ -89,36 +89,6 @@ logging:
     com.myapp: DEBUG
     org.hibernate: DEBUG
     org.springframework.security: DEBUG
-    
-# Testing Environment
----
-spring:
-  config:
-    activate:
-      on-profile: test
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: password
-    driver-class-name: org.h2.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-        ddl-auto: create-drop
-    show-sql: true
-
-server:
-  port: 8182
-
-# Database configuration
-
-# Logging configuration
-logging:
-  level:
-    root: INFO
-    org.springframework: WARN
-    com.myapp: DEBUG
-
 # Production Environment
 ---
 spring:
@@ -126,7 +96,7 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
+    url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}?logger=com.mysql.cj.log.Slf4JLogger&profileSQL=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver

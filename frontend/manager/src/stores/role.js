@@ -63,7 +63,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo vai trò mới'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo vai trò mới'
       throw err
     } finally {
       loading.value = false
@@ -81,7 +81,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật vai trò'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật vai trò'
       throw err
     } finally {
       loading.value = false
@@ -99,7 +99,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa vai trò'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa vai trò'
       throw err
     } finally {
       loading.value = false

@@ -1,0 +1,19 @@
+# Sử dụng ảnh MySQL 8.4
+FROM mysql:8.4
+
+# Biến môi trường cho MySQL (điều chỉnh nếu cần)
+# CẢNH BÁO: KHÔNG sử dụng mật khẩu rõ ràng trong Dockerfile cho production!
+# Sử dụng Docker secrets hoặc biến môi trường được inject khi chạy container.
+# Thay thế bằng cơ chế bí mật
+ENV MYSQL_ROOT_PASSWORD=changeme_root
+ENV MYSQL_DATABASE=milktea_prod_db
+ENV MYSQL_USER=milktea_prod_user
+# Thay thế bằng cơ chế bí mật
+ENV MYSQL_PASSWORD=changeme_user
+
+# Sao chép các script khởi tạo cho môi trường production
+# Đường dẫn này tương đối so với context gốc khi build (thường là thư mục gốc dự án)
+COPY backend/src/main/resources/db/migration/prod /docker-entrypoint-initdb.d/
+
+# Mở cổng MySQL
+EXPOSE 3306 

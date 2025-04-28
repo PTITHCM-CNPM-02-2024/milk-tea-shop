@@ -5,11 +5,9 @@ import com.mts.backend.domain.common.value_object.MemberDiscountValue;
 import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
-import com.mts.backend.domain.customer.value_object.MemberTypeName;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DomainException;
-import com.mts.backend.shared.exception.DuplicateException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -41,14 +39,15 @@ public class UpdateMemberCommandHandler implements ICommandHandler<UpdateMemberC
 
             membershipType.setMemberDiscountValue(memberDiscountValue);
 
-            membershipType.setRequiredPoint(command.getRequiredPoints());
+            membershipType.setRequiredPoint(command.getRequiredPoint());
 
             membershipType.setDescription(command.getDescription());
 
             membershipType.setValidUntil(command.getValidUntil());
 
             membershipType.setActive(command.isActive());
-
+            
+            membershipTypeRepository.saveAndFlush(membershipType);
             return CommandResult.success(membershipType.getId());
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("uk_membership_type_type")) {

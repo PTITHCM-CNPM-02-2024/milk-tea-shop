@@ -198,7 +198,7 @@ create table manager
 (
     order_id       int unsigned auto_increment comment 'Mã đơn hàng' primary key,
     customer_id    int unsigned                                  null comment 'Mã khách hàng',
-    employee_id    int unsigned                                  not null comment 'Mã nhân viên',
+    employee_id    int unsigned                                  null comment 'Mã nhân viên',
     order_time     timestamp    default CURRENT_TIMESTAMP        null comment 'Thời gian đặt hàng',
     total_amount   decimal(11, 3)                                null comment 'Tổng tiền',
     final_amount   decimal(11, 3)                                null comment 'Thành tiền',
@@ -213,7 +213,7 @@ create table manager
         ON DELETE SET NULL,
     constraint fk_order_employee foreign key (employee_id) references employee (employee_id)
         ON UPDATE CASCADE
-        ON DELETE CASCADE
+        ON DELETE SET NULL
 );
 
 create table order_discount

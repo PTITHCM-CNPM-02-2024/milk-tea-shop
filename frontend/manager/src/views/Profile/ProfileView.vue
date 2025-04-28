@@ -50,6 +50,7 @@
                       variant="outlined"
                       :rules="nameRules"
                       required
+                      @update:model-value="value => profile.firstName = toUpperCaseValue(value)"
                     ></v-text-field>
                   </v-col>
 
@@ -60,6 +61,7 @@
                       variant="outlined"
                       :rules="nameRules"
                       required
+                      @update:model-value="value => profile.lastName = toUpperCaseValue(value)"
                     ></v-text-field>
                   </v-col>
 
@@ -392,7 +394,8 @@ const updatingPassword = ref(false)
 // Validation rules
 const nameRules = [
   v => !!v || 'Trường này là bắt buộc',
-  v => v.length <= 50 || 'Tên không được quá 50 ký tự'
+  v => (v && v.length <= 50) || 'Tên không được quá 50 ký tự',
+  v => (v && /^[a-zA-ZÀ-ỹ\s]+$/.test(v)) || 'Chỉ chứa chữ cái và khoảng trắng'
 ]
 
 // Giữ lại usernameRules để kiểm tra username trong dữ liệu
@@ -580,4 +583,10 @@ const updatePassword = async () => {
 onMounted(() => {
   fetchProfile()
 })
+
+// Helper function to convert string to uppercase
+const toUpperCaseValue = (str) => {
+  if (!str) return '';
+  return str.toUpperCase();
+};
 </script>

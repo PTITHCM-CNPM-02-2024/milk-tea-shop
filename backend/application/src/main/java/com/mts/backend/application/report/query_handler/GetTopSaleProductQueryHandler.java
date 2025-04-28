@@ -45,7 +45,7 @@ public class GetTopSaleProductQueryHandler implements IQueryHandler<TopSaleProdu
                 .map(r -> {
                     var responseItem = TopSaleProductResponse.builder()
                             .productId(r[0] instanceof Integer id ? id : null)
-                            .productName(r[1] instanceof String name ? name.getClass().getName() : null)
+                            .productName(r[1] instanceof String name ? name: null)
                             .categoryName(r[2] instanceof String name ? name : null)
                             .quantity(r[3] instanceof Long quantity ? quantity : null)
                             .revenue(r[4] instanceof BigDecimal revenue ? revenue : null)

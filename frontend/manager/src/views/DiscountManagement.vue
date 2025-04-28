@@ -223,33 +223,35 @@
         {{ editCouponId ? 'Cập nhật mã giảm giá' : 'Thêm mã giảm giá mới' }}
       </v-card-title>
       <v-card-text>
-        <v-form ref="couponFormRef" v-model="validCouponForm" @submit.prevent="saveCoupon">
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="couponForm.coupon"
-                label="Mã giảm giá"
-                :rules="[v => !!v || 'Vui lòng nhập mã giảm giá',
-                        v => /^[a-zA-Z0-9]{3,15}$/.test(v) || 'Mã giảm giá phải từ 3 đến 15 ký tự, chỉ chứa chữ và số'
-                ]"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-textarea
-                v-model="couponForm.description"
-                label="Mô tả"
-                rows="3"
-                auto-grow
-              ></v-textarea>
-            </v-col>
-          </v-row>
+        <!-- Hiển thị lỗi dialog -->
+        <v-alert
+          v-if="couponDialogError"
+          type="error"
+          variant="tonal"
+          closable
+          class="mb-3"
+          @update:model-value="couponDialogError = null"
+        >
+          {{ couponDialogError }}
+        </v-alert>
+
+        <v-form ref="couponFormRef" v-model="validCouponForm">
+          <v-text-field
+            v-model="couponForm.coupon"
+            label="Mã giảm giá"
+            :rules="[v => !!v || 'Vui lòng nhập mã giảm giá']"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="couponForm.description"
+            label="Mô tả"
+          ></v-text-field>
         </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="couponDialog = false">
-          Hủy
+          Đóng
         </v-btn>
         <v-btn 
           color="primary" 
@@ -265,23 +267,23 @@
   </v-dialog>
 
   <!-- Dialog xác nhận xóa -->
-  <v-dialog v-model="deleteDialog" max-width="400">
+  <v-dialog v-model="deleteCouponDialog" max-width="400">
     <v-card>
       <v-card-title class="text-h5">
         Xác nhận xóa
       </v-card-title>
       <v-card-text>
-        Bạn có chắc chắn muốn xóa {{ activeTab === 'discounts' ? 'chương trình khuyến mãi' : 'mã giảm giá' }} này?
+        Bạn có chắc chắn muốn xóa mã giảm giá này?
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="deleteDialog = false">
-          Hủy
+        <v-btn color="primary" text @click="deleteCouponDialog = false">
+          Đóng
         </v-btn>
         <v-btn 
           color="error" 
           text 
-          @click="activeTab === 'discounts' ? deleteDiscount() : deleteCoupon()"
+          @click="deleteCoupon()"
           :loading="discountStore.loading"
         >
           Xóa
@@ -368,15 +370,27 @@
   </v-dialog>
 
   <!-- Dialog thêm/sửa chương trình khuyến mãi -->
-  <v-dialog v-model="discountDialog" max-width="800">
+  <v-dialog v-model="discountDialog" max-width="900">
     <v-card>
       <v-card-title class="text-h5">
         {{ editDiscountId ? 'Cập nhật chương trình khuyến mãi' : 'Thêm chương trình khuyến mãi mới' }}
       </v-card-title>
       <v-card-text>
-        <v-form ref="discountFormRef" v-model="validDiscountForm" @submit.prevent="saveDiscount">
+        <!-- Hiển thị lỗi dialog -->
+        <v-alert
+          v-if="discountDialogError"
+          type="error"
+          variant="tonal"
+          closable
+          class="mb-3"
+          @update:model-value="discountDialogError = null"
+        >
+          {{ discountDialogError }}
+        </v-alert>
+
+        <v-form ref="discountFormRef" v-model="validDiscountForm">
           <v-row>
-            <v-col cols="12" sm="6">
+            <v-col cols="12">
               <v-text-field
                 v-model="discountForm.name"
                 label="Tên chương trình"
@@ -384,39 +398,24 @@
                 required
               ></v-text-field>
             </v-col>
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="discountForm.couponId"
-                label="Mã giảm giá"
-                :items="editDiscountId ? [...discountStore.unusedCoupons, selectedCoupon] : discountStore.unusedCoupons"
-                item-title="coupon"
-                item-value="id"
-                :rules="[v => !!v || 'Vui lòng chọn mã giảm giá']"
-                required
-                :loading="discountStore.loading"
-                :hint="'Chọn mã giảm giá cho chương trình'"
-                persistent-hint
-              ></v-select>
-            </v-col>
             <v-col cols="12">
               <v-textarea
                 v-model="discountForm.description"
                 label="Mô tả"
-                rows="3"
+                rows="2"
                 auto-grow
               ></v-textarea>
             </v-col>
+            
             <v-col cols="12" sm="6">
               <v-select
                 v-model="discountForm.discountUnit"
-                label="Đơn vị giảm giá"
                 :items="[
                   { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
                   { title: 'Số tiền cố định', value: 'FIXED' }
                 ]"
-                item-title="title"
-                item-value="value"
-                :rules="[v => !!v || 'Vui lòng chọn đơn vị giảm giá']"
+                label="Loại giảm giá"
+                :rules="[v => !!v || 'Vui lòng chọn loại giảm giá']"
                 required
               ></v-select>
             </v-col>
@@ -427,10 +426,8 @@
                 type="number"
                 :rules="[
                   v => !!v || 'Vui lòng nhập giá trị giảm',
-                  v => v > 0 || 'Giá trị phải lớn hơn 0',
-                  v => (discountForm.discountUnit !== 'PERCENTAGE' || v <= 100) || 'Giá trị phần trăm không được vượt quá 100%',
-                  v => (discountForm.discountUnit !== 'PERCENTAGE' || v > 0) || 'Giá trị phần trăm phải lớn hơn 0',
-                  v => (discountForm.discountUnit !== 'FIXED' || v >= 1000) || 'Giá trị giảm cố định phải từ 1000đ trở lên'
+                  v => v >= 0 || 'Giá trị không được âm',
+                  v => discountForm.discountUnit !== 'PERCENTAGE' || v <= 100 || 'Giá trị phần trăm không được vượt quá 100%'
                 ]"
                 required
               ></v-text-field>
@@ -438,47 +435,35 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.maxDiscountAmount"
-                label="Giảm tối đa"
+                label="Số tiền giảm tối đa (đồng)"
                 type="number"
-                :rules="[
-                  v => !!v || 'Vui lòng nhập giá trị giảm tối đa',
-                  v => v >= 1000 || 'Giá trị phải lớn hơn 1000đ'
-                ]"
-                required
+                min="0"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.minimumOrderValue"
-                label="Đơn hàng tối thiểu"
+                label="Giá trị đơn hàng tối thiểu (đồng)"
                 type="number"
-                :rules="[
-                  v => !!v || 'Vui lòng nhập giá trị đơn hàng tối thiểu',
-                  v => v >= 1000 || 'Giá trị không được nhỏ hơn 1000đ'
-                ]"
-                required
+                min="0"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                v-model.number="discountForm.minimumRequiredProduct"
-                label="Số sản phẩm tối thiểu"
-                type="number"
-                hint="Để trống nếu không yêu cầu"
-                min="0"
-              ></v-text-field>
+              <v-select
+                v-model="discountForm.couponId"
+                :items="discountStore.unusedCoupons"
+                item-value="id"
+                item-title="coupon"
+                label="Mã giảm giá kèm theo (tùy chọn)"
+                clearable
+              ></v-select>
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.maxUsage"
                 label="Số lần sử dụng tối đa"
                 type="number"
-                hint="Để trống nếu không giới hạn"
                 min="0"
-                :rules="[
-                  v => !v || v > 0 || 'Số lần sử dụng tối đa phải lớn hơn 0',
-                  v => !v || !discountForm.maxUsagePerCustomer || v >= discountForm.maxUsagePerCustomer || 'Số lần sử dụng tối đa phải lớn hơn hoặc bằng số lần sử dụng tối đa/khách hàng'
-                ]"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
@@ -486,11 +471,7 @@
                 v-model.number="discountForm.maxUsagePerCustomer"
                 label="Số lần sử dụng tối đa/khách hàng"
                 type="number"
-                hint="Để trống nếu không giới hạn"
                 min="0"
-                :rules="[
-                  v => !v || v > 0 || 'Số lần sử dụng tối đa/khách hàng phải lớn hơn 0'
-                ]"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" v-if="editDiscountId">
@@ -539,7 +520,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" text @click="discountDialog = false">
-          Hủy
+          Đóng
         </v-btn>
         <v-btn 
           color="primary" 
@@ -549,6 +530,32 @@
           :disabled="!validDiscountForm"
         >
           {{ editDiscountId ? 'Cập nhật' : 'Tạo mới' }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Dialog xác nhận xóa -->
+  <v-dialog v-model="deleteDiscountDialog" max-width="400">
+    <v-card>
+      <v-card-title class="text-h5">
+        Xác nhận xóa
+      </v-card-title>
+      <v-card-text>
+        Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" text @click="deleteDiscountDialog = false">
+          Đóng
+        </v-btn>
+        <v-btn 
+          color="error" 
+          text 
+          @click="deleteDiscount()"
+          :loading="discountStore.loading"
+        >
+          Xóa
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -599,7 +606,6 @@ function showSnackbar(text, color = 'error') {
 // Biến cho quản lý dialog coupon
 const couponDialog = ref(false)
 const couponDetailDialog = ref(false)
-const deleteDialog = ref(false)
 const editCouponId = ref(null)
 const selectedCoupon = ref(null)
 const couponForm = reactive({
@@ -608,6 +614,8 @@ const couponForm = reactive({
 })
 const validCouponForm = ref(false)
 const couponFormRef = ref(null)
+// Thêm state lỗi cho dialog mã giảm giá
+const couponDialogError = ref(null)
 
 // Biến cho quản lý dialog discount
 const discountDialog = ref(false)
@@ -632,6 +640,14 @@ const discountForm = reactive({
 })
 const validDiscountForm = ref(false)
 const discountFormRef = ref(null)
+// Thêm state lỗi cho dialog khuyến mãi
+const discountDialogError = ref(null)
+
+// Thay thế dialog xóa chung bằng dialog xóa riêng
+const deleteCouponDialog = ref(false)
+const deleteDiscountDialog = ref(false)
+const couponToDelete = ref(null)
+const discountToDelete = ref(null)
 
 const discountHeaders = [
   { title: 'Tên chương trình', key: 'name', align: 'start' },
@@ -710,27 +726,29 @@ const resetCouponForm = () => {
 // Lưu mã giảm giá (thêm mới hoặc cập nhật)
 const saveCoupon = async () => {
   if (!validCouponForm.value) return
+  couponDialogError.value = null // Reset lỗi trước khi lưu
+  
+  try {
+    const couponData = {
+      coupon: couponForm.coupon,
+      description: couponForm.description
+    }
 
-  const couponData = {
-    coupon: couponForm.coupon,
-    description: couponForm.description
-  }
+    let result
+    if (editCouponId.value) {
+      result = await discountStore.updateCoupon(editCouponId.value, couponData)
+    } else {
+      result = await discountStore.createCoupon(couponData)
+    }
 
-  let result
-  if (editCouponId.value) {
-    // Cập nhật
-    result = await discountStore.updateCoupon(editCouponId.value, couponData)
-  } else {
-    // Thêm mới
-    result = await discountStore.createCoupon(couponData)
-  }
-
-  if (result) {
-    couponDialog.value = false
-    resetCouponForm()
-    showSnackbar('Thành công', 'success')
-  } else {
-    showSnackbar('Thất bại', 'error')
+    if (result) {
+      couponDialog.value = false
+      resetCouponForm()
+      showSnackbar('Thành công', 'success')
+    }
+  } catch (error) {
+    console.error("Lỗi khi lưu mã giảm giá:", error)
+    couponDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu mã giảm giá'
   }
 }
 
@@ -745,24 +763,37 @@ const viewCouponDetail = async (id) => {
 
 // Xác nhận xóa mã giảm giá
 const confirmDeleteCoupon = (id) => {
-  editCouponId.value = id
-  deleteDialog.value = true
+  couponToDelete.value = discountStore.coupons.find(c => c.id === id)
+  deleteCouponDialog.value = true
+}
+
+// Đóng dialog xác nhận xóa mã giảm giá
+const closeDeleteCouponDialog = () => {
+  deleteCouponDialog.value = false
+  couponToDelete.value = null
 }
 
 // Xóa mã giảm giá
 const deleteCoupon = async () => {
-  if (!editCouponId.value) return
+  if (!couponToDelete.value) return
   
-  const result = await discountStore.deleteCoupon(editCouponId.value)
-  if (result) {
-    deleteDialog.value = false
-    editCouponId.value = null
+  try {
+    const result = await discountStore.deleteCoupon(couponToDelete.value.id)
+    if (result) {
+      showSnackbar('Đã xóa mã giảm giá thành công', 'success')
+    }
+  } catch (error) {
+    console.error("Lỗi khi xóa mã giảm giá:", error)
+    showSnackbar(error.message || 'Đã xảy ra lỗi khi xóa mã giảm giá', 'error')
+  } finally {
+    closeDeleteCouponDialog()
   }
 }
 
 // Mở dialog thêm/sửa chương trình khuyến mãi
 const openDiscountDialog = async (id = null) => {
   resetDiscountForm()
+  discountDialogError.value = null // Reset lỗi khi mở dialog
   
   // Tải danh sách coupon
   await discountStore.fetchUnusedCoupons()
@@ -840,6 +871,7 @@ const resetDiscountForm = () => {
   if (discountFormRef.value) {
     discountFormRef.value.reset()
   }
+  discountDialogError.value = null // Reset lỗi khi reset form
 }
 
 // Định dạng datetime cho input
@@ -854,42 +886,46 @@ const formatDateTimeForInput = (dateString) => {
 // Lưu chương trình khuyến mãi (thêm mới hoặc cập nhật)
 const saveDiscount = async () => {
   if (!validDiscountForm.value) return
+  discountDialogError.value = null // Reset lỗi trước khi lưu
 
-  const discountData = {
-    name: discountForm.name,
-    description: discountForm.description,
-    couponId: discountForm.couponId,
-    discountUnit: discountForm.discountUnit,
-    discountValue: discountForm.discountValue,
-    maxDiscountAmount: discountForm.maxDiscountAmount,
-    minimumOrderValue: discountForm.minimumOrderValue,
-    minimumRequiredProduct: discountForm.minimumRequiredProduct,
-    validFrom: discountForm.validFrom,
-    validUntil: discountForm.validUntil,
-    maxUsage: discountForm.maxUsage,
-    maxUsagePerCustomer: discountForm.maxUsagePerCustomer
-  }
+  try {
+    const discountData = {
+      name: discountForm.name,
+      description: discountForm.description,
+      couponId: discountForm.couponId,
+      discountUnit: discountForm.discountUnit,
+      discountValue: discountForm.discountValue,
+      maxDiscountAmount: discountForm.maxDiscountAmount,
+      minimumOrderValue: discountForm.minimumOrderValue,
+      minimumRequiredProduct: discountForm.minimumRequiredProduct,
+      validFrom: discountForm.validFrom,
+      validUntil: discountForm.validUntil,
+      maxUsage: discountForm.maxUsage,
+      maxUsagePerCustomer: discountForm.maxUsagePerCustomer
+    }
 
-  // Thêm trường active khi cập nhật
-  if (editDiscountId.value) {
-    discountData.active = discountForm.active
-  }
+    // Thêm trường active khi cập nhật
+    if (editDiscountId.value) {
+      discountData.active = discountForm.active
+    }
 
-  let result
-  if (editDiscountId.value) {
-    // Cập nhật
-    result = await discountStore.updateDiscount(editDiscountId.value, discountData)
-  } else {
-    // Thêm mới
-    result = await discountStore.createDiscount(discountData)
-  }
+    let result
+    if (editDiscountId.value) {
+      // Cập nhật
+      result = await discountStore.updateDiscount(editDiscountId.value, discountData)
+    } else {
+      // Thêm mới
+      result = await discountStore.createDiscount(discountData)
+    }
 
-  if (result) {
-    discountDialog.value = false
-    resetDiscountForm()
-    showSnackbar('Thành công', 'success')
-  } else {
-    showSnackbar('Thất bại', 'error')
+    if (result) {
+      discountDialog.value = false
+      resetDiscountForm()
+      showSnackbar('Thành công', 'success')
+    }
+  } catch (error) {
+    console.error("Lỗi khi lưu khuyến mãi:", error)
+    discountDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu khuyến mãi'
   }
 }
 
@@ -904,21 +940,30 @@ const viewDiscountDetail = async (id) => {
 
 // Xác nhận xóa chương trình khuyến mãi
 const confirmDeleteDiscount = (id) => {
-  editDiscountId.value = id
-  deleteDialog.value = true
+  discountToDelete.value = discountStore.discounts.find(d => d.id === id)
+  deleteDiscountDialog.value = true
+}
+
+// Đóng dialog xác nhận xóa chương trình khuyến mãi
+const closeDeleteDiscountDialog = () => {
+  deleteDiscountDialog.value = false
+  discountToDelete.value = null
 }
 
 // Xóa chương trình khuyến mãi
 const deleteDiscount = async () => {
-  if (!editDiscountId.value) return
+  if (!discountToDelete.value) return
   
-  const result = await discountStore.deleteDiscount(editDiscountId.value)
-  if (result) {
-    deleteDialog.value = false
-    editDiscountId.value = null
-    showSnackbar('Đã xóa thành công', 'success')
-  } else {
-    showSnackbar('Xóa thất bại', 'error')
+  try {
+    const result = await discountStore.deleteDiscount(discountToDelete.value.id)
+    if (result) {
+      showSnackbar('Đã xóa thành công', 'success')
+    }
+  } catch (error) {
+    console.error("Lỗi khi xóa khuyến mãi:", error)
+    showSnackbar(error.message || 'Đã xảy ra lỗi khi xóa khuyến mãi', 'error')
+  } finally {
+    closeDeleteDiscountDialog()
   }
 }
 

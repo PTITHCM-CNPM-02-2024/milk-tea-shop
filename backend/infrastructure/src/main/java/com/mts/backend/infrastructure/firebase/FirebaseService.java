@@ -49,7 +49,7 @@ public class FirebaseService implements com.mts.backend.application.firebase.IFi
         try {
             result = storage.create(blobInfo, file.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            throw new RuntimeException("Không thể upload file", e);
         }
         var response = ImageFirebaseResponse.builder()
                 .fileName(result.getName())

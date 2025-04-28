@@ -37,6 +37,8 @@ public class UpdateProductPriceCommandHandler implements ICommandHandler<UpdateP
             for (var price : command.getProductPrices()) {
                 product.setPrice(price.getSizeId(), price.getPrice());
             }
+            
+            productRepository.saveAndFlush(product);
 
             return CommandResult.success(product.getId());
         } catch (DataIntegrityViolationException e) {

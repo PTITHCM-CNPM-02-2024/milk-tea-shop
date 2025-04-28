@@ -52,11 +52,11 @@ public class CreateProductSizeCommandHandler implements ICommandHandler<CreatePr
                 .description(command.getDescription().orElse(null))
                 .build();
         
-            var createdProductSize = sizeRepository.save(productSize);
+            var createdProductSize = sizeRepository.saveAndFlush(productSize);
             return CommandResult.success(createdProductSize.getId());
         }catch(DataIntegrityViolationException e){
             if(e.getMessage().contains("uk_product_size_unit_name")){
-                throw new DuplicateException("Kích thước " + command.getName().getValue() + " đã tồn tại trong đơn vị " + command.getUnitId().getValue());
+                throw new DuplicateException("Tên kích thước và dơn vị tính đã tồn tại");
             }
             if(e.getMessage().contains("fk_product_size_unit_of_measure")){
                 throw new NotFoundException("Đơn vị tính không tồn tại");

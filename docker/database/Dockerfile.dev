@@ -1,0 +1,15 @@
+# Sử dụng ảnh MySQL 8.4
+FROM mysql:8.4
+
+# Biến môi trường cho MySQL (điều chỉnh nếu cần)
+ENV MYSQL_ROOT_PASSWORD=devpassword
+ENV MYSQL_DATABASE=milktea_dev_db
+ENV MYSQL_USER=milktea_dev_user
+ENV MYSQL_PASSWORD=devpassword
+
+# Sao chép các script khởi tạo cho môi trường dev
+# Đường dẫn này tương đối so với context gốc khi build (thường là thư mục gốc dự án)
+COPY backend/src/main/resources/db/migration/dev /docker-entrypoint-initdb.d/
+
+# Mở cổng MySQL
+EXPOSE 3306 

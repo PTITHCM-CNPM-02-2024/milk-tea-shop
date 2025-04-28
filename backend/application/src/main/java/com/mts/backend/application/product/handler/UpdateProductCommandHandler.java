@@ -53,6 +53,7 @@ public class UpdateProductCommandHandler implements ICommandHandler<UpdateProduc
             product.setName(command.getName());
 
 
+            productRepository.saveAndFlush(product);
             return CommandResult.success(product.getId());
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("uk_product_name")) {
@@ -60,7 +61,7 @@ public class UpdateProductCommandHandler implements ICommandHandler<UpdateProduc
             }
             if (e.getMessage().contains("fk_product_category")) {
                 throw new NotFoundException(
-                        "Danh mục " + command.getCategoryId().orElse(null).getValue() + " không tồn tại");
+                        "Danh mục " + command.getCategoryId().map(CategoryId::getValue).orElse(null) + " không tồn tại");
             }
             throw new DomainException("Lỗi khi cập nhật sản phẩm", e);
         }

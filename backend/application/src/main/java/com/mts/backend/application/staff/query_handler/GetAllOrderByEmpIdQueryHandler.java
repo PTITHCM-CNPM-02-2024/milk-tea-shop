@@ -5,6 +5,7 @@ import com.mts.backend.application.staff.query.OrderByEmpIdQuery;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.customer.Customer;
 import com.mts.backend.domain.order.jpa.JpaOrderRepository;
+import com.mts.backend.domain.staff.Employee;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.query.IQueryHandler;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public class GetAllOrderByEmpIdQueryHandler implements IQueryHandler<OrderByEmpI
                     OrderBasicResponse orderBasicResponse = OrderBasicResponse.builder()
                             .orderId(r.getId())
                             .customerId(r.getCustomer().map(Customer::getId).orElse(null))
-                            .employeeId(r.getEmployee().getId())
+                            .employeeId(r.getEmployee().map(Employee::getId).orElse(null))
                             .orderTime(r.getOrderTime())
                             .finalAmount(r.getFinalAmount().map(Money::getValue).orElse(null))
                             .totalAmount(r.getTotalAmount().map(Money::getValue).orElse(null))

@@ -21,7 +21,7 @@ export const useManagerStore = defineStore('manager', () => {
       manager.value = response.data
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin hồ sơ'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin hồ sơ'
       throw err
     } finally {
       loading.value = false
@@ -39,7 +39,7 @@ export const useManagerStore = defineStore('manager', () => {
       manager.value = {...manager.value, ...managerData}
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật thông tin hồ sơ'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật thông tin hồ sơ'
       throw err
     } finally {
       loading.value = false

@@ -335,6 +335,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="addForm" @submit.prevent="saveProduct">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="productDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="productDialogError = null"
+            >
+              {{ productDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedProduct.name"
               label="Tên sản phẩm"
@@ -516,7 +528,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeAddDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeAddDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveProduct" 
@@ -539,6 +551,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="editForm" @submit.prevent="updateProduct">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="productDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="productDialogError = null"
+            >
+              {{ productDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedProduct.name"
               label="Tên sản phẩm"
@@ -711,7 +735,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeEditDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeEditDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="updateProduct" 
@@ -724,13 +748,13 @@
     </v-dialog>
     
     <!-- Dialog xác nhận xóa sản phẩm -->
-    <v-dialog v-model="deleteDialog" width="400">
+    <v-dialog v-model="deleteDialog" width="400" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
         
-        <v-card-text class="pa-4">
+        <v-card-text class="pa-4 pt-5">
           Bạn có chắc chắn muốn xóa sản phẩm <strong>{{ editedProduct.name }}</strong>?
           <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
@@ -739,7 +763,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeDeleteDialog">Đóng</v-btn>
           <v-btn 
             color="error" 
             @click="deleteSelectedProduct" 
@@ -763,6 +787,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="addCategoryForm" @submit.prevent="saveCategory">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="categoryDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="categoryDialogError = null"
+            >
+              {{ categoryDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedCategory.name"
               label="Tên danh mục"
@@ -787,7 +823,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeAddCategoryDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeAddCategoryDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveCategory" 
@@ -810,6 +846,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="editCategoryForm" @submit.prevent="updateCategory">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="categoryDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="categoryDialogError = null"
+            >
+              {{ categoryDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedCategory.name"
               label="Tên danh mục"
@@ -834,7 +882,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeEditCategoryDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeEditCategoryDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="updateCategory" 
@@ -847,13 +895,13 @@
     </v-dialog>
     
     <!-- Dialog xác nhận xóa danh mục -->
-    <v-dialog v-model="deleteCategoryDialog" width="400">
+    <v-dialog v-model="deleteCategoryDialog" width="400" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
         
-        <v-card-text class="pa-4">
+        <v-card-text class="pa-4 pt-5">
           Bạn có chắc chắn muốn xóa danh mục <strong>{{ editedCategory.name }}</strong>?
           <p class="text-medium-emphasis mt-2">Lưu ý: Sản phẩm thuộc danh mục này sẽ không bị xóa, nhưng sẽ không còn thuộc danh mục nào.</p>
         </v-card-text>
@@ -862,7 +910,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDeleteCategoryDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeDeleteCategoryDialog">Đóng</v-btn>
           <v-btn 
             color="error" 
             @click="deleteSelectedCategory" 
@@ -885,6 +933,18 @@
         
         <v-card-text class="pa-4">
           <v-form ref="addPriceForm" @submit.prevent="saveProductPrice">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="priceDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="priceDialogError = null"
+            >
+              {{ priceDialogError }}
+            </v-alert>
+
             <v-select
               v-model="newPrice.sizeId"
               :items="availableSizes"
@@ -916,7 +976,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeAddPriceDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeAddPriceDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveProductPrice" 
@@ -929,13 +989,13 @@
     </v-dialog>
 
     <!-- Dialog xác nhận xóa giá sản phẩm -->
-    <v-dialog v-model="deletePriceDialog" width="400">
+    <v-dialog v-model="deletePriceDialog" width="400" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
           Xác nhận xóa giá
         </v-card-title>
         
-        <v-card-text class="pa-4">
+        <v-card-text class="pa-4 pt-5">
           Bạn có chắc chắn muốn xóa giá cho kích cỡ <strong>{{ selectedPrice ? getSizeName(selectedPrice.sizeId) : '' }}</strong>?
           <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
@@ -944,13 +1004,45 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closePriceDeleteDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closePriceDeleteDialog">Đóng</v-btn>
           <v-btn 
             color="error" 
             @click="deletePrice" 
             :loading="productStore.loading"
           >
             Xóa
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <!-- Dialog xác nhận thay đổi topping -->
+    <v-dialog v-model="toppingConfirmationDialog" width="450" persistent>
+      <v-card>
+        <v-card-title class="text-h6 font-weight-medium pa-4 bg-warning text-white">
+          Xác nhận thay đổi thành Topping
+        </v-card-title>
+        
+        <v-card-text class="pa-4 pt-5">
+          <p>Việc đánh dấu sản phẩm này là "Topping" sẽ thực hiện các thay đổi sau:</p>
+          <ul class="my-3">
+            <li>Xóa tất cả các giá theo kích thước hiện có.</li>
+            <li>Thêm kích thước "NA" với giá mặc định (1.000đ).</li>
+            <li>Tự động chuyển sang danh mục "Topping".</li>
+          </ul>
+          <p>Bạn có chắc chắn muốn tiếp tục không?</p>
+        </v-card-text>
+        
+        <v-divider></v-divider>
+        
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="cancelToppingChange">Hủy</v-btn>
+          <v-btn 
+            color="warning" 
+            @click="confirmToppingChange"
+          >
+            Xác nhận
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -976,7 +1068,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { debounce } from 'lodash'
 import { productService } from '@/services/productService'
@@ -1050,6 +1142,14 @@ const snackbar = ref({
   message: '',
   color: 'success'
 })
+
+// Biến theo dõi lỗi dialog
+const productDialogError = ref(null)
+const categoryDialogError = ref(null)
+const priceDialogError = ref(null)
+
+// Dialog xác nhận topping
+const toppingConfirmationDialog = ref(false)
 
 // Xử lý hình ảnh
 const productImage = ref(null)
@@ -1163,28 +1263,43 @@ const closeAddPriceDialog = () => {
 }
 
 const saveProductPrice = () => {
-  if (!newPrice.value.sizeId) {
-    showSnackbar('Vui lòng chọn kích cỡ', 'error')
-    return
+  // Reset lỗi dialog
+  priceDialogError.value = null
+  
+  try {
+    if (!newPrice.value.sizeId) {
+      priceDialogError.value = 'Vui lòng chọn kích cỡ'
+      return
+    }
+    
+    // Kiểm tra xem kích cỡ đã tồn tại trong danh sách giá chưa
+    const existingPrice = editedProduct.value.prices.find(p => p.sizeId === newPrice.value.sizeId)
+    if (existingPrice) {
+      priceDialogError.value = 'Kích cỡ này đã được thiết lập giá'
+      return
+    }
+    
+    // Kiểm tra giá tối thiểu nếu sản phẩm là topping
+    if (editedProduct.value.isTopping && newPrice.value.price < 1000) {
+      priceDialogError.value = 'Giá topping phải từ 1.000đ trở lên'
+      return
+    }
+    
+    if (newPrice.value.price <= 0) {
+      priceDialogError.value = 'Giá phải lớn hơn 0'
+      return
+    }
+    
+    editedProduct.value.prices.push({
+      sizeId: newPrice.value.sizeId,
+      price: newPrice.value.price
+    })
+    
+    closeAddPriceDialog()
+  } catch (error) {
+    console.error('Lỗi khi thêm giá sản phẩm:', error)
+    priceDialogError.value = error.message || 'Đã xảy ra lỗi khi thêm giá'
   }
-  
-  // Kiểm tra giá tối thiểu nếu sản phẩm là topping
-  if (editedProduct.value.isTopping && newPrice.value.price < 1000) {
-    showSnackbar('Giá topping phải từ 1.000đ trở lên', 'error')
-    return
-  }
-  
-  if (newPrice.value.price <= 0) {
-    showSnackbar('Giá phải lớn hơn 0', 'error')
-    return
-  }
-  
-  editedProduct.value.prices.push({
-    sizeId: newPrice.value.sizeId,
-    price: newPrice.value.price
-  })
-  
-  closeAddPriceDialog()
 }
 
 const removeProductPrice = (index) => {
@@ -1203,6 +1318,9 @@ const closePriceDeleteDialog = () => {
 
 const deletePrice = async () => {
   try {
+    // Reset lỗi dialog
+    priceDialogError.value = null
+    
     if (editDialog.value && editedProduct.value.id && selectedPrice.value.id) {
       await productStore.deleteProductPrice(editedProduct.value.id, selectedPrice.value.sizeId)
       
@@ -1221,12 +1339,18 @@ const deletePrice = async () => {
     
     closePriceDeleteDialog()
   } catch (error) {
+    console.error('Lỗi khi xóa giá sản phẩm:', error)
+    priceDialogError.value = error.message || 'Đã xảy ra lỗi khi xóa giá'
     showSnackbar(`Lỗi: ${error.message}`, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
 const saveProduct = async () => {
   try {
+    // Reset lỗi dialog
+    productDialogError.value = null
+    
     // Kiểm tra nếu là topping
     if (editedProduct.value.isTopping) {
       // Kiểm tra danh mục
@@ -1265,12 +1389,18 @@ const saveProduct = async () => {
     closeAddDialog()
     loadProducts()
   } catch (error) {
+    console.error('Lỗi khi lưu sản phẩm:', error)
+    productDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu sản phẩm'
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
 const updateProduct = async () => {
   try {
+    // Reset lỗi dialog
+    productDialogError.value = null
+    
     // Kiểm tra nếu là topping
     if (editedProduct.value.isTopping) {
       // Kiểm tra danh mục
@@ -1319,7 +1449,10 @@ const updateProduct = async () => {
     closeEditDialog()
     loadProducts()
   } catch (error) {
+    console.error('Lỗi khi cập nhật sản phẩm:', error)
+    productDialogError.value = error.message || 'Đã xảy ra lỗi khi cập nhật sản phẩm'
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -1330,7 +1463,9 @@ const deleteSelectedProduct = async () => {
     closeDeleteDialog()
     loadProducts()
   } catch (error) {
+    console.error('Lỗi khi xóa sản phẩm:', error)
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -1379,23 +1514,35 @@ const closeDeleteCategoryDialog = () => {
 
 const saveCategory = async () => {
   try {
+    // Reset lỗi dialog
+    categoryDialogError.value = null
+    
     await productStore.createCategory(editedCategory.value)
     showSnackbar('Danh mục đã được thêm thành công', 'success')
     closeAddCategoryDialog()
     loadCategories()
   } catch (error) {
+    console.error('Lỗi khi lưu danh mục:', error)
+    categoryDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu danh mục'
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
 const updateCategory = async () => {
   try {
+    // Reset lỗi dialog
+    categoryDialogError.value = null
+    
     await productStore.updateCategory(editedCategory.value.id, editedCategory.value)
     showSnackbar('Danh mục đã được cập nhật thành công', 'success')
     closeEditCategoryDialog()
     loadCategories()
   } catch (error) {
+    console.error('Lỗi khi cập nhật danh mục:', error)
+    categoryDialogError.value = error.message || 'Đã xảy ra lỗi khi cập nhật danh mục'
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -1410,7 +1557,9 @@ const deleteSelectedCategory = async () => {
       selectedCategory.value = null
     }
   } catch (error) {
+    console.error('Lỗi khi xóa danh mục:', error)
     showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -1478,16 +1627,31 @@ const handleImageChange = async (file) => {
 
 // Thêm hàm xử lý khi thay đổi trạng thái topping
 const handleToppingChange = (value) => {
+  if (value && editDialog.value && editedProduct.value.prices.length > 1) {
+    // Nếu bật topping khi đang chỉnh sửa và có nhiều hơn 1 giá
+    toppingConfirmationDialog.value = true
+    // Tạm thời revert lại giá trị để chờ xác nhận
+    // Dùng nextTick để đảm bảo model được cập nhật trước khi revert
+    nextTick(() => {
+      editedProduct.value.isTopping = false
+    })
+  } else {
+    // Áp dụng thay đổi ngay nếu không cần xác nhận
+    applyToppingChange(value)
+  }
+}
+
+// Hàm thực hiện logic thay đổi topping sau khi xác nhận hoặc không cần xác nhận
+const applyToppingChange = (value) => {
+  // Cập nhật lại trạng thái isTopping thực sự
+  editedProduct.value.isTopping = value
+
   if (value) {
     // Nếu là topping, tự động thêm kích thước NA nếu chưa có
-    const hasNASize = editedProduct.value.prices.some(price => {
-      const size = productStore.productSizes.find(s => s.id === price.sizeId)
-      return size && size.name === 'NA'
-    })
-    
-    if (!hasNASize) {
-      const naSize = productStore.productSizes.find(s => s.name === 'NA')
-      if (naSize) {
+    const naSize = productStore.productSizes.find(s => s.name === 'NA')
+    if (naSize) {
+      const hasNASize = editedProduct.value.prices.some(price => price.sizeId === naSize.id)
+      if (!hasNASize) {
         // Xóa tất cả kích thước hiện có và thêm NA
         editedProduct.value.prices = [{
           sizeId: naSize.id,
@@ -1506,7 +1670,22 @@ const handleToppingChange = (value) => {
       const defaultToppingCategory = toppingCategories.find(cat => cat.id === 1) || toppingCategories[0]
       editedProduct.value.categoryId = defaultToppingCategory.id
     }
+  } else {
+    // Nếu không còn là topping, có thể cần xử lý thêm nếu muốn khôi phục giá cũ hoặc yêu cầu người dùng nhập lại
+    // Hiện tại chỉ bỏ đánh dấu
   }
+}
+
+// Hàm xác nhận thay đổi topping
+const confirmToppingChange = () => {
+  applyToppingChange(true)
+  toppingConfirmationDialog.value = false
+}
+
+// Hàm hủy thay đổi topping
+const cancelToppingChange = () => {
+  // Giá trị isTopping đã được revert trong handleToppingChange
+  toppingConfirmationDialog.value = false
 }
 
 // Thêm hàm xóa ảnh

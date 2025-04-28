@@ -72,9 +72,9 @@
             density="comfortable"
             class="elevation-0"
           >
-            <!-- Cột STT -->
-            <template v-slot:item.index="{ index }">
-              {{ index + 1 }}
+            <!-- Thêm template v-slot:item.id -->
+            <template v-slot:item.id="{ item }">
+              <span class="text-caption">#{{ item.id }}</span>
             </template>
             
             <!-- Cột Đơn vị tính -->
@@ -151,9 +151,9 @@
             density="comfortable"
             class="elevation-0"
           >
-            <!-- Cột STT -->
-            <template v-slot:item.index="{ index }">
-              {{ index + 1 }}
+            <!-- Thêm template v-slot:item.id -->
+            <template v-slot:item.id="{ item }">
+              <span class="text-caption">#{{ item.id }}</span>
             </template>
             
             <!-- Cột Ký hiệu -->
@@ -219,12 +219,28 @@
         
         <v-card-text class="pa-4">
           <v-form ref="sizeForm" @submit.prevent="saveSizeData">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="sizeDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="sizeDialogError = null"
+            >
+              {{ sizeDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedSize.name"
               label="Tên kích thước"
               variant="outlined"
               required
-              :rules="[v => !!v || 'Vui lòng nhập tên kích thước']"
+              :rules="[
+                v => !!v || 'Vui lòng nhập tên kích thước',
+                v => (v && v.length >= 1 && v.length <= 5) || 'Tên kích thước phải từ 1 đến 5 ký tự',
+                v => /^[a-zA-Z0-9]+$/.test(v) || 'Chỉ chứa chữ cái và số'
+              ]"
               class="mb-3"
             ></v-text-field>
             
@@ -263,7 +279,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeSizeDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeSizeDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveSizeData" 
@@ -286,12 +302,28 @@
         
         <v-card-text class="pa-4">
           <v-form ref="unitForm" @submit.prevent="saveUnitData">
+            <!-- Hiển thị lỗi dialog -->
+            <v-alert
+              v-if="unitDialogError"
+              type="error"
+              variant="tonal"
+              closable
+              class="mb-4"
+              @update:model-value="unitDialogError = null"
+            >
+              {{ unitDialogError }}
+            </v-alert>
+
             <v-text-field
               v-model="editedUnit.name"
               label="Tên đơn vị tính"
               variant="outlined"
               required
-              :rules="[v => !!v || 'Vui lòng nhập tên đơn vị tính']"
+              :rules="[
+                v => !!v || 'Vui lòng nhập tên đơn vị tính',
+                v => (v && v.length >= 1 && v.length <= 30) || 'Tên đơn vị tính phải từ 1 đến 30 ký tự',
+                v => /^[a-zA-ZÀ-ỹ\s]+$/.test(v) || 'Chỉ chứa chữ cái và khoảng trắng'
+              ]"
               class="mb-3"
             ></v-text-field>
             
@@ -309,7 +341,10 @@
               label="Ký hiệu"
               variant="outlined"
               required
-              :rules="[v => !!v || 'Vui lòng nhập ký hiệu']"
+              :rules="[
+                v => !!v || 'Vui lòng nhập ký hiệu',
+                v => (v && v.length >= 1 && v.length <= 5) || 'Ký hiệu phải từ 1 đến 5 ký tự'
+              ]"
               class="mb-3"
             ></v-text-field>
           </v-form>
@@ -319,7 +354,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeUnitDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeUnitDialog">Đóng</v-btn>
           <v-btn 
             color="primary" 
             @click="saveUnitData" 
@@ -352,7 +387,7 @@
         
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
+          <v-btn variant="text" @click="closeDeleteDialog">Đóng</v-btn>
           <v-btn 
             color="error" 
             @click="deleteItem" 
@@ -416,12 +451,16 @@ const snackbar = ref({
   color: 'success'
 })
 
+// Biến theo dõi lỗi dialog
+const sizeDialogError = ref(null)
+const unitDialogError = ref(null)
+
 const sizeForm = ref(null)
 const unitForm = ref(null)
 
 // Cấu hình headers cho bảng kích thước
 const sizeHeaders = [
-  { title: 'STT', key: 'index', width: '80px', sortable: false },
+  { title: 'ID', key: 'id', width: '80px', sortable: true },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
   { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Đơn vị tính', key: 'unitId', align: 'start', sortable: false },
@@ -431,7 +470,7 @@ const sizeHeaders = [
 
 // Cấu hình headers cho bảng đơn vị tính
 const unitHeaders = [
-  { title: 'STT', key: 'index', width: '80px', sortable: false },
+  { title: 'ID', key: 'id', width: '80px', sortable: true },
   { title: 'Tên', key: 'name', align: 'start', sortable: true },
   { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Ký hiệu', key: 'symbol', align: 'start', sortable: true, width: '100px' },
@@ -571,6 +610,9 @@ function closeDeleteDialog() {
 async function saveSizeData() {
   if (!sizeForm.value) return
   
+  // Reset lỗi dialog
+  sizeDialogError.value = null
+  
   const { valid } = await sizeForm.value.validate()
   if (!valid) return
   
@@ -578,21 +620,28 @@ async function saveSizeData() {
     if (editMode.value) {
       await sizeUnitStore.updateProductSize(editedSize.value.id, editedSize.value)
       showSnackbar('Kích thước đã được cập nhật thành công', 'success')
+      closeSizeDialog()
     } else {
       await sizeUnitStore.createProductSize(editedSize.value)
       showSnackbar('Kích thước đã được tạo thành công', 'success')
+      closeSizeDialog()
     }
     
-    closeSizeDialog()
     loadSizes()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    console.error('Lỗi khi lưu kích thước:', error)
+    sizeDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu kích thước'
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
 // Lưu dữ liệu đơn vị tính
 async function saveUnitData() {
   if (!unitForm.value) return
+  
+  // Reset lỗi dialog
+  unitDialogError.value = null
   
   const { valid } = await unitForm.value.validate()
   if (!valid) return
@@ -601,12 +650,13 @@ async function saveUnitData() {
     if (editMode.value) {
       await sizeUnitStore.updateUnit(editedUnit.value.id, editedUnit.value)
       showSnackbar('Đơn vị tính đã được cập nhật thành công', 'success')
+      closeUnitDialog()
     } else {
       await sizeUnitStore.createUnit(editedUnit.value)
       showSnackbar('Đơn vị tính đã được tạo thành công', 'success')
+      closeUnitDialog()
     }
     
-    closeUnitDialog()
     loadUnits()
     
     // Nếu đã thêm đơn vị tính mới và đang ở tab kích thước, cập nhật danh sách đơn vị tính cho dropdown
@@ -614,7 +664,10 @@ async function saveUnitData() {
       await sizeUnitStore.fetchUnits(0, 100)
     }
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    console.error('Lỗi khi lưu đơn vị tính:', error)
+    unitDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu đơn vị tính'
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -633,7 +686,7 @@ async function deleteItem() {
     
     closeDeleteDialog()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
   }
 }
 

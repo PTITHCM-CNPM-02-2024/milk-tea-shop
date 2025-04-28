@@ -36,7 +36,7 @@ public class UpdateAccountCommandHandler implements ICommandHandler<UpdateAccoun
             account.setUsername(command.getUsername());
             
             account.incrementTokenVersion();
-            
+            accountRepository.saveAndFlush(account);
             return CommandResult.success(account.getId());
         }catch(DataIntegrityViolationException e){
             if(e.getMessage().contains("uk_account_username")){

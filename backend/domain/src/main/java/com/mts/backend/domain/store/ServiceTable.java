@@ -78,7 +78,7 @@ public class ServiceTable extends BaseEntity<Integer> {
             return;
         }
         if (active && !area.getActive()) {
-            throw new DomainException("Khu vực" + area.getName() + " không hoạt động, không thể tạo bàn");
+            throw new DomainException("Khu vực" + area.getName().getValue() + " không hoạt động, không thể kích hoạt bàn");
         }
     }
 

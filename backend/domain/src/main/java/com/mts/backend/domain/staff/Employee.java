@@ -10,7 +10,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -25,6 +27,8 @@ import java.util.Objects;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class Employee extends BaseEntity<Long> {
     @Id
     @Comment("Mã nhân viên")
@@ -32,22 +36,7 @@ public class Employee extends BaseEntity<Long> {
     @NotNull
     @Getter
     private Long id;
-
-    public Employee(@NotNull Long id, @NotNull Account account, @NotBlank(message = "Chức vụ không được " +
-                                                                                    "để trống") @Size(max = 50, message = "Chức vụ không được vượt quá 50 ký tự") String position, @NotBlank(message = "Họ không được để trống") @Size(max = 70, message = "Họ không được vượt quá 70 ký tự") String lastName, @NotNull @Size(max = 70, message = "Tên không được vượt quá 70 ký tự") @NotBlank(message = "Tên không được để trống") String firstName, @NotNull Gender gender, @NotNull @Size(max = 15, message = "Số điện thoại không được vượt quá 15 ký tự") @NotBlank(message = "Số điện thoại không được để trống") @Pattern(regexp = "(?:\\+84|0084|0)[235789][0-9]{1,2}[0-9]{7}(?:[^\\d]+|$)", message = "Số điện thoại không hợp lệ") String phone, @NotNull @Size(max = 100, message = "Email không được vượt quá 100 ký tự") @NotBlank(message = "Email không được để trống") @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email không hợp lệ") String email) {
-        this.id = id;
-        this.account = account;
-        this.position = position;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.gender = gender;
-        this.phone = phone;
-        this.email = email;
-    }
-
-    public Employee() {
-    }
-
+    
     public static EmployeeEntityBuilder builder() {
         return new EmployeeEntityBuilder();
     }
@@ -64,11 +53,9 @@ public class Employee extends BaseEntity<Long> {
     @Comment("Mã tài khoản")
     @JoinColumn(name = "account_id")
     @NotNull
+    @Getter
     private Account account;
     
-    public Account getAccount() {
-        return account;
-    }
 
     public boolean setAccount(@NotNull Account account) {
         if (Objects.equals(this.account, account)) {

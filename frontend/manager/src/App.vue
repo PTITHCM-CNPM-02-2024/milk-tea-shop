@@ -6,10 +6,6 @@ import { useDisplay } from 'vuetify'
 import { useRoute, useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import BlankLayout from '@/layouts/BlankLayout.vue'
-// import Login from './components/MainLayout/Login.vue'
-// import { HomeIcon, Cog6ToothIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/vue/24/outline'
-// import Posdasboard from './components/MainLayout/SideBar.vue'
-//
 
 const theme = useTheme()
 const appStore = useAppStore()

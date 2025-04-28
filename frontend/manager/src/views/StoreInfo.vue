@@ -206,18 +206,21 @@
       </v-card>
     
     <!-- Hộp thoại xác nhận -->
-    <v-dialog v-model="showConfirmDialog" max-width="500px">
+    <v-dialog v-model="showConfirmDialog" max-width="500px" persistent>
       <v-card>
-        <v-card-title class="text-h5">
-          <v-icon color="warning" class="mr-2">mdi-alert</v-icon>
+        <v-card-title class="text-h5 pa-4 bg-primary text-white">
+          <v-icon color="white" class="mr-2">mdi-alert</v-icon>
           Xác nhận thay đổi
         </v-card-title>
         
-        <v-card-text>
+        <v-card-text class="pa-4 pt-5">
           Bạn có chắc chắn muốn cập nhật thông tin cửa hàng không?
+          <p class="text-medium-emphasis mt-2">Thông tin sẽ được hiển thị cho khách hàng.</p>
         </v-card-text>
         
-        <v-card-actions>
+        <v-divider></v-divider>
+        
+        <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn color="grey-darken-1" variant="text" @click="showConfirmDialog = false">
             Hủy
@@ -305,10 +308,10 @@ async function confirmSave() {
     }, 2000)
   } catch (err) {
     // Hiển thị thông báo lỗi
-    errorMessage.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật thông tin cửa hàng'
+    console.error('Lỗi khi cập nhật thông tin cửa hàng:', err)
+    errorMessage.value = err.response?.data || err.message || 'Đã xảy ra lỗi khi cập nhật thông tin cửa hàng'
     showErrorAlert.value = true
     showSuccessAlert.value = false
-    console.error('Lỗi khi cập nhật thông tin cửa hàng:', err)
     
     // Đóng hộp thoại xác nhận
     showConfirmDialog.value = false

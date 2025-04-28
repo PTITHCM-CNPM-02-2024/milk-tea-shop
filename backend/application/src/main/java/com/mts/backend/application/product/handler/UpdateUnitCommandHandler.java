@@ -42,6 +42,7 @@ public class UpdateUnitCommandHandler implements ICommandHandler<UpdateUnitComma
             unit.setName(command.getName());
             unit.setSymbol(command.getSymbol());
 
+            unitRepository.saveAndFlush(unit);
             return CommandResult.success(unit.getId());
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("uk_unit_of_measure_name")) {

@@ -53,7 +53,7 @@ public class CreateEmployeeCommandHandler implements ICommandHandler<CreateEmplo
                 .build();
 
         try {
-            var result = employeeRepository.save(em);
+            var result = employeeRepository.saveAndFlush(em);
             return CommandResult.success(result.getId());
         }catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("Duplicate entry") &&
@@ -62,7 +62,7 @@ public class CreateEmployeeCommandHandler implements ICommandHandler<CreateEmplo
             }
             if (e.getMessage().contains("Duplicate entry") &&
                 e.getMessage().contains("uk_employee_phone")) {
-                throw new DuplicateException("Số điện thoại đã tồn tại");
+                throw new DuplicateException(                "Số điện thoại đã tồn tại");
             }
             if (e.getMessage().contains("Duplicate entry") &&
                 e.getMessage().contains("uk_employee_account_id")) {

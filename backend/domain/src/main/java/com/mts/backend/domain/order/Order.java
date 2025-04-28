@@ -36,7 +36,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-@Slf4j
 @Entity
 @Table(name = "`order`", schema = "milk_tea_shop_prod", indexes = {
         @Index(name = "employee_id", columnList = "employee_id")
@@ -111,9 +110,8 @@ public class Order extends BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Comment("Mã nhân viên")
-    @JoinColumn(name = "employee_id", nullable = false)
+    @JoinColumn(name = "employee_id", nullable = true)
     @NotNull
-    @Getter
     private Employee employee;
     
     public boolean setEmployee(@NotNull Employee employee) {
@@ -123,6 +121,10 @@ public class Order extends BaseEntity<Long> {
         }
         this.employee = employee;
         return true;
+    }
+    
+    public Optional<Employee> getEmployee() {
+        return Optional.ofNullable(employee);
     }
     
     

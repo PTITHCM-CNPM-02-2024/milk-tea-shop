@@ -33,7 +33,7 @@ public class CreateRoleCommandHandler implements ICommandHandler<CreateRoleComma
                     .description(command.getDescription().orElse(null))
                     .build();
 
-            var savedRole = roleRepository.save(role);
+            var savedRole = roleRepository.saveAndFlush(role);
 
             return CommandResult.success(savedRole.getId());
         } catch (DataIntegrityViolationException e) {

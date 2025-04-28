@@ -15,7 +15,7 @@
         <div class="login-form-content">
           <div class="text-center mb-6">
             <img 
-              src="https://cdn-icons-png.flaticon.com/512/1047/1047711.png" 
+              src="@/assets/logo.jpg" 
               alt="Milk Tea Logo" 
               height="80" 
               class="mb-4" 
@@ -171,7 +171,7 @@ onMounted(() => {
 
 .login-wrapper {
   width: 900px;
-  min-height: 550px;
+  min-height: 500px;
   display: flex;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);

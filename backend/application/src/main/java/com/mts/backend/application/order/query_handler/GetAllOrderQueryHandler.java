@@ -3,6 +3,7 @@ package com.mts.backend.application.order.query_handler;
 import com.mts.backend.application.order.response.OrderBasicResponse;
 import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.customer.Customer;
+import com.mts.backend.domain.staff.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class GetAllOrderQueryHandler implements IQueryHandler<DefaultOrderQuery,
         Page<OrderBasicResponse> result = orders.map(order -> OrderBasicResponse.builder()
             .orderId(order.getId())
             .customerId(order.getCustomer().map(Customer::getId).orElse(null))
-            .employeeId(order.getEmployee().getId())
+            .employeeId(order.getEmployee().map(Employee::getId).orElse(null))
             .orderTime(order.getOrderTime())
             .orderStatus(order.getStatus().map(Enum::name).orElse(null))
             .totalAmount(order.getTotalAmount().map(Money::getValue).orElse(null))

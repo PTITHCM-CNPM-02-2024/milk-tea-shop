@@ -212,6 +212,18 @@
           
           <v-card-text class="pa-4">
             <v-form ref="areaForm" @submit.prevent="submitAreaForm">
+              <!-- Hiển thị lỗi dialog -->
+              <v-alert
+                v-if="areaDialogError"
+                type="error"
+                variant="tonal"
+                closable
+                class="mb-4"
+                @update:model-value="areaDialogError = null"
+              >
+                {{ areaDialogError }}
+              </v-alert>
+
               <v-text-field
                 v-model="areaFormData.name"
                 label="Tên khu vực"
@@ -220,7 +232,8 @@
                 class="mb-3"
                 :rules="[
                   v => !!v || 'Tên khu vực là bắt buộc',
-                  v => v.length == 3 || 'Tên khu vực phải có đúng 3 ký tự'
+                  v => (v && v.length == 3) || 'Tên khu vực phải có đúng 3 ký tự',
+                  v => /^[a-zA-Z0-9\s]+$/.test(v) || 'Tên khu vực không được chứa ký tự đặc biệt'
                 ]"
               ></v-text-field>
               
@@ -257,7 +270,7 @@
           
           <v-card-actions class="pa-4">
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="areaDialog = false">Hủy</v-btn>
+            <v-btn variant="text" @click="closeDialog">Đóng</v-btn>
             <v-btn 
               color="primary" 
               @click="submitAreaForm"
@@ -272,20 +285,20 @@
       <!-- Dialog xóa khu vực -->
       <v-dialog v-model="deleteAreaDialog" width="400" persistent>
         <v-card>
-          <v-card-title class="text-h5 font-weight-medium pa-4">
+          <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
             Xác nhận xóa khu vực
           </v-card-title>
           
-          <v-card-text class="pa-4">
+          <v-card-text class="pa-4 pt-5">
             <p>Bạn có chắc chắn muốn xóa khu vực "<strong>{{ selectedAreaToDelete?.name }}</strong>" không?</p>
-            <p class="text-red mt-2">Lưu ý: Tất cả bàn trong khu vực này cũng sẽ bị xóa!</p>
+            <p class="text-error mt-2">Lưu ý: Tất cả bàn trong khu vực này cũng sẽ bị xóa!</p>
           </v-card-text>
           
           <v-divider></v-divider>
           
           <v-card-actions class="pa-4">
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="deleteAreaDialog = false">Hủy</v-btn>
+            <v-btn variant="text" @click="closeDeleteDialog">Đóng</v-btn>
             <v-btn 
               color="error" 
               @click="confirmDeleteArea"
@@ -308,13 +321,29 @@
           
           <v-card-text class="pa-4">
             <v-form ref="tableForm" @submit.prevent="submitTableForm">
+              <!-- Hiển thị lỗi dialog -->
+              <v-alert
+                v-if="tableDialogError"
+                type="error"
+                variant="tonal"
+                closable
+                class="mb-4"
+                @update:model-value="tableDialogError = null"
+              >
+                {{ tableDialogError }}
+              </v-alert>
+
               <v-text-field
                 v-model="tableFormData.name"
                 label="Số bàn"
                 variant="outlined"
                 required
                 class="mb-3"
-                :rules="[v => !!v || 'Số bàn là bắt buộc']"
+                :rules="[
+                  v => !!v || 'Số bàn là bắt buộc',
+                  v => (v && v.length >= 1 && v.length <= 10) || 'Số bàn phải có độ dài từ 1 đến 10 ký tự',
+                  v => /^[a-zA-Z0-9\s]+$/.test(v) || 'Số bàn không được chứa ký tự đặc biệt'
+                ]"
               ></v-text-field>
               
               <v-select
@@ -322,12 +351,11 @@
                 :items="areaItems"
                 label="Khu vực"
                 variant="outlined"
-                required
                 class="mb-3"
-                :rules="[v => !!v || 'Khu vực là bắt buộc']"
                 return-object
                 item-title="title"
                 item-value="value"
+                clearable
               ></v-select>
               
               <v-switch
@@ -344,7 +372,7 @@
           
           <v-card-actions class="pa-4">
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="tableDialog = false">Hủy</v-btn>
+            <v-btn variant="text" @click="closeDialog">Đóng</v-btn>
             <v-btn 
               color="primary" 
               @click="submitTableForm"
@@ -359,11 +387,11 @@
       <!-- Dialog xóa bàn -->
       <v-dialog v-model="deleteTableDialog" width="400" persistent>
         <v-card>
-          <v-card-title class="text-h5 font-weight-medium pa-4">
+          <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
             Xác nhận xóa bàn
           </v-card-title>
           
-          <v-card-text class="pa-4">
+          <v-card-text class="pa-4 pt-5">
             <p>Bạn có chắc chắn muốn xóa bàn "<strong>{{ selectedTableToDelete?.name }}</strong>" không?</p>
             <p class="text-medium-emphasis mt-2">Lưu ý: Dữ liệu liên quan đến bàn này sẽ bị ảnh hưởng.</p>
           </v-card-text>
@@ -372,7 +400,7 @@
           
           <v-card-actions class="pa-4">
             <v-spacer></v-spacer>
-            <v-btn variant="text" @click="deleteTableDialog = false">Hủy</v-btn>
+            <v-btn variant="text" @click="closeDeleteDialog">Đóng</v-btn>
             <v-btn 
               color="error" 
               @click="confirmDeleteTable"
@@ -488,6 +516,10 @@ const snackbar = ref({
   color: 'success'
 })
 
+// Biến theo dõi lỗi dialog
+const areaDialogError = ref(null)
+const tableDialogError = ref(null)
+
 function showSnackbar(message, color = 'success') {
   snackbar.value = {  
     show: true,
@@ -537,10 +569,13 @@ const tableFormOriginal = ref(null)
 
 // Danh sách khu vực cho select
 const areaItems = computed(() => {
-  return areaTableStore.areas.map(area => ({
+  // Thêm tùy chọn không chọn khu vực vào đầu danh sách
+  const nullOption = { title: 'Không chọn khu vực', value: null };
+  const areaOptions = areaTableStore.areas.map(area => ({
     title: area.name,
     value: area.id
-  }))
+  }));
+  return [nullOption, ...areaOptions];
 })
 
 // Lấy tên khu vực từ ID
@@ -609,6 +644,9 @@ const openDeleteAreaDialog = (area) => {
 async function submitAreaForm() {
   if (!areaForm.value) return
   
+  // Reset lỗi dialog
+  areaDialogError.value = null
+  
   const { valid } = await areaForm.value.validate()
   if (!valid) return
 
@@ -623,11 +661,13 @@ async function submitAreaForm() {
     if (isEditingArea.value) {
       await areaTableStore.updateArea(areaFormOriginal.value.id, areaData)
       showSnackbar('Cập nhật khu vực thành công', 'success')
+      areaDialog.value = false
     } else {
       await areaTableStore.createArea(areaData)
       showSnackbar('Thêm khu vực mới thành công', 'success')
+      areaDialog.value = false
     }
-    areaDialog.value = false
+    
     await areaTableStore.fetchAreas()
     
     // Nếu đang chỉnh sửa khu vực đang được chọn, cập nhật lại tên khu vực
@@ -635,7 +675,10 @@ async function submitAreaForm() {
       selectArea({id: selectedAreaId.value, name: areaFormData.value.name})
     }
   } catch (err) {
+    console.error('Lỗi khi xử lý khu vực:', err)
+    areaDialogError.value = err.message || 'Đã xảy ra lỗi khi xử lý khu vực'
     showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -673,11 +716,10 @@ const openEditTableDialog = (table) => {
   isEditingTable.value = true
   
   // Tìm khu vực trong danh sách areaItems
-  const selectedArea = areaItems.value.find(item => item.value === (table.areaId || (table.area ? table.area.id : null)));
-  
+  const selectedArea = areaItems.value.find(item => item.value === table.area?.id);
   tableFormData.value = {
     name: table.name || '',
-    areaId: selectedArea || null,
+    areaId: selectedArea,
     isActive: table.isActive !== undefined ? table.isActive : true
   }
   
@@ -695,15 +737,17 @@ const openDeleteTableDialog = (table) => {
 async function submitTableForm() {
   if (!tableForm.value) return
   
+  // Reset lỗi dialog
+  tableDialogError.value = null
+  
   const { valid } = await tableForm.value.validate()
   if (!valid) return
 
   try {
     const tableData = {
       name: tableFormData.value.name,
-      areaId: tableFormData.value.areaId?.value || tableFormData.value.areaId,
+      areaId: tableFormData.value.areaId?.value || null,
       isActive: Boolean(tableFormData.value.isActive),
-      description: null
     }
     
     if (isEditingTable.value) {
@@ -711,11 +755,12 @@ async function submitTableForm() {
       tableData.id = tableFormOriginal.value.id
       await areaTableStore.updateTable(tableFormOriginal.value.id, tableData)
       showSnackbar('Cập nhật bàn thành công', 'success')
+      tableDialog.value = false
     } else {
       await areaTableStore.createTable(tableData)
       showSnackbar('Thêm bàn mới thành công', 'success')
+      tableDialog.value = false
     }
-    tableDialog.value = false
     
     // Nếu đang ở chế độ xem tất cả bàn hoặc đang xem khu vực mà bàn đang thuộc về, tải lại danh sách bàn
     if (!selectedAreaId.value || tableData.areaId === selectedAreaId.value) {
@@ -726,7 +771,10 @@ async function submitTableForm() {
       }
     }
   } catch (err) {
-    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
+    console.error('Lỗi khi xử lý bàn:', err)
+    tableDialogError.value = err.response?.data || 'Đã xảy ra lỗi khi xử lý bàn'
+    showSnackbar('Đã xảy ra lỗi: ' + err.response?.data, 'error')
+    // Không đóng dialog khi có lỗi
   }
 }
 
@@ -743,7 +791,7 @@ async function confirmDeleteTable() {
       await areaTableStore.fetchTables()
     }
   } catch (err) {
-    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + err.response?.data, 'error')
   }
 }
 
@@ -760,6 +808,20 @@ async function showTableDetails(table) {
   } finally {
     loading.value = false
   }
+}
+
+// Hàm đóng dialog chung
+const closeDialog = () => {
+  areaDialog.value = false
+  tableDialog.value = false
+  areaDialogError.value = null // Reset lỗi khi đóng
+  tableDialogError.value = null // Reset lỗi khi đóng
+}
+
+// Hàm đóng dialog xóa
+const closeDeleteDialog = () => {
+  deleteAreaDialog.value = false
+  deleteTableDialog.value = false
 }
 </script>
 

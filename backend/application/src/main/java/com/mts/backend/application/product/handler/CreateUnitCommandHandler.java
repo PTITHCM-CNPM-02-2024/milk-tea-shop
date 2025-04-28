@@ -44,7 +44,7 @@ public class CreateUnitCommandHandler implements ICommandHandler<CreateUnitComma
                     .description(command.getDescription().orElse(null))
                     .build();
 
-            var createdUnit = unitRepository.save(unit);
+            var createdUnit = unitRepository.saveAndFlush(unit);
 
             return CommandResult.success(createdUnit.getId());
         } catch (DataIntegrityViolationException e) {

@@ -1,17 +1,22 @@
 package com.mts.backend.shared.command;
 
 
+import com.mts.backend.shared.exception.DomainException;
+import com.mts.backend.shared.exception.DuplicateException;
+import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class AbstractCommandBus implements ICommandBus{
-    
+public class AbstractCommandBus implements ICommandBus {
+
     private final Map<Class<?>, ICommandHandler<?, ?>> handlers = new HashMap<>();
 
 
     /**
-     * @param commandClass 
+     * @param commandClass
      * @param handler
      * @param <R>
      * @param <C>
@@ -22,7 +27,7 @@ public class AbstractCommandBus implements ICommandBus{
     }
 
     /**
-     * @param command 
+     * @param command
      * @param <R>
      * @param <C>
      * @return

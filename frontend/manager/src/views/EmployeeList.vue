@@ -165,23 +165,45 @@
             <!-- Tab thông tin nhân viên -->
             <v-window-item value="info">
               <v-container class="pa-4">
+                <!-- Hiển thị lỗi dialog -->
+                <v-alert
+                  v-if="employeeDialogError"
+                  type="error"
+                  variant="tonal"
+                  closable
+                  class="mb-4"
+                  @update:model-value="employeeDialogError = null"
+                >
+                  {{ employeeDialogError }}
+                </v-alert>
+
                 <v-form ref="form" @submit.prevent="saveEmployee">
                   <v-row>
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.firstName"
+                        @update:model-value="value => editedEmployee.firstName = toUpperCaseValue(value)"
                         label="Họ"
                         variant="outlined"
-                        :rules="[v => !!v || 'Vui lòng nhập họ']"
+                        :rules="[
+                          v => !!v || 'Vui lòng nhập họ',
+                          v => (v && v.length <= 70) || 'Họ không được vượt quá 70 ký tự',
+                          v => (v && /^[a-zA-ZÀ-ỹ\s]+$/.test(v)) || 'Họ không được chứa ký tự đặc biệt'
+                        ]"
                       ></v-text-field>
                     </v-col>
 
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.lastName"
+                        @update:model-value="value => editedEmployee.lastName = toUpperCaseValue(value)"
                         label="Tên"
                         variant="outlined"
-                        :rules="[v => !!v || 'Vui lòng nhập tên']"
+                        :rules="[
+                          v => !!v || 'Vui lòng nhập tên',
+                          v => (v && v.length <= 70) || 'Tên không được vượt quá 70 ký tự',
+                          v => (v && /^[a-zA-ZÀ-ỹ\s]+$/.test(v)) || 'Tên không được chứa ký tự đặc biệt'
+                        ]"
                       ></v-text-field>
                     </v-col>
 
@@ -222,19 +244,24 @@
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.position"
-                        label="Chức vụ"
+                        label="Vị trí/Chức vụ"
                         variant="outlined"
-                        :rules="[v => !!v || 'Vui lòng nhập chức vụ']"
+                        :rules="[v => !!v || 'Vui lòng nhập vị trí/chức vụ']"
                       ></v-text-field>
                     </v-col>
 
                     <template v-if="!editMode">
+                      <v-col cols="12">
+                        <v-divider class="mb-2"></v-divider>
+                        <v-subheader>Thông tin tài khoản (nếu muốn tạo)</v-subheader>
+                      </v-col>
+
                       <v-col cols="12" md="6">
                         <v-text-field
                           v-model="editedEmployee.username"
                           label="Tên đăng nhập"
                           variant="outlined"
-                          :rules="[v => !!v || 'Vui lòng nhập tên đăng nhập']"
+                          :rules="[!editMode ? v => !!v || 'Tên đăng nhập là bắt buộc' : () => true]"
                         ></v-text-field>
                       </v-col>
 
@@ -244,7 +271,7 @@
                           label="Mật khẩu"
                           variant="outlined"
                           type="password"
-                          :rules="[v => !!v || 'Vui lòng nhập mật khẩu']"
+                          :rules="[!editMode ? v => !!v || 'Mật khẩu là bắt buộc' : () => true]"
                         ></v-text-field>
                       </v-col>
 
@@ -254,12 +281,25 @@
                           label="Vai trò"
                           variant="outlined"
                           :items="roleOptions"
-                          :rules="[v => !!v || 'Vui lòng chọn vai trò']"
+                          :rules="[!editMode ? v => !!v || 'Vui lòng chọn vai trò' : () => true]"
                         ></v-select>
                       </v-col>
                     </template>
                   </v-row>
                 </v-form>
+
+                <v-divider class="my-4"></v-divider>
+
+                <div class="d-flex justify-end">
+                  <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
+                  <v-btn
+                    color="primary"
+                    @click="saveEmployee"
+                    :loading="loading"
+                  >
+                    {{ editMode ? 'Cập nhật' : 'Thêm mới' }}
+                  </v-btn>
+                </div>
               </v-container>
             </v-window-item>
 
@@ -362,7 +402,7 @@
                               :color="accountDetail.isActive ? 'success' : 'warning'" 
                               class="mt-1"
                             >
-                              {{ accountDetail.isActive ? 'Đang hoạt động' : 'Vô hiệu hóa' }}
+                              {{ accountDetail.isActive ? 'Đang đăng nhập' : 'Đã đăng xuất' }}
                             </v-chip>
                           </v-list-item-subtitle>
                         </v-list-item>
@@ -406,6 +446,12 @@
                       {{ accountDetail.isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản' }}
                     </v-btn>
                   </div>
+
+                  <v-divider class="my-4"></v-divider>
+
+                  <div class="d-flex justify-end">
+                    <v-btn variant="text" @click="closeEmployeeDialog">Đóng</v-btn>
+                  </div>
                 </div>
 
                 <v-alert v-else type="info" variant="tonal" class="mb-3">
@@ -417,6 +463,18 @@
             <!-- Tab đổi mật khẩu -->
             <v-window-item value="password">
               <v-container class="pa-4">
+                <!-- Hiển thị lỗi dialog đổi mật khẩu -->
+                <v-alert
+                  v-if="passwordDialogError"
+                  type="error"
+                  variant="tonal"
+                  closable
+                  class="mb-4"
+                  @update:model-value="passwordDialogError = null"
+                >
+                  {{ passwordDialogError }}
+                </v-alert>
+
                 <v-form ref="passwordForm" @submit.prevent="savePasswordChange">
                   <v-text-field
                     v-model="passwordChange.oldPassword"
@@ -449,6 +507,7 @@
                   ></v-text-field>
 
                   <div class="d-flex justify-end mt-4">
+                    <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
                     <v-btn
                       color="primary"
                       @click="savePasswordChange"
@@ -458,12 +517,30 @@
                     </v-btn>
                   </div>
                 </v-form>
+
+                <v-divider class="my-4"></v-divider>
+
+                <div class="d-flex justify-end">
+                  <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
+                </div>
               </v-container>
             </v-window-item>
 
             <!-- Tab đổi vai trò -->
             <v-window-item value="role">
               <v-container class="pa-4">
+                <!-- Hiển thị lỗi dialog vai trò -->
+                <v-alert
+                  v-if="roleDialogError"
+                  type="error"
+                  variant="tonal"
+                  closable
+                  class="mb-4"
+                  @update:model-value="roleDialogError = null"
+                >
+                  {{ roleDialogError }}
+                </v-alert>
+
                 <v-form ref="roleForm" @submit.prevent="saveRoleChange">
                   <v-select
                     v-model="roleChange.roleId"
@@ -474,6 +551,7 @@
                   ></v-select>
 
                   <div class="d-flex justify-end mt-4">
+                    <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
                     <v-btn
                       color="primary"
                       @click="saveRoleChange"
@@ -483,47 +561,41 @@
                     </v-btn>
                   </div>
                 </v-form>
+
+                <v-divider class="my-4"></v-divider>
+
+                <div class="d-flex justify-end">
+                  <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
+                </div>
               </v-container>
             </v-window-item>
           </v-window>
         </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeEmployeeDialog">Hủy</v-btn>
-          <v-btn
-            color="primary"
-            @click="activeTab === 'info' ? saveEmployee() : null"
-            :loading="loading"
-            v-if="activeTab === 'info'"
-          >
-            {{ editMode ? 'Cập nhật' : 'Thêm mới' }}
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Dialog xác nhận xóa -->
-    <v-dialog v-model="deleteDialog" max-width="400">
+    <v-dialog v-model="deleteEmployeeDialog" max-width="520px" persistent>
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h6 pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
-
-        <v-card-text class="pa-4">
-          Bạn có chắc chắn muốn xóa nhân viên <strong>{{ editedEmployee.firstName }} {{ editedEmployee.lastName }}</strong> khỏi hệ thống?
-          <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
+        <v-card-text class="py-4 pt-5">
+          Bạn có chắc chắn muốn xóa nhân viên 
+          <strong class="text-justify" v-if="employeeToDelete">{{ employeeToDelete.firstName }} {{ employeeToDelete.lastName }}</strong>?
+          <br>
+          <p class="text-medium-emphasis text-justify mt-2">Xóa nhân viên sẽ xóa tài khoản và các đơn hàng liên quan.</p>
+          <p class="text-medium-emphasis text-justify mt-2">Hành động này không thể hoàn tác.</p>
         </v-card-text>
-
         <v-divider></v-divider>
-
-        <v-card-actions class="pa-4">
+        <v-card-actions class="pa-3">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeDeleteDialog">Hủy</v-btn>
+          <v-btn variant="text" color="grey-darken-1" @click="closeDeleteDialog">
+            Hủy
+          </v-btn>
           <v-btn
             color="error"
+            variant="flat"
             @click="deleteEmployee"
             :loading="loading"
           >
@@ -553,7 +625,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useEmployeeStore } from '@/stores/employee'
 import { useRoleStore } from '@/stores/role'
 import { debounce } from 'lodash'
@@ -569,34 +641,34 @@ const employeeDialog = ref(false)
 const deleteDialog = ref(false)
 const editMode = ref(false)
 const activeTab = ref('info')
+const loading = ref(false)
+
+// Dialog error states
+const employeeDialogError = ref(null)
+const passwordDialogError = ref(null)
+const roleDialogError = ref(null)
+
+// Delete confirmation dialogs
+const deleteEmployeeDialog = ref(false)
+const employeeToDelete = ref(null)
+
+// Dữ liệu biên tập
 const editedEmployee = ref({
   id: null,
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
-  gender: 'MALE',
   position: '',
+  gender: null,
+  accountId: null,
   username: '',
   password: '',
   roleId: null
 })
-const defaultEmployee = {
-  id: null,
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  gender: 'MALE',
-  position: '',
-  username: '',
-  password: '',
-  roleId: null
-}
 
-// State cho xem chi tiết
-const loading = ref(false)
-const employeeDetail = ref({})
+// Chi tiết employee và account
+const employeeDetail = ref(null)
 const accountDetail = ref(null)
 
 // State cho đổi mật khẩu
@@ -611,34 +683,58 @@ const roleChange = ref({
   roleId: null
 })
 
-// Form
-const form = ref(null)
-const passwordForm = ref(null)
-const roleForm = ref(null)
-const snackbar = reactive({
+// Snackbar
+const snackbar = ref({
   show: false,
   text: '',
   color: 'success'
 })
 
-// Cấu hình headers cho bảng
+// References to forms
+const form = ref(null)
+const passwordForm = ref(null)
+const roleForm = ref(null)
+
+// Debounced search
+const searchTimeout = ref(null)
+
 const headers = [
-  { title: 'ID', key: 'id', width: '70px', sortable: true },
-  { title: 'Họ Tên', key: 'fullName', align: 'start', sortable: false },
+  { title: 'ID', key: 'id', align: 'start', sortable: true, width: '70px' },
+  { title: 'Nhân viên', key: 'fullName', align: 'start', sortable: false },
+  { title: 'Vị trí', key: 'position', align: 'start', sortable: true },
   { title: 'Email', key: 'email', align: 'start', sortable: true },
   { title: 'Số điện thoại', key: 'phone', align: 'start', sortable: true },
-  { title: 'Giới tính', key: 'gender', align: 'center', width: '100px', sortable: false },
+  { title: 'Giới tính', key: 'gender', align: 'center', sortable: true, width: '100px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '100px' }
 ]
 
-// Options cho select
-const genderOptions = [
-  { title: 'Nam', value: 'MALE' },
-  { title: 'Nữ', value: 'FEMALE' },
-  { title: 'Khác', value: 'OTHER' }
-]
+// Computed properties
+const filteredEmployees = computed(() => {
+  let result = [...employeeStore.employees]
+  
+  // Lọc theo từ khóa tìm kiếm
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(employee =>
+      (employee.firstName + ' ' + employee.lastName).toLowerCase().includes(query) ||
+      (employee.email && employee.email.toLowerCase().includes(query)) ||
+      (employee.phone && employee.phone.includes(query)) ||
+      (employee.position && employee.position.toLowerCase().includes(query))
+    )
+  }
+  
+  return result
+})
 
-// Danh sách vai trò từ roleStore
+const totalFilteredPages = computed(() => {
+  return Math.ceil(filteredEmployees.value.length / 10) // 10 items per page
+})
+
+const genderOptions = computed(() => [
+  { title: 'Nam', value: 'MALE' },
+  { title: 'Nữ', value: 'FEMALE' }
+])
+
 const roleOptions = computed(() => {
   return roleStore.roles.map(role => ({
     title: role.name,
@@ -646,70 +742,62 @@ const roleOptions = computed(() => {
   }))
 })
 
-// Computed property cho nhân viên đã lọc
-const filteredEmployees = computed(() => {
-  let result = [...employeeStore.employees]
-
-  // Lọc theo từ khóa tìm kiếm
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(employee =>
-      employee.firstName?.toLowerCase().includes(query) ||
-      employee.lastName?.toLowerCase().includes(query) ||
-      employee.email?.toLowerCase().includes(query) ||
-      employee.phone?.includes(query) ||
-      employee.position?.toLowerCase().includes(query)
-    )
-  }
-
-  return result
-})
-
-// Computed property cho tổng số trang dựa trên kết quả đã lọc
-const totalFilteredPages = computed(() => {
-  return Math.ceil(filteredEmployees.value.length / 10) // 10 là số mục mỗi trang
-})
-
 // Methods
-// Lấy danh sách nhân viên
+// Load data
 const loadEmployees = () => {
-  employeeStore.fetchEmployees(0, 100) // Lấy tất cả nhân viên để lọc ở client
+  employeeStore.fetchEmployees(0, 1000) // Lấy tất cả nhân viên để xử lý lọc ở client
 }
 
 // Lấy danh sách vai trò
 const loadRoles = () => {
-  roleStore.fetchRoles(0, 100) // Lấy tất cả vai trò với kích thước lớn
+  roleStore.fetchRoles(0, 100) // Lấy tất cả vai trò
 }
 
-// Lấy chữ cái đầu
+// Helper functions
 const getInitials = (firstName, lastName) => {
   if (!firstName && !lastName) return 'N/A'
   return ((firstName ? firstName.charAt(0) : '') + (lastName ? lastName.charAt(0) : '')).toUpperCase()
 }
 
-// Lấy text giới tính
 const getGenderText = (gender) => {
-  switch(gender) {
-    case 'MALE': return 'Nam'
-    case 'FEMALE': return 'Nữ'
-    default: return 'Khác'
-  }
+  if (!gender) return 'Không xác định'
+  return gender === 'MALE' ? 'Nam' : 'Nữ'
 }
 
-// Mở dialog thêm nhân viên
+// Dialog controls
 const openAddDialog = () => {
+  // Reset employee dialog error
+  employeeDialogError.value = null
   editMode.value = false
-  activeTab.value = 'info'
-  editedEmployee.value = {...defaultEmployee}
+  editedEmployee.value = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    position: '',
+    gender: null,
+    accountId: null,
+    username: '',
+    password: '',
+    roleId: null
+  }
+  employeeDetail.value = null
   accountDetail.value = null
+  activeTab.value = 'info'
   employeeDialog.value = true
 }
 
-// Mở dialog sửa nhân viên
 const openEditDialog = async (employee) => {
+  // Reset employee dialog error
+  employeeDialogError.value = null
+  passwordDialogError.value = null
+  roleDialogError.value = null
+  
   loading.value = true
   editMode.value = true
   activeTab.value = 'info'
+  employeeDetail.value = null
+  accountDetail.value = null
 
   try {
     // Lấy thông tin chi tiết nhân viên
@@ -724,7 +812,8 @@ const openEditDialog = async (employee) => {
       email: employeeDetail.value.email,
       phone: employeeDetail.value.phone,
       gender: employeeDetail.value.gender,
-      position: employeeDetail.value.position
+      position: employeeDetail.value.position,
+      accountId: employeeDetail.value.accountId
     }
 
     // Nếu nhân viên có tài khoản liên kết, lấy thông tin tài khoản
@@ -732,7 +821,7 @@ const openEditDialog = async (employee) => {
       try {
         const accountResponse = await accountService.getAccountById(employeeDetail.value.accountId)
         accountDetail.value = accountResponse.data
-        activeTab.value = 'account' // Nếu có tài khoản, mở tab thông tin tài khoản
+        // Nếu có tài khoản, mở tab thông tin tài khoản
       } catch (error) {
         console.error('Lỗi khi lấy thông tin tài khoản:', error)
         accountDetail.value = null
@@ -750,7 +839,6 @@ const openEditDialog = async (employee) => {
   }
 }
 
-// Đóng dialog quản lý nhân viên
 const closeEmployeeDialog = () => {
   employeeDialog.value = false
   // Reset các tab về ban đầu
@@ -759,88 +847,79 @@ const closeEmployeeDialog = () => {
   }, 300)
 }
 
-// Mở dialog xác nhận xóa
 const openDeleteDialog = (employee) => {
-  editedEmployee.value = {...employee}
-  deleteDialog.value = true
+  employeeToDelete.value = employee;
+  deleteEmployeeDialog.value = true;
 }
 
-// Đóng dialog xác nhận xóa
 const closeDeleteDialog = () => {
-  deleteDialog.value = false
+  deleteEmployeeDialog.value = false;
+  employeeToDelete.value = null;
 }
 
-// Lưu nhân viên
+// Save/Delete operations
 const saveEmployee = async () => {
   if (!form.value) return
-
-  const { valid } = await form.value.validate()
-  if (!valid) return
+  employeeDialogError.value = null; // Reset lỗi
 
   try {
+    const { valid } = await form.value.validate()
+    if (!valid) return
+  
+    loading.value = true;
     const employeeData = { ...editedEmployee.value }
-
+  
+    // Khi cập nhật, không gửi các thông tin tài khoản
     if (editMode.value) {
-      // Xóa các trường không cần thiết khi cập nhật
       delete employeeData.username
       delete employeeData.password
       delete employeeData.roleId
-      delete employeeData.accountId
-
+  
       await employeeStore.updateEmployee(employeeData.id, employeeData)
       showSnackbar('Cập nhật thông tin nhân viên thành công', 'success')
+      closeEmployeeDialog()
+      loadEmployees()
     } else {
-      // Đảm bảo dữ liệu đúng định dạng cho API tạo mới
       await employeeStore.createEmployee(employeeData)
       showSnackbar('Thêm nhân viên mới thành công', 'success')
+      closeEmployeeDialog()
+      loadEmployees()
     }
-
-    closeEmployeeDialog()
-    loadEmployees()
   } catch (error) {
-    console.error('Lỗi khi lưu nhân viên:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+    console.error('Lỗi khi lưu thông tin nhân viên:', error)
+    employeeDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu thông tin nhân viên';
+    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi lưu thông tin nhân viên', 'error')
+    // Không đóng dialog khi có lỗi
+  } finally {
+    loading.value = false;
   }
 }
 
-// Xóa nhân viên
 const deleteEmployee = async () => {
+  if (!employeeToDelete.value) return;
+  
   try {
-    await employeeStore.deleteEmployee(editedEmployee.value.id)
-    showSnackbar('Xóa nhân viên thành công', 'success')
-    closeDeleteDialog()
-    loadEmployees()
+    await employeeStore.deleteEmployee(employeeToDelete.value.id);
+    showSnackbar('Xóa nhân viên thành công', 'success');
+    loadEmployees();
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    console.error('Lỗi khi xóa nhân viên:', error);
+    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi xóa nhân viên', 'error');
+  } finally {
+    closeDeleteDialog();
   }
-}
-
-// Xử lý thay đổi trang
-const handlePageChange = (newPage) => {
-  page.value = newPage
-}
-
-// Debounce search
-const debounceSearch = debounce(() => {
-  page.value = 1 // Reset về trang đầu khi tìm kiếm
-}, 300)
-
-// Hiển thị snackbar
-const showSnackbar = (text, color = 'success') => {
-  snackbar.text = text
-  snackbar.color = color
-  snackbar.show = true
 }
 
 // Lưu thay đổi mật khẩu
 const savePasswordChange = async () => {
   if (!passwordForm.value) return
+  passwordDialogError.value = null; // Reset lỗi
 
-  const { valid } = await passwordForm.value.validate()
-  if (!valid) return
-
-  loading.value = true
   try {
+    const { valid } = await passwordForm.value.validate()
+    if (!valid) return
+  
+    loading.value = true
     await accountService.changePassword(
       employeeDetail.value.accountId,
       passwordChange.value.oldPassword,
@@ -848,7 +927,7 @@ const savePasswordChange = async () => {
       passwordChange.value.confirmPassword
     )
     showSnackbar('Đổi mật khẩu thành công', 'success')
-
+  
     // Reset form và chuyển về tab thông tin tài khoản
     passwordChange.value = {
       oldPassword: '',
@@ -857,7 +936,10 @@ const savePasswordChange = async () => {
     }
     activeTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+    console.error('Lỗi khi đổi mật khẩu:', error)
+    passwordDialogError.value = error.response?.data || error.message || 'Đã xảy ra lỗi khi đổi mật khẩu';
+    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi đổi mật khẩu', 'error')
+    // Không chuyển tab khi có lỗi
   } finally {
     loading.value = false
   }
@@ -866,25 +948,29 @@ const savePasswordChange = async () => {
 // Lưu thay đổi vai trò
 const saveRoleChange = async () => {
   if (!roleForm.value) return
+  roleDialogError.value = null; // Reset lỗi
 
-  const { valid } = await roleForm.value.validate()
-  if (!valid) return
-
-  loading.value = true
   try {
+    const { valid } = await roleForm.value.validate()
+    if (!valid) return
+  
+    loading.value = true
     await accountService.changeRole(
       employeeDetail.value.accountId,
       roleChange.value.roleId
     )
-
+  
     // Cập nhật lại thông tin hiển thị
     const accountResponse = await accountService.getAccountById(employeeDetail.value.accountId)
     accountDetail.value = accountResponse.data
-
+  
     showSnackbar('Thay đổi vai trò thành công', 'success')
     activeTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+    console.error('Lỗi khi thay đổi vai trò:', error)
+    roleDialogError.value = error.response?.data || error.message || 'Đã xảy ra lỗi khi thay đổi vai trò';
+    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi thay đổi vai trò', 'error')
+    // Không chuyển tab khi có lỗi
   } finally {
     loading.value = false
   }
@@ -902,13 +988,36 @@ const initRoleChange = () => {
   }
 }
 
+// Thêm phương thức kích hoạt/vô hiệu hóa tài khoản
+// Kích hoạt/Vô hiệu hóa tài khoản
+const toggleAccountActiveStatus = async () => {
+  loading.value = true
+  try {
+    await accountService.toggleAccountActive(accountDetail.value.id, !accountDetail.value.isActive)
+    
+    // Cập nhật trạng thái hoạt động trong UI
+    accountDetail.value.isActive = !accountDetail.value.isActive
+    
+    showSnackbar(
+      accountDetail.value.isActive 
+        ? 'Tài khoản đã được kích hoạt thành công' 
+        : 'Tài khoản đã được vô hiệu hóa thành công', 
+      'success'
+    )
+  } catch (error) {
+    console.error('Lỗi khi thay đổi trạng thái hoạt động:', error)
+    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái hoạt động', 'error')
+  } finally {
+    loading.value = false
+  }
+}
 
-// Khởi tạo thêm phương thức khóa/mở khóa tài khoản
+// Thêm phương thức khóa/mở khóa tài khoản
 // Khóa/Mở khóa tài khoản
 const toggleAccountLockStatus = async () => {
   loading.value = true
   try {
-    await employeeStore.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
+    await accountService.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
 
     // Cập nhật trạng thái khóa trong UI
     accountDetail.value.isLocked = !accountDetail.value.isLocked
@@ -920,13 +1029,43 @@ const toggleAccountLockStatus = async () => {
       'success'
     )
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.message || error.message), 'error')
+    console.error('Lỗi khi thay đổi trạng thái khóa:', error)
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message || 'Không xác định'), 'error')
   } finally {
     loading.value = false
   }
 }
 
-// Lifecycle
+// Xử lý phân trang và tìm kiếm
+const handlePageChange = (newPage) => {
+  page.value = newPage
+}
+
+const debounceSearch = () => {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+  searchTimeout.value = setTimeout(() => {
+    page.value = 1 // Reset về trang đầu tiên khi tìm kiếm
+  }, 300)
+}
+
+// Show snackbar
+const showSnackbar = (text, color = 'success') => {
+  snackbar.value = {
+    show: true,
+    text,
+    color
+  }
+}
+
+// Helper function to convert string to uppercase
+const toUpperCaseValue = (str) => {
+  if (!str) return '';
+  return str.toUpperCase();
+};
+
+// Lifecycle hooks
 onMounted(() => {
   loadEmployees()
   loadRoles()

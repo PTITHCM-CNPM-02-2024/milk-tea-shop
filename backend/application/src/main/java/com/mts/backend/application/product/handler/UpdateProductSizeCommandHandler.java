@@ -50,6 +50,7 @@ public class UpdateProductSizeCommandHandler implements ICommandHandler<UpdatePr
             size.setDescription(command.getDescription().orElse(null));
             size.setQuantity(command.getQuantity());
 
+            sizeRepository.saveAndFlush(size);
             return CommandResult.success(size.getId());
         } catch (DataIntegrityViolationException e) {
 

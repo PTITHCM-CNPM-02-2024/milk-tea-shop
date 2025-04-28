@@ -91,9 +91,9 @@
       density="comfortable"
       class="elevation-0"
     >
-      <!-- Cột STT -->
-      <template v-slot:item.index="{ item, index }">
-        {{ (page - 1) * accountStore.pageSize + index + 1 }}
+      <!-- Thêm template v-slot:item.id -->
+      <template v-slot:item.id="{ item }">
+        <span class="text-caption">#{{ item.id }}</span>
       </template>
 
       <!-- Cột Username -->
@@ -268,9 +268,9 @@ const snackbar = ref({
 
 // Cấu hình headers cho bảng
 const headers = [
-  { title: 'STT', key: 'index', width: '70px', sortable: false },
-  { title: 'Tên đăng nhập', key: 'username', sortable: true },
-  { title: 'Mô tả', key: 'description', sortable: false },
+  { title: 'ID', key: 'id', width: '80px', sortable: true },
+  { title: 'Tên đăng nhập', key: 'username', align: 'start', sortable: true },
+  { title: 'Mô tả', key: 'description', align: 'start', sortable: false },
   { title: 'Vai trò', key: 'role', sortable: false },
   { title: 'Trạng thái', key: 'status', sortable: false },
   { title: 'Hành động', key: 'actions', sortable: false, align: 'center', width: '100px' }

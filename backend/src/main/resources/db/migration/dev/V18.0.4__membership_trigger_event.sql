@@ -108,6 +108,68 @@ BEGIN
 END //
 
 DELIMITER ;
+
+DELIMITER //
+
+-- Thủ tục đồng bộ điểm từ các đơn hàng COMPLETED từ đầu năm đến hiện tại
+CREATE PROCEDURE sp_sync_year_to_date_customer_points()
+BEGIN
+    DECLARE current_year INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            SELECT 'Đã xảy ra lỗi - transaction đã được rollback' AS result;
+        END;
+
+    START TRANSACTION;
+    
+    -- Lấy năm hiện tại
+    SET current_year = YEAR(CURRENT_DATE);
+    
+    -- Tạo bảng tạm để lưu kết quả tính toán
+    DROP TEMPORARY TABLE IF EXISTS temp_customer_points;
+    CREATE TEMPORARY TABLE temp_customer_points (
+        customer_id INT UNSIGNED,
+        calculated_points INT UNSIGNED
+    );
+    
+    -- Tính tổng điểm từ các đơn hàng hoàn thành của khách hàng từ đầu năm đến hiện tại
+    INSERT INTO temp_customer_points (customer_id, calculated_points)
+    SELECT 
+        o.customer_id,
+        SUM(o.point) AS calculated_points
+    FROM 
+        `order` o
+    WHERE 
+        o.customer_id IS NOT NULL
+        AND o.status = 'COMPLETED'
+        AND o.point IS NOT NULL
+        AND YEAR(o.order_time) = current_year
+        AND o.order_time <= CURRENT_TIMESTAMP
+    GROUP BY 
+        o.customer_id;
+    
+    -- Cập nhật điểm cho khách hàng nếu có sự khác biệt
+    UPDATE 
+        customer c
+        JOIN temp_customer_points tp ON c.customer_id = tp.customer_id
+    SET 
+        c.current_points = tp.calculated_points,
+        c.updated_at = CURRENT_TIMESTAMP
+    WHERE 
+        c.current_points <> tp.calculated_points;
+    
+    -- Log kết quả
+    SELECT CONCAT('Đã đồng bộ điểm cho ', ROW_COUNT(), ' khách hàng từ đơn hàng năm ', current_year) AS result;
+    
+    -- Xóa bảng tạm
+    DROP TEMPORARY TABLE IF EXISTS temp_customer_points;
+    
+    COMMIT;
+END //
+
+DELIMITER ;
+
 DELIMITER //
 
 -- Tạo event scheduler chạy hàng ngày để kiểm tra membership hết hạn
@@ -116,8 +178,11 @@ CREATE EVENT IF NOT EXISTS event_check_expired_memberships
         STARTS CURRENT_DATE + INTERVAL 1 DAY
     DO
     BEGIN
+        -- Đồng bộ điểm khách hàng
+        CALL sp_sync_year_to_date_customer_points();
+        -- Reset thành viên hết hạn
         CALL sp_reset_expired_memberships();
-        -- Thêm thủ tục tái cấp lại thành viên dựa trên điểm hiện tại
+        -- Tái cấp loại thành viên dựa trên điểm hiện tại
         CALL sp_recalculate_customer_memberships();
     END //
     

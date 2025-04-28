@@ -13,10 +13,19 @@
       <!-- Logo và Brand -->
       <div class="d-flex align-center justify-space-between py-3 px-4">
         <div class="d-flex align-center">
-          <v-avatar color="primary" size="32" class="mr-3">
-            <span class="text-h6 font-weight-bold">M</span>
+          <v-avatar 
+            size="32" 
+            class="mr-3"
+          >
+            <v-img 
+              src="@/assets/logo.jpg" 
+              alt="Logo"
+              contain
+            ></v-img>
           </v-avatar>
-          <span class="text-h6 font-weight-bold primary--text">MATERIO</span>
+          <router-link to="/" class="text-h6 font-weight-bold primary--text text-decoration-none">
+            Trang Chủ
+          </router-link>
         </div>
       </div>
 

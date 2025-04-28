@@ -25,7 +25,7 @@ public class GetMemberTypeByIdQueryHandler implements IQueryHandler<MemberTypeBy
                 .name(membershipType.getType().getValue())
                 .discountUnit(membershipType.getMemberDiscountValue().getUnit().name())
                 .discountValue(membershipType.getMemberDiscountValue().getValue())
-                .requiredPoints(membershipType.getRequiredPoint())
+                .requiredPoint(membershipType.getRequiredPoint())
                 .validUntil(membershipType.getValidUntil().orElse(null))
                 .isActive(membershipType.getActive())
                 .build();

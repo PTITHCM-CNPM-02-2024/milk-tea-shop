@@ -249,7 +249,6 @@
                     <th class="text-left">ID</th>
                     <th class="text-left">Tên phương thức</th>
                     <th class="text-left">Mô tả</th>
-                    <th class="text-center">Trạng thái</th>
                     <th class="text-center">Thao tác</th>
                   </tr>
                 </thead>
@@ -258,14 +257,6 @@
                     <td>{{ method.id }}</td>
                     <td class="font-weight-medium">{{ method.name }}</td>
                     <td>{{ method.description || 'Không có mô tả' }}</td>
-                    <td class="text-center">
-                      <v-switch
-                        v-model="method.isActive"
-                        color="success"
-                        density="compact"
-                        hide-details
-                      ></v-switch>
-                    </td>
                     <td class="text-center">
                       <div class="d-flex justify-center">
                         <v-btn icon variant="text" color="primary" size="small" @click="editPaymentMethod(method)">
@@ -342,7 +333,9 @@
           
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="grey-darken-1" variant="text" @click="paymentMethodDialog = false">Hủy</v-btn>
+            <v-btn color="error" text @click="paymentMethodDialog = false">
+              Đóng
+            </v-btn>
             <v-btn 
               color="primary" 
               variant="text" 
@@ -368,7 +361,9 @@
           
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="grey-darken-1" variant="text" @click="deleteMethodDialog = false">Hủy</v-btn>
+            <v-btn color="primary" text @click="deleteMethodDialog = false">
+              Đóng
+            </v-btn>
             <v-btn 
               color="error" 
               variant="text" 

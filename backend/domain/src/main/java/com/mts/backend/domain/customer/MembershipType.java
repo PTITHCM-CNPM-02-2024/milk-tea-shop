@@ -9,17 +9,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Entity
@@ -31,6 +34,8 @@ import java.util.Optional;
         @AttributeOverride(name = "createdAt", column = @Column(name = "created_at")),
         @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
+@NoArgsConstructor
+@AllArgsConstructor
 public class MembershipType extends BaseEntity<Integer> {
     @Id
     @Comment("Mã loại thành viên")
@@ -39,21 +44,48 @@ public class MembershipType extends BaseEntity<Integer> {
     @Getter
     private Integer id;
 
-    public MembershipType(@NotNull Integer id, MemberDiscountValue memberDiscountValue, @NotNull @PositiveOrZero(message = "Số điểm yêu cầu phải lớn hơn hoặc bằng 0") Integer requiredPoint, @Nullable String description, @Nullable LocalDateTime validUntil, Boolean active, @NotNull @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự") @NotBlank(message = "Tên loại thành viên không được để trống") String type) {
-        this.id = id;
-        this.memberDiscountValue = memberDiscountValue;
-        this.requiredPoint = requiredPoint;
-        this.description = description;
-        this.validUntil = validUntil;
-        this.active = active;
-        this.type = type;
-    }
-
-    public MembershipType() {
-    }
+    @OneToMany(mappedBy = "membershipType")
+    private Set<Customer> customers = new LinkedHashSet<>();
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "discount_value", precision = 10, scale = 3)),
+            @AttributeOverride(name = "unit", column = @Column(name = "discount_unit"))
+    })
+    @Getter
+    private MemberDiscountValue memberDiscountValue;
+    @Comment("Điểm yêu cầu")
+    @Column(name = "required_point", nullable = false)
+    @NotNull
+    @PositiveOrZero(message = "Số điểm yêu cầu phải lớn hơn hoặc bằng 0")
+    @Getter
+    private Integer requiredPoint;
+    @Comment("Mô tả")
+    @Column(name = "description")
+    @Nullable
+    private String description;
+    @Comment("Ngày hết hạn")
+    @Column(name = "valid_until")
+    @Nullable
+    private LocalDateTime validUntil;
+    @Comment("Trạng thái (1: Hoạt động, 0: Không hoạt động)")
+    @ColumnDefault("1")
+    @Column(name = "is_active")
+    @Getter
+    @Setter
+    private Boolean active;
+    @Comment("Loại thành viên")
+    @Column(name = "type", nullable = false, length = 50)
+    @NotNull
+    @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự")
+    @NotBlank(message = "Tên loại thành viên không được để trống")
+    private String type;
 
     public static MembershipTypeBuilder builder() {
         return new MembershipTypeBuilder();
+    }
+
+    private static Set<Customer> $default$customers() {
+        return new LinkedHashSet<>();
     }
 
     public boolean setId(@NotNull MembershipTypeId id) {
@@ -80,45 +112,13 @@ public class MembershipType extends BaseEntity<Integer> {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "value", column = @Column(name = "discount_value", precision = 10, scale = 3)),
-            @AttributeOverride(name = "unit", column = @Column(name = "discount_unit"))
-    })
-    @Getter
-    private MemberDiscountValue memberDiscountValue;
+    public Set<Customer> getCustomers() {
+        return Set.copyOf(customers);
+    }
 
-
-    @Comment("Điểm yêu cầu")
-    @Column(name = "required_point", nullable = false)
-    @NotNull
-    @PositiveOrZero(message = "Số điểm yêu cầu phải lớn hơn hoặc bằng 0")
-    @Getter
-    private Integer requiredPoint;
-
-    @Comment("Mô tả")
-    @Column(name = "description")
-    @Nullable
-    private String description;
-
-    @Comment("Ngày hết hạn")
-    @Column(name = "valid_until")
-    @Nullable
-    private LocalDateTime validUntil;
-
-    @Comment("Trạng thái (1: Hoạt động, 0: Không hoạt động)")
-    @ColumnDefault("1")
-    @Column(name = "is_active")
-    @Getter
-    @Setter
-    private Boolean active;
-
-    @Comment("Loại thành viên")
-    @Column(name = "type", nullable = false, length = 50)
-    @NotNull
-    @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự")
-    @NotBlank(message = "Tên loại thành viên không được để trống")
-    private String type;
+    public void setCustomers(Set<Customer> customers) {
+        this.customers = customers;
+    }
 
 
     public boolean setMemberDiscountValue(@NotNull MemberDiscountValue memberDiscountValue) {
@@ -184,6 +184,8 @@ public class MembershipType extends BaseEntity<Integer> {
         private @NotNull
         @Size(max = 50, message = "Tên loại thành viên không được vượt quá 50 ký tự")
         @NotBlank(message = "Tên loại thành viên không được để trống") String type;
+        private boolean customers$set;
+        private Set<Customer> customers$value;
 
         MembershipTypeBuilder() {
         }
@@ -223,8 +225,20 @@ public class MembershipType extends BaseEntity<Integer> {
             return this;
         }
 
+        public MembershipTypeBuilder customers(@NotNull Set<Customer> customers) {
+            this.customers$set = true;
+            this.customers$value = customers;
+            return this;
+        }
+
         public MembershipType build() {
-            return new MembershipType(this.id, this.memberDiscountValue, this.requiredPoint, this.description, this.validUntil, this.active, this.type);
+            Set<Customer> customers$value = this.customers$value;
+            if (!this.customers$set) {
+                customers$value = MembershipType.$default$customers();
+            }
+            return new MembershipType(this.id, customers$value, this.memberDiscountValue, this.requiredPoint,
+                    this.description,
+                    this.validUntil, this.active, this.type);
         }
 
         public String toString() {

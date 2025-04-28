@@ -37,6 +37,8 @@ public class UpdateEmployeeCommandHandler implements ICommandHandler<UpdateEmplo
             employee.setFirstName(command.getFirstName());
             employee.setLastName(command.getLastName());
             employee.setGender(command.getGender());
+            
+            employeeRepository.saveAndFlush(employee);
             return CommandResult.success(employee.getId());
         }catch (Exception e) {
             if (e.getMessage().contains("Duplicate entry") &&

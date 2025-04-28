@@ -86,7 +86,6 @@ public class EmployeeController implements IController {
                 .position(Position.of(request.getPosition()))
                 .username(Username.of(request.getUsername()))
                 .password(PasswordHash.of(request.getPassword()))
-                .roleId(RoleId.of(request.getRoleId()))
                 .build();
         
         var result = commandBus.dispatch(command);

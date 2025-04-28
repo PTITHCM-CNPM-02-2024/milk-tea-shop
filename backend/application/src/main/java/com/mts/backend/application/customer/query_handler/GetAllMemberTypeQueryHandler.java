@@ -35,7 +35,7 @@ public class GetAllMemberTypeQueryHandler implements IQueryHandler<DefaultMember
                     .name(memberType.getType().getValue())
                     .discountUnit(memberType.getMemberDiscountValue().getUnit().name())
                     .discountValue(memberType.getMemberDiscountValue().getValue())
-                    .requiredPoints(memberType.getRequiredPoint())
+                    .requiredPoint(memberType.getRequiredPoint())
                     .validUntil(memberType.getValidUntil().orElse(null))
                     .description(memberType.getDescription().orElse(null))
                     .isActive(memberType.getActive())

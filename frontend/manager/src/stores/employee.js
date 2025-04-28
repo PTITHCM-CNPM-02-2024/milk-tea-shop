@@ -115,7 +115,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       const response = await accountService.toggleAccountLock(accountId, isLocked)
       return response.data
     } catch (err) {
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {
       loading.value = false

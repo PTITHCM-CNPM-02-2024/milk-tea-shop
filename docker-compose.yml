@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db-dev:
+    build:
+      context: .
+      dockerfile: docker/database/Dockerfile.dev
+    container_name: milktea-db-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: devpassword
+      MYSQL_DATABASE: milktea_dev_db
+      MYSQL_USER: milktea_dev_user
+      MYSQL_PASSWORD: devpassword
+    volumes:
+      - mysql-data-dev:/var/lib/mysql
+    ports:
+      - "3306:3306" # Optional: Mở cổng để truy cập trực tiếp từ host
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: milktea-backend
+    depends_on:
+      - db-dev
+    environment:
+      # Cấu hình kết nối DB, điều chỉnh các biến này cho phù hợp với cấu hình Spring của bạn
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-dev:3306/milktea_dev_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: milktea_dev_user
+      SPRING_DATASOURCE_PASSWORD: devpassword
+      # Các biến môi trường khác cho Spring nếu cần
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend-employee:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.employee
+    container_name: milktea-frontend-employee
+    ports:
+      - "8081:80" # Truy cập qua http://localhost:8081
+    restart: unless-stopped
+
+  frontend-manager:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.manager
+    container_name: milktea-frontend-manager
+    ports:
+      - "8082:80" # Truy cập qua http://localhost:8082
+    restart: unless-stopped
+
+volumes:
+  mysql-data-dev:
+    driver: local 

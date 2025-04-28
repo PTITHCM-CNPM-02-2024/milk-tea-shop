@@ -47,7 +47,7 @@ public class CreateMembershipCommandHandler implements ICommandHandler<CreateMem
                 .active(true)
                 .build();
         
-        var savedMembershipType = membershipTypeRepository.save(membershipType);
+        var savedMembershipType = membershipTypeRepository.saveAndFlush(membershipType);
         
         return CommandResult.success(savedMembershipType.getId());
         } catch (DataIntegrityViolationException e) {

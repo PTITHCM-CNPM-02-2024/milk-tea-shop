@@ -33,10 +33,9 @@ public class UpdateMemberForCustomerCommandHandler implements ICommandHandler<Up
         Customer customer = mustExistCustomer(command.getCustomerId());
         MembershipType membershipType = membershipTypeRepository.findById(command.getMemberId().getValue())
                 .orElseThrow(() -> new NotFoundException("Loại thành viên không tồn tại"));
-
-        if (customer.setMembershipType(membershipType)) {
-            customer.setCurrentPoint(RewardPoint.of(membershipType.getRequiredPoint()));
-        }
+        
+        customer.setMembershipType(membershipType);
+        customerRepository.saveAndFlush(customer);
 
         return CommandResult.success(customer.getId());
     }

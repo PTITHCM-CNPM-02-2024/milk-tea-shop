@@ -75,9 +75,9 @@ public class MembershipController implements IController {
                 .description(request.getDescription())
                 .discountUnit(DiscountUnit.valueOf(request.getDiscountUnit()))
                 .discountValue(BigDecimal.valueOf(request.getDiscountValue()))
-                .requiredPoints(request.getRequiredPoint())
+                .requiredPoint(request.getRequiredPoint())
                 .validUntil(request.getValidUntil() == null ? null : LocalDateTime.parse(request.getValidUntil()))
-                .active(request.getIsActive())
+                .active(request.getActive())
                 .build();
         
         var result = commandBus.dispatch(command);
