@@ -26,7 +26,7 @@
       closable
       class="mx-4 mb-4"
     >
-      {{ sizeUnitStore.error }}
+      {{ sizeUnitStore.error?.detail }}
     </v-alert>
     
     <!-- Tabs cho kích thước và đơn vị tính -->
@@ -369,18 +369,17 @@
     <!-- Dialog xác nhận xóa -->
     <v-dialog v-model="deleteDialog" width="400">
       <v-card>
-        <v-card-title class="text-h5 font-weight-medium pa-4">
+        <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
           Xác nhận xóa
         </v-card-title>
         
-        <v-card-text class="pa-4">
+        <v-card-text class="pa-4 text-justify text-wrap">
           <p v-if="activeTab === 'size'">
             Bạn có chắc chắn muốn xóa kích thước <strong>{{ editedSize.name }}</strong>?
           </p>
           <p v-else>
             Bạn có chắc chắn muốn xóa đơn vị tính <strong>{{ editedUnit.name }}</strong>?
           </p>
-          <p class="text-medium-emphasis mt-2">Lưu ý: Sản phẩm sử dụng dữ liệu này sẽ bị ảnh hưởng.</p>
         </v-card-text>
         
         <v-divider></v-divider>
@@ -631,7 +630,7 @@ async function saveSizeData() {
   } catch (error) {
     console.error('Lỗi khi lưu kích thước:', error)
     sizeDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu kích thước'
-    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response.data?.detail, 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -666,7 +665,7 @@ async function saveUnitData() {
   } catch (error) {
     console.error('Lỗi khi lưu đơn vị tính:', error)
     unitDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu đơn vị tính'
-    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response.data?.detail, 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -686,7 +685,7 @@ async function deleteItem() {
     
     closeDeleteDialog()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response.data?.detail, 'error')
   }
 }
 

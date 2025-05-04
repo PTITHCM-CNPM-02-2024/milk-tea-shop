@@ -19,5 +19,4 @@ public class UpdateAccountPasswordCommand implements ICommand<CommandResult> {
     private PasswordHash oldPassword;
     private PasswordHash newPassword;
     private PasswordHash confirmPassword;
-    private UserDetails userDetails;
 }

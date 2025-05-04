@@ -153,7 +153,7 @@
             class="mt-2 bg-surface rounded"
           >
             <template v-slot:no-data>
-              <div class="text-center py-6">No data available</div>
+              <div class="text-center py-6">Không có dữ liệu</div>
             </template>
             
             <template v-slot:item.actions="{ item }">
@@ -269,11 +269,11 @@
   <!-- Dialog xác nhận xóa -->
   <v-dialog v-model="deleteCouponDialog" max-width="400">
     <v-card>
-      <v-card-title class="text-h5">
+      <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
         Xác nhận xóa
       </v-card-title>
-      <v-card-text>
-        Bạn có chắc chắn muốn xóa mã giảm giá này?
+      <v-card-text class="text-justify text-wrap">
+        <p>Bạn có chắc chắn muốn xóa mã giảm giá "<strong>{{ couponToDelete.coupon }}</strong>" không?</p>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -438,7 +438,7 @@
                 label="Số tiền giảm tối đa (đồng)"
                 type="number"
                 :rules="[
-                  v => v === 0 || v > 1000 || 'Số tiền phải bằng 0 hoặc lớn hơn 1000đ'
+                  v => v === 0 || v >= 1000 || 'Số tiền phải bằng 0 hoặc lớn hơn 1000đ'
                 ]"
                 min="0"
               ></v-text-field>
@@ -449,7 +449,7 @@
                 label="Giá trị đơn hàng tối thiểu (đồng)"
                 type="number"
                 :rules="[
-                  v => v === 0 || v > 1000 || 'Giá trị phải bằng 0 hoặc lớn hơn 1000đ'
+                  v => v === 0 || v >= 1000 || 'Giá trị phải bằng 0 hoặc lớn hơn 1000đ'
                 ]"
                 min="0"
               ></v-text-field>
@@ -544,11 +544,15 @@
   <!-- Dialog xác nhận xóa -->
   <v-dialog v-model="deleteDiscountDialog" max-width="400">
     <v-card>
-      <v-card-title class="text-h5">
+      <v-card-title class="text-h5 font-weight-medium pa-4 bg-error text-white">
         Xác nhận xóa
       </v-card-title>
-      <v-card-text>
-        Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?
+      <v-card-text class="text-justify text-wrap">
+        <p v-if="discountToDelete">Bạn có chắc chắn muốn xóa chương trình khuyến mãi "<strong>{{ discountToDelete.name }}</strong>" không?</p>
+        <p class="text-warning mt-2">
+          Lưu ý:
+          <br> Có thể gây mất mát dữ liệu với các đơn hàng đã được tạo.
+        </p>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -670,7 +674,7 @@ const discountHeaders = [
 const couponHeaders = [
   { title: 'Mã giảm giá', key: 'coupon', align: 'start' },
   { title: 'Mô tả', key: 'description' },
-  { title: 'Thao tác', key: 'actions', sortable: false, align: 'center' }
+  { title: 'Thao tác', key: 'actions', sortable: false, align: 'center', width: '100px' }
 ]
 
 // Format giá trị giảm giá

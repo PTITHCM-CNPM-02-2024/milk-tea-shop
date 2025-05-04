@@ -197,7 +197,7 @@
                   :disabled="!isFormValid"
                 >
                   <v-icon left>mdi-content-save</v-icon>
-                  Lưu thay đổi
+                  Cập nhật
                 </v-btn>
               </div>
             </v-form>
@@ -291,6 +291,37 @@ async function confirmSave() {
     // Tạo một bản sao plain object từ editedStore để tránh tham chiếu vòng tròn
     const storeData = { ...editedStore.value }
     
+    // Đảm bảo định dạng thời gian HH:mm:ss cho backend
+    if (storeData.openTime) {
+      // Đếm số dấu hai chấm để xác định định dạng hiện tại
+      const colonCount = (storeData.openTime.match(/:/g) || []).length;
+      
+      if (colonCount === 1) {
+        // Nếu chỉ có 1 dấu hai chấm (HH:mm), thêm phần giây
+        storeData.openTime = storeData.openTime + ':00';
+      } else if (colonCount > 2) {
+        // Nếu có nhiều hơn 2 dấu, cắt lấy chỉ HH:mm:ss
+        const timeParts = storeData.openTime.split(':');
+        storeData.openTime = `${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
+      }
+    }
+    
+    if (storeData.closeTime) {
+      // Đếm số dấu hai chấm để xác định định dạng hiện tại
+      const colonCount = (storeData.closeTime.match(/:/g) || []).length;
+      
+      if (colonCount === 1) {
+        // Nếu chỉ có 1 dấu hai chấm (HH:mm), thêm phần giây
+        storeData.closeTime = storeData.closeTime + ':00';
+      } else if (colonCount > 2) {
+        // Nếu có nhiều hơn 2 dấu, cắt lấy chỉ HH:mm:ss
+        const timeParts = storeData.closeTime.split(':');
+        storeData.closeTime = `${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
+      }
+    }
+    
+    console.log('Dữ liệu gửi đi:', storeData);
+    
     // Gọi API cập nhật với dữ liệu đã được xử lý
     await updateStoreInfo(storeData)
     
@@ -309,7 +340,7 @@ async function confirmSave() {
   } catch (err) {
     // Hiển thị thông báo lỗi
     console.error('Lỗi khi cập nhật thông tin cửa hàng:', err)
-    errorMessage.value = err.response?.data || err.message || 'Đã xảy ra lỗi khi cập nhật thông tin cửa hàng'
+    errorMessage.value = err.response?.data?.detail || err.message || 'Đã xảy ra lỗi khi cập nhật thông tin cửa hàng'
     showErrorAlert.value = true
     showSuccessAlert.value = false
     

@@ -103,31 +103,17 @@ public class AccountController implements IController {
     public ResponseEntity<?> changePassword(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id,
                                             @Parameter(description = "Mật khẩu cũ", required = true) @RequestParam(value = "oldPassword", required = true) String oldPassword,
                                             @Parameter(description = "Mật khẩu mới", required = true) @RequestParam(value = "newPassword", required = true) String newPassword,
-                                            @Parameter(description = "Xác nhận mật khẩu", required = true) @RequestParam(value = "confirmPassword", required = true) String confirmPassword,
-                                            @AuthenticationPrincipal UserDetails userDetails) {
+                                            @Parameter(description = "Xác nhận mật khẩu", required = true) @RequestParam(value = "confirmPassword", required = true) String confirmPassword) {
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
                 .id(AccountId.of(id))
                 .oldPassword(PasswordHash.of(oldPassword))
                 .newPassword(PasswordHash.of(newPassword))
                 .confirmPassword(PasswordHash.of(confirmPassword))
-                .userDetails(userDetails)
                 .build();
 
         var result = accountCommandBus.dispatch(command);
-        
-        var refreshToken = accountCommandBus.dispatch(GenerateRefreshTokenCommand.builder().build()).getData();
-        
-        var cookie = ResponseCookie.fromClientResponse("refreshToken", (String)refreshToken)
-                .httpOnly(true)
-                .path("/api/v1/auth/refresh")
-                .sameSite("None")
-                .secure(true)
-                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(result.getData());
-
+        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
     }
 
     @Operation(summary = "Đổi vai trò tài khoản")

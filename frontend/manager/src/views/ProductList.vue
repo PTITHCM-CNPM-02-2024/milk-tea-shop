@@ -471,9 +471,9 @@
           Xác nhận xóa
         </v-card-title>
 
-        <v-card-text class="pa-4 pt-5">
+        <v-card-text class="pa-4 pt-5 text-justify text-wrap">
           Bạn có chắc chắn muốn xóa sản phẩm <strong>{{ editedProduct.name }}</strong>?
-          <p class="text-medium-emphasis mt-2">Hành động này không thể hoàn tác.</p>
+          <p class="text-medium-emphasis mt-2 text-justify text-wrap text-warning">Lưu ý: Xóa sản phẩm sẽ gây mất dữ liệu cho các đơn hàng đã được đặt.</p>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -570,9 +570,9 @@
           Xác nhận xóa
         </v-card-title>
 
-        <v-card-text class="pa-4 pt-5">
+        <v-card-text class="pa-4 pt-5 text-justify text-wrap">
           Bạn có chắc chắn muốn xóa danh mục <strong>{{ editedCategory.name }}</strong>?
-          <p class="text-medium-emphasis mt-2">Lưu ý: Sản phẩm thuộc danh mục này sẽ không bị xóa, nhưng sẽ không còn
+          <p class="text-medium-emphasis mt-2 text-justify text-wrap text-warning">Lưu ý: Sản phẩm thuộc danh mục này sẽ không bị xóa, nhưng sẽ không còn
             thuộc
             danh mục nào.</p>
         </v-card-text>
@@ -612,7 +612,7 @@
 
             <v-text-field v-model.number="newPrice.price" label="Giá (VNĐ)" variant="outlined" type="number" :rules="[
               v => !!v || 'Vui lòng nhập giá sản phẩm',
-              v => v > 1000 || 'Giá sản phẩm phải lớn hơn 1.000đ'
+              v => v >= 1000 || 'Giá sản phẩm phải lớn hơn 1.000đ'
             ]" class="mb-3" required></v-text-field>
           </v-form>
         </v-card-text>
@@ -641,7 +641,7 @@
               ''
               }}</strong>?
           </p>
-          <p class="text-medium-emphasis mt-2 text-justify">Lưu ý: Xóa giá sản phẩm có thể gây mất dữ liệu cho các đơn hàng đã được đặt.</p>
+          <p class="text-medium-emphasis mt-2 text-justify text-wrap text-warning">Lưu ý: Xóa giá sản phẩm có thể gây mất dữ liệu cho các đơn hàng đã được đặt.</p>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -665,12 +665,12 @@
 
         <v-card-text class="pa-4 pt-5">
           <p>Việc đánh dấu sản phẩm này là "Topping" sẽ thực hiện các thay đổi sau:</p>
-          <ul class="my-3">
-            <li>Xóa tất cả các giá theo kích thước hiện có.</li>
-            <li>Thêm kích thước "NA" với giá mặc định (1.000đ).</li>
-            <li>Tự động chuyển sang danh mục "Topping".</li>
+          <ul class="my-3 text-justify text-wrap">
+            <li>1. Xóa tất cả các giá theo kích thước hiện có.</li>
+            <li>2. Thêm kích thước "NA" với giá mặc định (1.000đ).</li>
+            <li>3. Tự động chuyển sang danh mục "Topping".</li>
           </ul>
-          <p>Bạn có chắc chắn muốn tiếp tục không?</p>
+          <p class="text-medium-emphasis mt-2 text-justify text-wrap text-warning">Lưu ý: Hành động này không thể hoàn tác.</p>
         </v-card-text>
 
         <v-divider></v-divider>

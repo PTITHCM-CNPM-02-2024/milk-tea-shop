@@ -51,8 +51,8 @@ public class StoreController implements IController {
                 .email(Email.of(request.getEmail()))
                 .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
-                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm")))
-                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm")))
+                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
                 .build();
         
         var result = commandBus.dispatch(command);
@@ -71,8 +71,8 @@ public class StoreController implements IController {
                 .email(Email.of(request.getEmail()))
                 .openingDate(LocalDate.parse(request.getOpeningDate()))
                 .taxCode(request.getTaxCode())
-                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm")))
-                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm")))    
+                .openTime(LocalTime.parse(request.getOpenTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .closeTime(LocalTime.parse(request.getCloseTime(), DateTimeFormatter.ofPattern("HH:mm:ss")))    
                 .build();
         
         var result = commandBus.dispatch(command);

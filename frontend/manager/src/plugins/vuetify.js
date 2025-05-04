@@ -4,6 +4,8 @@ import 'vuetify/styles'
 
 // Vuetify
 import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components' // Import tất cả components
+import * as directives from 'vuetify/directives' // Import directives (nếu cần)
 
 // Định nghĩa theme màu sắc giống Materio
 const lightTheme = {
@@ -43,6 +45,8 @@ const darkTheme = {
 }
 
 export default createVuetify({
+  components,
+  directives,
   theme: {
     defaultTheme: 'light',
     themes: {

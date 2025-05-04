@@ -23,7 +23,7 @@
                 closable
                 class="mb-4"
               >
-                {{ managerStore.error }}
+                {{ managerStore.error?.detail }}
               </v-alert>
 
               <v-alert
@@ -589,14 +589,6 @@ const updatePassword = async () => {
       confirmPassword: confirmPassword.value,
     })
 
-    // Lưu accessToken mới nếu có
-    if (response?.data?.accessToken) {
-        authService.saveToken(response.data.accessToken);
-    }
-
-    // Hiển thị thông báo thành công
-    accountSuccessMessage.value = 'Thay đổi mật khẩu thành công'
-
     // Đóng dialog
     closePasswordDialog()
   } catch (error) {
@@ -612,8 +604,6 @@ const updatePassword = async () => {
 onMounted(() => {
   fetchProfile()
 })
-
-// Helper function to convert string to uppercase
 const toUpperCaseValue = (str) => {
   if (!str) return '';
   return str.toUpperCase();

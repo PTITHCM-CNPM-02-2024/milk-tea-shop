@@ -33,7 +33,7 @@
               variant="tonal"
               density="compact"
               closable
-              class="mb-4"
+              class="mb-4 text-justify"
               @click:close="error = null"
             >
               {{ error }}
@@ -138,18 +138,9 @@ const login = async () => {
     // Xử lý lỗi đăng nhập
     if (err.response && err.response.data) {
       // Ưu tiên hiển thị lỗi cụ thể từ ProblemDetail nếu có
-      const errorData = err.response.data;
-      if (errorData.detail) {
-        error.value = errorData.detail; // Hiển thị detail
-      } else if (errorData.title) {
-        error.value = errorData.title; // Hoặc title nếu không có detail
-      } else if (typeof errorData === 'string') {
-        error.value = errorData; // Nếu backend trả về string đơn giản
-      } else {
-        error.value = 'Tên đăng nhập hoặc mật khẩu không chính xác.'; // Thông báo chung cho lỗi 401
-      }
-    } else if (err.response && err.response.status === 401) { // Giữ lại phòng trường hợp không có body
-      error.value = 'Tên đăng nhập hoặc mật khẩu không chính xác'
+      const errorData = err.response.data
+      console.log(errorData);
+      error.value = errorData.detail || 'Tên đăng nhập hoặc mật khẩu không chính xác.'; // Thông báo chung cho lỗi 401
     } else {
       error.value = 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.'
       console.error('Login error:', err)

@@ -577,7 +577,7 @@
           Bạn có chắc chắn muốn xóa nhân viên 
           <strong class="text-justify" v-if="employeeToDelete">{{ employeeToDelete.firstName }} {{ employeeToDelete.lastName }}</strong>?
           <br>
-          <p class="text-medium-emphasis text-justify mt-2">Lưu ý: Xóa nhân viên sẽ xóa tài khoản của nhân viên.</p>
+          <p class="text-medium-emphasis text-justify mt-2 text-wrap text-warning">Lưu ý: Xóa nhân viên sẽ xóa tài khoản của nhân viên.</p>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions class="pa-3">
@@ -697,7 +697,7 @@ const headers = [
   { title: 'Vị trí', key: 'position', align: 'start', sortable: true },
   { title: 'Email', key: 'email', align: 'start', sortable: true },
   { title: 'Số điện thoại', key: 'phone', align: 'start', sortable: true },
-  { title: 'Giới tính', key: 'gender', align: 'center', sortable: true, width: '100px' },
+  { title: 'Giới tính', key: 'gender', align: 'center', sortable: true, width: '120px' },
   { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '100px' }
 ]
 
@@ -755,7 +755,7 @@ const getInitials = (firstName, lastName) => {
 
 const getGenderText = (gender) => {
   if (!gender) return 'Không xác định'
-  return gender === 'MALE' ? 'Nam' : 'Nữ'
+  return gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : 'Khác'
 }
 
 // Dialog controls

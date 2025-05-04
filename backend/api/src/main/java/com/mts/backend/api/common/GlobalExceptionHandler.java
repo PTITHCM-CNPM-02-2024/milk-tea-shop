@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(JpaSystemException.class)
     public ErrorResponse handleJpaSystemException(JpaSystemException e) {
-        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMostSpecificCause().getMessage());
         
         return ErrorResponse.builder(e, detail)
                 .title("Lỗi truy vấn dữ liệu")
@@ -107,18 +107,18 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(UsernameNotFoundException.class)
     public ErrorResponse handleUsernameNotFoundException(UsernameNotFoundException e) {
-        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Không tìm thấy tài khoản");
         
         return ErrorResponse.builder(e, detail)
-                .title("Không tìm thấy tên đăng nhập")
+                .title(e.getMessage())
                 .build();
     }
     
     @ExceptionHandler(BadCredentialsException.class)
     public ErrorResponse handleBadCredentialsException(BadCredentialsException e) {
-        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+        var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Tên đăng nhập hoặc mật khẩu không chính xác");
         return ErrorResponse.builder(e, detail)
-                .title("Mật khẩu không hợp lệ")
+                .title(e.getMessage())
                 .build();
     }
     

@@ -1059,12 +1059,12 @@ const roleChange = ref({
 // Headers cho bảng khách hàng
 const customerHeaders = [
   { title: 'ID', key: 'id', align: 'start', sortable: true, width: '70px' },
-  { title: 'Họ Tên', key: 'fullName', align: 'start', sortable: false },
-  { title: 'Điểm thưởng', key: 'rewardPoint', align: 'center', sortable: true, width: '120px' },
+  { title: 'Họ Tên', key: 'fullName', align: 'start', sortable: false},
+  { title: 'Điểm thưởng', key: 'rewardPoint', align: 'center', sortable: true, width: '100px' },
   { title: 'Số điện thoại', key: 'phone', align: 'start', sortable: true },
-  { title: 'Giới tính', key: 'gender', align: 'center', sortable: true, width: '100px' },
+  { title: 'Giới tính', key: 'gender', align: 'center', sortable: true, width: '120px' },
   { title: 'Loại thành viên', key: 'membershipId', align: 'center', sortable: false, width: '150px' },
-  { title: 'Hành động', key: 'actions', align: 'end', sortable: false, width: '100px' }
+  { title: 'Hành động', key: 'actions', align: 'center', sortable: false, width: '100px' }
 ]
 
 // Computed

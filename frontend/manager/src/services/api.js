@@ -31,6 +31,8 @@ let isRefreshing = false;
 let failedQueue = [];
 let refreshAttemptCount = 0; // Biến đếm số lần thử refresh
 const MAX_REFRESH_ATTEMPTS = 5; // Giới hạn số lần thử
+let lastRefreshTime = 0; // Thời điểm refresh token cuối cùng
+const MIN_REFRESH_INTERVAL = 5000; // Thời gian tối thiểu giữa các lần refresh (5 giây)
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -46,23 +48,31 @@ const processQueue = (error, token = null) => {
 // Xử lý các lỗi phản hồi
 api.interceptors.response.use(
   response => {
-    // Nếu request thành công và trước đó có lỗi (có thể do token hết hạn)
-    // thì reset bộ đếm refresh
-    if (isRefreshing) {
-        // Chỉ reset nếu đang không trong quá trình refresh khác bắt đầu ngay sau đó
-        // (check này có thể chưa hoàn hảo, nhưng tạm ổn)
-    } else if (refreshAttemptCount > 0) {
-        // console.log("Request successful, resetting refresh attempt count.");
-        refreshAttemptCount = 0; // Reset khi có request thành công
+    // Nếu request thành công, reset bộ đếm refresh
+    if (refreshAttemptCount > 0 && !isRefreshing) {
+      refreshAttemptCount = 0; // Reset khi có request thành công
     }
     return response
   },
   async error => {
     const originalRequest = error.config;
+    
+    // Ngăn chặn vòng lặp vô hạn - nếu request đã thử lại rồi mà vẫn lỗi 401,
+    // không refresh token nữa
+    if (originalRequest._retry) {
+      return Promise.reject(error);
+    }
 
     // Chỉ xử lý lỗi 401 và không phải là yêu cầu refresh token ban đầu
-    if (error.response?.status === 401 && originalRequest.url !== '/auth/refresh') {
+    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh') {
       
+      // Kiểm tra khoảng thời gian giữa các lần refresh
+      const now = Date.now();
+      if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) {
+        console.warn(`Refresh token quá thường xuyên. Đợi ít nhất ${MIN_REFRESH_INTERVAL/1000}s giữa các lần refresh.`);
+        refreshAttemptCount++; // Vẫn tăng bộ đếm để kiểm soát số lần thử
+      }
+
       // Nếu đang trong quá trình refresh, thêm yêu cầu vào hàng đợi
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
@@ -78,61 +88,65 @@ api.interceptors.response.use(
       // Kiểm tra giới hạn số lần thử refresh
       if (refreshAttemptCount >= MAX_REFRESH_ATTEMPTS) {
         console.error("Đã đạt giới hạn số lần thử làm mới token. Đang đăng xuất.");
-        processQueue(new Error('Refresh token attempts limit reached.'), null); // Báo lỗi cho hàng đợi
-        authService.clearAuthData();
-        router.push('/login').catch(() => {});
-        refreshAttemptCount = 0; // Reset bộ đếm sau khi xử lý xong
-        isRefreshing = false; // Đảm bảo trạng thái isRefreshing được reset
+        logoutUser("Đã vượt quá số lần thử làm mới token.");
         return Promise.reject(new Error('Refresh token attempts limit reached.'));
       }
 
-      // Bắt đầu quá trình refresh
-      originalRequest._retry = true; // Đánh dấu yêu cầu này đã thử lại
+      // Đánh dấu là đang refresh và tăng bộ đếm
+      originalRequest._retry = true;
       isRefreshing = true;
-      refreshAttemptCount++; // Tăng bộ đếm
+      refreshAttemptCount++;
+      lastRefreshTime = Date.now();
 
       try {
         console.log(`Đang thử làm mới token lần ${refreshAttemptCount}...`);
         const rs = await authService.refreshToken();
         const { accessToken } = rs.data;
-        authService.saveToken(accessToken); // Lưu token mới
         
-        // Reset bộ đếm khi refresh thành công
+        // Lưu token mới và reset trạng thái
+        authService.saveToken(accessToken);
         refreshAttemptCount = 0;
 
-        // Cập nhật header cho yêu cầu gốc và các yêu cầu trong hàng đợi
+        // Cập nhật header cho request hiện tại và các request trong hàng đợi
         api.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
         originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
         
-        processQueue(null, accessToken); // Xử lý hàng đợi với token mới
-        
-        return api(originalRequest); // Thử lại yêu cầu gốc
+        // Xử lý hàng đợi và trả về request đã được cập nhật token
+        processQueue(null, accessToken);
+        return api(originalRequest);
       } catch (refreshError) {
         console.error(`Làm mới token lần ${refreshAttemptCount} thất bại:`, refreshError);
-        processQueue(refreshError, null); // Báo lỗi cho các yêu cầu trong hàng đợi
-
-        // Chỉ clear và redirect nếu lỗi refresh là lỗi nghiêm trọng (vd: 401, 403 từ API refresh)
-        // Hoặc khi đã hết số lần thử (đã check ở trên)
-        // Nếu là lỗi mạng tạm thời, lần thử tiếp theo có thể thành công
-        if (refreshError.response?.status === 401 || refreshError.response?.status === 403) {
-             console.error("Refresh token không hợp lệ hoặc hết hạn. Đang đăng xuất.");
-             authService.clearAuthData(); // Xóa dữ liệu xác thực
-             router.push('/login').catch(() => {}); // Điều hướng về trang đăng nhập
-             refreshAttemptCount = 0; // Reset bộ đếm
+        
+        // Nếu lỗi từ server (không phải lỗi mạng), logout user
+        if (refreshError.response) {
+          logoutUser("Token không hợp lệ hoặc hết hạn.");
         }
-        // Không reset isRefreshing ở đây ngay lập tức nếu muốn thử lại
-        // Nhưng vì đã check limit ở trên, nên nếu vào catch này thì hoặc là lỗi thật sự hoặc hết lượt
-        // -> nên clear và logout
-
-        return Promise.reject(refreshError); // Trả về lỗi refresh
+        
+        // Xử lý hàng đợi với lỗi
+        processQueue(refreshError, null);
+        return Promise.reject(refreshError);
       } finally {
-        isRefreshing = false; // Kết thúc quá trình refresh cho lần thử này
+        isRefreshing = false; // Luôn đảm bảo reset flag
       }
     }
 
-    // Đối với các lỗi khác hoặc lỗi 401 từ /auth/refresh, trả về lỗi gốc
+    // Đối với các lỗi khác, trả về lỗi gốc
     return Promise.reject(error);
   }
-)
+);
+
+// Hàm phụ trợ để thực hiện đăng xuất
+function logoutUser(reason) {
+  console.warn(`Đăng xuất người dùng: ${reason}`);
+  // Thông báo các yêu cầu đang chờ
+  processQueue(new Error('User logged out: ' + reason), null);
+  // Xóa thông tin đăng nhập
+  authService.clearAuthData();
+  // Reset các biến trạng thái
+  refreshAttemptCount = 0;
+  isRefreshing = false;
+  // Chuyển hướng về trang đăng nhập
+  router.push('/login').catch(() => {});
+}
 
 export default api

@@ -623,9 +623,9 @@ const calculateDiscount = (order) => {
 // Xem chi tiết đơn hàng
 const viewOrderDetails = async (orderId) => {
   try {
-    selectedOrderId.value = orderId
-    await orderStore.fetchOrderById(orderId)
-    orderDetailsDialog.value = true
+  selectedOrderId.value = orderId
+  await orderStore.fetchOrderById(orderId)
+  orderDetailsDialog.value = true
   } catch (error) {
     // Lỗi đã được xử lý và gán vào orderStore.error trong store
     console.error('Lỗi khi tải chi tiết đơn hàng:', error)
@@ -695,7 +695,7 @@ const generateReport = async () => {
 // Khởi tạo dữ liệu
 onMounted(async () => {
   try {
-    await orderStore.fetchOrders()
+  await orderStore.fetchOrders()
   } catch (error) {
     // Lỗi đã được xử lý và gán vào orderStore.error trong store
     console.error('Lỗi khi tải danh sách đơn hàng ban đầu:', error)
