@@ -1,6 +1,7 @@
 package com.mts.backend.infrastructure.security;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.mts.backend.application.account.handler.CustomAccessDeniedHandler;
+import com.mts.backend.application.account.handler.CustomAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,36 +31,41 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUserDetailService jwtUserDetailService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
     
     private final List<String> ALLOWED_ORIGINS = List.of("http://localhost:9090", "http://localhost:9091", "https://yourdomain.com");
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, JwtUserDetailService jwtUserDetailService) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, 
+                         JwtUserDetailService jwtUserDetailService,
+                         CustomAuthenticationEntryPoint authenticationEntryPoint,
+                         CustomAccessDeniedHandler accessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.jwtUserDetailService = jwtUserDetailService;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/**",
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh",
         "/actuator/**","/swagger-ui/**","/api/v1/reports/**")
                         .permitAll()
-                        .requestMatchers("/api/v1/**")
-                        .hasAnyRole("MANAGER", "STAFF", "CUSTOMER", "GUEST")
                         .requestMatchers("/api/v1/managers/**")
                         .hasRole("MANAGER")
+                        .requestMatchers("/api/v1/**")
+                        .hasAnyRole("MANAGER", "STAFF", "CUSTOMER", "GUEST")
                         .anyRequest()
                         .authenticated())
                 .userDetailsService(jwtUserDetailService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + authException.getMessage() + "\"}");
-                }));
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler));
         return http.build();
     }
 

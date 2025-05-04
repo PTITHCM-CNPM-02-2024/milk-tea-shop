@@ -4,27 +4,23 @@ import com.mts.backend.application.security.model.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService implements IJwtService {
-    private final JwtProperties jwtProperties;
-
-    public JwtService(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
-    }
-
+    final JwtProperties jwtProperties;
+    
     @Override
-    public String generateToken(UserPrincipal userPrincipal) {
+    public String generateAccessToken(UserPrincipal userPrincipal) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("tokenVersion", userPrincipal.getTokenVersion());
         claims.put("role", userPrincipal.getAuthorities().iterator().next().getAuthority());
 
         return Jwts.builder()
@@ -34,15 +30,37 @@ public class JwtService implements IJwtService {
                 .signWith(getSigningKey())
                 .compact();
     }
+    
+    @Override
+    public String generateRefreshToken(UserPrincipal userPrincipal) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenVersion", userPrincipal.getTokenVersion());
+        claims.put("role", userPrincipal.getAuthorities().iterator().next().getAuthority());
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userPrincipal.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis())).issuer(jwtProperties.getIssuer())
+                .expiration(new Date(new Date().getTime() + 60 * 60 * 24 * 1000 *7 )) // 7 day
+                .signWith(getSigningKey())
+                .id(UUID.randomUUID().toString())
+                .compact();
+    }
 
     @Override
-    public boolean validateToken(String token, UserPrincipal userPrincipal) {
+    public boolean validateAccessToken(String token, UserPrincipal userPrincipal) {
         final String username = extractUsername(token);
-        final Long tokenVersion = extractClaim(token, claims -> claims.get("tokenVersion", Long.class));
 
         return username.equals(userPrincipal.getUsername()) &&
-                !isTokenExpired(token) &&
-                tokenVersion.equals(userPrincipal.getTokenVersion());
+                !isTokenExpired(token);}
+    
+    @Override
+    public boolean validateRefreshToken(String token, UserPrincipal userPrincipal) {
+        final String username = extractUsername(token);
+        final Long tokenVersion = extractClaim(token, claims -> claims.get("tokenVersion", Long.class));
+        
+        return username.equals(userPrincipal.getUsername()) &&
+                !isTokenExpired(token) && tokenVersion.equals(userPrincipal.getTokenVersion());
     }
 
     @Override
@@ -59,6 +77,7 @@ public class JwtService implements IJwtService {
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
+                .clockSkewSeconds(60)
                 .build().parseSignedClaims(token).getPayload();
     }
 
@@ -67,11 +86,11 @@ public class JwtService implements IJwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 }

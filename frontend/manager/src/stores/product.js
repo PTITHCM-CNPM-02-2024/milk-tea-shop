@@ -30,6 +30,7 @@ export const useProductStore = defineStore('product', () => {
       totalProducts.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchProducts:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách sản phẩm'
       throw err
     } finally {
@@ -46,6 +47,7 @@ export const useProductStore = defineStore('product', () => {
       const response = await productService.getProductById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchProductById:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin sản phẩm'
       throw err
     } finally {
@@ -64,6 +66,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createProduct:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo sản phẩm mới'
       throw err
     } finally {
@@ -82,6 +85,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateProduct:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật sản phẩm'
       throw err
     } finally {
@@ -100,6 +104,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchProducts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteProduct:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa sản phẩm'
       throw err
     } finally {
@@ -117,6 +122,7 @@ export const useProductStore = defineStore('product', () => {
       categories.value = response.data.content || []
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchCategories:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách danh mục'
       throw err
     } finally {
@@ -135,6 +141,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createCategory:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo danh mục mới'
       throw err
     } finally {
@@ -153,6 +160,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateCategory:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật danh mục'
       throw err
     } finally {
@@ -171,6 +179,7 @@ export const useProductStore = defineStore('product', () => {
       await fetchCategories()
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteCategory:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa danh mục'
       throw err
     } finally {
@@ -188,6 +197,7 @@ export const useProductStore = defineStore('product', () => {
       productSizes.value = response.data.content || []
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchProductSizes:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách kích cỡ sản phẩm'
       throw err
     } finally {
@@ -204,6 +214,7 @@ export const useProductStore = defineStore('product', () => {
       const response = await productService.addProductPrice(productId, prices)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong addProductPrice:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi thêm giá sản phẩm'
       throw err
     } finally {
@@ -220,6 +231,7 @@ export const useProductStore = defineStore('product', () => {
       const response = await productService.updateProductPrice(productId, prices)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateProductPrice:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật giá sản phẩm'
       throw err
     } finally {
@@ -236,6 +248,7 @@ export const useProductStore = defineStore('product', () => {
       const response = await productService.deleteProductPrice(productId, sizeId)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteProductPrice:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa giá sản phẩm'
       throw err
     } finally {

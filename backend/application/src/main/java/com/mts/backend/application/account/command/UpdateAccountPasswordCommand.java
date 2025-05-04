@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +19,5 @@ public class UpdateAccountPasswordCommand implements ICommand<CommandResult> {
     private PasswordHash oldPassword;
     private PasswordHash newPassword;
     private PasswordHash confirmPassword;
+    private UserDetails userDetails;
 }

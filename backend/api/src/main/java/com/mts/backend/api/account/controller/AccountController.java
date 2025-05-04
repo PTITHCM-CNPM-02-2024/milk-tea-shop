@@ -18,6 +18,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -75,8 +77,19 @@ public class AccountController implements IController {
                 .build();
 
         var result = accountCommandBus.dispatch(command);
-
-        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+        
+        var refreshToken =accountCommandBus.dispatch(GenerateRefreshTokenCommand.builder().build());
+        
+        var cookie = ResponseCookie.fromClientResponse("refreshToken", (String)refreshToken.getData())
+                .httpOnly(true)
+                .path("/api/v1/auth/refresh")
+                .sameSite("None")
+                .secure(true)
+                .build();
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(result.getData());
 
     }
 
@@ -92,21 +105,28 @@ public class AccountController implements IController {
                                             @Parameter(description = "Mật khẩu mới", required = true) @RequestParam(value = "newPassword", required = true) String newPassword,
                                             @Parameter(description = "Xác nhận mật khẩu", required = true) @RequestParam(value = "confirmPassword", required = true) String confirmPassword,
                                             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails instanceof UserPrincipal userPrincipal && userPrincipal.getId() != null) {
-            if (!Objects.equals(userPrincipal.getId(),id)) {
-                throw new AccessDeniedException("Bạn không có quyền truy cập vào tài khoản này");
-            }
-        }
         UpdateAccountPasswordCommand command = UpdateAccountPasswordCommand.builder()
                 .id(AccountId.of(id))
                 .oldPassword(PasswordHash.of(oldPassword))
                 .newPassword(PasswordHash.of(newPassword))
                 .confirmPassword(PasswordHash.of(confirmPassword))
+                .userDetails(userDetails)
                 .build();
 
         var result = accountCommandBus.dispatch(command);
+        
+        var refreshToken = accountCommandBus.dispatch(GenerateRefreshTokenCommand.builder().build()).getData();
+        
+        var cookie = ResponseCookie.fromClientResponse("refreshToken", (String)refreshToken)
+                .httpOnly(true)
+                .path("/api/v1/auth/refresh")
+                .sameSite("None")
+                .secure(true)
+                .build();
 
-        return result.isSuccess() ? ResponseEntity.ok(result.getData()) : handleError(result);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(result.getData());
 
     }
 

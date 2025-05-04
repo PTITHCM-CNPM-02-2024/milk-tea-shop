@@ -45,6 +45,7 @@ export const useStoreInfoStore = defineStore('storeInfo', () => {
       storeInfo.value = response.data
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchStoreInfo:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin cửa hàng'
       throw err
     } finally {
@@ -62,6 +63,7 @@ export const useStoreInfoStore = defineStore('storeInfo', () => {
       storeInfo.value = response.data
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateStoreInfo:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật thông tin cửa hàng'
       throw err
     } finally {

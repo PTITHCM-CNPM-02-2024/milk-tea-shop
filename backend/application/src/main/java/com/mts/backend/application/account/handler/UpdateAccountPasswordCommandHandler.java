@@ -1,6 +1,9 @@
 package com.mts.backend.application.account.handler;
 
 import com.mts.backend.application.account.command.UpdateAccountPasswordCommand;
+import com.mts.backend.application.account.response.AuthenticationResponse;
+import com.mts.backend.application.security.IJwtService;
+import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
@@ -9,21 +12,23 @@ import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.NotFoundException;
+import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
+@AllArgsConstructor
 public class UpdateAccountPasswordCommandHandler implements ICommandHandler<UpdateAccountPasswordCommand, CommandResult> {
-    private final JpaAccountRepository accountRepository;
-    private final PasswordEncoder  passwordEncoder;
-    
-    public UpdateAccountPasswordCommandHandler(JpaAccountRepository accountRepository, PasswordEncoder passwordEncoder) {
-        this.accountRepository = accountRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    JpaAccountRepository accountRepository;
+     PasswordEncoder  passwordEncoder;
+     IJwtService jwtService;
     /**
      * @param command 
      * @return
@@ -45,7 +50,7 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
             throw new DomainException("Mật khẩu cũ không chính xác");
         }
         
-        if (!passwordEncoder.matches(command.getNewPassword().getValue(), account.getPasswordHash().getValue())) {
+        if (passwordEncoder.matches(command.getNewPassword().getValue(), account.getPasswordHash().getValue())) {
             throw new DomainException("Mật khẩu mới không được trùng với mật khẩu cũ");
         }
         
@@ -55,7 +60,27 @@ public class UpdateAccountPasswordCommandHandler implements ICommandHandler<Upda
         
         accountRepository.saveAndFlush(account);
         
-        return CommandResult.success(account.getId());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                account.getUsername().getValue(),
+                command.getNewPassword().getValue()
+        );
+        
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        var userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        var accessToken = jwtService.generateAccessToken(userPrincipal);
+        var expiration = jwtService.extractClaim(accessToken, Claims::getExpiration);
+        var accountId = userPrincipal.getId();
+
+        return CommandResult.success(
+                AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .expiresIn(expiration.getTime() - System.currentTimeMillis())
+                        .id(accountId)
+                        .build()
+        );
+        
+        
     }
     
     private Account mustExistAccount(AccountId accountId) {

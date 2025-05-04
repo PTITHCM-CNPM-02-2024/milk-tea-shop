@@ -124,7 +124,7 @@
                 <v-chip
                   v-if="item.gender"
                   size="small"
-                  :color="item.gender === 'MALE' ? 'blue' : 'pink'"
+                  :color="item.gender === 'MALE' ? 'blue' : item.gender === 'FEMALE' ? 'pink' : 'grey'"
                   text-color="white"
                   variant="flat"
                 >
@@ -1105,7 +1105,8 @@ const totalFilteredCustomerPages = computed(() => {
 
 const genderOptions = computed(() => [
   { title: 'Nam', value: 'MALE' },
-  { title: 'Nữ', value: 'FEMALE' }
+  { title: 'Nữ', value: 'FEMALE' },
+  { title: 'Khác', value: 'OTHER' }
 ])
 
 // Danh sách vai trò từ roleStore
@@ -1124,12 +1125,22 @@ const formattedValidUntil = computed(() => {
 
 // Methods
 // Load data
-const loadCustomers = () => {
-  customerStore.fetchCustomers(0, 1000) // Lấy tất cả khách hàng để xử lý lọc ở client
+const loadCustomers = async () => {
+  try {
+    await customerStore.fetchCustomers(customerPage.value - 1, 10)
+  } catch (error) {
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách khách hàng.'
+    showSnackbar(detailMessage, 'error')
+  }
 }
 
-const loadMemberships = () => {
-  membershipStore.fetchMembershipTypes(0, 100) // lấy tất cả dữ liệu
+const loadMemberships = async () => {
+  try {
+    await membershipStore.fetchMembershipTypes()
+  } catch (error) {
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách loại thành viên.'
+    showSnackbar(detailMessage, 'error')
+  }
 }
 
 // Lấy danh sách vai trò
@@ -1166,7 +1177,7 @@ const getMembershipColor = (membershipId) => {
 
 const getGenderText = (gender) => {
   if (!gender) return 'Không xác định'
-  return gender === 'MALE' ? 'Nam' : 'Nữ'
+  return gender === 'MALE' ? 'Nam' : gender === 'FEMALE' ? 'Nữ' : 'Khác'
 }
 
 // Hàm format giá trị giảm giá
@@ -1366,7 +1377,8 @@ const saveCustomer = async () => {
     loadCustomers()
   } catch (error) {
     console.error('Lỗi khi lưu thông tin khách hàng:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message || 'Không xác định'), 'error')
+    const detailMessage = error.response?.data?.detail || (editMode.value ? 'Lỗi cập nhật khách hàng' : 'Lỗi tạo khách hàng mới')
+    customerDialogError.value = detailMessage
   }
 }
 
@@ -1387,7 +1399,9 @@ const saveMembership = async () => {
     closeMembershipDialog()
     loadMemberships()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    console.error('Lỗi khi lưu loại thành viên:', error)
+    const detailMessage = error.response?.data?.detail || (editMode.value ? 'Lỗi cập nhật loại thành viên.' : 'Lỗi tạo loại thành viên mới.')
+    membershipDialogError.value = detailMessage
   }
 }
 
@@ -1404,7 +1418,9 @@ const deleteItem = async () => {
     }
     closeDeleteDialog()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data, 'error')
+    console.error('Lỗi khi xóa khách hàng:', error)
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi xóa khách hàng'
+    showSnackbar(detailMessage, 'error')
   }
 }
 
@@ -1450,7 +1466,8 @@ const savePasswordChange = async () => {
     }
     activeCustomerTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+    console.error('Lỗi khi đổi mật khẩu:', error)
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.detail || error.message), 'error')
   } finally {
     loading.value = false
   }
@@ -1477,7 +1494,8 @@ const saveRoleChange = async () => {
     showSnackbar('Thay đổi vai trò thành công', 'success')
     activeCustomerTab.value = 'account'
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+    console.error('Lỗi khi đổi vai trò:', error)
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.detail || error.message), 'error')
   } finally {
     loading.value = false
   }
@@ -1497,21 +1515,17 @@ const initRoleChange = () => {
 
 // Khóa/Mở khóa tài khoản
 const toggleAccountLockStatus = async () => {
+  if (!customerDetail.value || !customerDetail.value.account) return
   loading.value = true
   try {
-    await customerStore.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
-
-    // Cập nhật trạng thái khóa trong UI
-    accountDetail.value.isLocked = !accountDetail.value.isLocked
-
-    showSnackbar(
-      accountDetail.value.isLocked
-        ? 'Tài khoản đã được khóa thành công'
-        : 'Tài khoản đã được mở khóa thành công',
-      'success'
-    )
+    const newLockStatus = !customerDetail.value.account.isLocked
+    await customerStore.toggleAccountLock(customerDetail.value.account.id, newLockStatus)
+    customerDetail.value.account.isLocked = newLockStatus
+    showSnackbar(`Tài khoản đã được ${newLockStatus ? 'khóa' : 'mở khóa'}.`, 'success')
+    await loadCustomers()
   } catch (error) {
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message), 'error')
+    console.error('Lỗi khi thay đổi trạng thái khóa:', error)
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.detail || error.message), 'error')
   } finally {
     loading.value = false
   }

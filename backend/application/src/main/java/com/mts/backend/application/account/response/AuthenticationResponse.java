@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AuthenticationResponse {
-    private String token;
+    private String accessToken;
+    private String tokenType;
+    private Long expiresIn;
     private Long id;
 }

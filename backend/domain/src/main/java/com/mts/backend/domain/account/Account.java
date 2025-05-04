@@ -146,9 +146,6 @@ public class Account extends BaseEntity<Long> {
     }
 
     public void setPasswordHash(@NotNull PasswordHash passwordHash) {
-        if (PasswordHash.of(this.passwordHash).equals(passwordHash)) {
-            return;
-        }
         this.passwordHash = passwordHash.getValue();
     }
 

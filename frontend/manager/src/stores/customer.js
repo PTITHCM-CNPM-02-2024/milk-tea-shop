@@ -28,6 +28,7 @@ export const useCustomerStore = defineStore('customer', () => {
       totalCustomers.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchCustomers:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách khách hàng'
       throw err
     } finally {
@@ -44,6 +45,7 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await customerService.getCustomerById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchCustomerById:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin khách hàng'
       throw err
     } finally {
@@ -62,6 +64,7 @@ export const useCustomerStore = defineStore('customer', () => {
       await fetchCustomers(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createCustomer:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo khách hàng mới'
       throw err
     } finally {
@@ -80,6 +83,7 @@ export const useCustomerStore = defineStore('customer', () => {
       await fetchCustomers(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateCustomer:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật khách hàng'
       throw err
     } finally {
@@ -98,6 +102,7 @@ export const useCustomerStore = defineStore('customer', () => {
       await fetchCustomers(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteCustomer:', err)
       error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa khách hàng'
       throw err
     } finally {
@@ -114,6 +119,7 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await accountService.toggleAccountLock(accountId, isLocked)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong toggleAccountLock (customerStore):', err)
       error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {

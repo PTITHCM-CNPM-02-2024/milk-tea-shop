@@ -29,6 +29,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       totalEmployees.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchEmployees:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách nhân viên'
       throw err
     } finally {
@@ -45,6 +46,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       const response = await employeeService.getEmployeeById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchEmployeeById:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin nhân viên'
       throw err
     } finally {
@@ -63,6 +65,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createEmployee:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo nhân viên mới'
       throw err
     } finally {
@@ -81,6 +84,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateEmployee:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật nhân viên'
       throw err
     } finally {
@@ -99,6 +103,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       await fetchEmployees(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteEmployee:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa nhân viên'
       throw err
     } finally {
@@ -115,6 +120,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       const response = await accountService.toggleAccountLock(accountId, isLocked)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong toggleAccountLock (employeeStore):', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {

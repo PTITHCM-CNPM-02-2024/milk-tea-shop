@@ -19,7 +19,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final com.mts.backend.infrastructure.security.JwtService jwtService;
+    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final JwtProperties jwtProperties;
 
@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                if (jwtService.validateToken(jwt, (UserPrincipal) userDetails)) {
+                if (jwtService.validateAccessToken(jwt, (UserPrincipal) userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,

@@ -5,20 +5,20 @@ import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.NotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class LogoutCommandHandler implements ICommandHandler<LogoutCommand, CommandResult> {
     
-    private final JpaAccountRepository accountRepository;
-    
-    public LogoutCommandHandler(JpaAccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
-    }
-
+    final JpaAccountRepository accountRepository;
     /**
      * @param command 
      * @return
@@ -32,6 +32,8 @@ public class LogoutCommandHandler implements ICommandHandler<LogoutCommand, Comm
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với id: " + command.getUserPrincipal().getId()));
         
         account.logout();
+        
+        SecurityContextHolder.clearContext();
         
         return CommandResult.success(account.getId());
     }

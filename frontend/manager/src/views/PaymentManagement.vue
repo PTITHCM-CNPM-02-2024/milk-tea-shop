@@ -662,7 +662,8 @@ const viewPaymentDetails = async (paymentId) => {
     currentPayment.value = paymentStore.currentPayment
     paymentDetailsDialog.value = true
   } catch (error) {
-    console.error('Lỗi khi tải chi tiết thanh toán:', error)
+    // console.error('Lỗi khi tải chi tiết thanh toán:', error); // Xóa log
+    showSnackbar('Lỗi khi tải chi tiết: ' + (error.response?.data?.detail || error.message || ''), 'error');
   }
 }
 
@@ -677,7 +678,8 @@ const generateReport = async () => {
   try {
     await paymentStore.fetchPaymentReport(reportYear.value, reportMonth.value)
   } catch (error) {
-    console.error('Lỗi khi tạo báo cáo:', error)
+    // console.error('Lỗi khi tạo báo cáo:', error); // Xóa log
+    showSnackbar('Lỗi khi tải báo cáo: ' + (error.response?.data?.detail || error.message || ''), 'error');
   }
 }
 
@@ -733,7 +735,9 @@ const submitPaymentMethodForm = async () => {
     }
     paymentMethodDialog.value = false
   } catch (error) {
-    console.error('Lỗi khi lưu phương thức thanh toán:', error)
+    // console.error('Lỗi khi lưu phương thức thanh toán:', error); // Xóa log
+    const detailMessage = error.response?.data?.detail || (isEditingMethod.value ? 'Lỗi cập nhật phương thức.' : 'Lỗi tạo phương thức mới.');
+    showSnackbar(detailMessage, 'error');
   }
 }
 
@@ -743,7 +747,8 @@ const confirmDeleteMethod = async () => {
     await paymentStore.deletePaymentMethod(selectedMethodToDelete.value.id)
     deleteMethodDialog.value = false
   } catch (error) {
-    console.error('Lỗi khi xóa phương thức thanh toán:', error)
+    // console.error('Lỗi khi xóa phương thức thanh toán:', error); // Xóa log
+    showSnackbar('Lỗi khi xóa: ' + (error.response?.data?.detail || error.message || ''), 'error');
   }
 }
 

@@ -622,9 +622,15 @@ const calculateDiscount = (order) => {
 
 // Xem chi tiết đơn hàng
 const viewOrderDetails = async (orderId) => {
-  selectedOrderId.value = orderId
-  await orderStore.fetchOrderById(orderId)
-  orderDetailsDialog.value = true
+  try {
+    selectedOrderId.value = orderId
+    await orderStore.fetchOrderById(orderId)
+    orderDetailsDialog.value = true
+  } catch (error) {
+    // Lỗi đã được xử lý và gán vào orderStore.error trong store
+    console.error('Lỗi khi tải chi tiết đơn hàng:', error)
+    // Không cần gán lại error ở đây vì store đã làm
+  }
 }
 
 // In đơn hàng
@@ -646,6 +652,9 @@ const viewPaymentDetails = async (paymentId) => {
     paymentDetailsDialog.value = true
   } catch (error) {
     console.error('Lỗi khi tải chi tiết thanh toán:', error)
+    // Gán lỗi vào store để hiển thị alert chung nếu cần
+    // orderStore.error = error.message || 'Lỗi khi tải chi tiết thanh toán' 
+    // Xem xét có nên hiển thị lỗi này trong v-alert chính không
   } finally {
     paymentLoading.value = false
   }
@@ -676,7 +685,8 @@ const generateReport = async () => {
     exportDialog.value = false
   } catch (error) {
     console.error('Lỗi khi tạo báo cáo:', error)
-    alert('Lỗi khi tạo báo cáo: ' + error.message)
+    // Gán lỗi vào store để hiển thị alert chung
+    orderStore.error = error.message || 'Lỗi khi tạo báo cáo'
   } finally {
     exportLoading.value = false
   }
@@ -684,7 +694,13 @@ const generateReport = async () => {
 
 // Khởi tạo dữ liệu
 onMounted(async () => {
-  await orderStore.fetchOrders()
+  try {
+    await orderStore.fetchOrders()
+  } catch (error) {
+    // Lỗi đã được xử lý và gán vào orderStore.error trong store
+    console.error('Lỗi khi tải danh sách đơn hàng ban đầu:', error)
+    // Không cần gán lại error ở đây vì store đã làm
+  }
 })
 
 // Watch tìm kiếm và lọc

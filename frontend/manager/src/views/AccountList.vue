@@ -351,7 +351,8 @@ async function loadAccounts() {
   try {
     await accountStore.fetchAccounts(page.value - 1, accountStore.pageSize)
   } catch (error) {
-    showSnackbar('Không thể tải danh sách tài khoản.', 'error')
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách tài khoản. Vui lòng thử lại.';
+    showSnackbar(detailMessage, 'error');
   }
 }
 
@@ -384,7 +385,8 @@ async function viewAccountDetail(account) {
     selectedAccount.value = accountDetail
     detailDialog.value = true
   } catch (error) {
-    showSnackbar('Không thể tải chi tiết tài khoản.', 'error')
+    const detailMessage = error.response?.data?.detail || 'Không thể tải chi tiết tài khoản. Vui lòng thử lại.';
+    showSnackbar(detailMessage, 'error');
   }
 }
 
@@ -409,7 +411,11 @@ onMounted(async () => {
   try {
     await accountStore.fetchRoles()
   } catch (error) {
-    showSnackbar('Không thể tải danh sách vai trò.', 'error')
+    // Không cần catch ở đây vì store không ném lại lỗi fetchRoles
+    // Nhưng nếu store *có* ném lại lỗi, thì bạn sẽ xử lý UI ở đây
+    // console.error('Lỗi khi tải danh sách vai trò:', error); // Xóa log nếu có
+    // const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách vai trò. Vui lòng thử lại.';
+    // showSnackbar(detailMessage, 'error'); 
   }
 
   // Sau đó tải danh sách tài khoản

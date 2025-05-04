@@ -289,9 +289,9 @@
             Xác nhận xóa khu vực
           </v-card-title>
           
-          <v-card-text class="pa-4 pt-5">
+          <v-card-text class="pa-4 pt-5 text-justify">
             <p>Bạn có chắc chắn muốn xóa khu vực "<strong>{{ selectedAreaToDelete?.name }}</strong>" không?</p>
-            <p class="text-error mt-2">Lưu ý: Tất cả bàn trong khu vực này cũng sẽ bị xóa!</p>
+            <p class="text-warning mt-2">Lưu ý: Tất cả bàn trong khu vực này sẽ không còn thuộc khu vực này nữa!</p>
           </v-card-text>
           
           <v-divider></v-divider>
@@ -391,9 +391,13 @@
             Xác nhận xóa bàn
           </v-card-title>
           
-          <v-card-text class="pa-4 pt-5">
+          <v-card-text class="pa-4 pt-5 text-justify">
             <p>Bạn có chắc chắn muốn xóa bàn "<strong>{{ selectedTableToDelete?.name }}</strong>" không?</p>
-            <p class="text-medium-emphasis mt-2">Lưu ý: Dữ liệu liên quan đến bàn này sẽ bị ảnh hưởng.</p>
+            <p class="text-warning mt-2">
+              Lưu ý:
+              <br>1. Nếu bàn đang được sử dụng, bàn này sẽ không được xóa.
+              <br>2. Xóa bàn sẽ gây mất mát dữ liệu đến đơn hàng đã được tạo.
+            </p>
           </v-card-text>
           
           <v-divider></v-divider>
@@ -674,29 +678,36 @@ async function submitAreaForm() {
     if (isEditingArea.value && selectedAreaId.value === areaFormOriginal.value.id) {
       selectArea({id: selectedAreaId.value, name: areaFormData.value.name})
     }
-  } catch (err) {
-    console.error('Lỗi khi xử lý khu vực:', err)
-    areaDialogError.value = err.message || 'Đã xảy ra lỗi khi xử lý khu vực'
-    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
+  } catch (error) {
+    // console.error('Lỗi khi xử lý khu vực:', error)
+    const detailMessage = error.response?.data?.detail || (isEditingArea.value ? 'Lỗi cập nhật khu vực.' : 'Lỗi tạo khu vực mới.');
+    areaDialogError.value = detailMessage;
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.detail || error.message || ''), 'error');
     // Không đóng dialog khi có lỗi
   }
 }
 
 async function confirmDeleteArea() {
+  if (!selectedAreaToDelete.value) return;
+  loading.value = true;
   try {
-    await areaTableStore.deleteArea(selectedAreaToDelete.value.id)
-    showSnackbar('Xóa khu vực thành công', 'success')
-    deleteAreaDialog.value = false
-    
-    // Nếu xóa khu vực đang được chọn, reset lại selection
+    await areaTableStore.deleteArea(selectedAreaToDelete.value.id);
+    showSnackbar('Xóa khu vực thành công', 'success');
+    deleteAreaDialog.value = false;
+    // Nếu khu vực đang chọn bị xóa, chọn khu vực đầu tiên hoặc reset
     if (selectedAreaId.value === selectedAreaToDelete.value.id) {
-      selectedAreaId.value = null
+      if (areaTableStore.areas.length > 0) {
+        selectArea(areaTableStore.areas[0]);
+      } else {
+        areaTableStore.selectArea(null);
+        loadAllTables(); // Tải bàn không thuộc khu vực nào
+      }
     }
-    
-    // Tải lại danh sách khu vực sau khi xóa
-    await areaTableStore.fetchAreas()
-  } catch (err) {
-    showSnackbar('Đã xảy ra lỗi: ' + err.message, 'error')
+  } catch (error) {
+    // console.error('Lỗi khi xóa khu vực:', error)
+    showSnackbar('Lỗi khi xóa: ' + (error.response?.data?.detail || error.message || ''), 'error');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -770,28 +781,33 @@ async function submitTableForm() {
         await areaTableStore.fetchTables()
       }
     }
-  } catch (err) {
-    console.error('Lỗi khi xử lý bàn:', err)
-    tableDialogError.value = err.response?.data || 'Đã xảy ra lỗi khi xử lý bàn'
-    showSnackbar('Đã xảy ra lỗi: ' + err.response?.data, 'error')
+  } catch (error) {
+    // console.error('Lỗi khi xử lý bàn:', error)
+    const detailMessage = error.response?.data?.detail || (isEditingTable.value ? 'Lỗi cập nhật bàn.' : 'Lỗi tạo bàn mới.');
+    tableDialogError.value = detailMessage;
+    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data?.detail || error.message || ''), 'error');
     // Không đóng dialog khi có lỗi
   }
 }
 
 async function confirmDeleteTable() {
+  if (!selectedTableToDelete.value) return;
+  loading.value = true;
   try {
-    await areaTableStore.deleteTable(selectedTableToDelete.value.id)
-    showSnackbar('Xóa bàn thành công', 'success')
-    deleteTableDialog.value = false
-    
-    // Tải lại danh sách bàn sau khi xóa
+    await areaTableStore.deleteTable(selectedTableToDelete.value.id);
+    showSnackbar('Xóa bàn thành công', 'success');
+    deleteTableDialog.value = false;
+    // Tải lại danh sách bàn cho khu vực hiện tại
     if (selectedAreaId.value) {
       await areaTableStore.fetchTables(0, 40, selectedAreaId.value)
     } else {
       await areaTableStore.fetchTables()
     }
-  } catch (err) {
-    showSnackbar('Đã xảy ra lỗi: ' + err.response?.data, 'error')
+  } catch (error) {
+    // console.error('Lỗi khi xóa bàn:', error)
+    showSnackbar('Lỗi khi xóa: ' + (error.response?.data?.detail || error.message || ''), 'error');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -803,7 +819,7 @@ async function showTableDetails(table) {
     const response = await areaTableService.getTableById(table.id)
     selectedTableDetails.value = response.data
     tableDetailsDialog.value = true
-  } catch (err) {
+  } catch (error) {
     showSnackbar('Đã xảy ra lỗi khi lấy thông tin chi tiết bàn', 'error')
   } finally {
     loading.value = false

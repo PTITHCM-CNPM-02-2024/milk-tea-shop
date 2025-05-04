@@ -8,7 +8,17 @@ export const authService = {
   
   // Đăng xuất
   logout() {
-    return api.post('/auth/logout')
+    // Khi đăng xuất, cũng nên xóa refreshToken trên server nếu có API
+    // Hiện tại chỉ xóa local
+    return api.post('/auth/logout') // Gọi API logout của backend (nếu có)
+  },
+  
+  // Làm mới access token
+  refreshToken() {
+    // API refresh sử dụng cookie refreshToken và cần access token cũ (đã hết hạn) trong header
+    // Interceptor đã tự động thêm access token cũ vào header
+    // Cookie được trình duyệt tự động gửi nếu `withCredentials: true` được đặt trong api.js
+    return api.post('/auth/refresh'); // Sử dụng POST thay vì GET như mô tả API Java
   },
   
   // Lấy thông tin quản lý từ id tài khoản

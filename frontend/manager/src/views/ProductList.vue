@@ -432,6 +432,7 @@
                       </td>
                       <td>
                         <v-text-field v-model.number="price.price" type="number" variant="plain" density="compact"
+                          :rules="[v => !!v || 'Vui lòng nhập giá sản phẩm', v => v > 1000 || 'Giá sản phẩm phải lớn hơn 1.000đ']"
                           hide-details class="ma-1"></v-text-field>
                       </td>
                       <td class="text-center">
@@ -610,8 +611,8 @@
               required></v-select>
 
             <v-text-field v-model.number="newPrice.price" label="Giá (VNĐ)" variant="outlined" type="number" :rules="[
-              v => !!v || 'Vui lòng nhập giá',
-              v => v > 0 || 'Giá phải lớn hơn 0'
+              v => !!v || 'Vui lòng nhập giá sản phẩm',
+              v => v > 1000 || 'Giá sản phẩm phải lớn hơn 1.000đ'
             ]" class="mb-3" required></v-text-field>
           </v-form>
         </v-card-text>
@@ -792,7 +793,8 @@ const loadProducts = async () => {
       productPage.value = 1
     }
   } catch (error) {
-    console.error("Lỗi khi tải sản phẩm:", error)
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách sản phẩm.'
+    showSnackbar(detailMessage, 'error')
   }
 }
 
@@ -801,7 +803,8 @@ const loadCategories = async () => {
     const response = await productStore.fetchCategories(categoryPage.value - 1, categoryPageSize.value)
     categoryTotal.value = response.totalElements || 0
   } catch (error) {
-    console.error("Lỗi khi tải danh mục:", error)
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách danh mục.'
+    showSnackbar(detailMessage, 'error')
   }
 }
 
@@ -809,7 +812,8 @@ const loadProductSizes = async () => {
   try {
     await productStore.fetchProductSizes()
   } catch (error) {
-    console.error("Lỗi khi tải kích cỡ sản phẩm:", error)
+    const detailMessage = error.response?.data?.detail || 'Không thể tải danh sách kích cỡ.'
+    showSnackbar(detailMessage, 'error')
   }
 }
 

@@ -349,7 +349,7 @@ async function loadRoles() {
   try {
     await roleStore.fetchRoles(page.value - 1, roleStore.pageSize)
   } catch (error) {
-    showSnackbar('Không thể tải danh sách vai trò.', 'error')
+    showSnackbar('Lỗi khi tải danh sách vai trò: ' + (error.response?.data?.detail || error.message || ''), 'error')
   }
 }
 

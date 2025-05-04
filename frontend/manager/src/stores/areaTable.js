@@ -38,8 +38,9 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       areas.value = response.data.content || []
       totalAreas.value = response.data.totalElements || 0
     } catch (err) {
+      console.error('Lỗi trong fetchAreas:', err)
       error.value = 'Có lỗi xảy ra khi tải danh sách khu vực: ' + (err?.response?.data || 'Lỗi không xác định')
-      console.error(err)
+      throw err
     } finally {
       loading.value = false
     }
@@ -55,8 +56,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       areas.value.push(newArea)
       return newArea
     } catch (err) {
+      console.error('Lỗi trong createArea:', err)
       error.value = 'Có lỗi xảy ra khi tạo khu vực mới: ' + (err?.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false
@@ -76,8 +77,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       }
       return updatedArea
     } catch (err) {
+      console.error('Lỗi trong updateArea:', err)
       error.value = 'Có lỗi xảy ra khi cập nhật khu vực: ' + (err?.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false
@@ -93,8 +94,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       areas.value = areas.value.filter(area => area.id !== id)
       return true
     } catch (err) {
+      console.error('Lỗi trong deleteArea:', err)
       error.value = 'Có lỗi xảy ra khi xóa khu vực: ' + (err?.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false
@@ -119,8 +120,9 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       tables.value = response.data.content || []
       totalTables.value = response.data.totalElements || 0
     } catch (err) {
+      console.error('Lỗi trong fetchTables:', err)
       error.value = 'Có lỗi xảy ra khi tải danh sách bàn: ' + (err.response?.data || 'Lỗi không xác định')
-      console.error(err)
+      throw err
     } finally {
       loading.value = false
     }
@@ -136,8 +138,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       tables.value.push(newTable)
       return newTable
     } catch (err) {
+      console.error('Lỗi trong createTable:', err)
       error.value = 'Có lỗi xảy ra khi tạo bàn mới: ' + (err.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false
@@ -157,8 +159,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       }
       return updatedTable
     } catch (err) {
+      console.error('Lỗi trong updateTable:', err)
       error.value = 'Có lỗi xảy ra khi cập nhật bàn: ' + (err.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false
@@ -174,8 +176,8 @@ export const useAreaTableStore = defineStore('areaTable', () => {
       tables.value = tables.value.filter(table => table.id !== id)
       return true
     } catch (err) {
+      console.error('Lỗi trong deleteTable:', err)
       error.value = 'Có lỗi xảy ra khi xóa bàn: ' + (err.response?.data || 'Lỗi không xác định')
-      console.error(err)
       throw err
     } finally {
       loading.value = false

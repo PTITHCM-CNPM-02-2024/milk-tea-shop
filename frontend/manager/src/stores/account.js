@@ -34,6 +34,7 @@ export const useAccountStore = defineStore('account', () => {
       totalAccounts.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchAccounts:', err)
       error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách tài khoản'
       throw err
     } finally {
@@ -50,6 +51,7 @@ export const useAccountStore = defineStore('account', () => {
       const response = await accountService.getAccountById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchAccountById:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin tài khoản'
       throw err
     } finally {
@@ -68,6 +70,7 @@ export const useAccountStore = defineStore('account', () => {
       await fetchAccounts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createAccount:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo tài khoản mới'
       throw err
     } finally {
@@ -86,23 +89,8 @@ export const useAccountStore = defineStore('account', () => {
       await fetchAccounts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateAccount:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật tài khoản'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // Cập nhật username
-  async function updateUsername(id, data) {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await accountService.updateUsername(id, data)
-      return response.data
-    } catch (err) {
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật tên đăng nhập'
       throw err
     } finally {
       loading.value = false
@@ -118,6 +106,7 @@ export const useAccountStore = defineStore('account', () => {
       const response = await accountService.changePassword(id, data.oldPassword, data.newPassword, data.confirmPassword)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updatePassword:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật mật khẩu'
       throw err
     } finally {
@@ -136,6 +125,7 @@ export const useAccountStore = defineStore('account', () => {
       await fetchAccounts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteAccount:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa tài khoản'
       throw err
     } finally {
@@ -154,6 +144,7 @@ export const useAccountStore = defineStore('account', () => {
       await fetchAccounts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong toggleAccountLock:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {
@@ -172,6 +163,7 @@ export const useAccountStore = defineStore('account', () => {
       await fetchAccounts(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong toggleAccountActive:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái kích hoạt tài khoản'
       throw err
     } finally {
@@ -189,10 +181,68 @@ export const useAccountStore = defineStore('account', () => {
       roles.value = response.data || roles.value
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchRoles:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách vai trò'
       // Không throw lỗi, sử dụng danh sách vai trò mặc định
     } finally {
       loading.value = false
+    }
+  }
+
+  // Thay đổi mật khẩu cho tài khoản cụ thể (dùng trong EmployeeList)
+  async function changeAccountPassword(accountId, passwordData) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await accountService.changePassword(
+        accountId,
+        passwordData.oldPassword,
+        passwordData.newPassword,
+        passwordData.confirmPassword
+      );
+      return response.data;
+    } catch (err) {
+      console.error('Lỗi trong changeAccountPassword:', err);
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi đổi mật khẩu';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  // Thay đổi vai trò cho tài khoản cụ thể (dùng trong EmployeeList)
+  async function changeAccountRole(accountId, roleId) {
+    loading.value = true;
+    error.value = null;
+    try {
+      // Gọi API thay đổi vai trò
+      await accountService.changeRole(accountId, roleId);
+      // Lấy lại thông tin tài khoản đã cập nhật để trả về (hoặc có thể không cần nếu EmployeeList tự fetch lại)
+      const updatedAccountResponse = await accountService.getAccountById(accountId);
+      return updatedAccountResponse.data; 
+    } catch (err) {
+      console.error('Lỗi trong changeAccountRole:', err);
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi vai trò';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  // Khóa/Mở khóa tài khoản cụ thể (dùng trong EmployeeList, không cần tải lại list)
+  async function toggleSingleAccountLock(accountId, isLocked) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await accountService.toggleAccountLock(accountId, isLocked);
+      // Trả về kết quả để component cập nhật UI nếu cần
+      return response.data;
+    } catch (err) {
+      console.error('Lỗi trong toggleSingleAccountLock:', err);
+      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa';
+      throw err;
+    } finally {
+      loading.value = false;
     }
   }
 
@@ -214,11 +264,13 @@ export const useAccountStore = defineStore('account', () => {
     fetchAccountById,
     createAccount,
     updateAccount,
-    updateUsername,
     updatePassword,
     deleteAccount,
     toggleAccountLock,
     toggleAccountActive,
-    fetchRoles
+    fetchRoles,
+    changeAccountPassword,
+    changeAccountRole,
+    toggleSingleAccountLock
   }
 })

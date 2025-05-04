@@ -90,7 +90,7 @@
           <template v-slot:item.gender="{ item }">
             <v-chip
               size="small"
-              :color="item.gender === 'MALE' ? 'blue' : 'pink'"
+              :color="item.gender === 'MALE' ? 'blue' : item.gender === 'FEMALE' ? 'pink' : 'grey'"
               text-color="white"
               variant="flat"
             >
@@ -253,7 +253,7 @@
                     <template v-if="!editMode">
                       <v-col cols="12">
                         <v-divider class="mb-2"></v-divider>
-                        <v-subheader>Thông tin tài khoản (nếu muốn tạo)</v-subheader>
+                        <v-subheader>Thông tin tài khoản (bắt buộc)</v-subheader>
                       </v-col>
 
                       <v-col cols="12" md="6">
@@ -519,10 +519,6 @@
                 </v-form>
 
                 <v-divider class="my-4"></v-divider>
-
-                <div class="d-flex justify-end">
-                  <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
-                </div>
               </v-container>
             </v-window-item>
 
@@ -564,9 +560,6 @@
 
                 <v-divider class="my-4"></v-divider>
 
-                <div class="d-flex justify-end">
-                  <v-btn variant="text" class="me-2" @click="closeEmployeeDialog">Đóng</v-btn>
-                </div>
               </v-container>
             </v-window-item>
           </v-window>
@@ -628,10 +621,11 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useEmployeeStore } from '@/stores/employee'
 import { useRoleStore } from '@/stores/role'
 import { debounce } from 'lodash'
-import { accountService } from '@/services/accountService'
+import { useAccountStore } from '@/stores/account'
 
 const employeeStore = useEmployeeStore()
 const roleStore = useRoleStore()
+const accountStore = useAccountStore()
 
 // State
 const page = ref(1)
@@ -731,7 +725,8 @@ const totalFilteredPages = computed(() => {
 
 const genderOptions = computed(() => [
   { title: 'Nam', value: 'MALE' },
-  { title: 'Nữ', value: 'FEMALE' }
+  { title: 'Nữ', value: 'FEMALE' },
+  { title: 'Khác', value: 'OTHER' }
 ])
 
 const roleOptions = computed(() => {
@@ -818,11 +813,10 @@ const openEditDialog = async (employee) => {
     // Nếu nhân viên có tài khoản liên kết, lấy thông tin tài khoản
     if (employeeDetail.value.accountId) {
       try {
-        const accountResponse = await accountService.getAccountById(employeeDetail.value.accountId)
-        accountDetail.value = accountResponse.data
-        // Nếu có tài khoản, mở tab thông tin tài khoản
+        const accountResponse = await accountStore.fetchAccountById(employeeDetail.value.accountId)
+        accountDetail.value = accountResponse
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin tài khoản:', error)
+        showSnackbar('Không thể tải thông tin tài khoản liên kết.', 'warning')
         accountDetail.value = null
       }
     } else {
@@ -831,8 +825,8 @@ const openEditDialog = async (employee) => {
 
     employeeDialog.value = true
   } catch (error) {
-    console.error('Lỗi khi lấy thông tin nhân viên:', error)
-    showSnackbar('Đã xảy ra lỗi khi tải thông tin chi tiết nhân viên', 'error')
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi tải thông tin chi tiết nhân viên';
+    showSnackbar(detailMessage, 'error')
   } finally {
     loading.value = false
   }
@@ -885,9 +879,8 @@ const saveEmployee = async () => {
       loadEmployees()
     }
   } catch (error) {
-    console.error('Lỗi khi lưu thông tin nhân viên:', error)
-    employeeDialogError.value = error.response?.data || 'Đã xảy ra lỗi khi lưu thông tin nhân viên';
-    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi lưu thông tin nhân viên', 'error')
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi lưu thông tin nhân viên';
+    employeeDialogError.value = detailMessage; // Hiển thị lỗi trong dialog
     // Không đóng dialog khi có lỗi
   } finally {
     loading.value = false;
@@ -902,8 +895,8 @@ const deleteEmployee = async () => {
     showSnackbar('Xóa nhân viên thành công', 'success');
     loadEmployees();
   } catch (error) {
-    console.error('Lỗi khi xóa nhân viên:', error);
-    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi xóa nhân viên', 'error');
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi xóa nhân viên';
+    showSnackbar(detailMessage, 'error');
   } finally {
     closeDeleteDialog();
   }
@@ -919,11 +912,9 @@ const savePasswordChange = async () => {
     if (!valid) return
   
     loading.value = true
-    await accountService.changePassword(
+    await accountStore.changeAccountPassword(
       employeeDetail.value.accountId,
-      passwordChange.value.oldPassword,
-      passwordChange.value.newPassword,
-      passwordChange.value.confirmPassword
+      passwordChange.value
     )
     showSnackbar('Đổi mật khẩu thành công', 'success')
   
@@ -935,9 +926,8 @@ const savePasswordChange = async () => {
     }
     activeTab.value = 'account'
   } catch (error) {
-    console.error('Lỗi khi đổi mật khẩu:', error)
-    passwordDialogError.value = error.response?.data || error.message || 'Đã xảy ra lỗi khi đổi mật khẩu';
-    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi đổi mật khẩu', 'error')
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi đổi mật khẩu';
+    passwordDialogError.value = detailMessage; // Hiển thị lỗi trong dialog
     // Không chuyển tab khi có lỗi
   } finally {
     loading.value = false
@@ -954,21 +944,19 @@ const saveRoleChange = async () => {
     if (!valid) return
   
     loading.value = true
-    await accountService.changeRole(
+    const updatedAccount = await accountStore.changeAccountRole(
       employeeDetail.value.accountId,
       roleChange.value.roleId
     )
   
-    // Cập nhật lại thông tin hiển thị
-    const accountResponse = await accountService.getAccountById(employeeDetail.value.accountId)
-    accountDetail.value = accountResponse.data
+    // Cập nhật lại thông tin hiển thị từ kết quả action
+    accountDetail.value = updatedAccount
   
     showSnackbar('Thay đổi vai trò thành công', 'success')
     activeTab.value = 'account'
   } catch (error) {
-    console.error('Lỗi khi thay đổi vai trò:', error)
-    roleDialogError.value = error.response?.data || error.message || 'Đã xảy ra lỗi khi thay đổi vai trò';
-    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi thay đổi vai trò', 'error')
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi thay đổi vai trò';
+    roleDialogError.value = detailMessage; // Hiển thị lỗi trong dialog
     // Không chuyển tab khi có lỗi
   } finally {
     loading.value = false
@@ -992,7 +980,7 @@ const initRoleChange = () => {
 const toggleAccountActiveStatus = async () => {
   loading.value = true
   try {
-    await accountService.toggleAccountActive(accountDetail.value.id, !accountDetail.value.isActive)
+    await accountStore.toggleAccountActive(accountDetail.value.id, !accountDetail.value.isActive)
     
     // Cập nhật trạng thái hoạt động trong UI
     accountDetail.value.isActive = !accountDetail.value.isActive
@@ -1004,8 +992,7 @@ const toggleAccountActiveStatus = async () => {
       'success'
     )
   } catch (error) {
-    console.error('Lỗi khi thay đổi trạng thái hoạt động:', error)
-    showSnackbar(error.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái hoạt động', 'error')
+    showSnackbar(error.response?.data?.detail || 'Đã xảy ra lỗi khi thay đổi trạng thái hoạt động', 'error')
   } finally {
     loading.value = false
   }
@@ -1014,24 +1001,25 @@ const toggleAccountActiveStatus = async () => {
 // Thêm phương thức khóa/mở khóa tài khoản
 // Khóa/Mở khóa tài khoản
 const toggleAccountLockStatus = async () => {
-  loading.value = true
+  if (!accountDetail.value) return;
+  loading.value = true;
   try {
-    await accountService.toggleAccountLock(accountDetail.value.id, !accountDetail.value.isLocked)
-
+    const newLockStatus = !accountDetail.value.isLocked;
+    // Gọi action mới không tải lại list
+    await accountStore.toggleSingleAccountLock(accountDetail.value.id, newLockStatus);
+    
     // Cập nhật trạng thái khóa trong UI
-    accountDetail.value.isLocked = !accountDetail.value.isLocked
-
+    accountDetail.value.isLocked = newLockStatus;
+    
     showSnackbar(
-      accountDetail.value.isLocked
-        ? 'Tài khoản đã được khóa thành công'
-        : 'Tài khoản đã được mở khóa thành công',
+      `Tài khoản đã được ${newLockStatus ? 'khóa' : 'mở khóa'} thành công.`,
       'success'
-    )
+    );
   } catch (error) {
-    console.error('Lỗi khi thay đổi trạng thái khóa:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + (error.response?.data || error.message || 'Không xác định'), 'error')
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản.';
+    showSnackbar(detailMessage, 'error');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 

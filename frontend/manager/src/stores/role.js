@@ -29,6 +29,7 @@ export const useRoleStore = defineStore('role', () => {
       totalRoles.value = response.data.totalElements || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchRoles:', err)
       error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách vai trò'
       throw err
     } finally {
@@ -45,6 +46,7 @@ export const useRoleStore = defineStore('role', () => {
       const response = await roleService.getRoleById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchRoleById:', err)
       error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin vai trò'
       throw err
     } finally {
@@ -63,6 +65,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createRole:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo vai trò mới'
       throw err
     } finally {
@@ -81,6 +84,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateRole:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật vai trò'
       throw err
     } finally {
@@ -99,6 +103,7 @@ export const useRoleStore = defineStore('role', () => {
       await fetchRoles(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteRole:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa vai trò'
       throw err
     } finally {

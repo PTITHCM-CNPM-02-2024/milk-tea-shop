@@ -28,6 +28,7 @@ export const useMembershipStore = defineStore('membership', () => {
       totalMembershipTypes.value = response.data.length || 0
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchMembershipTypes:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách loại thành viên'
       throw err
     } finally {
@@ -44,6 +45,7 @@ export const useMembershipStore = defineStore('membership', () => {
       const response = await membershipService.getMembershipTypeById(id)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong fetchMembershipTypeById:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin loại thành viên'
       throw err
     } finally {
@@ -62,6 +64,7 @@ export const useMembershipStore = defineStore('membership', () => {
       await fetchMembershipTypes(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong createMembershipType:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo loại thành viên mới'
       throw err
     } finally {
@@ -80,6 +83,7 @@ export const useMembershipStore = defineStore('membership', () => {
       await fetchMembershipTypes(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong updateMembershipType:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật loại thành viên'
       throw err
     } finally {
@@ -98,6 +102,7 @@ export const useMembershipStore = defineStore('membership', () => {
       await fetchMembershipTypes(currentPage.value, pageSize.value)
       return response.data
     } catch (err) {
+      console.error('Lỗi trong deleteMembershipType:', err)
       error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa loại thành viên'
       throw err
     } finally {

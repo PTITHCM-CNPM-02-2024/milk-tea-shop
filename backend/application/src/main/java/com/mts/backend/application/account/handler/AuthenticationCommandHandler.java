@@ -7,7 +7,7 @@ import com.mts.backend.application.security.model.UserPrincipal;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.shared.command.CommandResult;
 import com.mts.backend.shared.command.ICommandHandler;
-import com.mts.backend.shared.exception.NotFoundException;
+import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,8 +26,8 @@ public class AuthenticationCommandHandler implements ICommandHandler<Authenticat
     private final JpaAccountRepository accountRepository;
     private final IJwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    
-    public AuthenticationCommandHandler (AuthenticationManager authenticationManager, JpaAccountRepository accountRepository, IJwtService jwtService, PasswordEncoder passwordEncoder) {
+
+    public AuthenticationCommandHandler(AuthenticationManager authenticationManager, JpaAccountRepository accountRepository, IJwtService jwtService, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.accountRepository = accountRepository;
         this.jwtService = jwtService;
@@ -35,11 +35,10 @@ public class AuthenticationCommandHandler implements ICommandHandler<Authenticat
     }
 
     /**
-     * @param command 
+     * @param command
      * @return
      */
     @Override
-    @Transactional
     public CommandResult handle(AuthenticationCommand command) {
         Objects.requireNonNull(command, "Command cannot be null");
 
@@ -51,12 +50,21 @@ public class AuthenticationCommandHandler implements ICommandHandler<Authenticat
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
+
         var userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+
+        var accessToken = jwtService.generateAccessToken(userPrincipal);
+        var expiration = jwtService.extractClaim(accessToken, Claims::getExpiration);
+        var account = userPrincipal.getId();
         
-        
-        String token = jwtService.generateToken(userPrincipal);
-        
-        return CommandResult.success(new AuthenticationResponse(token, userPrincipal.getId()));
+        var response = AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .expiresIn(expiration.getTime() - System.currentTimeMillis())
+                .id(account)
+                .tokenType("Bearer")
+                .build();
+
+        return CommandResult.success(response);
     }
 }

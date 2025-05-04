@@ -23,7 +23,6 @@ public class JwtUserDetailService implements UserDetailsService {
      * @throws UsernameNotFoundException
      */
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var account = accountRepository.findByUsername(Username.of(username).getValue())
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản với tên đăng nhập: " + username));

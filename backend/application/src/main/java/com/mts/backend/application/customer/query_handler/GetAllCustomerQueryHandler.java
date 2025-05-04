@@ -39,6 +39,7 @@ public class GetAllCustomerQueryHandler implements IQueryHandler<DefaultCustomer
                     .phone(customer.getPhone().getValue())
                     .membershipId(customer.getMembershipType().getId())
                     .rewardPoint(customer.getCurrentPoint().getValue())
+                    .gender(customer.getGender().map(Enum::name).orElse(null))
                     .accountId(customer.getAccount().map(Account::getId).orElse(null))
                     .build();
         });

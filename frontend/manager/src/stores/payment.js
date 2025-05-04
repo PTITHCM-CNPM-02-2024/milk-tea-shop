@@ -55,7 +55,8 @@ export const usePaymentStore = defineStore('payment', {
       } catch (error) {
         this.payments = []
         this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu thanh toán'
-        console.error('Error fetching payments:', error)
+        console.error('Lỗi trong fetchPayments:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -88,7 +89,8 @@ export const usePaymentStore = defineStore('payment', {
           paymentDetailResponses: []
         }
         this.error = error.response?.data || 'Đã xảy ra lỗi khi tải báo cáo thanh toán'
-        console.error('Error fetching payment report:', error)
+        console.error('Lỗi trong fetchPaymentReport:', error)
+        throw error
       } finally {
         this.reportLoading = false
       }
@@ -111,7 +113,8 @@ export const usePaymentStore = defineStore('payment', {
       } catch (error) {
         this.currentPayment = null
         this.error = error.response?.data || 'Đã xảy ra lỗi khi tải chi tiết thanh toán'
-        console.error('Error fetching payment details:', error)
+        console.error('Lỗi trong fetchPaymentById:', error)
+        throw error
       } finally {
         this.paymentLoading = false
       }
@@ -126,7 +129,7 @@ export const usePaymentStore = defineStore('payment', {
         return response.data
       } catch (error) {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi thêm thanh toán'
-        console.error('Error adding payment to order:', error)
+        console.error('Lỗi trong addPaymentToOrder:', error)
         throw error
       } finally {
         this.loading = false
@@ -150,7 +153,8 @@ export const usePaymentStore = defineStore('payment', {
       } catch (error) {
         this.paymentMethods = []
         this.error = error.response?.data || 'Đã xảy ra lỗi khi tải phương thức thanh toán'
-        console.error('Error fetching payment methods:', error)
+        console.error('Lỗi trong fetchPaymentMethods:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -172,8 +176,8 @@ export const usePaymentStore = defineStore('payment', {
         }
       } catch (error) {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi tải chi tiết phương thức thanh toán'
-        console.error('Error fetching payment method details:', error)
-        return null
+        console.error('Lỗi trong fetchPaymentMethodById:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -189,7 +193,7 @@ export const usePaymentStore = defineStore('payment', {
         return response.data
       } catch (error) {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi thêm phương thức thanh toán'
-        console.error('Error creating payment method:', error)
+        console.error('Lỗi trong createPaymentMethod:', error)
         throw error
       } finally {
         this.loading = false
@@ -206,7 +210,7 @@ export const usePaymentStore = defineStore('payment', {
         return response.data
       } catch (error) {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật phương thức thanh toán'
-        console.error('Error updating payment method:', error)
+        console.error('Lỗi trong updatePaymentMethod:', error)
         throw error
       } finally {
         this.loading = false
@@ -222,7 +226,7 @@ export const usePaymentStore = defineStore('payment', {
         await this.fetchPaymentMethods() // Tải lại danh sách sau khi xóa
       } catch (error) {
         this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa phương thức thanh toán'
-        console.error('Error deleting payment method:', error)
+        console.error('Lỗi trong deletePaymentMethod:', error)
         throw error
       } finally {
         this.loading = false

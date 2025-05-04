@@ -6,9 +6,13 @@ import io.jsonwebtoken.Claims;
 import java.util.function.Function;
 
 public interface IJwtService {
-    String generateToken(UserPrincipal userPrincipal);
+    String generateAccessToken(UserPrincipal userPrincipal);
 
-    boolean validateToken(String token, UserPrincipal userPrincipal);
+    String generateRefreshToken(UserPrincipal userPrincipal);
+
+    boolean validateAccessToken(String token, UserPrincipal userPrincipal);
+    
+    boolean validateRefreshToken(String token, UserPrincipal userPrincipal);
 
     String extractUsername(String token);
 

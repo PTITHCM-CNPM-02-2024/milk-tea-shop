@@ -1,11 +1,12 @@
 <script setup>
 import { useTheme } from 'vuetify'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch, computed, onBeforeUnmount } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useDisplay } from 'vuetify'
 import { useRoute, useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import BlankLayout from '@/layouts/BlankLayout.vue'
+import { authService } from '@/services/authService'
 
 const theme = useTheme()
 const appStore = useAppStore()
@@ -19,6 +20,33 @@ const isMobile = computed(() => {
   return display.mdAndDown.value
 })
 
+// Hàm xử lý logout khi đóng tab/trình duyệt
+const handleLogoutOnClose = () => {
+  // Kiểm tra xem người dùng có đăng nhập không (ví dụ: có token)
+  if (authService.getToken()) {
+    const logoutUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8181/api/v1'}/auth/logout`;
+
+    // Sử dụng navigator.sendBeacon để gửi yêu cầu POST đáng tin cậy khi đóng trang
+    // Nó không đảm bảo 100% nhưng là cách tốt nhất hiện có
+    if (navigator.sendBeacon) {
+        try {
+            const success = navigator.sendBeacon(logoutUrl);
+            if (!success) {
+                console.warn('navigator.sendBeacon call to logout failed immediately.');
+            } else {
+                console.log('Logout request sent via sendBeacon on beforeunload.');
+            }
+        } catch (e) {
+            console.error('Error calling navigator.sendBeacon for logout:', e);
+        }
+    } else {
+      console.warn('navigator.sendBeacon not supported. Cannot send logout request on close.');
+      // Cân nhắc fallback sang fetch với keepalive nếu cần hỗ trợ trình duyệt cũ,
+      // nhưng sendBeacon là ưu tiên.
+    }
+  }
+};
+
 onMounted(() => {
   // Khởi tạo theme từ store
   const isDarkMode = appStore.darkMode
@@ -27,6 +55,9 @@ onMounted(() => {
 
   // Tự động thu gọn sidebar trên màn hình nhỏ
   rail.value = isMobile.value
+
+  // Đăng ký listener khi component được mount
+  window.addEventListener('beforeunload', handleLogoutOnClose);
 })
 
 // Theo dõi thay đổi kích thước màn hình
@@ -53,6 +84,11 @@ const layout = computed(() => {
   const layoutName = route.meta.layout || 'default'
   return layoutName === 'blank' ? BlankLayout : DefaultLayout
 })
+
+// Hủy đăng ký listener khi component bị hủy
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleLogoutOnClose);
+});
 </script>
 
 <template>

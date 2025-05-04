@@ -69,7 +69,7 @@ springdoc:
 
 jwt-config:
     secret: hdvfkfvewfowefihpqhfphwgbwiegihgwinwgnwigiwgiweigoewog
-    expiration: 86400000
+    expiration: 10000 #1000000
     header: Authorization
     prefix: Bearer
     token-type: JWT

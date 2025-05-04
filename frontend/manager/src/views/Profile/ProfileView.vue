@@ -336,6 +336,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useManagerStore } from '@/stores/manager'
 import { useAccountStore } from '@/stores/account'
+import { authService } from '@/services/authService'
 
 const managerStore = useManagerStore()
 const accountStore = useAccountStore()
@@ -451,8 +452,8 @@ const fetchAccountInfo = async (accountId) => {
     // Cập nhật tên đăng nhập trong profile
     profile.username = data.username
   } catch (error) {
-    accountError.value = 'Lỗi khi tải thông tin tài khoản: ' + (error.message || 'Đã xảy ra lỗi')
-    console.error('Lỗi khi tải thông tin tài khoản:', error)
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi tải thông tin tài khoản.';
+    accountError.value = detailMessage; // Hiển thị lỗi trên phần tài khoản
   } finally {
     accountLoading.value = false
   }
@@ -476,7 +477,10 @@ const fetchProfile = async () => {
       await fetchAccountInfo(data.accountId)
     }
   } catch (error) {
-    console.error('Lỗi khi tải thông tin hồ sơ:', error)
+    // console.error('Lỗi khi tải thông tin hồ sơ:', error) // Xóa log
+    // Hiển thị lỗi chung trên trang nếu cần, store đã lưu lỗi
+    // Ví dụ: Có thể set một biến lỗi riêng cho profile fetch
+    // profileFetchError.value = 'Không thể tải thông tin hồ sơ.' 
   }
 }
 
@@ -499,7 +503,10 @@ const updateProfile = async () => {
     await managerStore.updateManagerProfile(updateData)
     successMessage.value = 'Cập nhật thông tin thành công'
   } catch (error) {
-    console.error('Lỗi khi cập nhật thông tin hồ sơ:', error)
+    // console.error('Lỗi khi cập nhật thông tin hồ sơ:', error) // Xóa log
+    // Hiển thị lỗi (ví dụ: sử dụng v-alert với managerStore.error hoặc biến lỗi cục bộ)
+    // errorUpdatingProfile.value = 'Lỗi cập nhật: ' + (error.response?.data?.detail || 'Thử lại sau.')
+    successMessage.value = 'Lỗi: ' + (error.response?.data?.detail || 'Không thể cập nhật thông tin.') // Hoặc hiển thị lỗi ngay ở success msg
   } finally {
     updating.value = false
   }
@@ -521,12 +528,17 @@ const updateUsername = async () => {
   usernameError.value = ''
 
   try {
-    // Thực hiện cập nhật username
-    await accountStore.updateAccount(accountInfo.id, {
+    // Thực hiện cập nhật username và lấy accessToken mới
+    const response = await accountStore.updateAccount(accountInfo.id, {
       username: newUsername.value,
     })
 
-    // Cập nhật lại thông tin
+    // Lưu accessToken mới nếu có
+    if (response?.data?.accessToken) {
+      authService.saveToken(response.data.accessToken);
+    }
+
+    // Cập nhật lại thông tin local
     accountInfo.username = newUsername.value
     profile.username = newUsername.value
 
@@ -536,7 +548,17 @@ const updateUsername = async () => {
     // Đóng dialog
     closeUsernameDialog()
   } catch (error) {
-    usernameError.value = error.response?.data || 'Đã xảy ra lỗi khi thay đổi tên đăng nhập'
+    // Xử lý lỗi (ví dụ: hiển thị lỗi ProblemDetail)
+    const errorData = error.response?.data;
+    if (errorData?.detail) {
+        usernameError.value = errorData.detail;
+    } else if (errorData?.title) {
+        usernameError.value = errorData.title;
+    } else if (typeof errorData === 'string') {
+        usernameError.value = errorData;
+    } else {
+        usernameError.value = 'Đã xảy ra lỗi khi thay đổi tên đăng nhập';
+    }
     console.error('Lỗi khi cập nhật tên đăng nhập:', error)
   } finally {
     updatingUsername.value = false
@@ -560,12 +582,17 @@ const updatePassword = async () => {
   passwordError.value = ''
 
   try {
-    // Thực hiện cập nhật mật khẩu
-    await accountStore.updatePassword(accountInfo.id, {
+    // Thực hiện cập nhật mật khẩu và lấy response
+    const response = await accountStore.updatePassword(accountInfo.id, {
       oldPassword: currentPassword.value,
       newPassword: newPassword.value,
       confirmPassword: confirmPassword.value,
     })
+
+    // Lưu accessToken mới nếu có
+    if (response?.data?.accessToken) {
+        authService.saveToken(response.data.accessToken);
+    }
 
     // Hiển thị thông báo thành công
     accountSuccessMessage.value = 'Thay đổi mật khẩu thành công'
@@ -573,8 +600,9 @@ const updatePassword = async () => {
     // Đóng dialog
     closePasswordDialog()
   } catch (error) {
-    passwordError.value = error.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi mật khẩu'
-    console.error('Lỗi khi cập nhật mật khẩu:', error)
+    // console.error('Lỗi khi cập nhật mật khẩu:', error) // Xóa log
+    const detailMessage = error.response?.data?.detail || 'Đã xảy ra lỗi khi thay đổi mật khẩu';
+    passwordError.value = detailMessage; // Hiển thị lỗi trong dialog
   } finally {
     updatingPassword.value = false
   }
