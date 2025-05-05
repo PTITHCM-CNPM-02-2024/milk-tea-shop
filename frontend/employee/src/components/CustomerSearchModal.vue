@@ -232,8 +232,12 @@
 import { ref, onMounted } from 'vue';
 import CustomerService from '../services/customer.service';
 import useMembership from "@/services/useMembership.js";
+import { useSnackbar } from '@/helpers/useSnackbar';
 
 const emit = defineEmits(['select-customer', 'cancel']);
+
+// Snackbar
+const { showError, showSuccess } = useSnackbar();
 
 const phoneNumber = ref('');
 const customer = ref(null);
@@ -261,12 +265,14 @@ const newCustomer = ref({
 
 async function searchCustomer() {
   if (!phoneNumber.value) {
-    // Hiển thị thông báo lỗi với Vuetify
+    showError('Vui lòng nhập số điện thoại để tìm kiếm.');
     return;
   }
 
   searching.value = true;
   searchPerformed.value = true;
+  customer.value = null;
+  showNewCustomerForm.value = false;
 
   try {
     const response = await CustomerService.getCustomerByPhone(phoneNumber.value);
@@ -274,6 +280,7 @@ async function searchCustomer() {
   } catch (error) {
     console.error('Error searching customer:', error);
     customer.value = null;
+    showError(error.message || 'Đã xảy ra lỗi khi tìm kiếm khách hàng.');
   } finally {
     searching.value = false;
   }
@@ -290,43 +297,33 @@ async function createNewCustomer() {
   savingCustomer.value = true;
 
   try {
-    // Chuẩn bị dữ liệu trước khi gửi
     const customerData = {
       ...newCustomer.value,
-      // Chuyển chuỗi rỗng thành null
       firstName: newCustomer.value.firstName.trim() || null,
       lastName: newCustomer.value.lastName.trim() || null,
       email: newCustomer.value.email.trim() || null
     };
 
-    console.log('Sending customer data:', customerData);
+    const createResponse = await CustomerService.createCustomer(customerData);
+    const customerId = createResponse.data;
 
-    const response = await CustomerService.createCustomer(customerData);
-
-    // Xử lý kết quả từ API - trả về id của khách hàng mới
-    const customerId = response.data;
-    console.log('Customer created with ID:', customerId);
-
-    // Tải thông tin đầy đủ của khách hàng
     const customerResponse = await CustomerService.getCustomerById(customerId);
     customer.value = customerResponse.data;
 
     showNewCustomerForm.value = false;
+    showSuccess('Khách hàng đã được tạo thành công!');
 
-    // Hiển thị thông báo thành công
   } catch (error) {
     console.error('Error creating customer:', error);
-    // Hiển thị thông báo lỗi
+    showError(error.message || 'Không thể tạo khách hàng mới. Vui lòng thử lại.');
   } finally {
     savingCustomer.value = false;
   }
 }
 
-
 function selectCustomer() {
   emit('select-customer', customer.value);
 }
-
 
 const {
   getMembershipName,

@@ -223,7 +223,7 @@
     <!-- Dialog xác nhận thanh toán -->
     <v-dialog v-model="checkoutDialog" max-width="500px">
       <v-card>
-        <v-card-title>
+        <v-card-title class="text-h5 font-weight-bold bg-primary">
           Xác nhận thanh toán
         </v-card-title>
         <v-card-text>

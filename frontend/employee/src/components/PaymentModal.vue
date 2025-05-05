@@ -164,6 +164,7 @@
 import {ref, computed, onMounted, watch} from 'vue';
 import PaymentService from "@/services/payment.service.js";
 import OrderService from "@/services/order.service.js";
+import { useSnackbar } from '@/helpers/useSnackbar';
 
 const props = defineProps({
   cart: {
@@ -201,6 +202,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['complete-order', 'cancel', 'apply-coupon', 'remove-coupon']);
+
+// Snackbar
+const { showError, showSuccess } = useSnackbar();
 
 // Trạng thái
 const isProcessing = ref(false);
@@ -240,7 +244,7 @@ async function loadPaymentMethods() {
     }
   } catch (error) {
     console.error('Lỗi khi tải phương thức thanh toán:', error);
-    // Giữ nguyên dữ liệu mặc định nếu API lỗi
+    showError(error.message || 'Không thể tải danh sách phương thức thanh toán.');
   }
 }
 
@@ -277,22 +281,18 @@ function completePayment() {
   isProcessing.value = true;
 
   try {
-    // Chuẩn bị dữ liệu thanh toán
     const paymentData = {
       methodId: selectedMethod.value,
-      amount: cashAmount.value, // Sử dụng số tiền khách đưa thay vì tổng tiền từ server
+      amount: cashAmount.value,
       cashReceived: selectedMethod.value === 1 ? cashAmount.value : undefined,
       cashReturned: selectedMethod.value === 1 ? cashAmount.value - props.total : undefined,
       note: note.value
     };
-
-    // Gửi dữ liệu lên component cha để xử lý
     emit('complete-order', paymentData);
 
-    // Không cần setTimeout ở đây vì component cha sẽ đóng modal nếu thành công
   } catch (error) {
-    console.error('Lỗi khi xử lý thanh toán:', error);
-    alert('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại sau.');
+    console.error('Lỗi nội bộ khi chuẩn bị thanh toán:', error);
+    showError('Lỗi nội bộ khi chuẩn bị thanh toán. Vui lòng thử lại.');
   } finally {
     isProcessing.value = false;
   }
@@ -363,15 +363,11 @@ async function applyCoupon() {
       // Reset input
       couponCode.value = '';
     } else {
-      couponError.value = 'Không tìm thấy mã giảm giá';
+      couponError.value = response.message || 'Không tìm thấy mã giảm giá hợp lệ.';
     }
   } catch (error) {
     console.error('Lỗi khi áp dụng mã giảm giá:', error);
-    if (error.response && error.response.data && error.response.data.message) {
-      couponError.value = error.response.data.message;
-    } else {
-      couponError.value = 'Có lỗi xảy ra, vui lòng thử lại';
-    }
+    couponError.value = error.message || 'Có lỗi xảy ra khi kiểm tra mã giảm giá.';
   } finally {
     isApplyingCoupon.value = false;
   }

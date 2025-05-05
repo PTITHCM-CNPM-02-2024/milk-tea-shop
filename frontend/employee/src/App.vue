@@ -2,18 +2,18 @@
   <v-app>
     <Header 
       v-if="!isLoginRoute"
-      :employeeId="employeeId" 
-      :employeeName="employeeName"
-      :accountId="accountId"
+      :employeeId="authStore.employeeId" 
+      :employeeName="authStore.employeeName"
+      :accountId="authStore.accountId"
       @updateTheme="handleThemeUpdate"
       @searchProducts="handleSearch"
     />
     
     <v-main :class="{ 'login-main': isLoginRoute }">
       <router-view 
-        :employeeId="employeeId"
-        :employeeName="employeeName"
-        :accountId="accountId"
+        :employeeId="authStore.employeeId"
+        :employeeName="authStore.employeeName"
+        :accountId="authStore.accountId"
         :searchQuery="searchQuery"
       />
     </v-main>
@@ -48,11 +48,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from 'vuetify';
 import Header from './components/Header.vue';
 import { useSnackbar } from './helpers/useSnackbar';
-import AuthService from './services/auth.service';
+import { useAuthStore } from './stores/authStore';
 
 // Route
 const route = useRoute();
 const router = useRouter();
+
+// Auth Store
+const authStore = useAuthStore();
 
 // Theme
 const theme = useTheme();
@@ -79,60 +82,25 @@ const isLoginRoute = computed(() => {
 // Snackbar
 const { snackbar } = useSnackbar();
 
-// Thông tin nhân viên
-const accountId = ref(null);
-const employeeId = ref(null);
-const employeeName = ref('');
-
-// Hàm lấy thông tin nhân viên từ localStorage
-const fetchEmployeeInfo = async () => {
-  try {
-    const storedAccountId = AuthService.getAccountId();
-    const storedEmployeeId = AuthService.getEmployeeId();
-    
-    if (storedAccountId && storedEmployeeId) {
-      accountId.value = parseInt(storedAccountId);
-      employeeId.value = parseInt(storedEmployeeId);
-      
-      // Lấy thông tin chi tiết nhân viên từ API (nếu cần)
-      try {
-        const response = await AuthService.getEmployeeByAccountId(storedAccountId);
-        if (response && response.data) {
-          employeeName.value = response.data.name || 'Nhân viên';
-        }
-      } catch (error) {
-        console.error('Lỗi khi lấy thông tin nhân viên:', error);
-        employeeName.value = 'Nhân viên';
-      }
-    } else if (!isLoginRoute.value) {
-      // Nếu không có thông tin nhân viên và không ở trang login, chuyển về trang login
-      router.push('/login');
-    }
-  } catch (error) {
-    console.error('Lỗi khi lấy thông tin người dùng:', error);
-    if (!isLoginRoute.value) {
-      router.push('/login');
-    }
-  }
-};
-
-// Theo dõi thay đổi của route
+// Watch for route changes to redirect if not authenticated
 watch(() => route.path, (newPath) => {
-  if (newPath !== '/login' && !AuthService.isAuthenticated()) {
+  if (newPath !== '/login' && !authStore.isLoggedIn) {
+    console.log('App Watcher: Not logged in, redirecting to /login');
     router.push('/login');
   }
 });
 
-// Khởi tạo thông tin nhân viên khi component được mount
-onMounted(() => {
-  // Thiết lập token cho API requests nếu đã đăng nhập
-  const token = AuthService.getAuthToken();
-  if (token) {
-    AuthService.setAuthHeader(token);
-    fetchEmployeeInfo();
-  } else if (!isLoginRoute.value) {
+// Watch for changes in the store's logged-in state
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (!isLoggedIn && !isLoginRoute.value) {
+    console.log('App Watcher: authStore.isLoggedIn changed to false, redirecting to /login');
     router.push('/login');
   }
+});
+
+// Khởi tạo khi component được mount
+onMounted(() => {
+  authStore.initializeAuth();
   
   // Khôi phục theme từ localStorage nếu có
   const savedTheme = localStorage.getItem('theme');

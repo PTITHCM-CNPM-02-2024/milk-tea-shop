@@ -20,7 +20,7 @@
         <Cart :cart="cartStore.items" :subtotal="cartStore.subtotal" :discount="cartStore.discount"
           :total="cartStore.total" :customer="cartStore.selectedCustomer" :tables="cartStore.selectedTables"
           @remove-item="removeCartItem" @edit-item="editCartItem" @clear-cart="clearCart"
-          @find-customer="openCustomerModal" @select-table="openTableModal" @checkout="openPaymentModal"
+          @find-customer="openCustomerModal" @select-table="openTableModal" @checkout="handleCheckout"
           @update-quantity="updateCartQuantity" />
       </div>
     </div>
@@ -52,6 +52,15 @@
     <v-dialog v-model="billDialog" max-width="600px">
       <BillDialog :bill-html="billHtml" @close="closeBillDialog" />
     </v-dialog>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      v-model="showConfirmDialog"
+      :title="confirmDialogTitle"
+      :message="confirmDialogMessage"
+      @confirm="handleConfirm"
+      @cancel="handleCancelConfirm"
+    />
   </v-container>
 </template>
 
@@ -70,6 +79,7 @@ import { useProductStore } from '../stores/productStore';
 import { useCategoryStore } from '../stores/categoryStore';
 import { useCartStore } from '../stores/cartStore';
 import { useSnackbar } from '../helpers/useSnackbar';
+import ConfirmationDialog from "@/components/ConfirmationDialog.vue";
 
 // Sử dụng các store
 const productStore = useProductStore();
@@ -198,6 +208,129 @@ const editingItemIndex = ref(-1);
 const billDialog = ref(false);
 const billHtml = ref('');
 
+// Confirmation Dialog State
+const showConfirmDialog = ref(false);
+const confirmDialogTitle = ref('');
+const confirmDialogMessage = ref('');
+let confirmAction = null; // Callback to run on confirm
+
+// Core logic functions defined first
+
+// Logic to open payment modal after confirmation
+function proceedToPayment() {
+  // Kiểm tra giỏ hàng
+  if (cartStore.items.length === 0) {
+    showError('Giỏ hàng trống. Vui lòng thêm sản phẩm.');
+    return;
+  }
+  // Mở modal thanh toán
+  showPaymentModal.value = true;
+}
+
+// Logic to complete order after confirmation
+async function proceedWithOrderCompletion(paymentData) {
+  try {
+    // Kiểm tra giỏ hàng
+    if (cartStore.items.length === 0) {
+      showError('Giỏ hàng đang trống, không thể thanh toán.');
+      return;
+    }
+
+    // Tạo đơn hàng
+    const orderData = await cartStore.createOrder(props.employeeId, paymentData.note || 'Đơn hàng từ app');
+
+    if (!orderData || !orderData.orderId) {
+      throw new Error('Không tạo được đơn hàng');
+    }
+
+    const orderId = orderData.orderId;
+
+    // Khởi tạo thanh toán
+    const initiateResponse = await OrderService.initiatePayment({
+      orderId: orderId,
+      paymentMethodId: paymentData.methodId,
+      amount: cartStore.total // Sử dụng tổng tiền từ cartStore
+    });
+
+    if (!initiateResponse || !initiateResponse.data || !initiateResponse.data.paymentId) {
+      throw new Error('Không khởi tạo được thanh toán');
+    }
+
+    const paymentId = initiateResponse.data.paymentId;
+
+    // Hoàn tất thanh toán với số tiền khách hàng trả
+    const billing = await OrderService.completePayment(
+      paymentId,
+      paymentData.methodId,
+      {
+        amount: paymentData.amount
+      }
+    );
+
+    // Hiển thị hóa đơn
+    if (billing && billing.data) {
+      billHtml.value = billing.data;
+      billDialog.value = true;
+    }
+
+    // Đóng modal thanh toán
+    showPaymentModal.value = false;
+
+    // Reset giỏ hàng
+    cartStore.clearCart();
+
+    // Hiển thị thông báo thành công
+    showSuccess('Thanh toán đơn hàng thành công!');
+
+  } catch (error) {
+    console.error('Lỗi khi hoàn tất đơn hàng:', error);
+    showError(error.message || 'Không thể hoàn tất thanh toán');
+  }
+}
+
+// Function to open confirmation dialog
+function openConfirmation(title, message, action) {
+  confirmDialogTitle.value = title;
+  confirmDialogMessage.value = message;
+  confirmAction = action; // Store the action to be executed
+  showConfirmDialog.value = true;
+}
+
+// Handler for confirmation dialog confirm event
+function handleConfirm() {
+  if (typeof confirmAction === 'function') {
+    confirmAction(); // Execute the stored action
+  }
+  confirmAction = null; // Reset action
+}
+
+// Handler for confirmation dialog cancel event
+function handleCancelConfirm() {
+  confirmAction = null; // Reset action
+}
+
+// Functions that trigger confirmation
+
+// Xử lý checkout - opens confirmation for payment modal
+function handleCheckout() {
+  openConfirmation(
+    'Xác nhận thanh toán',
+    'Bạn có chắc chắn muốn thanh toán cho đơn hàng này không?',
+    () => proceedToPayment() // Arrow function calling the core logic
+  );
+}
+
+// Hoàn tất thanh toán đơn hàng - opens confirmation for order completion
+async function completeOrder(paymentData) {
+  openConfirmation(
+    'Xác nhận hoàn tất',
+    'Xác nhận hoàn tất thanh toán và tạo đơn hàng?',
+    () => proceedWithOrderCompletion(paymentData) // Arrow function calling the core logic
+  );
+}
+
+// Other component logic functions
+
 // Xử lý khi chọn danh mục
 function handleCategorySelect(category) {
   // Thay đổi danh mục đã chọn trong store
@@ -309,14 +442,6 @@ function selectTables(tables) {
   showTableModal.value = false;
 }
 
-function openPaymentModal() {
-  if (cartStore.items.length === 0) {
-    setAlert('warning', 'Giỏ hàng đang trống. Vui lòng thêm sản phẩm vào giỏ hàng.');
-    return;
-  }
-  showPaymentModal.value = true;
-}
-
 function applyCoupon(couponData) {
   // Áp dụng coupon mới vào danh sách
   cartStore.applyCoupon(couponData);
@@ -329,74 +454,6 @@ function removeCoupon(coupon) {
   cartStore.removeCoupon(coupon);
   cartStore.calculateOrderFromServer(props.employeeId);
   showInfo(`Đã xóa mã giảm giá: ${coupon.code}`);
-}
-
-// Hoàn tất thanh toán đơn hàng
-async function completeOrder(paymentData) {
-  try {
-    // Hiển thị hộp thoại xác nhận
-    const confirmed = window.confirm('Xác nhận thanh toán đơn hàng?');
-    if (!confirmed) return;
-
-    // Kiểm tra giỏ hàng
-    if (cartStore.items.length === 0) {
-      showAlert.value = true;
-      alertType.value = 'error';
-      alertMessage.value = 'Giỏ hàng đang trống, không thể thanh toán.';
-      return;
-    }
-
-    // Tạo đơn hàng
-    const orderData = await cartStore.createOrder(props.employeeId, paymentData.note || 'Đơn hàng từ app');
-
-    if (!orderData || !orderData.orderId) {
-      throw new Error('Không tạo được đơn hàng');
-    }
-
-    const orderId = orderData.orderId;
-
-    // Khởi tạo thanh toán
-    const initiateResponse = await OrderService.initiatePayment({
-      orderId: orderId,
-      paymentMethodId: paymentData.methodId,
-      amount: cartStore.total // Sử dụng tổng tiền từ cartStore
-    });
-
-    if (!initiateResponse || !initiateResponse.data || !initiateResponse.data.paymentId) {
-      throw new Error('Không khởi tạo được thanh toán');
-    }
-
-    const paymentId = initiateResponse.data.paymentId;
-
-    // Hoàn tất thanh toán với số tiền khách hàng trả
-    const billing = await OrderService.completePayment(
-      paymentId,
-      paymentData.methodId,
-      {
-        amount: paymentData.amount
-      }
-    );
-
-    // Hiển thị hóa đơn
-    if (billing && billing.data) {
-      billHtml.value = billing.data;
-      billDialog.value = true;
-    }
-
-    // Đóng modal thanh toán
-    showPaymentModal.value = false;
-
-    // Reset giỏ hàng
-    cartStore.clearCart();
-
-    // Hiển thị thông báo thành công
-    showSuccess('Thanh toán đơn hàng thành công!');
-  } catch (error) {
-    console.error('Lỗi khi hoàn tất đơn hàng:', error);
-    showAlert.value = true;
-    alertType.value = 'error';
-    alertMessage.value = error.message || 'Không thể hoàn tất thanh toán';
-  }
 }
 
 function closeBillDialog() {

@@ -6,11 +6,9 @@ import com.mts.backend.domain.account.identifier.AccountId;
 import com.mts.backend.domain.account.jpa.JpaAccountRepository;
 import com.mts.backend.domain.account.jpa.JpaRoleRepository;
 import com.mts.backend.domain.account.value_object.PasswordHash;
-import com.mts.backend.domain.common.value_object.*;
+import com.mts.backend.domain.common.value_object.Gender;
 import com.mts.backend.domain.customer.Customer;
-import com.mts.backend.domain.customer.MembershipType;
 import com.mts.backend.domain.customer.identifier.CustomerId;
-import com.mts.backend.domain.customer.identifier.MembershipTypeId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.customer.jpa.JpaMembershipTypeRepository;
 import com.mts.backend.domain.customer.value_object.RewardPoint;
@@ -19,7 +17,6 @@ import com.mts.backend.shared.command.ICommandHandler;
 import com.mts.backend.shared.exception.DomainException;
 import com.mts.backend.shared.exception.NotFoundException;
 import jakarta.transaction.Transactional;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,10 +49,15 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
         Objects.requireNonNull(command, "Create customer command is required");
 
         try {
-           
-            var msEn = command.getMembershipId().map(MembershipTypeId::getValue)
-                    .map(membershipTypeRepository::getReferenceById)
-                    .orElse(null);
+
+            var msEn = command.getMembershipId().map(e -> membershipTypeRepository.getReferenceById(e.getValue()))
+                    .orElseGet(() -> {
+                        var minimumMembershipType = membershipTypeRepository.findWithMinimumRequiredPoint();
+
+                        return minimumMembershipType.orElseThrow(() -> new NotFoundException("Không tìm thấy " +
+                                                                                             "chương trình khách " +
+                                                                                             "hàng phù hợp"));
+                    });
 
             Account acEn = create(command);
 
@@ -71,8 +73,7 @@ public class CreateCustomerCommandHandler implements ICommandHandler<CreateCusto
                     .currentPoint(RewardPoint.of(msEn == null ? RewardPoint.of(0).getValue() : msEn.getRequiredPoint()))
                     .build();
 
-            var createdAccount = accountRepository.saveAndFlush(acEn);
-            var createdCustomer = customerRepository.save(cus);
+            var createdCustomer = customerRepository.saveAndFlush(cus);
 
             return CommandResult.success(createdCustomer.getId());
         } catch (DataIntegrityViolationException e) {

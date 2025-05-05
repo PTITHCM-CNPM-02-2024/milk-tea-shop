@@ -26,7 +26,7 @@
             </p>
           </div>
 
-          <v-form ref="form" v-model="valid" @submit.prevent="login">
+          <v-form ref="form" v-model="valid" @submit.prevent="login" validate-on="submit">
             <v-alert
               v-if="showLoginAlert"
               :type="alertType"
@@ -58,7 +58,10 @@
               prepend-inner-icon="mdi-lock"
               :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
               :type="showPassword ? 'text' : 'password'"
-              :rules="[v => !!v || 'Vui lòng nhập mật khẩu']"
+              :rules="[
+                v => !!v || 'Vui lòng nhập mật khẩu', 
+                v => (v && v.length >= 6) || 'Mật khẩu phải có ít nhất 6 ký tự'
+              ]"
               required
               @click:append-inner="showPassword = !showPassword"
               class="mb-6"
@@ -98,8 +101,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AuthService from '../services/auth.service.js'
 import { useSnackbar } from '../helpers/useSnackbar'
+import { useAuthStore } from '../stores/authStore'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const valid = ref(false)
@@ -130,78 +135,34 @@ function showLoginError(message) {
 
 // Xử lý đăng nhập
 const login = async () => {
-  if (!form.value || !form.value.validate()) return
-  
-  loading.value = true
-  error.value = null
-  showLoginAlert.value = false
-  
-  try {
-    // Gọi API đăng nhập
-    const response = await AuthService.login(username.value, password.value)
-    
-    if (response && response.data) {
-      // Lấy ID tài khoản
-      const accountId = AuthService.getAccountId()
-      
-      if (!accountId) {
-        throw new Error('Không nhận được thông tin tài khoản')
-      }
-      
-      // Lấy thông tin nhân viên
-      const employeeResponse = await AuthService.getEmployeeByAccountId(accountId)
-      
-      if (employeeResponse && employeeResponse.data && employeeResponse.data.id) {
-        // Lưu ID nhân viên
-        const employeeId = employeeResponse.data.id
-        AuthService.setEmployeeId(employeeId)
-        
-        // Hiển thị thông báo thành công
-        showSuccess('Đăng nhập thành công!')
-        
-        // Chuyển hướng đến trang chính
-        router.push('/')
-      } else {
-        throw new Error('Không thể lấy thông tin nhân viên')
-      }
-    } else {
-      throw new Error('Đăng nhập thất bại')
-    }
-  } catch (err) {
-    console.error('Lỗi đăng nhập:', err)
-    
-    // Xử lý các loại lỗi đăng nhập
-    if (err.response) {
-      // Lỗi từ phản hồi server
-      const status = err.response.status
-      
-      if (status === 401) {
-        showLoginError('Tên đăng nhập hoặc mật khẩu không chính xác')
-      } else if (status === 403) {
-        showLoginError('Tài khoản của bạn không có quyền truy cập')
-      } else if (err.response.data && err.response.data.message) {
-        showLoginError(err.response.data.message)
-      } else {
-        showLoginError(`Lỗi máy chủ (${status})`)
-      }
-    } else if (err.request) {
-      // Không nhận được phản hồi từ server
-      showLoginError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.')
-    } else {
-      // Lỗi khác
-      showLoginError(err.message || 'Đã xảy ra lỗi khi đăng nhập')
-    }
-  } finally {
-    loading.value = false
+  if (!valid.value) {
+    return;
   }
-}
+  loading.value = true;
+  showLoginAlert.value = false;
+
+  const success = await authStore.login({ 
+    username: username.value, 
+    password: password.value 
+  });
+
+  if (success) {
+    showSuccess('Đăng nhập thành công!');
+    router.push('/');
+  } else {
+    showLoginError(authStore.authError || 'Đăng nhập thất bại. Vui lòng thử lại.');
+  }
+
+  loading.value = false;
+};
 
 // Kiểm tra nếu đã đăng nhập thì chuyển hướng
 onMounted(() => {
   if (AuthService.isAuthenticated()) {
-    router.push('/')
+    console.log('LoginView Mounted: Already authenticated, redirecting...');
+    router.push('/');
   }
-})
+});
 </script>
 
 <style scoped>

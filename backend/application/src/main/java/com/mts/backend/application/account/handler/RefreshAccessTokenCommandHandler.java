@@ -19,7 +19,7 @@ import java.util.Objects;
 @Service
 public class RefreshAccessTokenCommandHandler implements ICommandHandler<RefreshAccessTokenCommand, CommandResult> {
     IJwtService jwtService;
-    
+
     UserDetailsService userDetailsService;
 
     /**
@@ -29,7 +29,7 @@ public class RefreshAccessTokenCommandHandler implements ICommandHandler<Refresh
     @Override
     public CommandResult handle(RefreshAccessTokenCommand command) {
         Objects.requireNonNull(command, "command must not be null");
-        
+
         var user = (UserPrincipal) userDetailsService.loadUserByUsername(jwtService.extractUsername(command.getRefreshToken()));
 
         if (user == null) {
@@ -40,7 +40,7 @@ public class RefreshAccessTokenCommandHandler implements ICommandHandler<Refresh
         if (!jwtService.validateRefreshToken(command.getRefreshToken(), user)) {
             return CommandResult.businessFail("Refresh token không hợp lệ");
         }
-        
+
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
         );
@@ -48,9 +48,11 @@ public class RefreshAccessTokenCommandHandler implements ICommandHandler<Refresh
         var accessToken = jwtService.generateAccessToken(user);
         var expiration =
                 jwtService.extractClaim(accessToken, Claims::getExpiration).getTime() - System.currentTimeMillis();
-        
+
         return CommandResult.success(AuthenticationResponse.builder()
                 .accessToken(accessToken)
+                .tokenType("Bearer")
+                .id(user.getId())
                 .expiresIn(expiration)
                 .build());
     }

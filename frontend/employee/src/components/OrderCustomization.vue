@@ -197,7 +197,8 @@ const props = defineProps({
 
 // Lấy hình ảnh sản phẩm, kiểm tra cả hai trường hợp
 function getProductImage(product) {
-  return product.image_url || product.imageUrl || '/images/default-product.png';
+  //console.log(product);
+  return product.image_url;
 }
 
 const emit = defineEmits(['add-to-cart', 'cancel']);
@@ -222,13 +223,6 @@ async function loadToppings() {
 // Các tùy chọn có sẵn
 const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
 const iceOptions = ['0%', '30%', '50%', '70%', '100%'];
-const toppingOptions = [
-  { name: 'Trân châu đen', price: 5000 },
-  { name: 'Trân châu trắng', price: 5000 },
-  { name: 'Thạch trái cây', price: 7000 },
-  { name: 'Pudding', price: 8000 },
-  { name: 'Kem phô mai', price: 10000 }
-];
 
 // Trạng thái tùy chọn
 const selectedSizeIndex = ref(0);
@@ -370,8 +364,6 @@ function getToppingPrice(topping) {
   // Kiểm tra topping có hợp lệ không
   if (!topping) return 0;
   
-  console.log('Cấu trúc topping:', topping); // Log để debug
-
   // Nếu topping có mảng prices
   if (topping.prices && Array.isArray(topping.prices) && topping.prices.length > 0) {
     // Tìm size "NA" trước
