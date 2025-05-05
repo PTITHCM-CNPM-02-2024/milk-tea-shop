@@ -49,11 +49,11 @@ export default function useMembership() {
     
     // Dựa vào tên để xác định màu
     const colorMap = {
-      'BRONZE': 'brown',
-      'SILVER': 'blue-grey',
-      'GOLD': 'amber-darken-2',
-      'PLATINUM': 'deep-purple',
-      'DIAMOND': 'light-blue-darken-1'
+      'NEWMEM': 'brown',
+      'BRONZE': 'blue-grey',
+      'SILVER': 'amber-darken-2',
+      'GOLD': 'deep-purple',
+      'PLATINUM': 'light-blue-darken-1'
     };
     
     return colorMap[membership.name] || 'primary';
@@ -62,8 +62,8 @@ export default function useMembership() {
   // Định dạng hiển thị giảm giá
   function formatMembershipDiscount(membership) {
     if (!membership || !membership.discountValue) return 'Không có ưu đãi';
-    
-    if (membership.discountUnit === 'PERCENT') {
+    console.log(membership);
+    if (membership.discountUnit === 'PERCENTAGE') {
       return `Giảm ${membership.discountValue}% cho mỗi đơn hàng`;
     } else {
       return `Giảm ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(membership.discountValue)} cho mỗi đơn hàng`;
@@ -71,11 +71,11 @@ export default function useMembership() {
   }
 
   // Tìm membership tiếp theo
-  function getNextMembership(currentMembershipId, rewardPoints) {
+  function getNextMembership(currentMembershipId, rewardPoint) {
     if (!memberships.value.length) return null;
     
     // Sắp xếp theo requiredPoints tăng dần
-    const sortedMemberships = [...memberships.value].sort((a, b) => a.requiredPoints - b.requiredPoints);
+    const sortedMemberships = [...memberships.value].sort((a, b) => a.requiredPoint - b.requiredPoint);
     
     // Tìm membership hiện tại trong danh sách đã sắp xếp
     const currentIndex = sortedMemberships.findIndex(m => m.id === currentMembershipId);
@@ -88,11 +88,11 @@ export default function useMembership() {
   }
 
   // Tính số điểm cần để lên cấp tiếp theo
-  function getPointsToNextLevel(currentMembershipId, rewardPoints) {
-    const nextMembership = getNextMembership(currentMembershipId, rewardPoints);
+  function getPointsToNextLevel(currentMembershipId, rewardPoint) {
+    const nextMembership = getNextMembership(currentMembershipId, rewardPoint);
     if (!nextMembership) return 0;
     
-    return Math.max(0, nextMembership.requiredPoints - rewardPoints);
+    return Math.max(0, nextMembership.requiredPoint - rewardPoint);
   }
 
   // Tự động tải membership khi sử dụng composable

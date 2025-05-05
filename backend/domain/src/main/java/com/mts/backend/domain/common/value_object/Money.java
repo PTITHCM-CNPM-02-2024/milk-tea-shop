@@ -24,10 +24,10 @@ public class Money  implements Comparable<Money>, Serializable {
         List<String> businessErrors = new ArrayList<>(List.of());
 
 
-        // Allow zero amounts, only validate positive values
-        if (value.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
-            businessErrors.add("Đơn vị tiền là VNĐ, số tiền phải bằng 0 hoặc lớn hơn 1000");
-        }
+//        // Allow zero amounts, only validate positive values
+//        if (value.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(BigDecimal.valueOf(1000)) < 0) {
+//            businessErrors.add("Đơn vị tiền là VNĐ, số tiền phải bằng 0 hoặc lớn hơn 1000");
+//        }
         
         if (!businessErrors.isEmpty()) {
             throw new DomainBusinessLogicException(businessErrors);

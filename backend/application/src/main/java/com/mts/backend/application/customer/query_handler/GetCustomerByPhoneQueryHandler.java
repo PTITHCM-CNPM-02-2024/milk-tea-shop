@@ -2,6 +2,7 @@ package com.mts.backend.application.customer.query_handler;
 
 import com.mts.backend.application.customer.query.CustomerByPhoneQuery;
 import com.mts.backend.application.customer.response.CustomerDetailResponse;
+import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.common.value_object.Email;
 import com.mts.backend.domain.common.value_object.FirstName;
 import com.mts.backend.domain.common.value_object.LastName;
@@ -40,7 +41,7 @@ public class GetCustomerByPhoneQueryHandler implements IQueryHandler<CustomerByP
                 .phone(customer.getPhone().getValue())
                 .membershipId(customer.getMembershipType().getId())
                 .rewardPoint(customer.getCurrentPoint().getValue())
-                .accountId(customer.getAccount().map(a -> a.getId()).orElse(null))
+                .accountId(customer.getAccount().map(Account::getId).orElse(null))
                 .build();
         
         return CommandResult.success(response);

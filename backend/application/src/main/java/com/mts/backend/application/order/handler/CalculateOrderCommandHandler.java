@@ -4,6 +4,7 @@ import com.mts.backend.application.order.command.CalculateOrderCommand;
 import com.mts.backend.application.order.command.OrderDiscountCommand;
 import com.mts.backend.application.order.command.OrderProductCommand;
 import com.mts.backend.application.order.response.OrderDetailResponse;
+import com.mts.backend.domain.common.value_object.Money;
 import com.mts.backend.domain.customer.identifier.CustomerId;
 import com.mts.backend.domain.customer.jpa.JpaCustomerRepository;
 import com.mts.backend.domain.order.Order;
@@ -69,9 +70,9 @@ public class CalculateOrderCommandHandler implements ICommandHandler<CalculateOr
                 .orderId(order.getId())
                 .employeeId(command.getEmployeeId().getValue())
                 .customerId(command.getCustomerId().map(CustomerId::getValue).orElse(null))
-                .finalAmount(order.getFinalAmount().map(v -> v.getValue()).orElse(null))
-                .totalAmount(order.getTotalAmount().map(v -> v.getValue()).orElse(null))
-                .discountAmount(order.getDiscountAmount().map(v -> v.getValue()).orElse(null))
+                .finalAmount(order.getFinalAmount().map(Money::getValue).orElse(null))
+                .totalAmount(order.getTotalAmount().map(Money::getValue).orElse(null))
+                .discountAmount(order.getDiscountAmount().map(Money::getValue).orElse(null))
                 .build();
         
         return CommandResult.success(response);

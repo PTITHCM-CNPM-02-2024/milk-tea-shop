@@ -69,15 +69,6 @@
             <v-icon size="small" class="me-1">mdi-phone</v-icon>
             {{ customer.phone }}
           </v-card-subtitle>
-
-          <template v-slot:append>
-            <v-chip
-                :color="getMembershipColor(customer.membership)"
-                :text="customer.membership ? customer.membership.name : 'Chưa là thành viên'"
-                size="small"
-                class="font-weight-medium"
-            ></v-chip>
-          </template>
         </v-card-item>
 
         <v-card-text>

@@ -91,7 +91,7 @@ public class MembershipController implements IController {
         @ApiResponse(responseCode = "404", description = "Không tìm thấy hạng thành viên")
     })
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('MANAGER','STAFF')")
     public ResponseEntity<?> getMembership(@Parameter(description = "ID hạng thành viên", required = true) @PathVariable("id") Integer id){
         var query = MemberTypeByIdQuery.builder()
                 .id(MembershipTypeId.of(id))
@@ -107,7 +107,7 @@ public class MembershipController implements IController {
         @ApiResponse(responseCode = "200", description = "Thành công")
     })
     @GetMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER','STAFF')")
     public ResponseEntity<?> getMemberships(@Parameter(description = "Trang", required = false) @RequestParam(value = "page", defaultValue = "0") Integer page,
                                             @Parameter(description = "Kích thước trang", required = false) @RequestParam(value = "size", defaultValue = "10") Integer size){
         var query = DefaultMemberQuery.builder()

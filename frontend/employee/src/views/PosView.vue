@@ -430,7 +430,7 @@ function selectCustomer(customer) {
   cartStore.setCustomer(customer);
   cartStore.calculateOrderFromServer(props.employeeId);
   showCustomerModal.value = false;
-  showSuccess(`Đã chọn khách hàng: ${customer.name}`);
+  showSuccess(`Đã chọn khách hàng: ${customer.phone}`);
 }
 
 function openTableModal() {

@@ -34,13 +34,13 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
 
     private static final String TEMPLATE_PATH = "templates/invoice_template.html";
-    
+
     private final JpaStoreRepository storeRepository;
 
-    public CreateInvoiceCommandHandler(JpaStoreRepository storeRepository){
+    public CreateInvoiceCommandHandler(JpaStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
-    
+
 
     @Override
     public CommandResult handle(CreateInvoiceCommand command) {
@@ -71,15 +71,15 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
     }
 
     private String fillCompanyInfo(String template) {
-        
+
         var store = storeRepository.findAll().stream().findFirst()
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin cửa hàng"));
-        
+
         final String COMPANY_NAME = store.getName().getValue();
         final String COMPANY_ADDRESS = store.getAddress().getValue();
         final String COMPANY_PHONE = store.getPhone().getValue();
         final String COMPANY_EMAIL = store.getEmail().getValue();
-        
+
         template = template.replace("{{companyName}}", COMPANY_NAME);
         template = template.replace("{{companyAddress}}", COMPANY_ADDRESS);
         template = template.replace("{{companyPhone}}", COMPANY_PHONE);
@@ -96,7 +96,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         template = template.replace("{{notes}}", order.getCustomizeNote().orElse(""));
         template = template.replace("{{currentDate}}", LocalDateTime.now().format(formatter));
         template = template.replace("{{currentUser}}",
-                "Nhân viên: %s".formatted(order.getEmployee().map(e ->e.getFirstName().getValue()).orElse("")));
+                "Nhân viên: %s".formatted(order.getEmployee().map(e -> e.getFirstName().getValue()).orElse("")));
 
         return template;
     }
@@ -121,13 +121,13 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
 
     private String fillDiscountInfo(String template, Order order) {
         var discounts = getDiscounts(order);
-        
         if (discounts.isEmpty()) {
-            // Sửa biểu thức chính quy để bắt chính xác các ký tự xuống dòng và khoảng trắng
-            template = template.replaceAll("(?s)\\{\\{#if\\s+hasCouponPromotion\\}\\}.*?\\{\\{/if\\}\\}", "");
-            return template;
-        }
+            // Regex to remove the entire coupon promotion block, including the surrounding div
+            String regex = "(?s)<div\\s+class=\"promotion\">\\s*<p><strong>Mã giảm giá áp dụng:</strong>.*?</div>";
+            template = template.replaceAll(regex, "");
 
+            // Regex to remove the discount row in the totals table
+        }
 
         String discountNames = discounts.stream()
                 .map(OrderDiscountDetailResponse::getName)
@@ -140,7 +140,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         String couponCodes = discounts.stream()
                 .map(OrderDiscountDetailResponse::getCouponCode)
                 .collect(Collectors.joining(", "));
-        
+
 
         template = template.replace("{{#if hasCouponPromotion}}", "");
         template = template.replace("{{/if}}", "");
@@ -178,11 +178,11 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         // Total amount
         template = template.replace("{{totalAmount}}",
                 currency.format(order.getTotalAmount().orElse(Money.ZERO).getValue()));
-        
+
         // Final amount
         template = template.replace("{{grandTotal}}",
                 currency.format(order.getFinalAmount().orElse(Money.ZERO).getValue()));
-        
+
         // Total discount
         Money totalDiscount = order.getOrderDiscounts().stream()
                 .map(OrderDiscount::getDiscountAmount)
@@ -251,10 +251,10 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
                             .discountAmount(orderDiscount.getDiscountAmount().getValue())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    private PaymentDetailResponse getPayment(Payment payment){
+    private PaymentDetailResponse getPayment(Payment payment) {
         var paymentMethod = payment.getPaymentMethod();
 
         return PaymentDetailResponse.builder()
@@ -293,9 +293,9 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         template = template.replace("{{clientPhone}}", customer.getPhone().getValue());
         template = template.replace("{{memberPromotionDescription}}",
                 membershipType.getType().getValue() + " - " + membershipType.getMemberDiscountValue().getDescription());
-    // Hiển thị phần hasMemberPromotion nếu có thông tin thành viên
-    template = template.replace("{{#if hasMemberPromotion}}", "");
-    template = template.replace("{{/if}}", "");
+        // Hiển thị phần hasMemberPromotion nếu có thông tin thành viên
+        template = template.replace("{{#if hasMemberPromotion}}", "");
+        template = template.replace("{{/if}}", "");
 
         return template;
     }
@@ -304,7 +304,7 @@ public class CreateInvoiceCommandHandler implements ICommandHandler<CreateInvoic
         var employee = order.getEmployee();
 
         template = template.replace("{{staffName}}",
-                employee.map(e->e.getFirstName().getValue() + " " + e.getLastName().getValue())
+                employee.map(e -> e.getFirstName().getValue() + " " + e.getLastName().getValue())
                         .orElse("Nhân viên không xác định"));
         template = template.replace("{{staffId}}", String.valueOf(
                 employee.map(Employee::getId)
