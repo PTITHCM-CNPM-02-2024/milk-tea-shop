@@ -1,0 +1,36 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "backend",
+		},
+		{
+			"path": "frontend/employee"
+		},
+		{
+			"path": "frontend/manager"
+		},
+		
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/build": true,
+			"**/out": true,
+			"**/target": true,
+			"**/bin": true,
+			"**/obj": true,
+			"**/logs": true,
+			"**/build-cache": true,
+			"**/gradle": true,
+		},
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}

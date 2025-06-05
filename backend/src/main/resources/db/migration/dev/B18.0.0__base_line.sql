@@ -1,3 +1,6 @@
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
+
 create table area
 (
     area_id     smallint unsigned auto_increment comment 'Mã khu vực' primary key,
@@ -8,7 +11,7 @@ create table area
     created_at  datetime   default CURRENT_TIMESTAMP null,
     updated_at  datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_area_name unique (name)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table category
 (
@@ -18,7 +21,7 @@ create table category
     created_at         datetime default CURRENT_TIMESTAMP null,
     updated_at         datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_category_name unique (name)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table coupon
 (
@@ -28,7 +31,7 @@ create table coupon
     created_at  datetime default CURRENT_TIMESTAMP null comment 'Ngày tạo',
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_coupon_coupon unique (coupon)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table discount
 (
@@ -54,7 +57,7 @@ create table discount
     constraint fk_discount_coupon foreign key (coupon_id) references coupon (coupon_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table membership_type
 (
@@ -70,7 +73,7 @@ create table membership_type
     updated_at         datetime   default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_membership_type_type unique (type),
     constraint uk_membership_type_required_point unique (required_point)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table payment_method
 (
@@ -80,7 +83,7 @@ create table payment_method
     created_at          datetime default CURRENT_TIMESTAMP null,
     updated_at          datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_payment_method_payment_name unique (payment_name)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table product
 (
@@ -98,7 +101,7 @@ create table product
     constraint fk_product_category foreign key (category_id) references category (category_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table role
 (
@@ -109,7 +112,7 @@ create table role
     created_at  datetime default CURRENT_TIMESTAMP null,
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_role_name unique (name)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table account
 (
@@ -128,7 +131,7 @@ create table account
     constraint fk_account_role foreign key (role_id) references role (role_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table customer
 (
@@ -153,7 +156,7 @@ create table customer
     constraint fk_customer_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table employee
 (
@@ -173,7 +176,7 @@ create table employee
     constraint fk_employee_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table manager
 (
@@ -192,7 +195,7 @@ create table manager
     constraint fk_manager_account foreign key (account_id) references account (account_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
     create table `order`
 (
@@ -214,7 +217,7 @@ create table manager
     constraint fk_order_employee foreign key (employee_id) references employee (employee_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table order_discount
 (
@@ -231,7 +234,7 @@ create table order_discount
     constraint fk_order_discount_discount foreign key (discount_id) references discount (discount_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table payment
 (
@@ -251,7 +254,7 @@ create table payment
     constraint fk_payment_payment_method foreign key (payment_method_id) references payment_method (payment_method_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table service_table
 (
@@ -266,7 +269,7 @@ create table service_table
     constraint fk_service_table_area foreign key (area_id) references area (area_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table order_table
 (
@@ -286,7 +289,7 @@ create table order_table
     constraint fk_order_table_service_table foreign key (table_id) references service_table (table_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table store
 (
@@ -301,7 +304,7 @@ create table store
     tax_code     varchar(20)                        not null comment 'Mã số thuế',
     created_at   datetime default CURRENT_TIMESTAMP null,
     updated_at   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table unit_of_measure
 (
@@ -313,7 +316,7 @@ create table unit_of_measure
     updated_at  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint uk_unit_of_measure_name unique (name),
     constraint uk_unit_of_measure_symbol unique (symbol)
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table product_size
 (
@@ -328,7 +331,7 @@ create table product_size
     constraint fk_product_size_unit_of_measure foreign key (unit_id) references unit_of_measure (unit_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table product_price
 (
@@ -347,7 +350,7 @@ create table product_price
     constraint fk_product_price_product_size foreign key (size_id) references product_size (size_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 create table order_product
 (
@@ -367,7 +370,7 @@ create table order_product
     constraint fk_order_product_product_price foreign key (product_price_id) references product_price (product_price_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 

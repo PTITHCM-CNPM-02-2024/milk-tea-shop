@@ -9,4 +9,6 @@
 !.project
 !ddl-data-source/
 !ddl-data-source/**
+!backup
+!backup/
 

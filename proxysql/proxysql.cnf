@@ -1,0 +1,74 @@
+# proxysql.cnf
+datadir="/var/lib/proxysql"
+errorlog="/var/lib/proxysql/proxysql.log"
+
+admin_variables=
+{
+    admin_credentials="admin:admin" 
+    mysql_ifaces="0.0.0.0:6032"
+    cluster_name="milk_tea_pxc_cluster"
+    cluster_join="pxc1"
+    cluster_username="root"
+    cluster_password="admin_password"
+    web_enabled="true"
+    web_port="6080"
+    web_stats_url="/stats"
+    web_stats_user="stats_user" 
+    web_stats_password="stats_password"
+}
+
+mysql_variables=
+{
+    threads=4
+    max_connections=2048
+    default_query_delay=0
+    default_query_timeout=36000000
+    interfaces="0.0.0.0:6033" # Cổng ProxySQL lắng nghe kết nối từ client (ví dụ: backend)
+    stacksize=1048576
+    monitor_username="monitor"
+    monitor_password="monitor"
+    monitor_connect_interval=2000
+    monitor_ping_interval=1000
+    monitor_galera_healthcheck_interval=5000
+}
+
+# # Cấu hình ban đầu cho monitor (sẽ cần được load vào DB của ProxySQL sau)
+# mysql_monitor_username = "monitor_user" # User để ProxySQL monitor các node PXC
+# mysql_monitor_password = "monitor_password" # Mật khẩu cho monitor_user
+# mysql_monitor_connect_interval = 10000 # 10 giây
+# mysql_monitor_ping_interval = 1000 # 1 giây
+# mysql_monitor_ping_timeout_server = 500 # 0.5 giây
+# mysql_monitor_read_only_max_timeout_count = 3
+
+
+# # Cấu hình ban đầu cho các server PXC (sẽ cần được load vào DB của ProxySQL sau)
+# # Đây chỉ là định nghĩa, cần được thêm vào bảng mysql_servers thông qua admin interface
+mysql_servers =(
+{
+     address="pxc1"
+     port=3306
+     hostgroup=0
+
+   },
+   {
+     address="pxc2"
+     port=3306
+     hostgroup=0
+   },
+   {
+     address="pxc3"
+     port=3306
+     hostgroup=0
+   }
+)
+
+# # Cấu hình user cho backend kết nối qua ProxySQL (sẽ cần load vào DB của ProxySQL)
+mysql_users:
+(
+   {
+     username = "mts_user" # User mà backend sử dụng
+     password = "mts_password" # Mật khẩu tương ứng
+     default_hostgroup = 0
+     default_schema = "milk_tea_shop_prod"
+   }
+) 

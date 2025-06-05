@@ -1,0 +1,8 @@
+/pxc-docker-test/cert/ca.pem
+/pxc-docker-test/cert/ca-key.pem
+/pxc-docker-test/cert/client-cert.pem
+/pxc-docker-test/cert/client-key.pem
+/pxc-docker-test/cert/private_key.pem
+/pxc-docker-test/cert/public_key.pem
+/pxc-docker-test/cert/server-cert.pem
+/pxc-docker-test/cert/server-key.pem

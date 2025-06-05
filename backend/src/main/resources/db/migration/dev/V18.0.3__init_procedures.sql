@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 -- 1. Area
 DELIMITER //
 CREATE PROCEDURE sp_insert_area(

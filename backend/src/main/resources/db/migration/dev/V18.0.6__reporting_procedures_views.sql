@@ -4,6 +4,8 @@
 -- Bắt đầu với Stored Procedures
 
 -- Ví dụ: Procedure báo cáo doanh thu theo khoảng thời gian
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 DELIMITER //
 
 CREATE PROCEDURE sp_report_revenue_by_date_range(

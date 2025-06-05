@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 INSERT INTO category (category_id, name, description)
 VALUES (3,UPPER('Trân châu đường đen'), 'Các loại đồ uống kết hợp với trân châu đường đen, mang vị ngọt caramel đặc 
 trưng.') ,
@@ -149,7 +151,7 @@ values  (1001, 2, 40000.000),
         ( 6007, 4, 10000.000);
 
 insert into coupon(coupon_id, coupon, description)
-values (1, 'KHUYENMAI304', 'Khuyến mãi 30/04'),
+values (1, 'KHUYENMAI306', 'Khuyến mãi 30/06'),
        (2, 'GIAMGIA01', 'Mã demo'),
        (3, 'GIAMGIA02', 'Giảm giá 20% cho đơn hàng thứ hai'),
        (4, 'GIAMGIA03', 'Giảm giá 30% cho đơn hàng thứ ba'),
@@ -157,9 +159,9 @@ values (1, 'KHUYENMAI304', 'Khuyến mãi 30/04'),
        (6, 'GIAMGIA05', 'Giảm giá 50% cho đơn hàng thứ năm');
 
 insert into discount (discount_id, name, description, coupon_id, discount_value, discount_type, min_required_order_value, max_discount_amount, min_required_product, valid_from, valid_until, current_uses, max_uses, max_uses_per_customer, is_active, created_at, updated_at)
-values  (1, 'Khuyến mãi 30/04', null, 1, 15.000, 'PERCENTAGE', 2000.000, 40000.000, 2, null, '2025-05-30 21:22:16', 
+values  (1, 'Khuyến mãi 30/06', null, 1, 15.000, 'PERCENTAGE', 2000.000, 40000.000, 2, null, '2025-06-30 21:22:16', 
          0, 10000, null, 1, '2025-04-04 21:23:22', '2025-04-05 20:46:31'),
-        (2, 'Khuyến mãi 01/05', null, 2, 20000, 'FIXED', 2000.000, 40000.000, 2, null, '2025-05-30 21:22:16',
+        (2, 'Khuyến mãi 01/07', null, 2, 20000, 'FIXED', 2000.000, 40000.000, 2, '2025-07-01 00:00:00', '2025-07-30 23:59:59',
             0, 10000, 1, 1, '2025-04-04 21:23:22', '2025-04-05 20:46:31');
 
 

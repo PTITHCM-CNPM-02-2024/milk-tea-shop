@@ -2,6 +2,8 @@
 -- Chứa các Stored Procedures và Events được lên lịch.
 
 -- Procedure để vô hiệu hóa các discount đã hết hạn
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 DELIMITER //
 
 CREATE PROCEDURE sp_deactivate_expired_discounts()
@@ -22,7 +24,7 @@ BEGIN
     -- Error handling có thể được thêm vào nếu cần
 END //
 
-DELIMITER ;
+DELIMITER //
 
 CREATE EVENT event_deactivate_expired_discounts
 ON SCHEDULE EVERY 1 DAY
@@ -31,6 +33,8 @@ DO
 BEGIN
     -- Gọi stored procedure
     CALL sp_deactivate_expired_discounts();
-END; -- Kết thúc DO block
+END //-- Kết thúc DO block
+
+DELIMITER ;
 
 -- Các events và procedures khác (ví dụ: hủy order tự động) có thể được thêm ở đây. 

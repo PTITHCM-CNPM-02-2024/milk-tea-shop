@@ -1,57 +1,227 @@
 version: '3.8'
 
 services:
-  db-dev:
-    build:
-      context: .
-      dockerfile: docker/database/Dockerfile.dev
-    container_name: milktea-db-dev
-    environment:
-      MYSQL_ROOT_PASSWORD: devpassword
-      MYSQL_DATABASE: milktea_dev_db
-      MYSQL_USER: milktea_dev_user
-      MYSQL_PASSWORD: devpassword
-    volumes:
-      - mysql-data-dev:/var/lib/mysql
-    ports:
-      - "3306:3306" # Optional: Mở cổng để truy cập trực tiếp từ host
-    restart: unless-stopped
 
+  pxc1:
+    image: percona/percona-xtradb-cluster:8.0
+    container_name: milk_tea_pxc1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin_password
+      CLUSTER_NAME: milk_tea_pxc_cluster
+      CLUSTERCHECK_PASSWORD: clustercheck
+      CLUSTER_JOIN: pxc1
+      MYSQL_DATABASE: milk_tea_shop_prod
+      DISCOVERY_SERVICE: http://etcd:2379
+      MYSQL_USER: mts_user
+      MYSQL_PASSWORD: mts_password
+      XTRABACKUP_PASSWORD: mts_password
+      MONITOR_HOST: "%"
+    volumes: 
+      - ./database/init/dev:/docker-entrypoint-initdb.d
+      - pxc1_data:/var/lib/mysql
+      - ./pxc-docker-test/config/custom.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf:ro
+      - ./pxc-docker-test/cert:/cert
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin_password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
+    ports:
+      - "33061:3306"
+    networks:
+      - milk_tea_network
+    depends_on:
+      etcd:
+        condition: service_started
+
+  pxc2:
+    image: percona/percona-xtradb-cluster:8.0
+    container_name: milk_tea_pxc2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin_password
+      CLUSTER_NAME: milk_tea_pxc_cluster
+      CLUSTERCHECK_PASSWORD: clustercheck
+      CLUSTER_JOIN: pxc1
+      DISCOVERY_SERVICE: http://etcd:2379
+      MYSQL_USER: mts_user
+      MYSQL_PASSWORD: mts_password
+      XTRABACKUP_PASSWORD: mts_password
+    volumes:
+      - pxc2_data:/var/lib/mysql
+      - ./pxc-docker-test/config/custom.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf:ro
+      - ./pxc-docker-test/cert:/cert
+    ports:
+      - "33062:3306" # Port của pxc2
+    networks:
+      - milk_tea_network
+    depends_on:
+      pxc1:
+        condition: service_healthy
+
+  pxc3:
+    image: percona/percona-xtradb-cluster:8.0
+    container_name: milk_tea_pxc3
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin_password
+      CLUSTER_NAME: milk_tea_pxc_cluster
+      CLUSTERCHECK_PASSWORD: clustercheck
+      CLUSTER_JOIN: pxc1
+      DISCOVERY_SERVICE: http://etcd:2379
+      MYSQL_USER: mts_user
+      MYSQL_PASSWORD: mts_password
+      XTRABACKUP_PASSWORD: mts_password
+    volumes:
+      - pxc3_data:/var/lib/mysql
+      - ./pxc-docker-test/config/custom.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf:ro
+      - ./pxc-docker-test/cert:/cert
+    ports:
+      - "33063:3306" # Port của pxc3
+    networks:
+      - milk_tea_network
+    depends_on:
+      pxc1:
+        condition: service_healthy
+      pxc2:
+        condition: service_started
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.13
+    container_name: milk_tea_etcd
+    restart: unless-stopped
+    volumes:
+      - etcd_data:/bitnami/etcd/data
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_NAME=etcd
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token
+      - ETCD_INITIAL_CLUSTER=etcd=http://0.0.0.0:2380      
+      - ETCD_ENABLE_V2=true
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    networks:
+      - milk_tea_network
+  proxysql:
+    image: percona/proxysql2:latest
+    container_name: milk_tea_proxysql
+    hostname: proxysql
+    restart: unless-stopped
+    environment:
+      - CLUSTER_NAME=milk_tea_pxc_cluster
+      - MYSQL_ROOT_PASSWORD=admin_password
+      - MYSQL_PROXY_USER=proxyuser
+      - MYSQL_PROXY_PASSWORD=proxyuser
+      - PXC_SERVICE=pxc1:3306
+      - ECTD_HOST=etcd:2379
+      - DISCOVERY_SERVICE=etcd:2379
+    ports:
+      - "6032:6032"
+      - "6033:6033"
+      - "6080:6080"
+    volumes: 
+      - ./proxysql/proxysql.cnf:/etc/proxysql/proxysql.cnf # Đã bỏ theo thay đổi của bạn
+      - proxysql_data:/var/lib/proxysql
+      - ./proxysql/add_cluster_nodes.sh:/usr/bin/add_cluster_nodes.sh
+      - ./proxysql/proxysql-admin.cnf:/etc/proxysql-admin.cnf
+    networks:
+      - milk_tea_network
+    depends_on: # Đảm bảo ProxySQL khởi động sau PXC
+      - pxc1
+      - pxc2
+      - pxc3
+  
+  
   backend:
     build:
-      context: .
-      dockerfile: docker/backend/Dockerfile
-    container_name: milktea-backend
-    depends_on:
-      - db-dev
-    environment:
-      # Cấu hình kết nối DB, điều chỉnh các biến này cho phù hợp với cấu hình Spring của bạn
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-dev:3306/milktea_dev_db?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: milktea_dev_user
-      SPRING_DATASOURCE_PASSWORD: devpassword
-      # Các biến môi trường khác cho Spring nếu cần
-    ports:
-      - "8080:8080"
+      context: ./backend
+    container_name: milk_tea_backend
     restart: unless-stopped
-
+    ports:
+      - "8181:8181"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://proxysql:6033/milk_tea_shop_prod?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
+      SPRING_DATASOURCE_USERNAME: mts_user
+      SPRING_DATASOURCE_PASSWORD: mts_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: false
+      FIREBASE_BUCKET_NAME: milk-tea-shop-75973.firebasestorage.app
+      JWT_SECRET: hdvfkfvewfowefihpqhfphwgbwiegihgwinwgnwigiwgiweigoewog
+      JWT_EXPIRATION: 100000
+      JWT_HEADER: Authorization
+      JWT_PREFIX: Bearer
+      JWT_TOKEN_TYPE: JWT
+      JWT_ISSUER: mts-backend
+    networks:
+      - milk_tea_network
+    depends_on: [ proxysql ]
+  
   frontend-employee:
     build:
-      context: .
-      dockerfile: docker/frontend/Dockerfile.employee
-    container_name: milktea-frontend-employee
-    ports:
-      - "8081:80" # Truy cập qua http://localhost:8081
+      context: ./frontend/employee
+    container_name: milk_tea_frontend_employee
     restart: unless-stopped
-
+    ports:
+      - "9057:80"
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://localhost:8181
+    networks:
+      - milk_tea_network
+  
   frontend-manager:
     build:
-      context: .
-      dockerfile: docker/frontend/Dockerfile.manager
-    container_name: milktea-frontend-manager
-    ports:
-      - "8082:80" # Truy cập qua http://localhost:8082
+      context: ./frontend/manager
+    container_name: milk_tea_frontend_manager
     restart: unless-stopped
+    ports:
+      - "9058:80"
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://localhost:8181
+    networks:
+      - milk_tea_network
+
+  pxc_backup:
+    build:
+      context: ./database/backup
+      dockerfile: Dockerfile
+    container_name: milk_tea_pxc_backup
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: milk_tea_pxc1
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin_password}
+      BACKUP_EVERY_SECONDS: "3600"
+      FULL_BACKUP_INTERVAL_COUNT: "7"
+      KEEP_FULL_BACKUPS_COUNT: "3"
+    volumes:
+      - pxc1_data:/var/lib/mysql
+      - ./database/backup/data:/mnt/backups
+    networks:
+      - milk_tea_network
+    depends_on:
+      pxc1:
+        condition: service_healthy
 
 volumes:
-  mysql-data-dev:
-    driver: local 
+  pxc1_data:
+  pxc2_data:
+  pxc3_data:
+  proxysql_data:
+  etcd_data:
+  pxc_backups_data: {}
+networks:
+  milk_tea_network:
+    driver: bridge

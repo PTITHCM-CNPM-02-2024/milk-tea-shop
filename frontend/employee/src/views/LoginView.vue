@@ -192,8 +192,7 @@ onMounted(() => {
 .login-banner {
   flex: 1;
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1561296160-7ea9d1b5511d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80');
-  background-size: cover;
+  background-image: url('@/assets/login-background.jpg');
   background-position: center;
   display: flex;
   align-items: center;

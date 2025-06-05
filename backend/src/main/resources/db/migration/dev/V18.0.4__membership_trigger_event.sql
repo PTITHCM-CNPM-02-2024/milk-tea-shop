@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 -- Trigger kiểm tra thời hạn membership
 DELIMITER //
 
@@ -190,7 +192,7 @@ DELIMITER ;
 
 
 -- Kiểm tra trạng thái hiện tại của Event Scheduler
-SHOW VARIABLES LIKE 'event_scheduler';
-
+-- SHOW VARIABLES LIKE 'event_scheduler';
 -- Bật Event Scheduler nếu chưa được bật
-SET GLOBAL event_scheduler = ON;
+-- SET GLOBAL event_scheduler = ON;
+-- Migration completed successfully

@@ -1,16 +1,18 @@
 -- ---------------------------------------------------------Dữ lệu mặc định------------------------------------------------
 
 -- Dữ liệu cho bảng unit_of_measure
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 INSERT INTO unit_of_measure (name, symbol, description)
 VALUES ('Militer', 'mL', 'Đơn vị đo lường thể tích'),
        ('Piece', 'cái', 'Đơn vị đếm số lượng');
 
 -- Dữ liệu cho bảng product_size
-INSERT INTO product_size (unit_id, name, quantity, description)
-VALUES ((SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'S', 450, 'Size nhỏ - 450mL'),
-       ((SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'M', 650, 'Size vừa - 650mL'),
-       ((SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'L', 800, 'Size lớn - 800mL'),
-       ((SELECT unit_id FROM unit_of_measure WHERE symbol = 'cái'), 'NA', 1, 'Đơn vị (cái/phần)');
+INSERT INTO product_size (size_id,unit_id, name, quantity, description)
+VALUES (1,(SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'S', 450, 'Size nhỏ - 450mL'),
+       (2,(SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'M', 650, 'Size vừa - 650mL'),
+       (3,(SELECT unit_id FROM unit_of_measure WHERE symbol = 'mL'), 'L', 800, 'Size lớn - 800mL'),
+       (4,(SELECT unit_id FROM unit_of_measure WHERE symbol = 'cái'), 'NA', 1, 'Đơn vị (cái/phần)');
 
 -- Dữ liệu cho bảng category
 INSERT INTO category (category_id, name, description)

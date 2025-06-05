@@ -1,3 +1,5 @@
+SET NAMES 'utf8mb4';
+SET CHARACTER SET utf8mb4;
 DELIMITER //
 
 CREATE PROCEDURE sp_grant_permissions_by_role(
