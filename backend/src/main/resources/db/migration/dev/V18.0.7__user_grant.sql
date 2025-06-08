@@ -1,175 +1,287 @@
+-- Cải thiện V18.0.7__user_grant.sql - Version đơn giản
 SET NAMES 'utf8mb4';
 SET CHARACTER SET utf8mb4;
+
 DELIMITER //
 
 CREATE PROCEDURE sp_grant_permissions_by_role(
     IN p_account_id INT UNSIGNED
 )
-BEGIN
+sp_grant_permissions_by_role: BEGIN
     DECLARE role_name VARCHAR(50);
     DECLARE username VARCHAR(50);
     DECLARE mysql_username VARCHAR(100);
     DECLARE db_name VARCHAR(64);
-    DECLARE exit_handler BOOLEAN DEFAULT FALSE;
+    DECLARE v_account_exists INT DEFAULT 0;
 
-    -- Declare handler for errors to ensure transaction rollback
-    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    -- Improved error handling
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
-            SET exit_handler = TRUE;
+            ROLLBACK;
+            SELECT 'Có lỗi xảy ra khi cấp quyền. Đã rollback.' AS error_message;
         END;
+
+    -- Validate input
+    IF p_account_id IS NULL OR p_account_id <= 0 THEN
+        SELECT 'Account ID không hợp lệ' AS error_message;
+        LEAVE sp_grant_permissions_by_role;
+    END IF;
+
+    -- Check if account exists
+    SELECT COUNT(*) INTO v_account_exists
+    FROM account
+    WHERE account_id = p_account_id;
+
+    IF v_account_exists = 0 THEN
+        SELECT 'Tài khoản không tồn tại' AS error_message;
+        LEAVE sp_grant_permissions_by_role;
+    END IF;
 
     START TRANSACTION;
 
-    -- Lấy tên database hiện tại
+    -- Get database name
     SELECT DATABASE() INTO db_name;
+    IF db_name IS NULL THEN
+        SELECT 'Không thể xác định database hiện tại' AS error_message;
+        LEAVE sp_grant_permissions_by_role;
+    END IF;
 
-    -- Lấy thông tin tài khoản và vai trò
+    -- Get account and role information
     SELECT a.username, r.name
     INTO username, role_name
     FROM account a
              JOIN role r ON a.role_id = r.role_id
     WHERE a.account_id = p_account_id;
 
-    -- Chỉ xử lý cho MANAGER và STAFF
+    -- Only process for MANAGER and STAFF
     IF role_name IN ('MANAGER', 'STAFF') THEN
-        -- Tạo tên người dùng MySQL từ username và role
         SET mysql_username = CONCAT(username, '_', LOWER(role_name));
 
-        -- Kiểm tra xem người dùng MySQL đã tồn tại chưa
+        -- Check if MySQL user exists
         SET @user_exists = 0;
-        SELECT COUNT(*)
-        INTO @user_exists
+        SELECT COUNT(*) INTO @user_exists
         FROM mysql.user
-        WHERE User = mysql_username
-          AND (Host = 'localhost' OR Host = '%');
+        WHERE User = mysql_username;
 
-        -- Nếu chưa tồn tại, tạo người dùng MySQL mới với mật khẩu tạm thời
+        -- Create user if not exists with username as password
         IF @user_exists = 0 THEN
-            SET @temp_password = CONCAT(username, '_temp_pwd');
-
-            -- Create localhost user
-            SET @sql_create_user_localhost =
-                    CONCAT('CREATE USER \'', mysql_username, '\'@\'localhost\' IDENTIFIED BY \'', @temp_password, '\'');
-            PREPARE stmt FROM @sql_create_user_localhost;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-
-            -- Create remote user
-            SET @sql_create_user_remote =
-                    CONCAT('CREATE USER \'', mysql_username, '\'@\'%\' IDENTIFIED BY \'', @temp_password, '\'');
-            PREPARE stmt FROM @sql_create_user_remote;
+            SET @sql_create_user = CONCAT(
+                    'CREATE USER IF NOT EXISTS \'', mysql_username, '\'@\'%\' ',
+                    'IDENTIFIED BY \'', username, '\''
+                                   );
+            PREPARE stmt FROM @sql_create_user;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
         END IF;
 
-        -- Thu hồi tất cả quyền cũ trước khi cấp mới
-        SET @sql_revoke_localhost =
-                CONCAT('REVOKE ALL PRIVILEGES ON ', db_name, '.* FROM \'', mysql_username, '\'@\'localhost\'');
-        PREPARE stmt FROM @sql_revoke_localhost;
+        -- Revoke all existing privileges
+        SET @sql_revoke_all = CONCAT(
+                'REVOKE ALL PRIVILEGES ON *.* FROM \'', mysql_username, '\'@\'%\''
+                              );
+        PREPARE stmt FROM @sql_revoke_all;
         EXECUTE stmt;
         DEALLOCATE PREPARE stmt;
 
-        SET @sql_revoke_remote =
-                CONCAT('REVOKE ALL PRIVILEGES ON ', db_name, '.* FROM \'', mysql_username, '\'@\'%\'');
-        PREPARE stmt FROM @sql_revoke_remote;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-
-        -- Thu hồi quyền EXECUTE trên tất cả routines
-        SET @sql_revoke_execute_localhost =
-                CONCAT('REVOKE EXECUTE ON ', db_name, '.* FROM \'', mysql_username, '\'@\'localhost\'');
-        PREPARE stmt FROM @sql_revoke_execute_localhost;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-
-        SET @sql_revoke_execute_remote =
-                CONCAT('REVOKE EXECUTE ON ', db_name, '.* FROM \'', mysql_username, '\'@\'%\'');
-        PREPARE stmt FROM @sql_revoke_execute_remote;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-
+        -- Grant permissions based on role
         IF role_name = 'MANAGER' THEN
-            -- Cấp toàn quyền cho MANAGER
-            SET @sql_grant_all_localhost =
-                    CONCAT('GRANT ALL PRIVILEGES ON ', db_name, '.* TO \'', mysql_username, '\'@\'localhost\'');
-            PREPARE stmt FROM @sql_grant_all_localhost;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-
-            SET @sql_grant_all_remote =
-                    CONCAT('GRANT ALL PRIVILEGES ON ', db_name, '.* TO \'', mysql_username, '\'@\'%\'');
-            PREPARE stmt FROM @sql_grant_all_remote;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-
-            SET @sql_grant_execute_localhost =
-                    CONCAT('GRANT EXECUTE ON ', db_name, '.* TO \'', mysql_username, '\'@\'localhost\'');
-            PREPARE stmt FROM @sql_grant_execute_localhost;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-
-            SET @sql_grant_execute_remote =
-                    CONCAT('GRANT EXECUTE ON ', db_name, '.* TO \'', mysql_username, '\'@\'%\'');
-            PREPARE stmt FROM @sql_grant_execute_remote;
+            -- Grant all privileges for MANAGER
+            SET @sql_grant = CONCAT(
+                    'GRANT ALL PRIVILEGES ON ', db_name, '.* TO \'', mysql_username, '\'@\'%\''
+                             );
+            PREPARE stmt FROM @sql_grant;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             SELECT mysql_username AS username,
                    role_name AS role,
-                   'Đã cấp toàn quyền(ALL PRIVILEGES + EXECUTE) thành công' AS message;
+                   'Đã cấp toàn quyền cho MANAGER thành công' AS message,
+                   CONCAT('Mật khẩu: ', username) AS password_info;
 
         ELSEIF role_name = 'STAFF' THEN
-            -- Cấp quyền SELECT trên tất cả các bảng
-            SET @sql_grant_select_localhost =
-                    CONCAT('GRANT SELECT ON ', db_name, '.* TO \'', mysql_username, '\'@\'localhost\'');
-            PREPARE stmt FROM @sql_grant_select_localhost;
+            -- Grant specific permissions for STAFF based on business requirements
+
+            -- 1. Quyền quản lý tài khoản của mình
+            SET @sql_grant_account = CONCAT(
+                    'GRANT SELECT, UPDATE ON ', db_name, '.account TO \'', mysql_username, '\'@\'%\''
+                                     );
+            PREPARE stmt FROM @sql_grant_account;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            SET @sql_grant_select_remote =
-                    CONCAT('GRANT SELECT ON ', db_name, '.* TO \'', mysql_username, '\'@\'%\'');
-            PREPARE stmt FROM @sql_grant_select_remote;
+            -- 2. Quyền quản lý khách hàng (tìm kiếm, tạo mới)
+            SET @sql_grant_customer = CONCAT(
+                    'GRANT SELECT, INSERT, UPDATE ON ', db_name, '.customer TO \'', mysql_username, '\'@\'%\''
+                                      );
+            PREPARE stmt FROM @sql_grant_customer;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            -- Grant execute on specific procedures
-            SET @sql_grant_exec_proc1 =
-                    CONCAT('GRANT EXECUTE ON PROCEDURE ', db_name, '.sp_create_full_order TO \'',
-                           mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            -- 3. Quyền xem sản phẩm và giá
+            SET @sql_grant_product = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.product TO \'', mysql_username, '\'@\'%\''
+                                     );
+            PREPARE stmt FROM @sql_grant_product;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            SET @sql_grant_product_price = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.product_price TO \'', mysql_username, '\'@\'%\''
+                                           );
+            PREPARE stmt FROM @sql_grant_product_price;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            SET @sql_grant_product_size = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.product_size TO \'', mysql_username, '\'@\'%\''
+                                          );
+            PREPARE stmt FROM @sql_grant_product_size;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 4. Quyền xem danh mục sản phẩm
+            SET @sql_grant_category = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.category TO \'', mysql_username, '\'@\'%\''
+                                      );
+            PREPARE stmt FROM @sql_grant_category;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 5. Quyền xem đơn vị tính
+            SET @sql_grant_unit = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.unit_of_measure TO \'', mysql_username, '\'@\'%\''
+                                  );
+            PREPARE stmt FROM @sql_grant_unit;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 6. Quyền áp dụng khuyến mãi
+            SET @sql_grant_discount = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.discount TO \'', mysql_username, '\'@\'%\''
+                                      );
+            PREPARE stmt FROM @sql_grant_discount;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            SET @sql_grant_coupon = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.coupon TO \'', mysql_username, '\'@\'%\''
+                                    );
+            PREPARE stmt FROM @sql_grant_coupon;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 7. Quyền quản lý bàn
+            SET @sql_grant_table = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.service_table TO \'', mysql_username, '\'@\'%\''
+                                   );
+            PREPARE stmt FROM @sql_grant_table;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            SET @sql_grant_area = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.area TO \'', mysql_username, '\'@\'%\''
+                                  );
+            PREPARE stmt FROM @sql_grant_area;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 8. Quyền xem loại thành viên
+            SET @sql_grant_membership = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.membership_type TO \'', mysql_username, '\'@\'%\''
+                                        );
+            PREPARE stmt FROM @sql_grant_membership;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 9. Quyền xem phương thức thanh toán
+            SET @sql_grant_payment_method = CONCAT(
+                    'GRANT SELECT ON ', db_name, '.payment_method TO \'', mysql_username, '\'@\'%\''
+                                            );
+            PREPARE stmt FROM @sql_grant_payment_method;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 10. Quyền quản lý đơn hàng
+            SET @sql_grant_order = CONCAT(
+                    'GRANT SELECT, INSERT, UPDATE ON ', db_name, '.`order` TO \'', mysql_username, '\'@\'%\''
+                                   );
+            PREPARE stmt FROM @sql_grant_order;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 11. Quyền quản lý sản phẩm trong đơn hàng
+            SET @sql_grant_order_product = CONCAT(
+                    'GRANT SELECT, INSERT, UPDATE ON ', db_name, '.order_product TO \'', mysql_username, '\'@\'%\''
+                                           );
+            PREPARE stmt FROM @sql_grant_order_product;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 12. Quyền áp dụng giảm giá cho đơn hàng
+            SET @sql_grant_order_discount = CONCAT(
+                    'GRANT SELECT, INSERT ON ', db_name, '.order_discount TO \'', mysql_username, '\'@\'%\''
+                                            );
+            PREPARE stmt FROM @sql_grant_order_discount;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 13. Quyền quản lý bàn cho đơn hàng và trả bàn
+            SET @sql_grant_order_table = CONCAT(
+                    'GRANT SELECT, INSERT, UPDATE ON ', db_name, '.order_table TO \'', mysql_username, '\'@\'%\''
+                                         );
+            PREPARE stmt FROM @sql_grant_order_table;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 14. Quyền quản lý thanh toán
+            SET @sql_grant_payment = CONCAT(
+                    'GRANT SELECT, INSERT, UPDATE ON ', db_name, '.payment TO \'', mysql_username, '\'@\'%\''
+                                     );
+            PREPARE stmt FROM @sql_grant_payment;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            -- 15. Grant execute on specific procedures for order management
+            SET @sql_grant_exec_proc1 = CONCAT(
+                    'GRANT EXECUTE ON PROCEDURE ', db_name, '.sp_create_full_order TO \'',
+                    mysql_username, '\'@\'%\''
+                                        );
             PREPARE stmt FROM @sql_grant_exec_proc1;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            SET @sql_grant_exec_proc2 =
-                    CONCAT('GRANT EXECUTE ON PROCEDURE ', db_name, '.sp_insert_customer TO \'',
-                           mysql_username, '\'@\'localhost\', \'', mysql_username, '\'@\'%\'');
+            SET @sql_grant_exec_proc2 = CONCAT(
+                    'GRANT EXECUTE ON PROCEDURE ', db_name, '.sp_insert_customer TO \'',
+                    mysql_username, '\'@\'%\''
+                                        );
             PREPARE stmt FROM @sql_grant_exec_proc2;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+
+            SET @sql_grant_exec_proc3 = CONCAT(
+                    'GRANT EXECUTE ON PROCEDURE ', db_name, '.sp_update_order_table_checkout TO \'',
+                    mysql_username, '\'@\'%\''
+                                        );
+            PREPARE stmt FROM @sql_grant_exec_proc3;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
             SELECT mysql_username AS username,
                    role_name AS role,
-                   'Đã cấp quyền SELECT và EXECUTE giới hạn cho STAFF thành công' AS message;
+                   'Đã cấp quyền đầy đủ cho STAFF thành công' AS message,
+                   CONCAT('Mật khẩu: ', username) AS password_info,
+                   'Quyền: Quản lý đơn hàng, khách hàng, bàn, thanh toán và tài khoản cá nhân' AS permissions_summary;
         END IF;
 
-        -- Áp dụng thay đổi
         FLUSH PRIVILEGES;
 
     ELSE
-        -- Trả về thông báo cho các vai trò khác
         SELECT 'Không cấp quyền DB cho vai trò này' AS message;
     END IF;
 
-    -- Commit or rollback based on whether we encountered errors
-    IF exit_handler THEN
-        ROLLBACK;
-        SELECT 'Có lỗi xảy ra, đã rollback' AS error_message;
-    ELSE
-        COMMIT;
-    END IF;
+    COMMIT;
 END//
 
--- Thủ tục thu hồi quyền khi tài khoản bị khóa (Giữ nguyên logic)
+-- Thủ tục thu hồi quyền đơn giản hóa
 CREATE PROCEDURE sp_revoke_permissions(
     IN p_account_id INT UNSIGNED
 )
@@ -178,61 +290,47 @@ BEGIN
     DECLARE username VARCHAR(50);
     DECLARE mysql_username VARCHAR(100);
     DECLARE db_name VARCHAR(64);
-    -- Biến lưu tên database
 
-    -- Lấy tên database hiện tại
+    -- Get database name
     SELECT DATABASE() INTO db_name;
 
-    -- Lấy thông tin tài khoản và vai trò
+    -- Get account and role information
     SELECT a.username, r.name
     INTO username, role_name
     FROM account a
              JOIN role r ON a.role_id = r.role_id
     WHERE a.account_id = p_account_id;
 
-    -- Chỉ xử lý cho MANAGER và STAFF
+    -- Only process for MANAGER and STAFF
     IF role_name IN ('MANAGER', 'STAFF') THEN
-        -- Tạo tên người dùng MySQL từ username và role
         SET mysql_username = CONCAT(username, '_', LOWER(role_name));
 
-        -- Kiểm tra xem người dùng MySQL có tồn tại không
+        -- Check if MySQL user exists
         SET @user_exists = 0;
-        SELECT COUNT(*)
-        INTO @user_exists
+        SELECT COUNT(*) INTO @user_exists
         FROM mysql.user
-        WHERE User = mysql_username
-          AND (Host = 'localhost' OR Host = '%');
+        WHERE User = mysql_username;
 
         IF @user_exists > 0 THEN
-            -- Thu hồi tất cả quyền trên database cụ thể
-            SET @sql_revoke_localhost =
-                    CONCAT('REVOKE ALL PRIVILEGES ON ', db_name, '.* FROM \'', mysql_username,
-                           '\'@\'localhost\'');
-            PREPARE stmt FROM @sql_revoke_localhost;
+            -- Revoke all privileges
+            SET @sql_revoke_all = CONCAT(
+                    'REVOKE ALL PRIVILEGES ON *.* FROM \'', mysql_username, '\'@\'%\''
+                                  );
+            PREPARE stmt FROM @sql_revoke_all;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
 
-            SET @sql_revoke_remote = CONCAT('REVOKE ALL PRIVILEGES ON ', db_name, '.* FROM \'', mysql_username,
-                                            '\'@\'%\'');
-            PREPARE stmt FROM @sql_revoke_remote;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-
-            -- Áp dụng thay đổi
             FLUSH PRIVILEGES;
 
-            -- Trả về thông tin
-            SELECT mysql_username                  AS username,
-                   ' Đã thu hồi quyền thành công ' AS message;
+            SELECT mysql_username AS username,
+                   'Đã thu hồi quyền thành công' AS message;
         ELSE
-            -- Trả về thông báo
-            SELECT ' Người dùng MySQL không tồn tại ' AS message;
+            SELECT 'Người dùng MySQL không tồn tại' AS message;
         END IF;
     ELSE
-        -- Trả về thông báo
-        SELECT ' Không cần thu hồi quyền cho vai trò này ' AS message;
+        SELECT 'Không cần thu hồi quyền cho vai trò này' AS message;
     END IF;
-END //
+END//
 
 -- Thủ tục khóa/mở khóa tài khoản và xử lý quyền tương ứng (Gọi sp_grant_permissions_by_role đã sửa)
 CREATE PROCEDURE sp_lock_unlock_account(
@@ -276,8 +374,6 @@ BEGIN
         SELECT 'Trạng thái khóa không thay đổi' AS message;
     END IF;
 END //
-
-DELIMITER //
 
 -- Thủ tục tạo tài khoản MANAGER (Gọi sp_grant_permissions_by_role đã sửa)
 CREATE PROCEDURE sp_create_manager_account(
@@ -450,7 +546,6 @@ BEGIN
 
 END create_staff_proc// -- End labeled block
 
-DELIMITER //
 -- Bảo vệ tài khoản admin mặc định khỏi việc thay đổi username
 CREATE TRIGGER protect_default_admin_update
     BEFORE UPDATE

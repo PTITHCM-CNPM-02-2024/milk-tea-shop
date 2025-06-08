@@ -1,6 +1,9 @@
 SET NAMES 'utf8mb4';
 SET CHARACTER SET utf8mb4;
 
+grant all privileges on *.* to 'mts_user'@'%' with grant option;
+flush privileges;
+
 create table area
 (
     area_id     smallint unsigned auto_increment comment 'Mã khu vực' primary key,

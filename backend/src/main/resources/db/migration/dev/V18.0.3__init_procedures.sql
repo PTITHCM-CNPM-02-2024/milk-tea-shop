@@ -511,6 +511,7 @@ BEGIN
         )
     );
 
+
     SET @v_has_manager = (
         SELECT EXISTS(
             SELECT 1 FROM manager WHERE account_id = p_account_id

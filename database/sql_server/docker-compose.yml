@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: milk-tea-shop-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=MilkTeaShop@2025
+      - MSSQL_PID=Developer
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - sqlserver_backup:/var/opt/mssql/backup
+      - ./init:/docker-entrypoint-initdb.d
+      - ./init/entrypoint.sh:/usr/local/bin/entrypoint.sh
+    networks:
+      - milk-tea-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+    driver: local
+  sqlserver_backup:
+    driver: local
+
+networks:
+  milk-tea-network:
+    driver: bridge 

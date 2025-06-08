@@ -11,4 +11,7 @@
 !ddl-data-source/**
 !backup
 !backup/
-
+!sql_server
+!sql_server/*
+!sql_server/init/**
+!sql_server/**
