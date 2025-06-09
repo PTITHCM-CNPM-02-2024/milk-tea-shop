@@ -81,8 +81,8 @@ BEGIN
             PRINT N'';
         END
         
-        -- 3. Có thể thêm các tác vụ bảo trì khác ở đây
-        -- Ví dụ: Hủy order tự động, dọn dẹp dữ liệu cũ, v.v.
+        -- 3. Hủy order tự động được xử lý bằng job riêng biệt (sp_auto_cancel_overdue_orders)
+        -- 4. Có thể thêm các tác vụ bảo trì khác ở đây
         
         PRINT N'===============================================';
         PRINT N'=== HOÀN THÀNH BẢO TRÌ HỆ THỐNG ===';
@@ -104,41 +104,10 @@ END
 GO
 
 -- =====================================================
--- OPTIONAL: AUTO ORDER CANCELLATION PROCEDURE
+-- AUTO ORDER CANCELLATION - REMOVED
 -- =====================================================
-
--- Thủ tục hủy tự động các order quá hạn (ví dụ)
-CREATE PROCEDURE sp_cancel_overdue_orders
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @rows_affected INT;
-    DECLARE @result_message NVARCHAR(500);
-    DECLARE @timeout_hours INT = 2; -- Hủy order sau 2 tiếng nếu vẫn ở trạng thái PENDING
-    
-    BEGIN TRY
-        PRINT N'Bắt đầu hủy các order quá thời hạn...';
-        
-        -- Hủy các order PENDING quá 2 tiếng
-        UPDATE [order]
-        SET status = 'CANCELLED',
-            updated_at = GETDATE()
-        WHERE status = 'PENDING'
-          AND DATEDIFF(HOUR, order_time, GETDATE()) > @timeout_hours;
-        
-        SET @rows_affected = @@ROWCOUNT;
-        SET @result_message = N'Đã hủy ' + CAST(@rows_affected AS NVARCHAR(10)) + N' order quá thời hạn ' + CAST(@timeout_hours AS NVARCHAR(2)) + N' giờ';
-        PRINT @result_message;
-        
-    END TRY
-    BEGIN CATCH
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-        PRINT N'Lỗi trong quá trình hủy order: ' + @ErrorMessage;
-        THROW;
-    END CATCH
-END
-GO
+-- SP này đã được thay thế bằng sp_auto_cancel_overdue_orders 
+-- trong file 011_auto_cancel_overdue_orders.sql với tính năng nâng cao hơn
 
 -- =====================================================
 -- SQL SERVER AGENT JOB SETUP SCRIPTS
@@ -156,18 +125,15 @@ PRINT N'   - Tên job: "Deactivate Expired Discounts"';
 PRINT N'   - Command: EXEC sp_deactivate_expired_discounts';
 PRINT N'   - Schedule: Hàng ngày lúc 01:30 AM';
 PRINT N'';
-PRINT N'3. JOB AUTO CANCEL ORDERS (tùy chọn):';
-PRINT N'   - Tên job: "Cancel Overdue Orders"';
-PRINT N'   - Command: EXEC sp_cancel_overdue_orders';
-PRINT N'   - Schedule: Mỗi 30 phút';
+PRINT N'3. JOB AUTO CANCEL ORDERS:';
+PRINT N'   - Được xử lý bởi file 011_auto_cancel_overdue_orders.sql';
+PRINT N'   - Command: EXEC sp_auto_cancel_overdue_orders';
+PRINT N'   - Schedule: Mỗi 30 giây';
 PRINT N'';
 
-/*
 -- =====================================================
 -- AUTOMATED JOB CREATION SCRIPTS
 -- =====================================================
--- Uncomment và chỉnh sửa script này để tạo jobs tự động (cần quyền sysadmin)
-
 USE msdb;
 GO
 
@@ -195,32 +161,7 @@ EXEC dbo.sp_attach_schedule
 EXEC dbo.sp_add_jobserver
     @job_name = N'Daily System Maintenance';
 
--- 2. Tạo job cho hủy order tự động (chạy mỗi 30 phút)
-EXEC dbo.sp_add_job
-    @job_name = N'Cancel Overdue Orders',
-    @description = N'Automatically cancel pending orders that are overdue';
-
-EXEC dbo.sp_add_jobstep
-    @job_name = N'Cancel Overdue Orders',
-    @step_name = N'Cancel Orders',
-    @command = N'EXEC MilkTeaShop.dbo.sp_cancel_overdue_orders',
-    @database_name = N'MilkTeaShop';
-
-EXEC dbo.sp_add_schedule
-    @schedule_name = N'Every 30 Minutes',
-    @freq_type = 4, -- Daily
-    @freq_interval = 1,
-    @freq_subday_type = 4, -- Minutes
-    @freq_subday_interval = 30,
-    @active_start_time = 000000, -- 00:00:00
-    @active_end_time = 235959; -- 23:59:59
-
-EXEC dbo.sp_attach_schedule
-    @job_name = N'Cancel Overdue Orders',
-    @schedule_name = N'Every 30 Minutes';
-
-EXEC dbo.sp_add_jobserver
-    @job_name = N'Cancel Overdue Orders';
+-- 2. Job hủy order tự động được xử lý trong file 011_auto_cancel_overdue_orders.sql
 
 -- 3. Tạo job riêng cho discount deactivation (nếu muốn tách riêng)
 EXEC dbo.sp_add_job
@@ -245,8 +186,9 @@ EXEC dbo.sp_attach_schedule
 
 EXEC dbo.sp_add_jobserver
     @job_name = N'Deactivate Expired Discounts';
-*/
 
+PRINT N'✅ Job Daily System Maintenance đã được tạo';
+PRINT N'✅ Job Deactivate Expired Discounts đã được tạo';
 PRINT N'Đã tạo thành công các procedures cho scheduled events';
 PRINT N'Các procedures có thể được gọi thủ công hoặc thông qua SQL Server Agent Jobs';
 GO 

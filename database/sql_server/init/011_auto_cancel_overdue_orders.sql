@@ -319,10 +319,8 @@ PRINT N'';
 
 
 -- =======================================================
--- AUTOMATED JOB CREATION SCRIPTS (OPTIONAL)
+-- AUTOMATED JOB CREATION SCRIPTS
 -- =======================================================
--- Uncomment script này để tạo jobs tự động (cần quyền sysadmin)
-
 USE msdb;
 GO
 
@@ -379,6 +377,9 @@ EXEC dbo.sp_attach_schedule
 
 EXEC dbo.sp_add_jobserver
     @job_name = N'Order Maintenance';
+
+PRINT N'✅ Job Auto Cancel Overdue Orders đã được tạo';
+PRINT N'✅ Job Order Maintenance đã được tạo';
 GO
 
 PRINT N'===============================================';
@@ -390,10 +391,12 @@ PRINT N'   - sp_check_overdue_orders_status';
 PRINT N'   - sp_order_maintenance';
 PRINT N'   - sp_force_cancel_order';
 PRINT N'';
-PRINT N'⏱️  Cấu hình timeout: 3 phút';
-PRINT N'🔄 Tần suất quét đề xuất: 30 giây';
-PRINT N'📋 Monitoring đề xuất: 5 phút';
+PRINT N'✅ Đã tạo các SQL Server Agent Jobs:';
+PRINT N'   - Auto Cancel Overdue Orders (mỗi 30 giây)';
+PRINT N'   - Order Maintenance (mỗi 5 phút)';
 PRINT N'';
-PRINT N'Để bật tự động, hãy tạo SQL Server Agent Jobs theo hướng dẫn ở trên.';
+PRINT N'⏱️  Cấu hình timeout: 3 phút';
+PRINT N'🔄 Tần suất quét: 30 giây';
+PRINT N'📋 Monitoring: 5 phút';
 
 GO 

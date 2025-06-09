@@ -236,10 +236,8 @@ PRINT N'';
 PRINT N'Hoặc sử dụng script T-SQL sau để tạo job tự động:';
 PRINT N'';
 
-/*
--- Script tạo SQL Server Agent Job (cần quyền sysadmin)
--- Uncomment và chạy script này nếu có quyền tạo job
 
+-- Script tạo SQL Server Agent Job (cần quyền sysadmin)
 USE msdb;
 GO
 
@@ -265,7 +263,8 @@ EXEC dbo.sp_attach_schedule
 
 EXEC dbo.sp_add_jobserver
     @job_name = N'Daily Membership Maintenance';
-*/
 
+
+PRINT N'✅ Job Daily Membership Maintenance đã được tạo';
 PRINT N'Đã tạo thành công các triggers và procedures cho quản lý membership';
 GO 
