@@ -5,17 +5,6 @@
 echo "🚀 Bắt đầu khởi tạo database Milk Tea Shop..."
 echo "================================================="
 
-echo "📁 Backup Location: /var/opt/mssql/backup/"
-mkdir -p /var/opt/mssql/backup/
-chmod 777 /var/opt/mssql/backup/
-chown mssql:mssql /var/opt/mssql/backup/
-if [ $? -eq 0 ]; then
-    echo "✅ Tạo thư mục backup thành công"
-else
-    echo "❌ Lỗi khi tạo thư mục backup"
-    exit 1
-fi
-
 # Đợi SQL Server khởi động hoàn toàn
 echo "⏳ Đang đợi SQL Server khởi động..."
 echo "📋 Danh sách file sẽ được thực thi:"

@@ -9,7 +9,6 @@ services:
       - MSSQL_SA_PASSWORD=MilkTeaShop@2025
       - MSSQL_PID=Developer
       - MSSQL_AGENT_ENABLED=true
-      - MSSQL_BACKUP_DIR=/var/opt/mssql/backup
     ports:
       - "1433:1433"
     volumes:

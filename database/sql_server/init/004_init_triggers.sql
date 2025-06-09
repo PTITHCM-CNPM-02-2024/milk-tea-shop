@@ -841,11 +841,6 @@ BEGIN
         RETURN;
     END
     
-    -- Set null employee_id trong order trước khi xóa nhân viên
-    UPDATE [order]
-    SET employee_id = NULL, updated_at = GETDATE()
-    WHERE employee_id IN (SELECT employee_id FROM deleted);
-    
     DELETE FROM employee WHERE employee_id IN (SELECT employee_id FROM deleted);
 END
 GO
