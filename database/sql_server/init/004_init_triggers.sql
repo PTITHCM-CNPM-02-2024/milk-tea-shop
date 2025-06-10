@@ -1129,17 +1129,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Kiểm tra đơn hàng phải ở trạng thái PROCESSING
-    IF EXISTS (
-        SELECT 1 FROM deleted d
-        INNER JOIN [order] o ON d.order_id = o.order_id
-        WHERE o.status != 'PROCESSING'
-    )
-    BEGIN
-        THROW 50051, N'Không thể xóa sản phẩm khỏi đơn hàng đã hoàn thành hoặc đã hủy', 1;
-        RETURN;
-    END
-    
     DELETE FROM order_product
     WHERE order_product_id IN (SELECT order_product_id FROM deleted);
 END
@@ -1176,22 +1165,6 @@ BEGIN
     )
     BEGIN
         THROW 50057, N'Không thể đặt bàn cho bàn không hoạt động', 1;
-        RETURN;
-    END
-    
-    -- Kiểm tra bàn có đang được sử dụng không
-    IF EXISTS (
-        SELECT 1 FROM inserted i
-        WHERE EXISTS (
-            SELECT 1 FROM order_table ot
-            INNER JOIN [order] o ON ot.order_id = o.order_id
-            WHERE ot.table_id = i.table_id 
-            AND o.status = 'PROCESSING'
-            AND ot.check_out IS NULL
-        )
-    )
-    BEGIN
-        THROW 50058, N'Bàn đang được sử dụng bởi đơn hàng khác', 1;
         RETURN;
     END
     

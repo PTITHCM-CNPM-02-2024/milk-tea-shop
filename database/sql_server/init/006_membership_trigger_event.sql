@@ -220,24 +220,6 @@ BEGIN
 END
 GO
 
--- =====================================================
--- SQL SERVER AGENT JOB SETUP SCRIPT
--- =====================================================
-
-PRINT N'=== HƯỚNG DẪN THIẾT LẬP SQL SERVER AGENT JOB ===';
-PRINT N'Để thay thế MySQL Event Scheduler, hãy tạo SQL Server Agent Job với script sau:';
-PRINT N'';
-PRINT N'1. Mở SQL Server Management Studio';
-PRINT N'2. Vào SQL Server Agent > Jobs > New Job...';
-PRINT N'3. Tạo job tên: "Daily Membership Maintenance"';
-PRINT N'4. Thêm step với T-SQL command: EXEC sp_daily_membership_maintenance';
-PRINT N'5. Thiết lập schedule chạy hàng ngày lúc 01:00 AM';
-PRINT N'';
-PRINT N'Hoặc sử dụng script T-SQL sau để tạo job tự động:';
-PRINT N'';
-
-
--- Script tạo SQL Server Agent Job (cần quyền sysadmin)
 USE msdb;
 GO
 

@@ -8,14 +8,10 @@
 USE MilkTeaShop;
 GO
 
--- Set required options
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
--- =======================================================
--- 1. PROCEDURE HỦY ORDER QUÁ HẠN (3 PHÚT)
--- =======================================================
 
 CREATE PROCEDURE sp_auto_cancel_overdue_orders
 AS
@@ -293,34 +289,6 @@ BEGIN
 END
 GO
 
--- =======================================================
--- 5. SQL SERVER AGENT JOB SETUP GUIDE
--- =======================================================
-
-PRINT N'===============================================';
-PRINT N'=== HƯỚNG DẪN THIẾT LẬP SQL SERVER AGENT JOB ===';
-PRINT N'===============================================';
-PRINT N'';
-PRINT N'1. TẠO JOB AUTO CANCEL OVERDUE ORDERS:';
-PRINT N'   - Tên job: "Auto Cancel Overdue Orders"';
-PRINT N'   - Command: EXEC MilkTeaShop.dbo.sp_auto_cancel_overdue_orders';
-PRINT N'   - Schedule: Mỗi 30 giây (để phát hiện nhanh)';
-PRINT N'';
-PRINT N'2. TẠO JOB ORDER MAINTENANCE:';
-PRINT N'   - Tên job: "Order Maintenance"';
-PRINT N'   - Command: EXEC MilkTeaShop.dbo.sp_order_maintenance';
-PRINT N'   - Schedule: Mỗi 5 phút (để monitoring)';
-PRINT N'';
-PRINT N'3. CÁCH CHẠY THỬ NGHIỆM:';
-PRINT N'   - EXEC sp_check_overdue_orders_status';
-PRINT N'   - EXEC sp_auto_cancel_overdue_orders';
-PRINT N'   - EXEC sp_order_maintenance';
-PRINT N'';
-
-
--- =======================================================
--- AUTOMATED JOB CREATION SCRIPTS
--- =======================================================
 USE msdb;
 GO
 

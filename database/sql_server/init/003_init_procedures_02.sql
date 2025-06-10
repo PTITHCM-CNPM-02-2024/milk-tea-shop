@@ -561,14 +561,7 @@ END
 GO
 
 -- Delete Order
-CREATE PROCEDURE sp_delete_order @p_order_id INT
-AS
-BEGIN
-    SET NOCOUNT ON;
 
-    DELETE FROM [order] WHERE order_id = @p_order_id;
-END
-GO
 
 -- =====================================================
 -- 19. ORDER DISCOUNT PROCEDURES
