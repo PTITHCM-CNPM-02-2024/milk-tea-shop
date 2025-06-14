@@ -36,7 +36,7 @@ export const useDiscountStore = defineStore('discount', {
         }
       } catch (error) {
         this.discounts = []
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải dữ liệu'
         console.error('Lỗi trong fetchDiscounts:', error)
         throw error
       } finally {
@@ -64,7 +64,7 @@ export const useDiscountStore = defineStore('discount', {
         }
       } catch (error) {
         this.coupons = []
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải dữ liệu'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải dữ liệu'
         console.error('Lỗi trong fetchCoupons:', error)
         throw error
       } finally {
@@ -79,7 +79,7 @@ export const useDiscountStore = defineStore('discount', {
         const response = await discountService.getCouponDetail(id)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải thông tin mã giảm giá'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin mã giảm giá'
         console.error('Lỗi trong getCouponById:', error)
         throw error
       } finally {
@@ -95,7 +95,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchCoupons(this.pagination.page)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tạo mã giảm giá'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tạo mã giảm giá'
         console.error('Lỗi trong createCoupon:', error)
         throw error
       } finally {
@@ -111,7 +111,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchCoupons(this.pagination.page)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật mã giảm giá'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật mã giảm giá'
         console.error('Lỗi trong updateCoupon:', error)
         throw error
       } finally {
@@ -127,7 +127,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchCoupons(this.pagination.page)
         return true
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa mã giảm giá'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa mã giảm giá'
         console.error('Lỗi trong deleteCoupon:', error)
         throw error
       } finally {
@@ -142,7 +142,7 @@ export const useDiscountStore = defineStore('discount', {
         const response = await discountService.getDiscountDetail(id)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải thông tin chương trình khuyến mãi'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin chương trình khuyến mãi'
         console.error('Lỗi trong getDiscountById:', error)
         throw error
       } finally {
@@ -158,7 +158,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchDiscounts(this.pagination.page)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tạo chương trình khuyến mãi'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tạo chương trình khuyến mãi'
         console.error('Lỗi trong createDiscount:', error)
         throw error
       } finally {
@@ -174,7 +174,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchDiscounts(this.pagination.page)
         return response.data
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi cập nhật chương trình khuyến mãi'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật chương trình khuyến mãi'
         console.error('Lỗi trong updateDiscount:', error)
         throw error
       } finally {
@@ -190,7 +190,7 @@ export const useDiscountStore = defineStore('discount', {
         await this.fetchDiscounts(this.pagination.page)
         return true
       } catch (error) {
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi xóa chương trình khuyến mãi'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa chương trình khuyến mãi'
         console.error('Lỗi trong deleteDiscount:', error)
         throw error
       } finally {
@@ -215,7 +215,7 @@ export const useDiscountStore = defineStore('discount', {
         }
       } catch (error) {
         this.unusedCoupons = []
-        this.error = error.response?.data || 'Đã xảy ra lỗi khi tải danh sách mã giảm giá chưa được sử dụng'
+        this.error = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách mã giảm giá chưa được sử dụng'
         console.error('Lỗi trong fetchUnusedCoupons:', error)
         throw error
       } finally {

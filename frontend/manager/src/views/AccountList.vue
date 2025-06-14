@@ -10,16 +10,7 @@
       </div>
     </div>
 
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert
-      v-if="accountStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ accountStore.error }}
-    </v-alert>
+
 
     <!-- Filter và Search -->
     <v-row class="mb-4 px-3">

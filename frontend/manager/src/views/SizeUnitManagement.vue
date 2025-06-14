@@ -18,16 +18,7 @@
       </v-btn>
     </div>
     
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert
-      v-if="sizeUnitStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ sizeUnitStore.error?.detail }}
-    </v-alert>
+
     
     <!-- Tabs cho kích thước và đơn vị tính -->
     <v-tabs v-model="activeTab" color="primary" align-tabs="start" class="px-4 mb-4">
@@ -233,7 +224,8 @@
 
             <v-text-field
               v-model="editedSize.name"
-              label="Tên kích thước"
+              label="Tên kích thước *"
+              placeholder="Ví dụ: S, M, L, XL"
               variant="outlined"
               required
               :rules="[
@@ -247,6 +239,7 @@
             <v-textarea
               v-model="editedSize.description"
               label="Mô tả"
+              placeholder="Ví dụ: Kích thước nhỏ 300ml, Kích thước vừa 500ml"
               variant="outlined"
               rows="3"
               auto-grow
@@ -256,7 +249,7 @@
             <v-select
               v-model="editedSize.unitId"
               :items="unitsForSelect"
-              label="Đơn vị tính"
+              label="Đơn vị tính *"
               variant="outlined"
               required
               :rules="[v => !!v || 'Vui lòng chọn đơn vị tính']"
@@ -265,7 +258,8 @@
             
             <v-text-field
               v-model="editedSize.quantity"
-              label="Số lượng"
+              label="Số lượng *"
+              placeholder="Ví dụ: 300, 500, 700"
               variant="outlined"
               required
               type="number"
@@ -316,7 +310,8 @@
 
             <v-text-field
               v-model="editedUnit.name"
-              label="Tên đơn vị tính"
+              label="Tên đơn vị tính *"
+              placeholder="Ví dụ: mililít, centimet, gram"
               variant="outlined"
               required
               :rules="[
@@ -330,6 +325,7 @@
             <v-textarea
               v-model="editedUnit.description"
               label="Mô tả"
+              placeholder="Ví dụ: Đơn vị đo thể tích chất lỏng"
               variant="outlined"
               rows="3"
               auto-grow
@@ -338,7 +334,8 @@
             
             <v-text-field
               v-model="editedUnit.symbol"
-              label="Ký hiệu"
+              label="Ký hiệu *"
+              placeholder="Ví dụ: ml, cm, g"
               variant="outlined"
               required
               :rules="[

@@ -30,7 +30,7 @@ export const useOrderStore = defineStore('order', () => {
         total: response.data.totalElements || 0
       }
     } catch (err) {
-      error.value = err.message || 'Có lỗi xảy ra khi lấy danh sách đơn hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Có lỗi xảy ra khi lấy danh sách đơn hàng'
       console.error('Lỗi trong fetchOrders:', err)
       throw err
     } finally {
@@ -48,7 +48,7 @@ export const useOrderStore = defineStore('order', () => {
       currentOrder.value = response.data
       return response.data
     } catch (err) {
-      error.value = err.message || 'Có lỗi xảy ra khi lấy chi tiết đơn hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Có lỗi xảy ra khi lấy chi tiết đơn hàng'
       console.error('Lỗi trong fetchOrderById:', err)
       throw err
     } finally {
@@ -64,7 +64,7 @@ export const useOrderStore = defineStore('order', () => {
       const response = await paymentService.getPaymentById(paymentId)
       return response.data
     } catch (err) {
-      error.value = err.message || 'Có lỗi xảy ra khi lấy chi tiết thanh toán'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Có lỗi xảy ra khi lấy chi tiết thanh toán'
       console.error('Lỗi trong fetchPaymentById:', err)
       throw err
     }

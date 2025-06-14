@@ -32,6 +32,7 @@ public class UpdateAccountCommandHandler implements ICommandHandler<UpdateAccoun
     JpaAccountRepository accountRepository;
     IJwtService jwtService;
     AuthenticationManager authenticationManager;
+    PasswordEncoder passwordEncoder;
     @Override
     @Transactional
     public CommandResult handle(UpdateAccountCommand command) {
@@ -45,16 +46,15 @@ public class UpdateAccountCommandHandler implements ICommandHandler<UpdateAccoun
             account.incrementTokenVersion();
             accountRepository.saveAndFlush(account);
             
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            account.getUsername().getValue(),
-                            account.getPassword().getValue()
-                    )
-            );
-            
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             
             var userPrincipal = (UserPrincipal) authentication.getPrincipal();
+            
+            if(!userPrincipal.getId().equals(account.getId())){
+                throw new NotFoundException("Tài khoản không hợp lệ");
+            }
+            
+            userPrincipal.setUsername(account.getUsername().getValue());
             var accessToken = jwtService.generateAccessToken(userPrincipal);
             var expiration = jwtService.extractClaim(accessToken, Claims::getExpiration);
             var accountId = userPrincipal.getId();

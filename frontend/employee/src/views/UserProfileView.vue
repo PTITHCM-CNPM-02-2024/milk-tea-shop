@@ -155,15 +155,13 @@
                   v-model="passwordData.oldPassword"
                   label="Mật khẩu hiện tại"
                   type="password"
-                  required
                   :rules="[v => !!v || 'Mật khẩu hiện tại là bắt buộc']"
                 ></v-text-field>
                 
                 <v-text-field
                   v-model="passwordData.newPassword"
                   label="Mật khẩu mới"
-                  type="password"
-                  required
+                  type="password"              
                   :rules="[v => !!v || 'Mật khẩu mới là bắt buộc']"
                 ></v-text-field>
                 
@@ -171,7 +169,6 @@
                   v-model="passwordData.confirmPassword"
                   label="Xác nhận mật khẩu"
                   type="password"
-                  required
                   :rules="[
                     v => !!v || 'Xác nhận mật khẩu là bắt buộc',
                     v => v === passwordData.newPassword || 'Mật khẩu không khớp'

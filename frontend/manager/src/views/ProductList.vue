@@ -10,10 +10,7 @@
       </div>
     </div>
 
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert v-if="productStore.error" type="error" variant="tonal" closable class="mx-4 mb-4">
-      {{ productStore.error }}
-    </v-alert>
+
 
     <!-- Tabs cho sản phẩm và danh mục -->
     <v-tabs v-model="activeTab" color="primary" align-tabs="start" class="px-4 mb-4">
@@ -229,10 +226,10 @@
               {{ productDialogError }}
             </v-alert>
 
-            <v-text-field v-model="editedProduct.name" label="Tên sản phẩm" variant="outlined" required
+            <v-text-field v-model="editedProduct.name" label="Tên sản phẩm *" placeholder="Ví dụ: Trà sữa truyền thống, Cà phê đen đá" variant="outlined" required
               :rules="[v => !!v || 'Vui lòng nhập tên sản phẩm']" class="mb-3"></v-text-field>
 
-            <v-textarea v-model="editedProduct.description" label="Mô tả" variant="outlined" auto-grow rows="3"
+            <v-textarea v-model="editedProduct.description" label="Mô tả" placeholder="Ví dụ: Trà sữa thơm ngon với topping trân châu tự nhiên" variant="outlined" auto-grow rows="3"
               class="mb-3"></v-textarea>
 
             <v-select v-model="editedProduct.categoryId" :items="categoryOptions" label="Danh mục" variant="outlined"
@@ -355,10 +352,10 @@
               {{ productDialogError }}
             </v-alert>
 
-            <v-text-field v-model="editedProduct.name" label="Tên sản phẩm" variant="outlined" required
+            <v-text-field v-model="editedProduct.name" label="Tên sản phẩm *" placeholder="Ví dụ: Trà sữa truyền thống, Cà phê đen đá" variant="outlined" required
               :rules="[v => !!v || 'Vui lòng nhập tên sản phẩm']" class="mb-3"></v-text-field>
 
-            <v-textarea v-model="editedProduct.description" label="Mô tả" variant="outlined" auto-grow rows="3"
+            <v-textarea v-model="editedProduct.description" label="Mô tả" placeholder="Ví dụ: Trà sữa thơm ngon với topping trân châu tự nhiên" variant="outlined" auto-grow rows="3"
               class="mb-3"></v-textarea>
 
             <v-select v-model="editedProduct.categoryId" :items="categoryOptions" label="Danh mục" variant="outlined"
@@ -506,10 +503,10 @@
               {{ categoryDialogError }}
             </v-alert>
 
-            <v-text-field v-model="editedCategory.name" label="Tên danh mục" variant="outlined" required
+            <v-text-field v-model="editedCategory.name" label="Tên danh mục *" placeholder="Ví dụ: Trà sữa, Cà phê, Bánh ngọt" variant="outlined" required
               :rules="[v => !!v || 'Vui lòng nhập tên danh mục']" class="mb-3"></v-text-field>
 
-            <v-textarea v-model="editedCategory.description" label="Mô tả" variant="outlined" auto-grow rows="3"
+            <v-textarea v-model="editedCategory.description" label="Mô tả" placeholder="Ví dụ: Các loại đồ uống trà sữa với nhiều hương vị" variant="outlined" auto-grow rows="3"
               class="mb-3"></v-textarea>
           </v-form>
         </v-card-text>
@@ -543,10 +540,10 @@
               {{ categoryDialogError }}
             </v-alert>
 
-            <v-text-field v-model="editedCategory.name" label="Tên danh mục" variant="outlined" required
+            <v-text-field v-model="editedCategory.name" label="Tên danh mục *" placeholder="Ví dụ: Trà sữa, Cà phê, Bánh ngọt" variant="outlined" required
               :rules="[v => !!v || 'Vui lòng nhập tên danh mục']" class="mb-3"></v-text-field>
 
-            <v-textarea v-model="editedCategory.description" label="Mô tả" variant="outlined" auto-grow rows="3"
+            <v-textarea v-model="editedCategory.description" label="Mô tả" placeholder="Ví dụ: Các loại đồ uống trà sữa với nhiều hương vị" variant="outlined" auto-grow rows="3"
               class="mb-3"></v-textarea>
           </v-form>
         </v-card-text>
@@ -606,11 +603,11 @@
               {{ priceDialogError }}
             </v-alert>
 
-            <v-select v-model="newPrice.sizeId" :items="availableSizes" label="Kích cỡ" variant="outlined"
+            <v-select v-model="newPrice.sizeId" :items="availableSizes" label="Kích cỡ *" variant="outlined"
               item-title="name" item-value="id" :rules="[v => !!v || 'Vui lòng chọn kích cỡ']" class="mb-3"
               required></v-select>
 
-            <v-text-field v-model.number="newPrice.price" label="Giá (VNĐ)" variant="outlined" type="number" :rules="[
+            <v-text-field v-model.number="newPrice.price" label="Giá (VNĐ) *" placeholder="Ví dụ: 25000, 30000, 35000" variant="outlined" type="number" :rules="[
               v => !!v || 'Vui lòng nhập giá sản phẩm',
               v => v >= 1000 || 'Giá sản phẩm phải lớn hơn 1.000đ'
             ]" class="mb-3" required></v-text-field>
@@ -864,7 +861,7 @@ const openEditDialog = async (product) => {
 
     editDialog.value = true
   } catch (error) {
-    showSnackbar(`Lỗi: ${error.message}`, 'error')
+    showSnackbar(`Lỗi: ${error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải sản phẩm' }`, 'error')
   }
 }
 
@@ -929,7 +926,7 @@ const saveProductPrice = () => {
     closeAddPriceDialog()
   } catch (error) {
     console.error('Lỗi khi thêm giá sản phẩm:', error)
-    priceDialogError.value = error.message || 'Đã xảy ra lỗi khi thêm giá'
+    priceDialogError.value = error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi thêm giá'
   }
 }
 
@@ -972,7 +969,7 @@ const deletePrice = async () => {
   } catch (error) {
     console.error('Lỗi khi xóa giá sản phẩm:', error)
     priceDialogError.value = error.message || 'Đã xảy ra lỗi khi xóa giá'
-    showSnackbar(`Lỗi: ${error.message}`, 'error')
+    showSnackbar(`Lỗi: ${error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa giá' }`, 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1022,7 +1019,7 @@ const saveProduct = async () => {
   } catch (error) {
     console.error('Lỗi khi lưu sản phẩm:', error)
     productDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu sản phẩm'
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu sản phẩm', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1082,7 +1079,7 @@ const updateProduct = async () => {
   } catch (error) {
     console.error('Lỗi khi cập nhật sản phẩm:', error)
     productDialogError.value = error.message || 'Đã xảy ra lỗi khi cập nhật sản phẩm'
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật sản phẩm', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1095,7 +1092,7 @@ const deleteSelectedProduct = async () => {
     loadProducts()
   } catch (error) {
     console.error('Lỗi khi xóa sản phẩm:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa sản phẩm', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1155,7 +1152,7 @@ const saveCategory = async () => {
   } catch (error) {
     console.error('Lỗi khi lưu danh mục:', error)
     categoryDialogError.value = error.message || 'Đã xảy ra lỗi khi lưu danh mục'
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu danh mục', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1172,7 +1169,7 @@ const updateCategory = async () => {
   } catch (error) {
     console.error('Lỗi khi cập nhật danh mục:', error)
     categoryDialogError.value = error.message || 'Đã xảy ra lỗi khi cập nhật danh mục'
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật danh mục', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1189,7 +1186,7 @@ const deleteSelectedCategory = async () => {
     }
   } catch (error) {
     console.error('Lỗi khi xóa danh mục:', error)
-    showSnackbar('Đã xảy ra lỗi: ' + error.message, 'error')
+    showSnackbar('Đã xảy ra lỗi: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa danh mục', 'error')
     // Không đóng dialog khi có lỗi
   }
 }
@@ -1249,7 +1246,7 @@ const handleImageChange = async (file) => {
     editedProduct.value.imageUrl = imageData.fileUrl
     showSnackbar('Tải hình ảnh lên thành công', 'success')
   } catch (error) {
-    showSnackbar('Lỗi khi tải hình ảnh: ' + error.message, 'error')
+    showSnackbar('Lỗi khi tải hình ảnh: ' + error.response?.data?.detail || error.response?.data?.message || 'Đã xảy ra lỗi khi tải hình ảnh', 'error')
   } finally {
     uploadingImage.value = false
     productImage.value = null

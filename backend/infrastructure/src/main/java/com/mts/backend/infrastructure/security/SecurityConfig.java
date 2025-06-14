@@ -34,7 +34,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     
-    private final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000", "http://localhost:3001", "https://yourdomain.com");
+    private final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:9057", "http://localhost:9058", "http://localhost:9090", "http://localhost:9091");
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, 
                          JwtUserDetailService jwtUserDetailService,

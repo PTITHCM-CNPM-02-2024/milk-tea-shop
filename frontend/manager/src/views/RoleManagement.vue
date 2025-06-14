@@ -18,16 +18,7 @@
       </v-btn>
     </div>
     
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert
-      v-if="roleStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ roleStore.error }}
-    </v-alert>
+
     
     <!-- Filter và Search -->
     <v-row class="mb-4 px-3">
@@ -149,7 +140,8 @@
 
             <v-text-field
               v-model="editedRole.name"
-              label="Tên vai trò"
+              label="Tên vai trò *"
+              placeholder="Ví dụ: MANAGER, EMPLOYEE, CASHIER"
               variant="outlined"
               required
               :rules="[v => !!v || 'Vui lòng nhập tên vai trò']"
@@ -158,7 +150,8 @@
             
             <v-text-field
               v-model="editedRole.description"
-              label="Mô tả"
+              label="Mô tả *"
+              placeholder="Ví dụ: Quản lý cửa hàng, Nhân viên pha chế"
               variant="outlined"
               required
               :rules="[v => !!v || 'Vui lòng nhập mô tả vai trò']"
@@ -208,7 +201,8 @@
 
             <v-text-field
               v-model="editedRole.name"
-              label="Tên vai trò"
+              label="Tên vai trò *"
+              placeholder="Ví dụ: MANAGER, EMPLOYEE, CASHIER"
               variant="outlined"
               required
               :rules="[v => !!v || 'Vui lòng nhập tên vai trò']"
@@ -218,7 +212,8 @@
             
             <v-text-field
               v-model="editedRole.description"
-              label="Mô tả"
+              label="Mô tả *"
+              placeholder="Ví dụ: Quản lý cửa hàng, Nhân viên pha chế"
               variant="outlined"
               required
               :rules="[v => !!v || 'Vui lòng nhập mô tả vai trò']"

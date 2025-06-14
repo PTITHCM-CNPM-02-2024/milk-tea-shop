@@ -10,26 +10,7 @@
       </div>
     </div>
 
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert
-      v-if="customerStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ customerStore.error }}
-    </v-alert>
 
-    <v-alert
-      v-if="membershipStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ membershipStore.error }}
-    </v-alert>
 
     <!-- Tabs -->
     <v-tabs v-model="activeTab" color="primary" align-tabs="start" class="px-4 mb-4">
@@ -357,6 +338,7 @@
                         v-model="editedCustomer.firstName"
                         @update:model-value="value => editedCustomer.firstName = toUpperCaseValue(value)"
                         label="Họ"
+                        placeholder="Ví dụ: NGUYỄN, TRẦN, LÊ"
                         variant="outlined"
                         hint="Có thể để trống"
                         persistent-hint
@@ -372,6 +354,7 @@
                         v-model="editedCustomer.lastName"
                         @update:model-value="value => editedCustomer.lastName = toUpperCaseValue(value)"
                         label="Tên"
+                        placeholder="Ví dụ: VĂN AN, THỊ BÌNH, MINH CHÂU"
                         variant="outlined"
                         hint="Có thể để trống"
                         persistent-hint
@@ -386,6 +369,7 @@
                       <v-text-field
                         v-model="editedCustomer.email"
                         label="Email"
+                        placeholder="Ví dụ: nguyenvana@gmail.com"
                         variant="outlined"
                         hint="Có thể để trống"
                         persistent-hint
@@ -396,7 +380,8 @@
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedCustomer.phone"
-                        label="Số điện thoại"
+                        label="Số điện thoại *"
+                        placeholder="Ví dụ: 0987654321, +84987654321"
                         variant="outlined"
                         :rules="[
                           v => !!v || 'Vui lòng nhập số điện thoại',
@@ -438,6 +423,7 @@
                         <v-text-field
                           v-model="editedCustomer.username"
                           label="Tên đăng nhập"
+                          placeholder="Ví dụ: nguyenvana, customer123"
                           variant="outlined"
                           hint="Để trống nếu không tạo tài khoản"
                           :rules="[
@@ -452,6 +438,7 @@
                         <v-text-field
                           v-model="editedCustomer.password"
                           label="Mật khẩu"
+                          placeholder="Tối thiểu 6 ký tự"
                           variant="outlined"
                           type="password"
                           hint="Để trống nếu không tạo tài khoản"
@@ -769,7 +756,8 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="editedMembership.name"
-                  label="Tên chương trình"
+                  label="Tên chương trình *"
+                  placeholder="Ví dụ: NEWMEM, BRONZE, SILVER, GOLD, PLATINUM"
                   variant="outlined"
                   :rules="[v => !!v || 'Vui lòng nhập tên chương trình']"
                 ></v-text-field>
@@ -779,6 +767,7 @@
                 <v-textarea
                   v-model="editedMembership.description"
                   label="Mô tả"
+                  placeholder="Ví dụ: Thành viên mới, ưu đãi cơ bản"
                   variant="outlined"
                   rows="3"
                   hint="Mô tả chi tiết về chương trình thành viên"
@@ -789,7 +778,7 @@
               <v-col cols="12" md="6">
                 <v-select
                   v-model="editedMembership.discountUnit"
-                  label="Đơn vị giảm giá"
+                  label="Đơn vị giảm giá *"
                   variant="outlined"
                   :items="[
                     { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
@@ -802,7 +791,8 @@
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model.number="editedMembership.discountValue"
-                  label="Giá trị giảm giá"
+                  label="Giá trị giảm giá *"
+                  placeholder="Ví dụ: 5 (cho 5%), 10000 (cho 10,000 VNĐ)"
                   variant="outlined"
                   type="number"
                   min="0"
@@ -818,7 +808,8 @@
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model.number="editedMembership.requiredPoint"
-                  label="Điểm thưởng yêu cầu"
+                  label="Điểm thưởng yêu cầu *"
+                  placeholder="Ví dụ: 0, 100, 500, 1000"
                   variant="outlined"
                   type="number"
                   min="0"

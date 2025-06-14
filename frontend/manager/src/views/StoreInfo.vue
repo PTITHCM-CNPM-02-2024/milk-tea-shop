@@ -72,7 +72,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="editedStore.name"
-                      label="Tên cửa hàng"
+                      label="Tên cửa hàng *"
+                      placeholder="Ví dụ: Milk Tea Shop Nguyễn Văn Cừ"
                       :rules="[v => !!v || 'Vui lòng nhập tên cửa hàng']"
                       prepend-inner-icon="mdi-store"
                       variant="outlined"
@@ -81,7 +82,8 @@
                     
                     <v-text-field
                       v-model="editedStore.address"
-                      label="Địa chỉ"
+                      label="Địa chỉ *"
+                      placeholder="Ví dụ: 123 Nguyễn Văn Cừ, Quận 5, TP.HCM"
                       :rules="[v => !!v || 'Vui lòng nhập địa chỉ']"
                       prepend-inner-icon="mdi-map-marker"
                       variant="outlined"
@@ -113,7 +115,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="editedStore.phone"
-                      label="Số điện thoại"
+                      label="Số điện thoại *"
+                      placeholder="Ví dụ: 0287654321, +842887654321"
                       :rules="[v => !!v || 'Vui lòng nhập số điện thoại']"
                       prepend-inner-icon="mdi-phone"
                       variant="outlined"
@@ -124,7 +127,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="editedStore.email"
-                      label="Email"
+                      label="Email *"
+                      placeholder="Ví dụ: info@milkteashop.com"
                       :rules="[
                         v => !!v || 'Vui lòng nhập email',
                         v => /.+@.+\..+/.test(v) || 'Email không hợp lệ'
@@ -139,6 +143,7 @@
                     <v-text-field
                       v-model="editedStore.taxCode"
                       label="Mã số thuế"
+                      placeholder="Ví dụ: 0123456789"
                       prepend-inner-icon="mdi-file-document"
                       variant="outlined"
                       density="comfortable"

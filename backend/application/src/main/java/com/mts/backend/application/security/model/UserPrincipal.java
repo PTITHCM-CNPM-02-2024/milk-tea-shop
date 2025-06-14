@@ -2,6 +2,7 @@ package com.mts.backend.application.security.model;
 
 import com.mts.backend.domain.account.Account;
 import com.mts.backend.domain.account.identifier.AccountId;
+import com.mts.backend.domain.account.value_object.Username;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,10 @@ public class UserPrincipal implements UserDetails {
     
     public Long  getId() {
         return account.getId();
+    }
+    
+    public void setUsername(String username) {
+        account.setUsername(Username.of(username));
     }
     
     /**

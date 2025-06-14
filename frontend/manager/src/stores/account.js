@@ -35,7 +35,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchAccounts:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -52,7 +52,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchAccountById:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -71,7 +71,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createAccount:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo tài khoản mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo tài khoản mới'
       throw err
     } finally {
       loading.value = false
@@ -90,7 +90,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateAccount:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -107,7 +107,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updatePassword:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật mật khẩu'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật mật khẩu'
       throw err
     } finally {
       loading.value = false
@@ -126,7 +126,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteAccount:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -145,7 +145,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong toggleAccountLock:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -164,7 +164,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong toggleAccountActive:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái kích hoạt tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái kích hoạt tài khoản'
       throw err
     } finally {
       loading.value = false
@@ -182,7 +182,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchRoles:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách vai trò'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách vai trò'
       // Không throw lỗi, sử dụng danh sách vai trò mặc định
     } finally {
       loading.value = false
@@ -203,7 +203,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data;
     } catch (err) {
       console.error('Lỗi trong changeAccountPassword:', err);
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi đổi mật khẩu';
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi đổi mật khẩu';
       throw err;
     } finally {
       loading.value = false;
@@ -222,7 +222,7 @@ export const useAccountStore = defineStore('account', () => {
       return updatedAccountResponse.data; 
     } catch (err) {
       console.error('Lỗi trong changeAccountRole:', err);
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi vai trò';
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi vai trò';
       throw err;
     } finally {
       loading.value = false;
@@ -239,7 +239,7 @@ export const useAccountStore = defineStore('account', () => {
       return response.data;
     } catch (err) {
       console.error('Lỗi trong toggleSingleAccountLock:', err);
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa';
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa';
       throw err;
     } finally {
       loading.value = false;

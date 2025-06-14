@@ -29,7 +29,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchCustomers:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách khách hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -46,7 +46,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchCustomerById:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin khách hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -65,7 +65,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createCustomer:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo khách hàng mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo khách hàng mới'
       throw err
     } finally {
       loading.value = false
@@ -84,7 +84,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateCustomer:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật khách hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -103,7 +103,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteCustomer:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi xóa khách hàng'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa khách hàng'
       throw err
     } finally {
       loading.value = false
@@ -120,7 +120,7 @@ export const useCustomerStore = defineStore('customer', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong toggleAccountLock (customerStore):', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {
       loading.value = false

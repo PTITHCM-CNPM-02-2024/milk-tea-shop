@@ -30,7 +30,7 @@ export const useRoleStore = defineStore('role', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchRoles:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách vai trò'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách vai trò'
       throw err
     } finally {
       loading.value = false
@@ -47,7 +47,7 @@ export const useRoleStore = defineStore('role', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchRoleById:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin vai trò'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin vai trò'
       throw err
     } finally {
       loading.value = false
@@ -66,7 +66,7 @@ export const useRoleStore = defineStore('role', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createRole:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo vai trò mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo vai trò mới'
       throw err
     } finally {
       loading.value = false
@@ -85,7 +85,7 @@ export const useRoleStore = defineStore('role', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateRole:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật vai trò'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật vai trò'
       throw err
     } finally {
       loading.value = false
@@ -104,7 +104,7 @@ export const useRoleStore = defineStore('role', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteRole:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa vai trò'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa vai trò'
       throw err
     } finally {
       loading.value = false

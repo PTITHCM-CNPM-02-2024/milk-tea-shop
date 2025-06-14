@@ -32,6 +32,8 @@ services:
       - "33061:3306"
     networks:
       - milk_tea_network
+    cap_add:
+      - SYS_NICE
     depends_on:
       etcd:
         condition: service_started
@@ -49,6 +51,8 @@ services:
       MYSQL_USER: mts_user
       MYSQL_PASSWORD: mts_password
       XTRABACKUP_PASSWORD: mts_password
+    cap_add:
+      - SYS_NICE
     volumes:
       - pxc2_data:/var/lib/mysql
       - ./pxc-docker-test/config/custom.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf:ro
@@ -74,6 +78,8 @@ services:
       MYSQL_USER: mts_user
       MYSQL_PASSWORD: mts_password
       XTRABACKUP_PASSWORD: mts_password
+    cap_add:
+        - SYS_NICE
     volumes:
       - pxc3_data:/var/lib/mysql
       - ./pxc-docker-test/config/custom.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf:ro
@@ -143,6 +149,7 @@ services:
   backend:
     build:
       context: ./backend
+    image: milk_tea_backend:latest
     container_name: milk_tea_backend
     restart: unless-stopped
     ports:
@@ -156,19 +163,20 @@ services:
       SPRING_FLYWAY_ENABLED: false
       FIREBASE_BUCKET_NAME: milk-tea-shop-75973.firebasestorage.app
       JWT_SECRET: hdvfkfvewfowefihpqhfphwgbwiegihgwinwgnwigiwgiweigoewog
-      JWT_EXPIRATION: 100000
+      JWT_EXPIRATION: 1000000
       JWT_HEADER: Authorization
       JWT_PREFIX: Bearer
       JWT_TOKEN_TYPE: JWT
       JWT_ISSUER: mts-backend
     networks:
       - milk_tea_network
-    depends_on: [ proxysql ]
+    depends_on: [proxysql]
   
   frontend-employee:
     build:
       context: ./frontend/employee
     container_name: milk_tea_frontend_employee
+    image: milk_tea_frontend_employee:latest
     restart: unless-stopped
     ports:
       - "9057:80"
@@ -183,13 +191,14 @@ services:
     build:
       context: ./frontend/manager
     container_name: milk_tea_frontend_manager
+    image: milk_tea_frontend_manager:latest
     restart: unless-stopped
     ports:
       - "9058:80"
     depends_on:
       - backend
     environment:
-      API_URL: http://localhost:8181
+      VITE_API_URL: http://localhost:8181/api/v1
     networks:
       - milk_tea_network
 

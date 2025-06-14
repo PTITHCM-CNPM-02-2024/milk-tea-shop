@@ -20,9 +20,9 @@ const processQueue = (error, token = null) => {
 const apiClient = axios.create({
   baseURL: 'http://localhost:8181/api/v1',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
-  // Gửi kèm cookie (quan trọng cho refresh token HttpOnly)
   withCredentials: true,
 });
 

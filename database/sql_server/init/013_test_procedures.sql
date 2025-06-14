@@ -128,9 +128,9 @@ EXEC sp_insert_membership_type
     @p_type = N'Test Bronze',
     @p_discount_value = 5.000,
     @p_discount_unit = 'PERCENTAGE',
-    @p_required_point = 100,
+    @p_required_point = 500,
     @p_description = N'Test membership type',
-    @p_valid_until = '2024-12-31',
+    @p_valid_until = '2026-12-31',
     @p_is_active = 1,
     @p_membership_type_id = @membership_type_id OUTPUT;
 PRINT N'Inserted Membership Type ID: ' + CAST(@membership_type_id AS NVARCHAR(10));
@@ -144,9 +144,9 @@ EXEC sp_update_membership_type
     @p_type = N'Test Silver',
     @p_discount_value = 10.000,
     @p_discount_unit = 'PERCENTAGE',
-    @p_required_point = 200,
+    @p_required_point = 550,
     @p_description = N'Updated test membership type',
-    @p_valid_until = '2025-12-31',
+    @p_valid_until = '2026-12-31',
     @p_is_active = 1;
 SELECT * FROM membership_type WHERE membership_type_id = @membership_type_id;
 GO
@@ -389,7 +389,7 @@ DECLARE @change_amount DECIMAL(11, 3);
 EXEC sp_complete_order
     @p_order_id = @order_id,
     @p_payment_method_id = @payment_method_id,
-    @p_amount_paid = 70000.000,
+    @p_amount_paid = 110000.000,
     @p_success = @success OUTPUT,
     @p_message = @message OUTPUT,
     @p_change_amount = @change_amount OUTPUT;

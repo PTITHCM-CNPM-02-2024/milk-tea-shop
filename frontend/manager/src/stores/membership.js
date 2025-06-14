@@ -29,7 +29,7 @@ export const useMembershipStore = defineStore('membership', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchMembershipTypes:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách loại thành viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách loại thành viên'
       throw err
     } finally {
       loading.value = false
@@ -46,7 +46,7 @@ export const useMembershipStore = defineStore('membership', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchMembershipTypeById:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin loại thành viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin loại thành viên'
       throw err
     } finally {
       loading.value = false
@@ -65,7 +65,7 @@ export const useMembershipStore = defineStore('membership', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createMembershipType:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo loại thành viên mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo loại thành viên mới'
       throw err
     } finally {
       loading.value = false
@@ -84,7 +84,7 @@ export const useMembershipStore = defineStore('membership', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateMembershipType:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật loại thành viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật loại thành viên'
       throw err
     } finally {
       loading.value = false
@@ -103,7 +103,7 @@ export const useMembershipStore = defineStore('membership', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteMembershipType:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa loại thành viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa loại thành viên'
       throw err
     } finally {
       loading.value = false

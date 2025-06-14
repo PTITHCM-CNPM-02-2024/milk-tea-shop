@@ -5,16 +5,7 @@
         <h1 class="text-h5 font-weight-medium">Quản lý khu vực và bàn</h1>
       </v-card-title>
       
-      <!-- Hiển thị thông báo lỗi nếu có -->
-      <v-alert
-        v-if="areaTableStore.error"
-        type="error"
-        variant="tonal"
-        closable
-        class="mx-4 mt-2"
-      >
-        {{ areaTableStore.error }}
-      </v-alert>
+
       
       <v-row class="px-2">
         <!-- Phần Danh sách khu vực -->
@@ -226,7 +217,8 @@
 
               <v-text-field
                 v-model="areaFormData.name"
-                label="Tên khu vực"
+                label="Tên khu vực *"
+                placeholder="Ví dụ: A01, B02, C03"
                 variant="outlined"
                 required
                 class="mb-3"
@@ -240,6 +232,7 @@
               <v-textarea
                 v-model="areaFormData.description"
                 label="Mô tả"
+                placeholder="Ví dụ: Khu vực tầng 1, gần cửa sổ"
                 variant="outlined"
                 class="mb-3"
                 rows="3"
@@ -249,6 +242,7 @@
               <v-text-field
                 v-model.number="areaFormData.maxTable"
                 label="Số bàn tối đa"
+                placeholder="Ví dụ: 10, 20, 50"
                 type="number"
                 variant="outlined"
                 class="mb-3"
@@ -335,7 +329,8 @@
 
               <v-text-field
                 v-model="tableFormData.name"
-                label="Số bàn"
+                label="Số bàn *"
+                placeholder="Ví dụ: T01, T02, Bàn 5"
                 variant="outlined"
                 required
                 class="mb-3"

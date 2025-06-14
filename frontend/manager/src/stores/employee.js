@@ -30,7 +30,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchEmployees:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách nhân viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -47,7 +47,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchEmployeeById:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải thông tin nhân viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -66,7 +66,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createEmployee:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo nhân viên mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo nhân viên mới'
       throw err
     } finally {
       loading.value = false
@@ -85,7 +85,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateEmployee:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật nhân viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -104,7 +104,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteEmployee:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa nhân viên'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa nhân viên'
       throw err
     } finally {
       loading.value = false
@@ -121,7 +121,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong toggleAccountLock (employeeStore):', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi thay đổi trạng thái khóa tài khoản'
       throw err
     } finally {
       loading.value = false

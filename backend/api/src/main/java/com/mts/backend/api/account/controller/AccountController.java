@@ -67,7 +67,7 @@ public class AccountController implements IController {
         @ApiResponse(responseCode = "404", description = "Không tìm thấy tài khoản")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated() and authentication.principal.getId() == #id")
+    @PreAuthorize("hasRole('MANAGER') or (isAuthenticated() and authentication.principal.getId() == #id) ")
     public ResponseEntity<?> updateAccount(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id,
                                            @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateAccountRequest request) {
 
@@ -99,7 +99,7 @@ public class AccountController implements IController {
             @ApiResponse(responseCode = "403", description = "Không có quyền truy cập")
     })
     @PutMapping("/{id}/password")
-    @PreAuthorize("(isAuthenticated() and authentication.principal.getId() == #id) or hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'EMPLOYEE')")
     public ResponseEntity<?> changePassword(@Parameter(description = "ID tài khoản", required = true) @PathVariable("id") Long id,
                                             @Parameter(description = "Mật khẩu cũ", required = true) @RequestParam(value = "oldPassword", required = true) String oldPassword,
                                             @Parameter(description = "Mật khẩu mới", required = true) @RequestParam(value = "newPassword", required = true) String newPassword,

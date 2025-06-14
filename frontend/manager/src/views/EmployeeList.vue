@@ -19,16 +19,7 @@
       </v-btn>
     </div>
 
-    <!-- Alert hiển thị lỗi nếu có -->
-    <v-alert
-      v-if="employeeStore.error"
-      type="error"
-      variant="tonal"
-      closable
-      class="mx-4 mb-4"
-    >
-      {{ employeeStore.error }}
-    </v-alert>
+
 
     <!-- Card danh sách nhân viên -->
     <v-card class="mx-4">
@@ -183,7 +174,8 @@
                       <v-text-field
                         v-model="editedEmployee.firstName"
                         @update:model-value="value => editedEmployee.firstName = toUpperCaseValue(value)"
-                        label="Họ"
+                        label="Họ *"
+                        placeholder="Ví dụ: NGUYỄN, TRẦN, LÊ"
                         variant="outlined"
                         :rules="[
                           v => !!v || 'Vui lòng nhập họ',
@@ -197,7 +189,8 @@
                       <v-text-field
                         v-model="editedEmployee.lastName"
                         @update:model-value="value => editedEmployee.lastName = toUpperCaseValue(value)"
-                        label="Tên"
+                        label="Tên *"
+                        placeholder="Ví dụ: VĂN AN, THỊ BÌNH, MINH CHÂU"
                         variant="outlined"
                         :rules="[
                           v => !!v || 'Vui lòng nhập tên',
@@ -210,7 +203,8 @@
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.email"
-                        label="Email"
+                        label="Email *"
+                        placeholder="Ví dụ: nguyenvana@company.com"
                         variant="outlined"
                         :rules="[
                           v => !!v || 'Vui lòng nhập email',
@@ -222,7 +216,8 @@
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.phone"
-                        label="Số điện thoại"
+                        label="Số điện thoại *"
+                        placeholder="Ví dụ: 0987654321, +84987654321"
                         variant="outlined"
                         :rules="[
                           v => !!v || 'Vui lòng nhập số điện thoại',
@@ -234,7 +229,7 @@
                     <v-col cols="12" md="6">
                       <v-select
                         v-model="editedEmployee.gender"
-                        label="Giới tính"
+                        label="Giới tính *"
                         variant="outlined"
                         :items="genderOptions"
                         :rules="[v => !!v || 'Vui lòng chọn giới tính']"
@@ -244,7 +239,8 @@
                     <v-col cols="12" md="6">
                       <v-text-field
                         v-model="editedEmployee.position"
-                        label="Vị trí/Chức vụ"
+                        label="Vị trí/Chức vụ *"
+                        placeholder="Ví dụ: Nhân viên pha chế, Thu ngân, Quản lý ca"
                         variant="outlined"
                         :rules="[v => !!v || 'Vui lòng nhập vị trí/chức vụ']"
                       ></v-text-field>
@@ -259,7 +255,8 @@
                       <v-col cols="12" md="6">
                         <v-text-field
                           v-model="editedEmployee.username"
-                          label="Tên đăng nhập"
+                          label="Tên đăng nhập *"
+                          placeholder="Ví dụ: nguyenvana, employee123"
                           variant="outlined"
                           :rules="[!editMode ? v => !!v && /^[a-zA-Z0-9_-]+$/.test(v) && v.length >= 3 && v.length <= 50 || 'Tên đăng nhập phải có ít nhất 3 ký tự và không quá 50 ký tự' : () => true]"
                         ></v-text-field>
@@ -268,7 +265,8 @@
                       <v-col cols="12" md="6">
                         <v-text-field
                           v-model="editedEmployee.password"
-                          label="Mật khẩu"
+                          label="Mật khẩu *"
+                          placeholder="Tối thiểu 6 ký tự"
                           variant="outlined"
                           type="password"
                           :rules="[!editMode ? v => !!v && v.length >= 6 || 'Mật khẩu phải có ít nhất 6 ký tự' : () => true]"
@@ -278,7 +276,7 @@
                       <v-col cols="12">
                         <v-select
                           v-model="editedEmployee.roleId"
-                          label="Vai trò"
+                          label="Vai trò *"
                           variant="outlined"
                           :items="roleOptions"
                           :rules="[!editMode ? v => !!v || 'Vui lòng chọn vai trò' : () => true]"

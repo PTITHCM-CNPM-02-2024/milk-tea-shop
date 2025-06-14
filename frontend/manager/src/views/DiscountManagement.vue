@@ -5,16 +5,7 @@
         <h1 class="text-h5 font-weight-medium">Quản lý khuyến mãi</h1>
       </v-card-title>
       
-      <!-- Hiển thị thông báo lỗi nếu có -->
-      <v-alert
-        v-if="discountStore.error"
-        type="error"
-        variant="tonal"
-        closable
-        class="mx-4 mt-2"
-      >
-        {{ discountStore.error }}
-      </v-alert>
+
       
       <v-tabs v-model="activeTab" color="primary" class="px-4">
         <v-tab value="discounts" class="text-none">Khuyến mãi</v-tab>
@@ -238,13 +229,15 @@
         <v-form ref="couponFormRef" v-model="validCouponForm">
           <v-text-field
             v-model="couponForm.coupon"
-            label="Mã giảm giá"
+            label="Mã giảm giá *"
+            placeholder="Ví dụ: SUMMER2024, NEWCUST, WELCOME10"
             :rules="[v => !!v || 'Vui lòng nhập mã giảm giá']"
             required
           ></v-text-field>
           <v-text-field
             v-model="couponForm.description"
             label="Mô tả"
+            placeholder="Ví dụ: Mã giảm giá cho khách hàng mới"
           ></v-text-field>
         </v-form>
       </v-card-text>
@@ -393,7 +386,8 @@
             <v-col cols="12">
               <v-text-field
                 v-model="discountForm.name"
-                label="Tên chương trình"
+                label="Tên chương trình *"
+                placeholder="Ví dụ: Khuyến mãi mùa hè, Giảm giá sinh nhật"
                 :rules="[v => !!v || 'Vui lòng nhập tên chương trình']"
                 required
               ></v-text-field>
@@ -402,6 +396,7 @@
               <v-textarea
                 v-model="discountForm.description"
                 label="Mô tả"
+                placeholder="Ví dụ: Chương trình khuyến mãi dành cho khách hàng thân thiết"
                 rows="2"
                 auto-grow
               ></v-textarea>
@@ -414,7 +409,7 @@
                   { title: 'Phần trăm (%)', value: 'PERCENTAGE' },
                   { title: 'Số tiền cố định', value: 'FIXED' }
                 ]"
-                label="Loại giảm giá"
+                label="Loại giảm giá *"
                 :rules="[v => !!v || 'Vui lòng chọn loại giảm giá']"
                 required
               ></v-select>
@@ -422,7 +417,8 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.discountValue"
-                label="Giá trị giảm"
+                label="Giá trị giảm *"
+                placeholder="Ví dụ: 10 (cho 10%), 50000 (cho 50,000đ)"
                 type="number"
                 :rules="[
                   v => !!v || 'Vui lòng nhập giá trị giảm',
@@ -436,22 +432,25 @@
               <v-text-field
                 v-model.number="discountForm.maxDiscountAmount"
                 label="Số tiền giảm tối đa (đồng)"
+                placeholder="Ví dụ: 100000 (giảm tối đa 100k)"
                 type="number"
                 :rules="[
-                  v => v === 0 || v >= 1000 || 'Số tiền phải bằng 0 hoặc lớn hơn 1000đ'
+                  v => v >= 1000 || 'Số tiền giảm tối đa phải lớn hơn 1000đ'
                 ]"
-                min="0"
+                min="1000"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model.number="discountForm.minimumOrderValue"
                 label="Giá trị đơn hàng tối thiểu (đồng)"
+                placeholder="Ví dụ: 200000 (đơn hàng từ 200k), hoặc để trống"
                 type="number"
                 :rules="[
-                  v => v === 0 || v >= 1000 || 'Giá trị phải bằng 0 hoặc lớn hơn 1000đ'
+                  v => !v || v >= 1000 || 'Giá trị đơn hàng tối thiểu phải lớn hơn 1000đ'
                 ]"
-                min="0"
+                min="1000"
+                clearable
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
@@ -461,7 +460,8 @@
                 item-value="id"
                 item-title="coupon"
                 label="Mã giảm giá kèm theo"
-                clearable
+                :rules="[v => !!v || 'Vui lòng chọn mã giảm giá']"
+                required
               ></v-select>
             </v-col>
             <v-col cols="12" sm="6">
@@ -494,6 +494,7 @@
                 v-model="discountForm.validFrom"
                 label="Ngày bắt đầu"
                 type="datetime-local"
+                hint="Để trống nếu bắt đầu ngay"
                 :rules="[
                   v => !v || !discountForm.validUntil || new Date(v) < new Date(discountForm.validUntil) || 'Ngày bắt đầu phải trước ngày kết thúc'
                 ]"
@@ -502,8 +503,9 @@
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="discountForm.validUntil"
-                label="Ngày kết thúc"
+                label="Ngày kết thúc *"
                 type="datetime-local"
+                hint="Chọn ngày và giờ kết thúc chương trình"
                 :rules="[
                   v => !!v || 'Vui lòng nhập ngày kết thúc',
                   v => !discountForm.validFrom || new Date(v) > new Date(discountForm.validFrom) || 'Ngày kết thúc phải sau ngày bắt đầu',

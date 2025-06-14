@@ -5,16 +5,7 @@
         <h1 class="text-h5 font-weight-medium">Quản lý đơn hàng</h1>
       </v-card-title>
 
-      <!-- Hiển thị thông báo lỗi nếu có -->
-      <v-alert
-        v-if="orderStore.error"
-        type="error"
-        variant="tonal"
-        closable
-        class="mx-4 mt-2"
-      >
-        {{ orderStore.error }}
-      </v-alert>
+
 
       <v-card-text>
         <div class="d-flex align-center my-4">

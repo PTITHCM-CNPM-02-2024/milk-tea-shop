@@ -67,7 +67,7 @@ public class MembershipController implements IController {
         @ApiResponse(responseCode = "404", description = "Không tìm thấy hạng thành viên")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER','STAFF')")
     public ResponseEntity<?> updateMembership(@Parameter(description = "ID hạng thành viên", required = true) @PathVariable("id") Integer id, @Parameter(description = "Thông tin cập nhật", required = true) @RequestBody UpdateMembershipTypeRequest request){
         var command = UpdateMemberCommand.builder()
                 .memberId(MembershipTypeId.of(id))

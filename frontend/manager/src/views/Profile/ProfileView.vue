@@ -46,7 +46,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="profile.firstName"
-                      label="Tên"
+                      label="Tên *"
+                      placeholder="Ví dụ: VĂN AN, THỊ BÌNH, MINH CHÂU"
                       variant="outlined"
                       :rules="nameRules"
                       required
@@ -57,7 +58,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="profile.lastName"
-                      label="Họ"
+                      label="Họ *"
+                      placeholder="Ví dụ: NGUYỄN, TRẦN, LÊ"
                       variant="outlined"
                       :rules="nameRules"
                       required
@@ -68,7 +70,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="profile.email"
-                      label="Email"
+                      label="Email *"
+                      placeholder="Ví dụ: manager@milkteashop.com"
                       variant="outlined"
                       :rules="emailRules"
                       required
@@ -79,7 +82,8 @@
                   <v-col cols="12" md="6">
                     <v-text-field
                       v-model="profile.phone"
-                      label="Số điện thoại"
+                      label="Số điện thoại *"
+                      placeholder="Ví dụ: 0987654321, +84987654321"
                       variant="outlined"
                       :rules="phoneRules"
                       required
@@ -90,7 +94,7 @@
                     <v-select
                       v-model="profile.gender"
                       :items="genderOptions"
-                      label="Giới tính"
+                      label="Giới tính *"
                       variant="outlined"
                       required
                     ></v-select>
@@ -233,7 +237,8 @@
           <v-form ref="usernameForm" v-model="usernameValid" @submit.prevent="updateUsername">
             <v-text-field
               v-model="newUsername"
-              label="Tên đăng nhập mới"
+              label="Tên đăng nhập mới *"
+              placeholder="Ví dụ: manager123, admin_user"
               variant="outlined"
               :rules="usernameRules"
               required
@@ -282,7 +287,8 @@
           <v-form ref="passwordForm" v-model="passwordValid" @submit.prevent="updatePassword">
             <v-text-field
               v-model="currentPassword"
-              label="Mật khẩu hiện tại"
+              label="Mật khẩu hiện tại *"
+              placeholder="Nhập mật khẩu hiện tại của bạn"
               variant="outlined"
               :rules="[v => !!v || 'Mật khẩu hiện tại là bắt buộc']"
               required
@@ -292,7 +298,8 @@
 
             <v-text-field
               v-model="newPassword"
-              label="Mật khẩu mới"
+              label="Mật khẩu mới *"
+              placeholder="Tối thiểu 6 ký tự"
               variant="outlined"
               :rules="passwordRules"
               required
@@ -302,7 +309,8 @@
 
             <v-text-field
               v-model="confirmPassword"
-              label="Xác nhận mật khẩu mới"
+              label="Xác nhận mật khẩu mới *"
+              placeholder="Nhập lại mật khẩu mới"
               variant="outlined"
               :rules="[
                 v => !!v || 'Xác nhận mật khẩu là bắt buộc',

@@ -108,7 +108,7 @@ const form = ref(null)
 
 // Xử lý đăng nhập
 const login = async () => {
-  if (!form.value || !form.value.validate()) return
+  if (!form.value || ! await form.value.validate()) return
   
   loading.value = true
   error.value = null

@@ -5,16 +5,7 @@
           <h1 class="text-h5 font-weight-medium">Quản lý thanh toán</h1>
         </v-card-title>
 
-        <!-- Hiển thị thông báo lỗi nếu có -->
-        <v-alert
-          v-if="paymentStore.error"
-          type="error"
-          variant="tonal"
-          closable
-          class="mx-4 mt-2"
-        >
-          {{ paymentStore.error }}
-        </v-alert>
+
 
         <v-tabs v-model="activeTab" color="primary" class="px-4">
           <v-tab value="payments" class="text-none">Thanh toán</v-tab>
@@ -116,14 +107,14 @@
                   Tạo báo cáo
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn 
+                <!-- <v-btn 
                   color="success" 
                   prepend-icon="mdi-microsoft-excel" 
                   class="mb-2"
                   @click="downloadReport"
                 >
                   Xuất Excel
-                </v-btn>
+                </v-btn> -->
               </div>
             </v-card>
 
@@ -303,7 +294,8 @@
             <v-form ref="methodForm" @submit.prevent="submitPaymentMethodForm">
               <v-text-field
                 v-model="paymentMethodForm.name"
-                label="Tên phương thức"
+                label="Tên phương thức *"
+                placeholder="Ví dụ: Tiền mặt, Chuyển khoản, Thẻ tín dụng"
                 required
                 variant="outlined"
                 density="comfortable"
@@ -314,6 +306,7 @@
               <v-textarea
                 v-model="paymentMethodForm.description"
                 label="Mô tả"
+                placeholder="Ví dụ: Thanh toán bằng tiền mặt tại quầy"
                 variant="outlined"
                 density="comfortable"
                 class="mb-3"
@@ -509,9 +502,6 @@
             </v-row>
 
             <div class="d-flex justify-center mt-4">
-              <v-btn color="secondary" prepend-icon="mdi-printer" class="me-2" @click="printReceipt(currentPayment.id)">
-                In biên lai
-              </v-btn>
               <v-btn color="primary" variant="tonal" @click="paymentDetailsDialog = false">
                 Đóng
               </v-btn>
@@ -519,6 +509,21 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+
+      <!-- Snackbar thông báo -->
+      <v-snackbar
+        v-model="snackbar"
+        :color="snackbarColor"
+        :timeout="4000"
+        style="margin-top: 60px;"
+      >
+        {{ snackbarMessage }}
+        <template v-slot:actions>
+          <v-btn color="white" variant="text" @click="snackbar = false">
+            Đóng
+          </v-btn>
+        </template>
+      </v-snackbar>
   </div>
 </template>
 
@@ -557,6 +562,11 @@ const searchMethod = ref('')
 const paymentPage = ref(1)
 const paymentDetailsDialog = ref(false)
 const currentPayment = ref(null)
+
+// Snackbar
+const snackbar = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref('success')
 
 // Biến báo cáo
 const reportMonth = ref(new Date().getMonth() + 1)
@@ -671,12 +681,14 @@ const viewPaymentDetails = async (paymentId) => {
 const printReceipt = (paymentId) => {
   console.log('In biên lai cho thanh toán:', paymentId)
   // Tạo và in biên lai
+  showSnackbar('Đã gửi lệnh in biên lai!', 'info')
 }
 
 // Tạo báo cáo thanh toán
 const generateReport = async () => {
   try {
     await paymentStore.fetchPaymentReport(reportYear.value, reportMonth.value)
+    showSnackbar('Tải báo cáo thanh toán thành công!', 'success')
   } catch (error) {
     // console.error('Lỗi khi tạo báo cáo:', error); // Xóa log
     showSnackbar('Lỗi khi tải báo cáo: ' + (error.response?.data?.detail || error.message || ''), 'error');
@@ -729,9 +741,11 @@ const submitPaymentMethodForm = async () => {
     if (isEditingMethod.value) {
       // Cập nhật phương thức thanh toán
       await paymentStore.updatePaymentMethod(originalMethod.value.id, paymentMethodForm.value)
+      showSnackbar('Cập nhật phương thức thanh toán thành công!', 'success')
     } else {
       // Thêm mới phương thức thanh toán
       await paymentStore.createPaymentMethod(paymentMethodForm.value)
+      showSnackbar('Thêm phương thức thanh toán mới thành công!', 'success')
     }
     paymentMethodDialog.value = false
   } catch (error) {
@@ -745,6 +759,7 @@ const submitPaymentMethodForm = async () => {
 const confirmDeleteMethod = async () => {
   try {
     await paymentStore.deletePaymentMethod(selectedMethodToDelete.value.id)
+    showSnackbar('Xóa phương thức thanh toán thành công!', 'success')
     deleteMethodDialog.value = false
   } catch (error) {
     // console.error('Lỗi khi xóa phương thức thanh toán:', error); // Xóa log
@@ -852,6 +867,13 @@ const chartOptions = ref({
   }
 })
 // ----------------------------------------
+
+// Hiển thị snackbar
+const showSnackbar = (message, color = 'success') => {
+  snackbarMessage.value = message
+  snackbarColor.value = color
+  snackbar.value = true
+}
 
 // Khởi tạo
 onMounted(async () => {

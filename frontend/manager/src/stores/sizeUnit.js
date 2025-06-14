@@ -32,7 +32,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchProductSizes:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách kích thước sản phẩm'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách kích thước sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -51,7 +51,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createProductSize:', err)
-      error.value = err.response?.data?.message || 'Đã xảy ra lỗi khi tạo kích thước sản phẩm mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo kích thước sản phẩm mới'
       throw err
     } finally {
       loading.value = false
@@ -70,7 +70,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateProductSize:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật kích thước sản phẩm'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật kích thước sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -89,7 +89,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteProductSize:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa kích thước sản phẩm'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa kích thước sản phẩm'
       throw err
     } finally {
       loading.value = false
@@ -110,7 +110,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong fetchUnits:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tải danh sách đơn vị tính'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tải danh sách đơn vị tính'
       throw err
     } finally {
       loading.value = false
@@ -129,7 +129,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong createUnit:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi tạo đơn vị tính mới'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi tạo đơn vị tính mới'
       throw err
     } finally {
       loading.value = false
@@ -148,7 +148,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong updateUnit:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi cập nhật đơn vị tính'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật đơn vị tính'
       throw err
     } finally {
       loading.value = false
@@ -167,7 +167,7 @@ export const useSizeUnitStore = defineStore('sizeUnit', () => {
       return response.data
     } catch (err) {
       console.error('Lỗi trong deleteUnit:', err)
-      error.value = err.response?.data || 'Đã xảy ra lỗi khi xóa đơn vị tính'
+      error.value = err.response?.data?.detail || err.response?.data?.message || 'Đã xảy ra lỗi khi xóa đơn vị tính'
       throw err
     } finally {
       loading.value = false
