@@ -9,14 +9,10 @@
 USE MilkTeaShop;
 GO
 
--- Set required options
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
--- =======================================================
--- 1. PROCEDURE KIỂM TRA BACKUP DIRECTORY
--- =======================================================
 
 CREATE PROCEDURE sp_ensure_backup_directory
     @backup_path NVARCHAR(500) = N'/var/opt/mssql/backup/'
@@ -25,11 +21,6 @@ BEGIN
     RETURN 1; -- Giả sử luôn thành công, có thể mở rộng sau này để kiểm tra thực tế
 END;
 GO
-
--- =======================================================
--- 2. PROCEDURE FULL BACKUP
--- =======================================================
-
 CREATE PROCEDURE sp_full_backup_database
     @backup_path NVARCHAR(500) = N'/var/opt/mssql/backup/',
     @database_name NVARCHAR(100) = N'MilkTeaShop'
@@ -42,28 +33,21 @@ BEGIN
     DECLARE @date_stamp NVARCHAR(20);
     DECLARE @sql NVARCHAR(1000);
     DECLARE @backup_dir_ok INT;
-    
-    -- Kiểm tra backup directory trước
-    EXEC @backup_dir_ok = sp_ensure_backup_directory @backup_path;
-    
-    -- Nếu backup directory không ok, fallback sang data directory
+    EXEC @backup_dir_ok = sp_ensure_backup_directory @backup_path;    
     IF @backup_dir_ok = 0
     BEGIN
         SET @backup_path = N'/var/opt/mssql/data/';
         PRINT N'⚠️ Fallback to data directory: ' + @backup_path;
     END
     
-    -- Tạo timestamp cho filename
     SET @date_stamp = FORMAT(GETDATE(), 'yyyyMMdd_HHmmss');
     SET @filename = @database_name + N'_FULL_' + @date_stamp + N'.bak';
     SET @full_path = @backup_path + @filename;
     
-    -- Prepare backup name and description before using in BACKUP statement
     DECLARE @backup_name NVARCHAR(500) = @database_name + N' Full Backup';
     DECLARE @backup_desc NVARCHAR(500) = N'Full backup của ' + @database_name + N' lúc ' + CONVERT(NVARCHAR(19), GETDATE(), 120);
     
     BEGIN TRY
-        -- Thực hiện full backup
         BACKUP DATABASE @database_name 
         TO DISK = @full_path
         WITH FORMAT, INIT, 
@@ -76,7 +60,6 @@ BEGIN
         PRINT N'✅ Full backup thành công: ' + @full_path;
         PRINT N'📅 Thời gian: ' + CONVERT(NVARCHAR(19), GETDATE(), 120);
         
-        -- Log backup history
         INSERT INTO backup_log (backup_type, backup_path, database_name, backup_size_mb, created_at)
         SELECT 
             N'FULL' as backup_type,
@@ -96,10 +79,6 @@ BEGIN
 END;
 GO
 
--- =======================================================
--- 3. PROCEDURE DIFFERENTIAL BACKUP (BACKUP THEO GIỜ)
--- =======================================================
-
 CREATE PROCEDURE sp_differential_backup_database
     @backup_path NVARCHAR(500) = N'/var/opt/mssql/backup/',
     @database_name NVARCHAR(100) = N'MilkTeaShop'
@@ -114,31 +93,26 @@ BEGIN
     DECLARE @backup_dir_ok INT;
     DECLARE @temp NVARCHAR(500);
     
-    -- Kiểm tra backup directory trước
     EXEC @backup_dir_ok = sp_ensure_backup_directory @backup_path;
     
-    -- Nếu backup directory không ok, fallback sang data directory
     IF @backup_dir_ok = 0
     BEGIN
         SET @backup_path = N'/var/opt/mssql/data/';
         PRINT N'⚠️ Fallback to data directory: ' + @backup_path;
     END
     
-    -- Tạo timestamp cho filename
     SET @date_stamp = FORMAT(GETDATE(), 'yyyyMMdd_HH') + N'00';
     SET @filename = @database_name + N'_DIFF_' + @date_stamp + N'.bak';
     SET @full_path = @backup_path + @filename;
     
-    -- Prepare backup name and description before using in BACKUP statement
     DECLARE @backup_name NVARCHAR(500) = N'Differential Backup of ' + @database_name;
     DECLARE @backup_desc NVARCHAR(500) = N'Differential backup của ' + @database_name + N' lúc ' + CONVERT(NVARCHAR(19), GETDATE(), 120);
     
     BEGIN TRY
-        -- Kiểm tra xem có full backup gần đây không (trong 7 ngày)
         IF NOT EXISTS (
             SELECT 1 FROM msdb.dbo.backupset 
             WHERE database_name = @database_name 
-            AND type = 'D' -- Full backup
+            AND type = 'D'
             AND backup_start_date >= DATEADD(DAY, -7, GETDATE())
         )
         BEGIN
@@ -147,7 +121,6 @@ BEGIN
             RETURN;
         END;
         
-        -- Thực hiện differential backup
         BACKUP DATABASE @database_name 
         TO DISK = @full_path
         WITH DIFFERENTIAL, FORMAT, INIT,
@@ -160,7 +133,6 @@ BEGIN
         PRINT N'✅ Differential backup thành công: ' + @full_path;
         PRINT N'📅 Thời gian: ' + CONVERT(NVARCHAR(19), GETDATE(), 120);
         
-        -- Log backup history
         INSERT INTO backup_log (backup_type, backup_path, database_name, backup_size_mb, created_at)
         SELECT 
             N'DIFFERENTIAL' as backup_type,
@@ -180,10 +152,6 @@ BEGIN
 END;
 GO
 
--- =======================================================
--- 4. PROCEDURE CLEANUP OLD BACKUPS
--- =======================================================
-
 CREATE PROCEDURE sp_cleanup_old_backups
     @backup_path NVARCHAR(500) = N'/var/opt/mssql/backup/',
     @retention_days INT = 30
@@ -197,12 +165,10 @@ BEGIN
     SET @cutoff_date = DATEADD(DAY, -@retention_days, GETDATE());
     
     BEGIN TRY
-        -- Xóa các backup files cũ hơn retention_days
         DECLARE @filename NVARCHAR(500);
         DECLARE @full_path NVARCHAR(500);
         DECLARE @cmd NVARCHAR(1000);
         
-        -- Lấy danh sách file cũ từ backup_log
         DECLARE cleanup_cursor CURSOR FOR
         SELECT backup_path 
         FROM backup_log 
@@ -213,11 +179,9 @@ BEGIN
         
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            -- Xóa file backup (sử dụng xp_cmdshell nếu enabled)
             SET @cmd = N'rm -f "' + @full_path + N'"';
-            -- EXEC xp_cmdshell @cmd, NO_OUTPUT; -- Uncomment nếu xp_cmdshell được enable
+            EXEC xp_cmdshell @cmd, NO_OUTPUT;
             
-            -- Xóa record khỏi backup_log
             DELETE FROM backup_log WHERE backup_path = @full_path;
             SET @deleted_count = @deleted_count + 1;
             
@@ -243,10 +207,6 @@ BEGIN
 END;
 GO
 
--- =======================================================
--- 5. PROCEDURE BACKUP STATUS & MONITORING
--- =======================================================
-
 CREATE PROCEDURE sp_backup_status_report
 AS
 BEGIN
@@ -258,7 +218,6 @@ BEGIN
     PRINT N'📅 Report time: ' + CONVERT(NVARCHAR(19), GETDATE(), 120);
     PRINT N'';
     
-    -- Backup summary từ backup_log table
     PRINT N'📈 BACKUP SUMMARY (Last 7 days):';
     SELECT 
         backup_type,
@@ -282,7 +241,6 @@ BEGIN
     WHERE created_at >= DATEADD(DAY, -1, GETDATE())
     ORDER BY created_at DESC;
     
-    -- Kiểm tra backup health
     DECLARE @last_full_backup DATETIME;
     DECLARE @last_diff_backup DATETIME;
     
@@ -314,10 +272,6 @@ BEGIN
 END;
 GO
 
--- =======================================================
--- 6. TẠO BẢNG BACKUP_LOG (NẾU CHƯA CÓ)
--- =======================================================
-
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'backup_log')
 BEGIN
     CREATE TABLE backup_log (
@@ -336,63 +290,50 @@ BEGIN
 END;
 GO
 
--- =======================================================
--- 7. TẠO SQL SERVER AGENT JOBS CHO BACKUP
--- =======================================================
-
 -- Job 1: Full Backup hàng ngày lúc 2:00 AM
 PRINT N'📝 Tạo SQL Server Agent Job: Daily Full Backup...';
 
--- Tạo job Daily Full Backup
 EXEC msdb.dbo.sp_add_job
     @job_name = N'MilkTeaShop - Daily Full Backup',
     @enabled = 1,
     @description = N'Full backup database MilkTeaShop hàng ngày lúc 2:00 AM',
     @category_name = N'Database Maintenance';
 
--- Thêm job step
 EXEC msdb.dbo.sp_add_jobstep
     @job_name = N'MilkTeaShop - Daily Full Backup',
     @step_name = N'Execute Full Backup',
     @command = N'EXEC MilkTeaShop.dbo.sp_full_backup_database;',
     @database_name = N'MilkTeaShop';
 
--- Tạo schedule cho job
 EXEC msdb.dbo.sp_add_schedule
     @schedule_name = N'Daily at 2:00 AM',
     @freq_type = 4, -- Daily
     @freq_interval = 1,
     @active_start_time = 20000; -- 2:00 AM
 
--- Gán schedule cho job
 EXEC msdb.dbo.sp_attach_schedule
     @job_name = N'MilkTeaShop - Daily Full Backup',
     @schedule_name = N'Daily at 2:00 AM';
 
--- Gán job cho server
 EXEC msdb.dbo.sp_add_jobserver
     @job_name = N'MilkTeaShop - Daily Full Backup';
 
 PRINT N'✅ Job Daily Full Backup đã được tạo';
 
--- Job 2: Differential Backup mỗi giờ
 PRINT N'📝 Tạo SQL Server Agent Job: Hourly Differential Backup...';
 
--- Tạo job Hourly Differential Backup  
 EXEC msdb.dbo.sp_add_job
     @job_name = N'MilkTeaShop - Hourly Differential Backup',
     @enabled = 1,
     @description = N'Differential backup database MilkTeaShop mỗi giờ',
     @category_name = N'Database Maintenance';
 
--- Thêm job step
 EXEC msdb.dbo.sp_add_jobstep
     @job_name = N'MilkTeaShop - Hourly Differential Backup',
     @step_name = N'Execute Differential Backup',
     @command = N'EXEC MilkTeaShop.dbo.sp_differential_backup_database;',
     @database_name = N'MilkTeaShop';
 
--- Tạo schedule cho job (mỗi giờ từ 8:00 AM đến 10:00 PM)
 EXEC msdb.dbo.sp_add_schedule
     @schedule_name = N'Hourly Business Hours',
     @freq_type = 4, -- Daily
@@ -402,35 +343,29 @@ EXEC msdb.dbo.sp_add_schedule
     @active_start_time = 80000, -- 8:00 AM
     @active_end_time = 220000; -- 10:00 PM
 
--- Gán schedule cho job
 EXEC msdb.dbo.sp_attach_schedule
     @job_name = N'MilkTeaShop - Hourly Differential Backup',
     @schedule_name = N'Hourly Business Hours';
 
--- Gán job cho server
 EXEC msdb.dbo.sp_add_jobserver
     @job_name = N'MilkTeaShop - Hourly Differential Backup';
 
 PRINT N'✅ Job Hourly Differential Backup đã được tạo';
 
--- Job 3: Cleanup old backups hàng tuần
 PRINT N'📝 Tạo SQL Server Agent Job: Weekly Backup Cleanup...';
 
--- Tạo job Weekly Backup Cleanup
 EXEC msdb.dbo.sp_add_job
     @job_name = N'MilkTeaShop - Weekly Backup Cleanup',
     @enabled = 1,
     @description = N'Cleanup old backup files (>30 days) hàng tuần',
     @category_name = N'Database Maintenance';
 
--- Thêm job step
 EXEC msdb.dbo.sp_add_jobstep
     @job_name = N'MilkTeaShop - Weekly Backup Cleanup',
     @step_name = N'Execute Backup Cleanup',
     @command = N'EXEC MilkTeaShop.dbo.sp_cleanup_old_backups @retention_days = 30;',
     @database_name = N'MilkTeaShop';
 
--- Tạo schedule cho job (Chủ nhật hàng tuần lúc 3:00 AM)
 EXEC msdb.dbo.sp_add_schedule
     @schedule_name = N'Weekly Sunday 3:00 AM',
     @freq_type = 8, -- Weekly
@@ -438,20 +373,14 @@ EXEC msdb.dbo.sp_add_schedule
     @freq_recurrence_factor = 1,
     @active_start_time = 30000; -- 3:00 AM
 
--- Gán schedule cho job
 EXEC msdb.dbo.sp_attach_schedule
     @job_name = N'MilkTeaShop - Weekly Backup Cleanup',
     @schedule_name = N'Weekly Sunday 3:00 AM';
 
--- Gán job cho server
 EXEC msdb.dbo.sp_add_jobserver
     @job_name = N'MilkTeaShop - Weekly Backup Cleanup';
 
 PRINT N'✅ Job Weekly Backup Cleanup đã được tạo';
-
--- =======================================================
--- 8. TEST INITIAL BACKUP
--- =======================================================
 
 PRINT N'';
 PRINT N'🧪 TESTING BACKUP SYSTEM...';

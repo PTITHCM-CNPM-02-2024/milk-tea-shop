@@ -1884,20 +1884,25 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
+    -- Kiểm tra vai trò mặc định
     IF EXISTS (SELECT 1 FROM deleted WHERE name IN (N'MANAGER', N'STAFF', N'CUSTOMER', N'GUEST'))
     BEGIN
         THROW 50069, N'Không thể xóa vai trò mặc định', 1;
         RETURN;
     END
     
-    -- Xóa tất cả tài khoản có vai trò trước
-    DELETE FROM account 
-    WHERE role_id IN (
-        SELECT role_id FROM deleted 
-        WHERE name NOT IN (N'MANAGER', N'STAFF', N'CUSTOMER', N'GUEST')
-    );
+    -- Kiểm tra xem có tài khoản nào đang sử dụng vai trò này không
+    IF EXISTS (
+        SELECT 1 FROM account a
+        INNER JOIN deleted d ON a.role_id = d.role_id
+        WHERE d.name NOT IN (N'MANAGER', N'STAFF', N'CUSTOMER', N'GUEST')
+    )
+    BEGIN
+        THROW 50075, N'Không thể xóa vai trò đang được sử dụng bởi tài khoản. Vui lòng xóa hoặc chuyển tài khoản sang vai trò khác trước.', 1;
+        RETURN;
+    END
     
-    -- Sau đó xóa vai trò
+    -- Chỉ xóa vai trò nếu không có tài khoản nào sử dụng
     DELETE FROM role 
     WHERE role_id IN (
         SELECT role_id FROM deleted 
@@ -2241,23 +2246,26 @@ BEGIN
         RETURN;
     END
 
-    -- Xóa thông tin khách hàng liên kết
-    DELETE FROM customer 
-    WHERE account_id IN (SELECT account_id FROM deleted);
-    
-    -- Xóa thông tin nhân viên liên kết
-    DELETE FROM employee 
-    WHERE account_id IN (SELECT account_id FROM deleted);
-    
-    -- Xóa thông tin quản lý liên kết
-    DELETE FROM manager 
-    WHERE account_id IN (SELECT account_id FROM deleted);
+    -- Kiểm tra ràng buộc: tài khoản có đang được sử dụng không
+    IF EXISTS (
+        SELECT 1 FROM customer WHERE account_id IN (SELECT account_id FROM deleted)
+        UNION
+        SELECT 1 FROM employee WHERE account_id IN (SELECT account_id FROM deleted)  
+        UNION
+        SELECT 1 FROM manager WHERE account_id IN (SELECT account_id FROM deleted)
+    )
+    BEGIN
+        THROW 50083, N'Không thể xóa tài khoản đang được sử dụng. Vui lòng xóa thông tin khách hàng/nhân viên/quản lý liên kết trước.', 1;
+        RETURN;
+    END
 
-    -- Thực hiện delete account cuối cùng
+    -- Chỉ xóa account nếu không có ràng buộc
     DELETE FROM account 
     WHERE account_id IN (SELECT account_id FROM deleted);
 END
 GO
 
 PRINT N'Đã tạo thành công tất cả triggers cho SQL Server bao gồm triggers bảo vệ admin mặc định';
+PRINT N'✅ ĐÃ SỬA: Triggers đã được cập nhật để tránh vòng lặp vô hạn (nesting level > 32)';
+PRINT N'🔧 Giải pháp: Thay đổi từ CASCADE DELETE sang CONSTRAINT CHECK để tránh trigger recursion';
 GO 

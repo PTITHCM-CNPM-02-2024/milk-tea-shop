@@ -21,7 +21,13 @@ BEGIN
     INSERT INTO area (name, max_tables, is_active, description)
     VALUES (@p_name, @p_max_tables, @p_is_active, @p_description);
 
-    SET @p_area_id = SCOPE_IDENTITY();
+    SET @p_area_id = CAST(SCOPE_IDENTITY() AS SMALLINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_area_id IS NULL
+    BEGIN
+        SELECT @p_area_id = area_id FROM area WHERE name = @p_name;
+    END
 END
 GO
 
@@ -75,7 +81,13 @@ BEGIN
     INSERT INTO category (name, description)
     VALUES (@p_name, @p_description);
 
-    SET @p_category_id = SCOPE_IDENTITY();
+    SET @p_category_id = CAST(SCOPE_IDENTITY() AS SMALLINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_category_id IS NULL
+    BEGIN
+        SELECT @p_category_id = category_id FROM category WHERE name = @p_name;
+    END
 END
 GO
 
@@ -125,7 +137,13 @@ BEGIN
     INSERT INTO coupon (coupon, description)
     VALUES (@p_coupon, @p_description);
 
-    SET @p_coupon_id = SCOPE_IDENTITY();
+    SET @p_coupon_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_coupon_id IS NULL
+    BEGIN
+        SELECT @p_coupon_id = coupon_id FROM coupon WHERE coupon = @p_coupon;
+    END
 END
 GO
 
@@ -191,7 +209,13 @@ BEGIN
             @p_min_required_order_value, @p_max_discount_amount, @p_min_required_product,
             @p_valid_from, @p_valid_until, @p_current_uses, @p_max_uses, @p_max_uses_per_customer, @p_is_active);
 
-    SET @p_discount_id = SCOPE_IDENTITY();
+    SET @p_discount_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_discount_id IS NULL OR @p_discount_id = 0
+    BEGIN
+        SELECT @p_discount_id = discount_id FROM discount WHERE name = @p_name AND coupon_id = @p_coupon_id;
+    END
 END
 GO
 
@@ -269,7 +293,13 @@ BEGIN
     VALUES (@p_type, @p_discount_value, @p_discount_unit, @p_required_point,
             @p_description, @p_valid_until, @p_is_active);
 
-    SET @p_membership_type_id = SCOPE_IDENTITY();
+    SET @p_membership_type_id = CAST(SCOPE_IDENTITY() AS TINYINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_membership_type_id IS NULL OR @p_membership_type_id = 0
+    BEGIN
+        SELECT @p_membership_type_id = membership_type_id FROM membership_type WHERE type = @p_type;
+    END
 END
 GO
 
@@ -326,7 +356,13 @@ BEGIN
     INSERT INTO payment_method (payment_name, payment_description)
     VALUES (@p_payment_name, @p_payment_description);
 
-    SET @p_payment_method_id = SCOPE_IDENTITY();
+    SET @p_payment_method_id = CAST(SCOPE_IDENTITY() AS TINYINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_payment_method_id IS NULL OR @p_payment_method_id = 0
+    BEGIN
+        SELECT @p_payment_method_id = payment_method_id FROM payment_method WHERE payment_name = @p_payment_name;
+    END
 END
 GO
 
@@ -377,7 +413,13 @@ BEGIN
     INSERT INTO product (category_id, name, description, is_available, is_signature, image_path)
     VALUES (@p_category_id, @p_name, @p_description, @p_is_available, @p_is_signature, @p_image_path);
 
-    SET @p_product_id = SCOPE_IDENTITY();
+    SET @p_product_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_product_id IS NULL OR @p_product_id = 0
+    BEGIN
+        SELECT @p_product_id = product_id FROM product WHERE name = @p_name;
+    END
 END
 GO
 
@@ -432,7 +474,13 @@ BEGIN
     INSERT INTO role (name, description)
     VALUES (@p_name, @p_description);
 
-    SET @p_role_id = SCOPE_IDENTITY();
+    SET @p_role_id = CAST(SCOPE_IDENTITY() AS TINYINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_role_id IS NULL OR @p_role_id = 0
+    BEGIN
+        SELECT @p_role_id = role_id FROM role WHERE name = @p_name;
+    END
 END
 GO
 
@@ -459,16 +507,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @v_has_account BIT;
-
-    SELECT @v_has_account = CASE WHEN EXISTS(SELECT 1 FROM account WHERE role_id = @p_role_id) THEN 1 ELSE 0 END;
-
-    IF @v_has_account = 1
-        BEGIN
-            THROW 50001, N'Không thể xóa vai trò đang được sử dụng bởi tài khoản', 1;
-            RETURN;
-        END
-
+    -- Trigger sẽ xử lý tất cả validation, chỉ cần gọi DELETE
     DELETE FROM role WHERE role_id = @p_role_id;
     SET @p_row_count = @@ROWCOUNT;
 END
@@ -492,10 +531,15 @@ BEGIN
     INSERT INTO account (role_id, username, password_hash, is_active, is_locked, token_version)
     VALUES (@p_role_id, @p_username, @p_password_hash, @p_is_active, @p_is_locked, 0);
 
-    -- Lấy account_id vừa tạo vì SCOPE_IDENTITY() không hoạt động với INSTEAD OF triggers
-    SELECT @p_account_id = account_id 
-    FROM account 
-    WHERE username = @p_username AND role_id = @p_role_id;
+    SET @p_account_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL (có thể do INSTEAD OF triggers)
+    IF @p_account_id IS NULL OR @p_account_id = 0
+    BEGIN
+        SELECT @p_account_id = account_id 
+        FROM account 
+        WHERE username = @p_username AND role_id = @p_role_id;
+    END
 END
 GO
 
@@ -553,32 +597,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @v_has_employee BIT, @v_has_manager BIT, @v_has_customer BIT;
-
-    SELECT
-        @v_has_employee = CASE WHEN EXISTS(SELECT 1 FROM employee WHERE account_id = @p_account_id) THEN 1 ELSE 0 END;
-    SELECT @v_has_manager = CASE WHEN EXISTS(SELECT 1 FROM manager WHERE account_id = @p_account_id) THEN 1 ELSE 0 END;
-    SELECT
-        @v_has_customer = CASE WHEN EXISTS(SELECT 1 FROM customer WHERE account_id = @p_account_id) THEN 1 ELSE 0 END;
-
-    IF @v_has_employee = 1
-        BEGIN
-            THROW 50002, N'Không thể xóa tài khoản đang được sử dụng bởi nhân viên', 1;
-            RETURN;
-        END
-
-    IF @v_has_manager = 1
-        BEGIN
-            THROW 50003, N'Không thể xóa tài khoản đang được sử dụng bởi quản lý', 1;
-            RETURN;
-        END
-
-    IF @v_has_customer = 1
-        BEGIN
-            THROW 50004, N'Không thể xóa tài khoản đang được sử dụng bởi khách hàng', 1;
-            RETURN;
-        END
-
+    -- Trigger sẽ xử lý tất cả validation, chỉ cần gọi DELETE
     DELETE FROM account WHERE account_id = @p_account_id;
     SET @p_row_count = @@ROWCOUNT;
 END
@@ -607,7 +626,13 @@ BEGIN
     VALUES (@p_membership_type_id, @p_account_id, @p_last_name, @p_first_name,
             @p_phone, @p_email, @p_current_points, @p_gender);
 
-    SET @p_customer_id = SCOPE_IDENTITY();
+    SET @p_customer_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_customer_id IS NULL OR @p_customer_id = 0
+    BEGIN
+        SELECT @p_customer_id = customer_id FROM customer WHERE phone = @p_phone;
+    END
 END
 GO
 
@@ -715,4 +740,6 @@ GO
 
 PRINT N'Đã tạo thành công tất cả stored procedures cơ bản cho SQL Server';
 PRINT N'Ghi chú: Các procedures phức tạp với JSON đã được đơn giản hóa do SQL Server có cách xử lý JSON khác với MySQL';
+PRINT N'✅ ĐÃ SỬA: Tất cả procedures đã được cập nhật để xử lý vấn đề SCOPE_IDENTITY() trả về NULL';
+PRINT N'🔧 Giải pháp: CAST + fallback query để đảm bảo luôn có ID hợp lệ';
 GO 

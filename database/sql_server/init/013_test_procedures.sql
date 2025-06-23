@@ -597,6 +597,322 @@ GO
 -- 13. CLEANUP TEST DATA
 -- =====================================================
 
+PRINT N'=== THÊM TEST CHO CÁC PROCEDURES CHƯA ĐƯỢC TEST ===';
+
+-- =====================================================
+-- TEST COUPON & DISCOUNT UPDATE/DELETE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_update_coupon ===';
+DECLARE @coupon_id INT = (SELECT TOP 1 coupon_id FROM coupon WHERE coupon = N'TESTCODE123');
+DECLARE @row_count INT;
+EXEC sp_update_coupon
+    @p_coupon_id = @coupon_id,
+    @p_coupon = N'UPDATEDCODE123',
+    @p_description = N'Updated test coupon từ script'
+    , @p_row_count = @row_count OUTPUT;
+SELECT * FROM coupon WHERE coupon_id = @coupon_id;
+GO
+
+PRINT N'=== TEST sp_delete_coupon ===';
+DECLARE @coupon_id INT = (SELECT TOP 1 coupon_id FROM coupon WHERE coupon = N'UPDATEDCODE123');
+DECLARE @row_count INT;
+-- Phải xóa discount trước vì có foreign key
+DELETE FROM discount WHERE coupon_id = @coupon_id;
+EXEC sp_delete_coupon
+    @p_coupon_id = @coupon_id,
+    @p_row_count = @row_count OUTPUT;
+PRINT N'Delete Coupon affected rows: ' + CAST(@row_count AS NVARCHAR(10));
+GO
+
+PRINT N'=== TEST sp_update_discount ===';
+-- Tạo coupon và discount mới để test
+DECLARE @coupon_id INT;
+EXEC sp_insert_coupon
+    @p_coupon = N'UPDATETEST123',
+    @p_description = N'Test coupon for update discount',
+    @p_coupon_id = @coupon_id OUTPUT;
+
+DECLARE @discount_id INT;
+DECLARE @valid_from DATETIME2 = GETDATE();
+DECLARE @valid_until DATETIME2 = DATEADD(MONTH, 1, GETDATE());
+EXEC sp_insert_discount
+    @p_name = N'Test Discount for Update',
+    @p_description = N'Test discount for update từ script',
+    @p_coupon_id = @coupon_id,
+    @p_discount_value = 10.000,
+    @p_discount_type = 'PERCENTAGE',
+    @p_min_required_order_value = 30000.000,
+    @p_max_discount_amount = 15000.000,
+    @p_min_required_product = 1,
+    @p_valid_from = @valid_from,
+    @p_valid_until = @valid_until,
+    @p_current_uses = 0,
+    @p_max_uses = 50,
+    @p_max_uses_per_customer = 1,
+    @p_is_active = 1,
+    @p_discount_id = @discount_id OUTPUT;
+
+-- Update discount
+DECLARE @new_valid_until DATETIME2 = DATEADD(MONTH, 2, GETDATE());
+EXEC sp_update_discount
+    @p_discount_id = @discount_id,
+    @p_name = N'Updated Test Discount 20%',
+    @p_description = N'Updated test discount từ script',
+    @p_coupon_id = @coupon_id,
+    @p_discount_value = 20.000,
+    @p_discount_type = 'PERCENTAGE',
+    @p_min_required_order_value = 40000.000,
+    @p_max_discount_amount = 25000.000,
+    @p_min_required_product = 2,
+    @p_valid_from = @valid_from,
+    @p_valid_until = @new_valid_until,
+    @p_current_uses = 5,
+    @p_max_uses = 100,
+    @p_max_uses_per_customer = 2,
+    @p_is_active = 1;
+SELECT * FROM discount WHERE discount_id = @discount_id;
+GO
+
+PRINT N'=== TEST sp_delete_discount ===';
+DECLARE @discount_id INT = (SELECT TOP 1 discount_id FROM discount WHERE name = N'Updated Test Discount 20%');
+DECLARE @row_count INT;
+EXEC sp_delete_discount
+    @p_discount_id = 1003,
+    @p_row_count = @row_count OUTPUT;
+PRINT N'Delete Discount affected rows: ' + CAST(@row_count AS NVARCHAR(10));
+GO
+
+-- =====================================================
+-- TEST EMPLOYEE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_insert_employee ===';
+-- Tạo account cho employee
+DECLARE @role_id TINYINT = (SELECT TOP 1 role_id FROM role WHERE name = 'staff');
+DECLARE @account_id INT;
+EXEC sp_insert_account
+    @p_role_id = @role_id,
+    @p_username = N'test_employee_user',
+    @p_password_hash = N'$2b$10$hashedpassword123',
+    @p_is_active = 1,
+    @p_is_locked = 0,
+    @p_account_id = @account_id OUTPUT;
+
+DECLARE @employee_id INT;
+EXEC sp_insert_employee
+    @p_account_id = @account_id,
+    @p_position = N'Nhân viên pha chế',
+    @p_last_name = N'Nguyễn',
+    @p_first_name = N'Test Employee',
+    @p_gender = 'MALE',
+    @p_phone = '0999123456',
+    @p_email = 'test_employee@example.com',
+    @p_employee_id = @employee_id OUTPUT;
+PRINT N'Inserted Employee ID: ' + CAST(@employee_id AS NVARCHAR(10));
+SELECT * FROM employee WHERE employee_id = @employee_id;
+GO
+
+PRINT N'=== TEST sp_update_employee ===';
+DECLARE @employee_id INT = (SELECT TOP 1 employee_id FROM employee WHERE email = 'test_employee@example.com');
+DECLARE @account_id INT = (SELECT account_id FROM employee WHERE employee_id = @employee_id);
+EXEC sp_update_employee
+    @p_employee_id = @employee_id,
+    @p_account_id = @account_id,
+    @p_position = N'Nhân viên phục vụ',
+    @p_last_name = N'Trần',
+    @p_first_name = N'Updated Test Employee',
+    @p_gender = 'FEMALE',
+    @p_phone = '0999123457',
+    @p_email = 'updated_test_employee@example.com';
+SELECT * FROM employee WHERE employee_id = @employee_id;
+GO
+
+PRINT N'=== TEST sp_delete_employee ===';
+DECLARE @employee_id INT = (SELECT TOP 1 employee_id FROM employee WHERE email = 'updated_test_employee@example.com');
+EXEC sp_delete_employee @p_employee_id = @employee_id;
+-- Cleanup account
+DECLARE @account_id INT = (SELECT account_id FROM account WHERE username = N'test_employee_user');
+DELETE FROM account WHERE account_id = @account_id;
+PRINT N'Employee deleted successfully';
+GO
+
+-- =====================================================
+-- TEST UNIT OF MEASURE & PRODUCT SIZE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_insert_unit_of_measure ===';
+DECLARE @unit_id SMALLINT;
+EXEC sp_insert_unit_of_measure
+    @p_name = N'Test Milliliter',
+    @p_symbol = N'tml',
+    @p_description = N'Test unit for milliliter',
+    @p_unit_id = @unit_id OUTPUT;
+PRINT N'Inserted Unit ID: ' + CAST(@unit_id AS NVARCHAR(10));
+SELECT * FROM unit_of_measure WHERE unit_id = @unit_id;
+GO
+
+PRINT N'=== TEST sp_update_unit_of_measure ===';
+DECLARE @unit_id SMALLINT = (SELECT TOP 1 unit_id FROM unit_of_measure WHERE symbol = N'tml');
+EXEC sp_update_unit_of_measure
+    @p_unit_id = @unit_id,
+    @p_name = N'Updated Test Liter',
+    @p_symbol = N'utl',
+    @p_description = N'Updated test unit for liter';
+SELECT * FROM unit_of_measure WHERE unit_id = @unit_id;
+GO
+
+PRINT N'=== TEST sp_insert_product_size ===';
+DECLARE @unit_id SMALLINT = (SELECT TOP 1 unit_id FROM unit_of_measure WHERE symbol = N'utl');
+DECLARE @size_id SMALLINT;
+EXEC sp_insert_product_size
+    @p_unit_id = @unit_id,
+    @p_name = N'XL',
+    @p_quantity = 800,
+    @p_description = N'Extra Large test size',
+    @p_size_id = @size_id OUTPUT;
+PRINT N'Inserted Size ID: ' + CAST(@size_id AS NVARCHAR(10));
+SELECT * FROM product_size WHERE size_id = @size_id;
+GO
+
+PRINT N'=== TEST sp_update_product_size ===';
+DECLARE @size_id SMALLINT = (SELECT TOP 1 size_id FROM product_size WHERE name = N'XL');
+DECLARE @unit_id SMALLINT = (SELECT unit_id FROM product_size WHERE size_id = @size_id);
+EXEC sp_update_product_size
+    @p_size_id = @size_id,
+    @p_unit_id = @unit_id,
+    @p_name = N'XXL',
+    @p_quantity = 1000,
+    @p_description = N'Extra Extra Large test size';
+SELECT * FROM product_size WHERE size_id = @size_id;
+GO
+
+PRINT N'=== TEST sp_delete_product_size ===';
+DECLARE @size_id SMALLINT = (SELECT TOP 1 size_id FROM product_size WHERE name = N'XXL');
+DECLARE @row_count INT;
+EXEC sp_delete_product_size
+    @p_size_id = @size_id,
+    @p_row_count = @row_count OUTPUT;
+PRINT N'Delete Product Size affected rows: ' + CAST(@row_count AS NVARCHAR(10));
+GO
+
+PRINT N'=== TEST sp_delete_unit_of_measure ===';
+DECLARE @unit_id SMALLINT = (SELECT TOP 1 unit_id FROM unit_of_measure WHERE symbol = N'utl');
+DECLARE @row_count INT;
+EXEC sp_delete_unit_of_measure
+    @p_unit_id = @unit_id,
+    @p_row_count = @row_count OUTPUT;
+PRINT N'Delete Unit of Measure affected rows: ' + CAST(@row_count AS NVARCHAR(10));
+GO
+
+-- =====================================================
+-- TEST PRODUCT PRICE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_insert_product_price ===';
+DECLARE @product_id INT = (SELECT TOP 1 product_id FROM product WHERE name LIKE N'%Trà sữa đác%');
+DECLARE @size_id SMALLINT = (SELECT TOP 1 size_id FROM product_size WHERE name = 'M');
+DECLARE @product_price_id INT;
+EXEC sp_insert_product_price
+    @p_product_id = @product_id,
+    @p_size_id = @size_id,
+    @p_price = 45000.000,
+    @p_product_price_id = @product_price_id OUTPUT;
+PRINT N'Inserted Product Price ID: ' + CAST(@product_price_id AS NVARCHAR(10));
+SELECT * FROM product_price WHERE product_price_id = @product_price_id;
+GO
+
+PRINT N'=== TEST sp_update_product_price ===';
+DECLARE @product_price_id INT = (SELECT TOP 1 product_price_id FROM product_price WHERE price = 45000.000);
+DECLARE @product_id INT = (SELECT product_id FROM product_price WHERE product_price_id = @product_price_id);
+DECLARE @size_id SMALLINT = (SELECT size_id FROM product_price WHERE product_price_id = @product_price_id);
+EXEC sp_update_product_price
+    @p_product_price_id = @product_price_id,
+    @p_product_id = @product_id,
+    @p_size_id = @size_id,
+    @p_unit_id = @size_id, -- placeholder, không sử dụng trong procedure thực tế
+    @p_price = 48000.000,
+    @p_is_active = 1; -- placeholder, không sử dụng trong procedure thực tế
+SELECT * FROM product_price WHERE product_price_id = @product_price_id;
+GO
+
+PRINT N'=== TEST sp_delete_product_price ===';
+DECLARE @product_price_id INT = (SELECT TOP 1 product_price_id FROM product_price WHERE price = 48000.000);
+DECLARE @row_count INT;
+EXEC sp_delete_product_price
+    @p_product_price_id = @product_price_id,
+    @p_row_count = @row_count OUTPUT;
+PRINT N'Delete Product Price affected rows: ' + CAST(@row_count AS NVARCHAR(10));
+GO
+
+-- =====================================================
+-- TEST SERVICE TABLE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_insert_service_table ===';
+DECLARE @area_id SMALLINT = (SELECT TOP 1 area_id FROM area WHERE is_active = 1);
+DECLARE @table_id SMALLINT;
+EXEC sp_insert_service_table
+    @p_area_id = @area_id,
+    @p_table_number = N'T99',
+    @p_is_active = 1,
+    @p_table_id = @table_id OUTPUT;
+PRINT N'Inserted Service Table ID: ' + CAST(@table_id AS NVARCHAR(10));
+SELECT * FROM service_table WHERE table_id = @table_id;
+GO
+
+PRINT N'=== TEST sp_update_service_table ===';
+DECLARE @table_id SMALLINT = (SELECT TOP 1 table_id FROM service_table WHERE table_number = N'T99');
+DECLARE @area_id SMALLINT = (SELECT area_id FROM service_table WHERE table_id = @table_id);
+EXEC sp_update_service_table
+    @p_table_id = @table_id,
+    @p_area_id = @area_id,
+    @p_table_number = N'T100',
+    @p_is_active = 1;
+SELECT * FROM service_table WHERE table_id = @table_id;
+GO
+
+PRINT N'=== TEST sp_delete_service_table ===';
+DECLARE @table_id SMALLINT = (SELECT TOP 1 table_id FROM service_table WHERE table_number = N'T100');
+EXEC sp_delete_service_table @p_table_id = @table_id;
+PRINT N'Service Table deleted successfully';
+GO
+
+-- =====================================================
+-- TEST STORE PROCEDURES
+-- =====================================================
+
+PRINT N'=== TEST sp_insert_store ===';
+DECLARE @store_id TINYINT;
+EXEC sp_insert_store
+    @p_name = N'Test Milk Tea Store',
+    @p_address = N'123 Test Street, Test City',
+    @p_phone = '0299999999',
+    @p_opening_time = '07:00:00',
+    @p_closing_time = '22:00:00',
+    @p_email = 'test_store@example.com',
+    @p_opening_date = '2024-01-01',
+    @p_tax_code = 'TEST123456789',
+    @p_store_id = @store_id OUTPUT;
+PRINT N'Inserted Store ID: ' + CAST(@store_id AS NVARCHAR(10));
+SELECT * FROM store WHERE store_id = @store_id;
+GO
+
+PRINT N'=== TEST sp_update_store ===';
+DECLARE @store_id TINYINT = (SELECT TOP 1 store_id FROM store WHERE tax_code = 'TEST123456789');
+EXEC sp_update_store
+    @p_store_id = @store_id,
+    @p_name = N'Updated Test Milk Tea Store',
+    @p_address = N'456 Updated Test Street, Updated Test City',
+    @p_phone = '0288888888',
+    @p_opening_time = '06:30:00',
+    @p_closing_time = '23:00:00',
+    @p_email = 'updated_test_store@example.com',
+    @p_opening_date = '2024-01-15',
+    @p_tax_code = 'UPDATED123456789';
+SELECT * FROM store WHERE store_id = @store_id;
+GO
+
 PRINT N'=== CLEANUP TEST DATA ===';
 -- Xóa dữ liệu test vừa tạo
 DELETE FROM order_discount WHERE order_id IN (
@@ -611,14 +927,57 @@ DELETE FROM payment WHERE order_id IN (
 DELETE FROM [order] WHERE customize_note LIKE N'%Test%' OR customize_note LIKE N'%script%';
 DELETE FROM discount WHERE name LIKE N'%Test%';
 DELETE FROM coupon WHERE coupon LIKE N'%TEST%';
+DELETE FROM store WHERE tax_code LIKE N'%TEST%';
 PRINT N'Test data cleaned up!';
 GO
 
 PRINT N'=== HOÀN THÀNH TẤT CẢ TEST SCRIPTS ===';
 PRINT N'';
-PRINT N'Cách sử dụng:';
+PRINT N'📋 DANH SÁCH CÁC STORED PROCEDURES ĐÃ ĐƯỢC TEST:';
+PRINT N'✅ BASIC CRUD PROCEDURES:';
+PRINT N'   - Area: sp_insert/update/delete_area';
+PRINT N'   - Category: sp_insert/update/delete_category';
+PRINT N'   - Role: sp_insert/update/delete_role';
+PRINT N'   - Membership Type: sp_insert/update/delete_membership_type';
+PRINT N'   - Payment Method: sp_insert/update/delete_payment_method';
+PRINT N'   - Product: sp_insert/update/delete_product';
+PRINT N'   - Account: sp_insert/update/delete_account + password & login updates';
+PRINT N'   - Customer: sp_insert/update/delete_customer + points update';
+PRINT N'';
+PRINT N'✅ COUPON & DISCOUNT PROCEDURES:';
+PRINT N'   - Coupon: sp_insert/update/delete_coupon';
+PRINT N'   - Discount: sp_insert/update/delete_discount';
+PRINT N'   - sp_check_coupon_validity';
+PRINT N'';
+PRINT N'✅ EMPLOYEE & MANAGEMENT PROCEDURES:';
+PRINT N'   - Employee: sp_insert/update/delete_employee';
+PRINT N'';
+PRINT N'✅ PRODUCT MANAGEMENT PROCEDURES:';
+PRINT N'   - Unit of Measure: sp_insert/update/delete_unit_of_measure';
+PRINT N'   - Product Size: sp_insert/update/delete_product_size';
+PRINT N'   - Product Price: sp_insert/update/delete_product_price';
+PRINT N'';
+PRINT N'✅ SERVICE & STORE PROCEDURES:';
+PRINT N'   - Service Table: sp_insert/update/delete_service_table';
+PRINT N'   - Store: sp_insert/update_store';
+PRINT N'';
+PRINT N'✅ ORDER WORKFLOW PROCEDURES:';
+PRINT N'   - Order: sp_insert_order, sp_update_order_status/amounts';
+PRINT N'   - sp_complete_order, sp_cancel_order';
+PRINT N'   - sp_add_product_to_order, sp_update_order_product_quantity';
+PRINT N'   - sp_remove_product_from_order';
+PRINT N'   - sp_apply_discount_to_order';
+PRINT N'   - sp_calculate_order_total';
+PRINT N'';
+PRINT N'✅ REPORTING PROCEDURES:';
+PRINT N'   - sp_get_sales_report';
+PRINT N'   - sp_get_product_sales_report';
+PRINT N'';
+PRINT N'🔧 CÁCH SỬ DỤNG:';
 PRINT N'- Copy từng section để test riêng lẻ các procedure';
 PRINT N'- Hoặc chạy toàn bộ file để test tất cả';
 PRINT N'- Dữ liệu test sử dụng từ 005_init_optional_data.sql';
 PRINT N'- Script tự động cleanup dữ liệu test ở cuối';
+PRINT N'';
+PRINT N'📊 TỔNG KẾT: Đã test 60+ stored procedures cơ bản và workflow';
 GO

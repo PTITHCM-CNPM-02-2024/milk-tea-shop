@@ -24,10 +24,15 @@ BEGIN
     INSERT INTO employee (account_id, position, last_name, first_name, gender, phone, email)
     VALUES (@p_account_id, @p_position, @p_last_name, @p_first_name, @p_gender, @p_phone, @p_email);
 
-    -- Lấy employee_id của record vừa insert với INSTEAD OF trigger
-    SELECT @p_employee_id = employee_id
-    FROM employee 
-    WHERE account_id = @p_account_id;
+    SET @p_employee_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL (có thể do INSTEAD OF trigger)
+    IF @p_employee_id IS NULL OR @p_employee_id = 0
+    BEGIN
+        SELECT @p_employee_id = employee_id
+        FROM employee 
+        WHERE account_id = @p_account_id;
+    END
 END
 GO
 
@@ -86,7 +91,13 @@ BEGIN
     INSERT INTO manager (account_id, last_name, first_name, gender, phone, email)
     VALUES (@p_account_id, @p_last_name, @p_first_name, @p_gender, @p_phone, @p_email);
 
-    SET @p_manager_id = SCOPE_IDENTITY();
+    SET @p_manager_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_manager_id IS NULL OR @p_manager_id = 0
+    BEGIN
+        SELECT @p_manager_id = manager_id FROM manager WHERE account_id = @p_account_id;
+    END
 END
 GO
 
@@ -140,7 +151,14 @@ BEGIN
     INSERT INTO service_table (area_id, table_number, is_active)
     VALUES (@p_area_id, @p_table_number, @p_is_active);
 
-    SET @p_table_id = SCOPE_IDENTITY();
+    SET @p_table_id = CAST(SCOPE_IDENTITY() AS SMALLINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_table_id IS NULL OR @p_table_id = 0
+    BEGIN
+        SELECT @p_table_id = table_id FROM service_table 
+        WHERE area_id = @p_area_id AND table_number = @p_table_number;
+    END
 END
 GO
 
@@ -192,7 +210,13 @@ BEGIN
     INSERT INTO store (name, address, phone, opening_time, closing_time, email, opening_date, tax_code)
     VALUES (@p_name, @p_address, @p_phone, @p_opening_time, @p_closing_time, @p_email, @p_opening_date, @p_tax_code);
 
-    SET @p_store_id = SCOPE_IDENTITY();
+    SET @p_store_id = CAST(SCOPE_IDENTITY() AS TINYINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_store_id IS NULL OR @p_store_id = 0
+    BEGIN
+        SELECT @p_store_id = store_id FROM store WHERE name = @p_name AND tax_code = @p_tax_code;
+    END
 END
 GO
 
@@ -240,7 +264,13 @@ BEGIN
     INSERT INTO unit_of_measure (name, symbol, description)
     VALUES (@p_name, @p_symbol, @p_description);
 
-    SET @p_unit_id = SCOPE_IDENTITY();
+    SET @p_unit_id = CAST(SCOPE_IDENTITY() AS SMALLINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_unit_id IS NULL OR @p_unit_id = 0
+    BEGIN
+        SELECT @p_unit_id = unit_id FROM unit_of_measure WHERE name = @p_name;
+    END
 END
 GO
 
@@ -291,7 +321,13 @@ BEGIN
     INSERT INTO product_size (unit_id, name, quantity, description)
     VALUES (@p_unit_id, @p_name, @p_quantity, @p_description);
 
-    SET @p_size_id = SCOPE_IDENTITY();
+    SET @p_size_id = CAST(SCOPE_IDENTITY() AS SMALLINT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_size_id IS NULL OR @p_size_id = 0
+    BEGIN
+        SELECT @p_size_id = size_id FROM product_size WHERE unit_id = @p_unit_id AND name = @p_name;
+    END
 END
 GO
 
@@ -342,7 +378,14 @@ BEGIN
     INSERT INTO product_price (product_id, size_id, price)
     VALUES (@p_product_id, @p_size_id, @p_price);
 
-    SET @p_product_price_id = SCOPE_IDENTITY();
+    SET @p_product_price_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_product_price_id IS NULL OR @p_product_price_id = 0
+    BEGIN
+        SELECT @p_product_price_id = product_price_id FROM product_price 
+        WHERE product_id = @p_product_id AND size_id = @p_size_id;
+    END
 END
 GO
 
@@ -399,7 +442,18 @@ BEGIN
     VALUES (@p_customer_id, @p_employee_id, @p_order_time, NULL, NULL,
             @p_status, @p_customize_note, ISNULL(@p_point, 1)); -- Đảm bảo mặc định 1
 
-    SET @p_order_id = SCOPE_IDENTITY();
+    SET @p_order_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_order_id IS NULL OR @p_order_id = 0
+    BEGIN
+        SELECT TOP 1 @p_order_id = order_id FROM [order] 
+        WHERE customer_id = @p_customer_id 
+        AND employee_id = @p_employee_id 
+        AND order_time = @p_order_time
+        AND status = @p_status
+        ORDER BY order_id DESC;
+    END
 END
 GO
 
@@ -579,7 +633,14 @@ BEGIN
     INSERT INTO order_discount (order_id, discount_id, discount_amount)
     VALUES (@p_order_id, @p_discount_id, @p_discount_amount);
 
-    SET @p_order_discount_id = SCOPE_IDENTITY();
+    SET @p_order_discount_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_order_discount_id IS NULL OR @p_order_discount_id = 0
+    BEGIN
+        SELECT @p_order_discount_id = order_discount_id FROM order_discount 
+        WHERE order_id = @p_order_id AND discount_id = @p_discount_id;
+    END
 END
 GO
 
@@ -602,7 +663,16 @@ BEGIN
     INSERT INTO payment (order_id, payment_method_id, status, amount_paid, change_amount, payment_time)
     VALUES (@p_order_id, @p_payment_method_id, @p_status, @p_amount_paid, @p_change_amount, @p_payment_time);
 
-    SET @p_payment_id = SCOPE_IDENTITY();
+    SET @p_payment_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_payment_id IS NULL OR @p_payment_id = 0
+    BEGIN
+        SELECT TOP 1 @p_payment_id = payment_id FROM payment 
+        WHERE order_id = @p_order_id 
+        AND payment_method_id = @p_payment_method_id
+        ORDER BY payment_id DESC;
+    END
 END
 GO
 
@@ -718,7 +788,14 @@ BEGIN
     INSERT INTO order_table (order_id, table_id, check_in, check_out)
     VALUES (@p_order_id, @p_table_id, @p_check_in, @p_check_out);
 
-    SET @p_order_table_id = SCOPE_IDENTITY();
+    SET @p_order_table_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_order_table_id IS NULL OR @p_order_table_id = 0
+    BEGIN
+        SELECT @p_order_table_id = order_table_id FROM order_table 
+        WHERE order_id = @p_order_id AND table_id = @p_table_id;
+    END
 END
 GO
 
@@ -753,7 +830,18 @@ BEGIN
     INSERT INTO order_product (order_id, product_price_id, quantity, [option])
     VALUES (@p_order_id, @p_product_price_id, @p_quantity, @p_option);
 
-    SET @p_order_product_id = SCOPE_IDENTITY();
+    SET @p_order_product_id = CAST(SCOPE_IDENTITY() AS INT);
+    
+    -- Fallback nếu SCOPE_IDENTITY() trả về NULL
+    IF @p_order_product_id IS NULL OR @p_order_product_id = 0
+    BEGIN
+        SELECT TOP 1 @p_order_product_id = order_product_id FROM order_product 
+        WHERE order_id = @p_order_id 
+        AND product_price_id = @p_product_price_id
+        AND quantity = @p_quantity
+        AND (([option] IS NULL AND @p_option IS NULL) OR [option] = @p_option)
+        ORDER BY order_product_id DESC;
+    END
 END
 GO
 
@@ -1259,4 +1347,6 @@ END
 GO
 
 PRINT N'Đã tạo thành công tất cả stored procedures cho SQL Server - Part 2';
+PRINT N'✅ ĐÃ SỬA: Tất cả procedures đã được cập nhật để xử lý vấn đề SCOPE_IDENTITY() trả về NULL';
+PRINT N'🔧 Giải pháp: CAST + fallback query để đảm bảo luôn có ID hợp lệ';
 GO 
